@@ -1,0 +1,30 @@
+*.aux
+*.acn
+*.bcf
+*.brf
+*.fdb_latexmk
+*.fls
+*.glo
+*.ist
+*.loa
+*.lof
+*.log
+*.lot
+*.toc
+*.maf
+*.mtc*
+*.mw
+*.ntn
+*.out
+*.run.xml
+*.synctex.gz
+
+# bibtex
+*.bbl
+*.blg
+
+# glossary
+*.xdy
+
+# misc
+.vscode

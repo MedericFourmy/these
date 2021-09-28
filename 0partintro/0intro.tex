@@ -1,0 +1,27 @@
+\chapter{Introduction}
+% De tout temps les hommes ont voulus estimer des trucs...
+
+% ...et voila le pbe qu'on va résoudre.
+
+For robots, perception of oneself and of its environment is a major challenge on the road toward many real world applications. 
+Tasks that are instinctive to us, like for instance manipulating an object, actually involve a complex 
+interactions between our many senses, our nervous and our muscular system.
+Though our sensory motor skills have been developed by millions of year of evolution, and are refined throughout our childhood,
+the task of representing them in abstracted algorithm to be implemented on a cybernetic system is a serious challenge. 
+Let's investigate the example a human lifting package. Our vision might inform us about the general form of the object, 
+its location in space with respect to us, some of its physical properties through our prior knowledge of the world. Our proprioception 
+instinctively guide our arms toward the right path. Our sense of touch might infer the surface texture of the object, 
+its softness, making us adapt our grip. During this whole process, our vestibular system
+provides us with a sense of balance to counter gravity, while our hears make us aware of events external to our current enterprise.
+
+All these complex phenomena happen mostly at the subconscious level while our conscious mind focuses on high level decisions.
+Imitating these skills in robot system requires then to build models of available sensor modalities and to integrate them through sensor
+fusion. This can be achieved at several levels depending on the task to solve. In the legged robot community, one of the core task is locomotion.
+For this application, robust algorithms exist in the literature using a limited set of sensors, most often inertial and contact detection.
+On the other end of the blind robot approach, a broad field of research has been concentrated on building representations of the environment 
+using exteroceptive sensors such as cameras and LIDARs. This in turn enables planning algorithms to navigate the robot in its environment. 
+Many approaches decouple the two tasks, using layered perception systems. However, theoretically, a system able to tightly fuse all the 
+available modalities would benefit a better consideration of the correlations between the different quantities to estimate. 
+Even though recent approaches have taken step in this direction, such a system is still not widely used in legged robotics. 
+This thesis is a contribution to this goal. 
+

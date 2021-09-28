@@ -1,0 +1,39 @@
+\documentclass[english, a4paper, 12pt, twoside,openright]{book}
+
+\usepackage[subpreambles=false]{standalone}
+
+
+\input{preambule}
+
+
+\usepackage[english]{babel}
+
+\input{page_de_garde/page_de_garde}
+
+\begin{document}
+
+
+
+\pagenumbering{gobble}
+% insert the Toulouse University thesis page here
+\makeflyleaf
+
+\frontmatter
+
+
+% create a minitoc at the beginning of each chapter
+\dominitoc
+% insert the toc here
+\tableofcontents
+
+% enter the "main" matter behaviour of the book class 
+\mainmatter
+
+\input{0partintro/_part.tex}
+\input{1parttheory/_part.tex}
+\input{2partapps/_part.tex}
+\input{3partconclusion/_part.tex}
+
+\printbibliography
+	
+\end{document}

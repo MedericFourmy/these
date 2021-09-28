@@ -1,0 +1,166 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Réglage des fontes et typo    
+\usepackage[utf8]{inputenc}		% LaTeX, comprend les accents !
+\usepackage[T1]{fontenc}
+
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{mathrsfs}
+
+\usepackage{listings}
+\definecolor{gray}{rgb}{0.4,0.4,0.4}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.6}
+\definecolor{cyan}{rgb}{0.0,0.6,0.6}
+\lstset{
+  basicstyle=\ttfamily,
+  columns=fullflexible,
+  showstringspaces=false,
+  commentstyle=\color{gray}\upshape
+}
+\lstdefinelanguage{XML}
+{
+  morestring=[b]",
+  morestring=[s]{>}{<},
+  morecomment=[s]{<?}{?>},
+  stringstyle=\color{black},
+  identifierstyle=\color{darkblue},
+  keywordstyle=\color{cyan},
+  morekeywords={diameter, name}% list your attributes here
+}
+\lstset{language=XML}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Apparence globale             
+\usepackage[top=3cm, bottom=2cm, left=3cm, right=3cm,
+			headheight=15pt]{geometry} 
+\usepackage{fancyhdr}			% Entête et pieds de page
+	\pagestyle{fancy}			% Indique que le style de la page sera justement fancy
+	\lfoot[\thepage]{} %gauche du pied de page
+	\cfoot{} %milieu du pied de page
+	\rfoot[]{\thepage} %droite du pied de page
+	\fancyhead[RO, LE] {}	
+\usepackage{enumerate}
+\usepackage{enumitem}
+\usepackage[section]{placeins}	% Place un FloatBarrier à chaque nouvelle section
+\usepackage{epigraph}
+\usepackage[font={small}]{caption}
+\usepackage[english]{minitoc}		% Mini table des matières, en français
+	\setcounter{minitocdepth}{2}	% Mini-toc détaillées (sections/sous-sections)
+\usepackage{pdflscape}				% Permet d'utiliser des pages au format paysage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Biblio                        
+%\makeatletter
+%\patchcmd{\BR@backref}{\newblock}{\newblock(page~}{}{}	% Pour les back-references, affiche 'page' au lieu de 'p.'
+%\patchcmd{\BR@backref}{\par}{)\par}{}{}
+%\makeatother
+	
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Tableau
+\usepackage{array}
+\usepackage{hhline}
+\usepackage{adjustbox}
+\usepackage{multirow,makecell}
+\usepackage{color}
+\usepackage{arydshln}
+
+% Images
+\usepackage{subfigure}
+
+% Algo
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Mise en forme du texte        
+\usepackage{xspace}
+%\usepackage[load-configurations = abbreviations]{siunitx}
+%	\DeclareSIUnit{\MPa}{\mega\pascal}
+%	\DeclareSIUnit{\micron}{\micro\meter}
+%	\DeclareSIUnit{\tr}{tr}
+%	\DeclareSIPostPower\totheM{m}
+%	\sisetup{
+%	locale = FR,
+%	  inter-unit-separator=$\cdot$,
+%	  range-phrase=~\`{a}~,     	% Utilise le tiret court pour dire "de... à"
+%	  range-units=single,  			% Cache l'unité sur la première borne
+%	  }
+%\usepackage{chemist}
+%\usepackage[version=3]{mhchem}
+\usepackage{textcomp}
+\usepackage{numprint}
+
+\usepackage{hyphenat}
+
+
+\usepackage{times}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{tikz-uml}
+\usepackage{environ}
+
+% to be able to scale tikzpicture
+\makeatletter
+\newsavebox{\measure@tikzpicture}
+\NewEnviron{scaletikzpicturetowidth}[1]{%
+  \def\tikz@width{#1}%
+  \def\tikzscale{1}\begin{lrbox}{\measure@tikzpicture}%
+  \BODY
+  \end{lrbox}%
+  \pgfmathparse{#1/\wd\measure@tikzpicture}%
+  \edef\tikzscale{\pgfmathresult}%
+  \BODY
+}
+\makeatother
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Pour changer localement les marges
+
+\newenvironment{changemargin}[2]{%
+\begin{list}{}{%
+\setlength{\leftmargin}{#1}%
+\setlength{\rightmargin}{#2}%
+\setlength{\listparindent}{\parindent}%
+\setlength{\itemindent}{\parindent}%
+\setlength{\parsep}{\parskip}%
+}%
+\item[]}{\end{list}}
+
+\definecolor{ieeeblue}{RGB}{0,98,155}
+
+\usepackage{bm}
+
+
+\usepackage[sorting=none,
+  style=numeric,
+  backref=true,
+  backend=biber,
+  maxnames=6,
+  minnames=1]{biblatex}
+
+% recommended when using biblatex with babel
+\usepackage{csquotes}
+
+%% Navigation dans le document
+\usepackage[pdftex,
+  pdfborder={0 0 0},
+  colorlinks=true,
+  linkcolor=blue,
+  citecolor=red,
+  pagebackref=false,
+  ]{hyperref} %Créera automatiquement les liens internes au PDF
+
+\addbibresource{bibfiles/these.bib}
+\addbibresource{bibfiles/legged_robots.bib}
+\addbibresource{bibfiles/graph_opt_est.bib}
+
+
+\usepackage{customCommands}
+\usepackage{customCommandsBis}
+
+
+
