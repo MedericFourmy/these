@@ -4,16 +4,38 @@ State estimation for legged robots
 
 %%%%%%%%%%
 \section{Proprioceptive base estimation}
+ We refer to proprioceptive base estimation as the technics involved in the implementation of an estimator purely relying
+ on proprioceptive sensors. The base is a frame attached to the main body of the polyarticulate system and serves
+ as the root of its kinematic chains. For legged robots, those usually include IMUs, joint encoders, sometimes strain gauges at the 
+ articulation level or at the end effector for more expensive systems. The goal is then to fuse efficiently those 
+ modalities to obtain a reliable odometry of the robot. The robot is alike a blindfolded animal that has to balance and locomote using 
+ only its inner ear and kinestesis. \cite{bloesch2013state,rotella2014state} showed that using IMU and kinematic measurements 
+ only, the absolute velocity, pitch and roll angles of the base as well as IMU biases are fully observable when at least one contact 
+ is kept with the ground.
+
+ The robotician has to make many design choices when building such a system. Those choices mainly include the nature of the used filter (tightly coupled vs oosely coupled), 
+ the way kinematic information is used in the system, how stable contacts are detected and if extra sensors or filter complexity
+ has to be put to mitigate model errors.
  
 
 \subsection{Filter based data fusion}
-Loosely coupled vs tightly coupled
+Mainy types of observers have been put to test on legged robots proprioceptive estimation. The problem being markovian in nature,
+most are Bayesian filters such as variants of the \KalmanF \cite{kalman1960new} and complementary filters. The different works can be 
+roughly divided in \textit{tightly coupled} approaches which try to capture all statistical cross correlations between the estimated states
+and \textit{loosely coupled} approach that divide the estimation in several steps, the results being successively taken as fixed priors to the 
+following steps.
+
+
+
+
+
+
 
 \subsection{Kinematic information}
 The main particularity of legged systems is the fact that they interact with their environment through intermitent contacts.
 Once a stable contact (no slipping) is detected, the relative pose or velocity of the end effector in contact with respect to the robot base 
 can be computed through forward kinematics. Integrated over time, the relative displacement of the base of the robot can be infered, a computation 
-often refered to as \textit{leg odometry} (by analogy with wheel odometry). This computation is very fast and is readily available in libraries such as \cite{carpentier2019pinocchio}, [cite another one]. It uses
+often refered to as \textit{leg odometry} (by analogy with wheel odometry). This computation is very fast and is readily available in libraries such as \cite{carpentier2019pinocchio, hereid2017frost}. It uses
 readings from the articulations/joints encoders as well as the robot kinematic model. Encoders, usually placed before the reduction step of the actuators
 are very accurate (... for solo \cite{grimminger2020open}) except for certain technologies such as [cite]. The main sources of uncertainty usually comes from
 modelling inaccuracies may be difficult to model such as approximate segment lengths [cite calibration paper VBonnet], flexibilities \cite{vigne2018estimation}, backlash \cite{fallon2014drift} etc. 
@@ -38,47 +60,131 @@ demonstrated in its most general form (to the best of our knowledge) in \cite{fo
 was introduced in \cite{bloesch2013state} for a point feet quadruped as relative position. It was subsequently adapted for a humanoid robot \cite{rotella2014state}, 
 which 6D stance foot constraint permits to add orientation information. In this formulation, states variables corresponding to the robot feet pose have to 
 be added to the estimator. This approach was adopted by other groups such as \cite{hartley2018legged, hartley2018hybrid, hartley2020contact} and \cite{bledt2018cheetah}.
+Potential undetected slips and rolls of the foot are model in this context as a random walk on stance foot position. In the \KalmanF context, this is represented 
+by a process noise on the feet position dynamics, which is an important tuning parameter.
 
 When a single point foot is in contact with the ground, the leg can move around the three remaing rotational degrees of freedom without changing encoder measurements.
 A \textit{relative velocity} of the base can however be computed by using joint velocities and the angular velocity of the robot body. 
 Joint velocities are usually obtained through numerical differentiation of the joint encoder outputs, which may result is noisy measurements \cite{rotella2016imu}.
 Gyro measurements are also subject to noise and affected by a bias that should be compensated for. These velocity measurements can then easier directly be used as
-residuals for the instantaneous base velocity \cite{bloesch2013stateSlippery,bledt2018cheetah} or 
-integrated over time as relative displacements \cite{ma2012robust, wisth2020preintegrated}
+residuals for the instantaneous base velocity \cite{bloesch2013stateSlippery,bledt2018cheetah} or integrated over time as relative 
+displacements \cite{ma2012robust, wisth2020preintegrated}. Some author such as \cite{bloesch2013stateSlippery, bledt2018cheetah} 
+use these types of measurements in conjunction with \textit{instantaneous relative pose} which seems to reduce position drift. On the other end,
+\cite{fallon2014drift} argues that in the case of an erroneous kinematic model (backlash, flexibilities), only using direct velocity measurements
+prevents the filter to become inconsistent when another source of position measurement is present (such as LIDAR localization).  
 
 
-Some author such as \cite{bloesch2013stateSlippery, bledt2018cheetah, }
+% \subsection{Contact detection}
+% As we saw, a critical part of legged robot estimation is the integration of kinematic information when feet are in contact. A major
+% assumption of those methods is that the stable contacts is known a priori. The definition of a stable contact depends on the system: for quadruped that 
+% are usually equipped with point feet, three positional degrees of freedom are blocked (to some moderate rolling effects), the leg being able to rotate; while for a humanoid robot with
+% planar feet, the six degrees of freedom are constrained. Slipping appears when the contact forces go outside of the coulomb friction cone, that is when the ration $\frac{f_{tang}}{f_{norm}}$
+% exceeds a certain threshold, called friction coefficient. This coefficient is generally unknown as it depends on the the nature of the feet of the robot but also of the contact.
+
+% The most generally available information are the planned contacts, which may be assumed to be generally respected in nominal operation. 
+% This method is not optimal and suffers in the presence of unknown events such as changes in terrain heights and slips but is straightforward to implement and 
+% does not require extra sensors. The weights of feet nearby their swing phases can being carefully reduced in order to robustify the \cite{leziart2021implementation, bledt2018contact}. 
+% Most high end humanoid robots however [Cite Talos and ??] are equipped with strain gauge at their feet that can fairly accurately measure the ground reaction forces (GRFs). 
+% Though often biased depending on their temperature, those can be used as a proxy to stable contact by setting a reasonably large threshold \cite{fallon2014drift}. 
+% This method is an approximation of checking the coulomb cone.
+% \cite{Focchi2015SlipDA} argues that force sensing is not enough, especially for quadruped robots which are more subject to slips because the friction coefficient
+% as well as the contact normal is hard to know. The authors argue for a simple algorithm checking relative feet velocities values in the base frame and discarding those
+% far from the median. A similar choice is made by \cite{bloesch2013stateSlippery} in which \KalmanF velocity updates are regected as outliers if their innovation exceeds a threshold.  
+% More recent papers try to fuse these different sources of information in bayesian filters. \cite{hwangbo2016probabilistic} and subsequently \cite{jenelten2019dynamic} fuse 
+% the kinodynamic models of the robot, IMU, joint encoders values and first and second order differentiation as well as
+% joint torques in a Hidden Markov Model where states are binary velues. They build separate filters for contact and slip detections and demonstrate walking on ice with an ANYmal-C using a special controller.
+% \cite{bledt2018contact} takes a similar approach but uses different measurement processing fused in a \KalmanF where the sates are contact probability. 
+% A the gait cycle taken into account and fuses it with the kinematics as well as contact forces estimated using a novel Generalized Momentum estimator. Contrary to methods 
+% based on direct computation of the robot whole body dynamics (using the RNEA) such as \cite{hwangbo2016probabilistic}, their methods does not require the joint acceleration which may be very noisy due to double.  
+
+% This problem is not trivial and practical solutions seem to hesitate between simple heuristic based methods and very involved bayesian filters. 
+% The problem with simple heuristic is that they neglect the temporal aspect of the data stream and the parameters (though few in numbers) may be hard to tune.
+% Bayesian filters on the other hand provides a more fine tuned control of the modelled aspects of the problem, at the expense of manual parameter tuning.
+% One thread of research tries to alleviate the need for manual tuning by relying on data based approaches. \cite{camurri2017probabilistic} introduces a probabilistic 
+% contact detector using only joint torques, expressed as a logistic regression. The detectors provide a probability distribution on feet contacts which is used to ponder kinematic
+% measurements of an IMU kinematics filter. The method outperforms a baseline based on threshold selection. However, the method seems to require manual annotation of datasets and 
+% fits different treshold for each type of gait in a supervised learning fashion. The model may certainly suffer from different terrains and robot loads. 
+% \cite{rotella2018unsupervised} cluster fuzzy contact states by training in an unsupervized fashion for simulated data of a humanoid robot. The datasets are augmented
+% with IMU measurements at the feet which are removed at evaluation time. The resulting estimator odometry system is shown to outperform one based on contact force classification.
+% More recently, \cite{lin2021deep} proposes to use a deep network to infer contact states using a buffer of 150ms of raw IMU, encoder and kinematic measurents. 
+% The emphasis is put in training the estimator in many different ground type in outside extented environment using an MIT Mini Cheetah. Ground truth is generated
+% as finding a region around the local minimum of low pass feet height trajectories in the hip frames. The estimator provides a relaible source of contact information 
+% and generalizes better to different environments but does not provides covariances about the contacts, contrary to \cite{camurri2017probabilistic}.  
 
 
-\subsection{Contact detection}
+% \subsection{Extra sensor modalities}
+% For some systems, model inaccuracies are too important to be modelled as noise. As a comparison, only tactical grade IMUs measurements
+% can be reasonably used directly without somehow taking biases into account. The same applies to kinematic measurements. 
 
-\subsection{Mitigating flexibilities}
+% One source of error comes from joint velocities measurement, especially for hydraulic robots. Encoders measuring joint angles are usually placed 
+% at the actuator level which makes for a very precise angle estimation if subsequent reduction steps are present. It is then acceptable to numerically 
+% differentiate and slightly filter those values to use them for joint impedance control for instance [Cite]. However, hydraulic
+% actuators do not include those reduction steps and fall victim to important joint velocity noise, which can degrate feedback control.
+% \cite{xinjilefu2016distributed} proposes to use a network of low cost gyroscopes to estimate the joint velocities of an ATLAS robot legs. A \KalmanF
+% is used to fuse desired joint acceleration from the control as process input and angular velocity measurements coming from the MEMS and numerical
+% differentiation of the encoders. It requires a calibration procedure of the gyroscopes orientations and a good quality attitude
+% estimation of the base, from a high grade IMU for instance. This method was extended in \cite{rotella2016imu} by also including
+% accelerometers measurements, explicitely compenstating IMU biases and alleviating the need of a global attitude estimation.
+
+% Another one comes from the presence of flexibilities in the structure of the robot. For HRP-2 for instance, a rubber joint is placed 
+% at the ankle to mechanically absorb feet impacts. It also acts as a "rotational spring" that, given the length of the ankle-base lever, 
+% leads to important and unmeasured base accelerations. One way is to model the flexibility as linear spring. HRP2 being equipped with 6 axis 
+% forces sensors at the end effectors, \cite{flayols2017experimental} proposes to map these measurements to relative orientations that can 
+% directly be included in the kinematic chain as an intermediate ball joint. Calibration of the stiffness matrix is done by comparing 
+% kinematics to motion capture measurements. \cite{benallegue2015estimation} derives a procedure to alleviate the need of force sensors by 
+% designing a centroidal filter using the dynamics of the inverted pendulum. For the Wandercraft exoskelet, flexibilities
+% are shown to be spread along the successive segments of the kinematic chain. \cite{vigne2018estimation} proposies to model them as ponctual, 
+% 3d rotations with a srping lie behaviour. This work implements a IMU network similar to the ideas of \cite{xinjilefu2016distributed,rotella2016imu} 
+% but it uses independant complementary filters for each IMU to recover their orientation. Relative orientations are then used as 
+% virtual joints and fused with using the robot whole body dynamics and the linear spring models to recover segments relative orientation and angular velocities.
+
+% %%%%%%%%%%
+% \section{Dynamic centroidal estimation}
+% Dynamic centroidal estimation, that is to say estimation of the center of mass position, angular momentum and their derivates, is often treated as a separate problem in 
+% the legged robotics litterature. For most of the works, the assumption is mayde that the position, orientation and velocity of the base is given by another 
+% estimator. Given the kinodynamic model of the robot, it is easy to compute the centroidal quantities by summing contributions of the different segments. However,
+% models are biased and this bias is a nonlinear fontion of the system joint configuration which is hard to model. Balance algorithms rely heavily on centroidal quantities [cite] which makes 
+% an unbiased estimation critical. This fosters the use of more complex algorithms by fusing kinematic and other dynamical information sources.
+% This problem was closely scrutinized in the biomechanics litterature where mass distributions of human subjects are even harder to obtain. 
+% Assuming the contacts all lie on the same plane, the ZMP (or center of pressure \cite{sardain2004forces}) is defined as the point
+% where the moment component of the resulting wrench is aligned with the normal axis of the plane. Neglecting the angular momentum of the system, it gives an approximate measure of the
+% the  
+
+% \cite{stephens2011state} and \cite{atkeson2012state} ponder the use of simplified dynamical models 
+% such as the Linear Inverse Pendulum Model as an process model for a \KalmanF. Ground reaction measurements are needed for the computation of the Center of Pressure, which only requires [FInd the citation, Xinjelifu???].
+% \cite{atkeson2012state} explores a first exploitation of the full body dynamics of a planar five link robot in simulation.
 
 
 
-%%%%%%%%%%
-\section{Dynamic centroidal estimation}
+% \cite{stephens2011state}
+% \cite{atkeson2012state}
+% \cite{rotella2015humanoid}
+% \cite{xinjilefu2015center}
+% \cite{carpentier2016center}
+% \cite{benallegue2018model}
+% \cite{piperakis2018nonlinear}
+% \cite{bailly2019recursive}
+% \cite{hawley2019external}
+% \cite{bailly2021optimal}
+
+% %%%%%%%%%%
+% \section{Environment mapping}
+% \subsection{Localization and mapping}
+% \subsection{Terrain reconstruction and classification}
 
 
 
-%%%%%%%%%%
-\section{Environment mapping}
-\subsection{Localization and mapping}
-\subsection{Terrain reconstruction and classification}
+% %%%%%%%%%%
+% \section{Online batch estimation}
 
+% Dévoloppement des dernières années ont apporté:
+% Plus précis, plus rapide, plus généraliste
 
+% Donner des précisions sur la précision apportée par les maths manifolds
 
-%%%%%%%%%%
-\section{Online batch estimation}
+% Evoquer l'aspect Factor graph qui est important dans cette partie de la biblio
 
-Dévoloppement des dernières années ont apporté:
-Plus précis, plus rapide, plus généraliste
-
-Donner des précisions sur la précision apportée par les maths manifolds
-
-Evoquer l'aspect Factor graph qui est important dans cette partie de la biblio
-
-Dernier paragraphe: Wisth+Michigan
+% Dernier paragraphe: Wisth+Michigan
 
 
 % \cite{dellaert2017factor}
