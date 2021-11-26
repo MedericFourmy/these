@@ -136,12 +136,16 @@
 
 
 \usepackage[sorting=none,
-  style=numeric,
+  style=alphabetic,
   backref=true,
   backend=biber,
   maxnames=6,
   minnames=1]{biblatex}
 
+% \usepackage[
+% backend=biber,
+% style=numeric,
+% ]{biblatex}
 % recommended when using biblatex with babel
 \usepackage{csquotes}
 
@@ -154,9 +158,18 @@
   pagebackref=false,
   ]{hyperref} %Créera automatiquement les liens internes au PDF
 
+% include all bib files separately.
+% to use wildecard (*) upgrade biber to 2.13
 \addbibresource{bibfiles/these.bib}
-\addbibresource{bibfiles/legged_robots.bib}
-\addbibresource{bibfiles/graph_opt_est.bib}
+\addbibresource{bibfiles/centroidal-est.bib}
+\addbibresource{bibfiles/contact-detection.bib}
+\addbibresource{bibfiles/exteroceptive.bib}
+\addbibresource{bibfiles/fiducial.bib}
+\addbibresource{bibfiles/graph-opt-est.bib}
+\addbibresource{bibfiles/improving-kin.bib}
+\addbibresource{bibfiles/online-smoothing.bib}
+\addbibresource{bibfiles/preintegration.bib}
+\addbibresource{bibfiles/proprioceptive-est.bib}
 
 
 \usepackage{customCommands}

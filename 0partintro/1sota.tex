@@ -1,0 +1,84 @@
+\chapter{Legged robot state estimation}
+State estimation for legged robots 
+
+
+%%%%%%%%%%
+\section{Proprioceptive base estimation}
+ 
+
+\subsection{Filter based data fusion}
+Loosely coupled vs tightly coupled
+
+\subsection{Kinematic information}
+The main particularity of legged systems is the fact that they interact with their environment through intermitent contacts.
+Once a stable contact (no slipping) is detected, the relative pose or velocity of the end effector in contact with respect to the robot base 
+can be computed through forward kinematics. Integrated over time, the relative displacement of the base of the robot can be infered, a computation 
+often refered to as \textit{leg odometry} (by analogy with wheel odometry). This computation is very fast and is readily available in libraries such as \cite{carpentier2019pinocchio}, [cite another one]. It uses
+readings from the articulations/joints encoders as well as the robot kinematic model. Encoders, usually placed before the reduction step of the actuators
+are very accurate (... for solo \cite{grimminger2020open}) except for certain technologies such as [cite]. The main sources of uncertainty usually comes from
+modelling inaccuracies may be difficult to model such as approximate segment lengths [cite calibration paper VBonnet], flexibilities \cite{vigne2018estimation}, backlash \cite{fallon2014drift} etc. 
+\cite{bloesch2018technical} makes the distinction between three ways in which the kinematic information can be "inserted" as data fusion, 
+which classification we will borrow in this thesis. 
+
+
+\textit{Feet matching} is the earliest example of leg odometry to be used in the leg robotics litterature. Pioneered by [Roston et al.] 
+\footnote{An earlier example might exist in \cite{roston1991dead} even though the technical report is unclear about the method they used: 
+"Leg-position feedback is used from legs in support phase for the purpose of correcting for gyro and integration drift in the inertial reference system."},
+multiple feet matching provides a relative 6D pose between timesteps during which at least three feet are in stable contact with the ground.
+For point feet robots (such as most quadrupeds), the problem is akin to the ICP algorithm in which correspondances between 3D points are known and is an instance of the orthogonal Procrustes problem.
+Follow up works adapted the method to smaller hexapods \cite{lin2005leg} and began to fuse it with other sensors such as GPS \cite{gassmann2005localization, cobano2008location} 
+and most importantly IMUs \cite{lin2006sensor, reinstein2011dead}.
+The inherent limitation of this method is that for point feet robot it requires at least three feet to be in contact with the ground between given timesteps, limiting
+applications to hexapods (or more) or to slow gaits for quadrupeds.
+\textit{Single foot matching} is also possible for humanoid robots as the 6D contact constraints at each foot directly produces 6D 
+relative measurements \cite{flayols2017experimental} [CITE OTHERS]. This approach is less invastigated for point feet robots and was only 
+demonstrated in its most general form (to the best of our knowledge) in \cite{fourmy2021contact}.
+
+\textit{Instantaneous relative pose} between the base and the foot can also be directly used as a residual in the estimator. This formulation
+was introduced in \cite{bloesch2013state} for a point feet quadruped as relative position. It was subsequently adapted for a humanoid robot \cite{rotella2014state}, 
+which 6D stance foot constraint permits to add orientation information. In this formulation, states variables corresponding to the robot feet pose have to 
+be added to the estimator. This approach was adopted by other groups such as \cite{hartley2018legged, hartley2018hybrid, hartley2020contact} and \cite{bledt2018cheetah}.
+
+When a single point foot is in contact with the ground, the leg can move around the three remaing rotational degrees of freedom without changing encoder measurements.
+A \textit{relative velocity} of the base can however be computed by using joint velocities and the angular velocity of the robot body. 
+Joint velocities are usually obtained through numerical differentiation of the joint encoder outputs, which may result is noisy measurements \cite{rotella2016imu}.
+Gyro measurements are also subject to noise and affected by a bias that should be compensated for. These velocity measurements can then easier directly be used as
+residuals for the instantaneous base velocity \cite{bloesch2013stateSlippery,bledt2018cheetah} or 
+integrated over time as relative displacements \cite{ma2012robust, wisth2020preintegrated}
+
+
+Some author such as \cite{bloesch2013stateSlippery, bledt2018cheetah, }
+
+
+\subsection{Contact detection}
+
+\subsection{Mitigating flexibilities}
+
+
+
+%%%%%%%%%%
+\section{Dynamic centroidal estimation}
+
+
+
+%%%%%%%%%%
+\section{Environment mapping}
+\subsection{Localization and mapping}
+\subsection{Terrain reconstruction and classification}
+
+
+
+%%%%%%%%%%
+\section{Online batch estimation}
+
+Dévoloppement des dernières années ont apporté:
+Plus précis, plus rapide, plus généraliste
+
+Donner des précisions sur la précision apportée par les maths manifolds
+
+Evoquer l'aspect Factor graph qui est important dans cette partie de la biblio
+
+Dernier paragraphe: Wisth+Michigan
+
+
+% \cite{dellaert2017factor}

@@ -28,3 +28,7 @@
 
 # misc
 .vscode
+
+
+# pdf too 
+*.pdf
