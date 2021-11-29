@@ -202,18 +202,19 @@ as black-boxes sources of odometry by integrating them as relative pose measurem
 this has the benefit to greatly simplifying the development process.
 
 While a camera system benefits from low cost and hardware integration difficulty, outside environments 
-may cause some difficulties to such systems, such as shadows being mistaken for solid edges.
+may cause some difficulties to such systems, such as shadows being mistaken for solid edges (Figure 8. of \cite{fallon2014drift}).
 During the DARPA robotic challenge [cite?] where robots had to autonomously traverse a challenging environments while performing task at known given checkpoints, 
 many teams [really?] at the LIDAR as a localization procedure [cite, cite cite]. Oftentimes, the ICP algorithm is used to localize the robot 
 with respect to a known map. Taking another route, the MIT team \cite{fallon2014drift} managed to integrate LIDAR measurements directly as position update in a proprioceptive
-filter. This provided a faster localization with respect to the known global point-cloud map, which was built in advance. 
+filter. This provided a faster localization with respect to the known global octomap \cite{hornung2013octomap}, which was built on the static robot at the beginning of operations. 
 LIDAR can also be used as an odometry by matching point clouds taken at successive timestamps with ICP. However, this procedure is time consuming 
 which represents a burden to integrate them with online embedded filters, due to time delays. \cite{nobili2017heterogeneous} solves this issue by keeping a
-buffer of past belief state of the EKF.
+buffer of past belief state of the EKF, a method on which is based the Pronto framework \cite{camurri2020pronto}.
 
 
 
-\subsection{Terrain surface reconstruction}
+
+\subsection{Reconstruction for footstep planning}
 Even though some legged robots designs [cite agility] and controllers [cite MIT?] are robust to some extent of terrain uncertainty, having some information about the local
 shape of the environment is crucial to their safe operation. 
 - Question of the representation needed for planning -> read Tonneau/Pierre Feinbard
@@ -224,16 +225,24 @@ For rover applications, \cite{kleiner2007real} argues that building a globally c
 The map is constantly updated using two sources of information: range measurements that refine the visible parts of the map while the and wheel odometry increases uncertainty using heuristic
 based on the traveled distance. \cite{fankhauser2014robot, fankhauser2018probabilistic} adapted these ideas to legged robots. The map grid probabilistic representation
 was also improved by including horizontal uncertainty due to the robot relative motion. A costly map fusion process which computes lower and upper bound on the elevations
-can be computed intermittently. \cite{kolter2009stereo} adopts a mesh representation built from point-clouds aligned twice a seconds off-board using ICP initialized by proprioceptive odometry and filled with
+can be computed intermittently. 
+
+As an extension of the elevation grid map is to represent occupied occupated 3D space as an 3D occupancy voxel map, which can be efficiently stored using an octomap.
+While \cite{fallon2014drift} only used this representation as prior for online localization, it was used for online foot planning in \cite{winkler2015planning, mastalli2015line}. 
+
+\cite{kolter2009stereo} adopts a mesh representation built from point-clouds aligned twice a seconds off-board using ICP initialized by proprioceptive odometry and filled with
 a texture synthesis step. This representation directly provides richer information such as the slope of the terrain which is used in \cite{mastalli2020motion} to 
-tightly couple motion planning and terrain reconstruction. 
+tightly couple motion/step planning and terrain reconstruction. 
 
 
 \cite{fallon2015continuous} used the Kintinuous framework to obtain a local Truncated Signed Distance Function (TSDF) based dense representation. This map was
 shown to be of equivalent quality to that of a LIDAR and used as an input to a feasible contact surface segmentation algorithm selecting planar convex regions of uneven cinder blocks. 
 In order better handle local loopy trajectories, Elastic Fusion was shown to be usable on humanoid platforms \cite{scona2017direct}. However, the map in this case was only used to localize against.
 
-\cite{winkler2015planning} -> octomap based
+
+
+ASK NICOLAS/OLIVIER FOR MORE REFERENCES
+
 
 
 
@@ -241,16 +250,18 @@ In order better handle local loopy trajectories, Elastic Fusion was shown to be 
 
 %%%%%%%%%%
 \section{Online batch estimation}
-As we have seen in section [], the largest part of the legged robotics state estimation literature consists in fusing sensor modalities using various 
-implementations of the Bayesian and complementary filter. The core of those systems consists in a tightly or loosely coupled IMU/kinematics proprioceptive
+As we have previsously, the largest part of the legged robotics state estimation literature consists in fusing sensor modalities using various 
+implementations of the Bayesian and complementary filters. The core of those systems consists in a tightly or loosely coupled IMU/kinematics proprioceptive
 filter. Then, either this proprioception is used as a prior to a SLAM system or the exteroceptive sensors serves to localize with respect to a known map,
-rendering position and yaw observable.
+making position and yaw observable.
 
 Another different kind of estimator has been investigated over the last decades in the visual/LIDAR SLAM community and has become predominant in applications
-such as drone navigation: Factor Graph optimization, also known as simply graph optimization or smoothing and mapping. While the Bayesian filter summarizes
-the accumulated information about the current estimated state and its cross-correlations as a single probabilistic distribution, Factor Graph optimization
-keeps a trajectory of past states which are regularly re-optimized in the least square sense, by finding the so called Maximum A Posterio over the trajectory
-joint distribution. Many ad hoc efficient solvers such as\cite{grisetti2011g2o, dellaert2012factor, ila2017slam++, ceres-solver} have been developed 
+such as drone navigation: Factor Graph optimization, also known as simply graph optimization. The terms smoothing and mapping or sliding window estimator are
+also used when a limited window of past state are kept in the estimator, the oldes being marginalized. The earliest example \cite{lu1997globally} 
+proposed to obtain globally consistent 2D LIDAR range scan alignments by minimizing cost function over a trajectory of 2D poses constrained by LIDAR scans and wheel odometry.
+While the Bayesian filter summarizes the accumulated information about the current estimated state and its cross-correlations as a single probabilistic distribution, 
+Factor Graph optimization keeps a trajectory of arbitrarily spaced past states which are regularly re-optimized in the least square sense, by finding the so called 
+Maximum A Posterio over the trajectory joint distribution. Many ad hoc efficient solvers such as\cite{grisetti2011g2o, dellaert2012factor, ila2017slam++, ceres-solver} have been developed 
 over the years to leverage the specific sparsity of the SLAM problem.
 
 While the first successful online monocular visual SLAM algorithm was implemented using an EKF \cite{davison2007monoslam}, a breakthrough happened with the 
@@ -259,7 +270,7 @@ mapping in separate processes. Mapping was handled by bundle adjusting sparse fe
 structure for motion pipelines \cite{triggs1999bundle} which made possible Augmented Reality applications in limited spaces. 
 A great wealth of papers following these two methodologies were subsenquently published. \cite{strasdat2012visual} provided a thorough comparison 
 of the two approaches and concluded that the graph optimization was superior in that it had for most tested datasets the greatest precision to 
-computational cost ratio.
+computational cost ratio. Most of state of the art visual SLAM framework now follow this methodology \cite{forster2017-TRO, mur2015orb, qin2018vins, leutenegger2015keyframe, ferrera2021ov}.
 
 In order to robustify visual SLAM/odometry systems in cases of adverse situations, IMU provides a complementary high rate odometry information which can 
 be debiased by tightly coupling the mapping and the inertial odometry. A careful preintegration \cite{lupton-09,forster2017-TRO} of these high 
@@ -276,15 +287,19 @@ odometry by using a sparse 3D landmark map. In a following work \cite{wisth2020p
 to include a slowly variable bias on odometry measurements by adapting the preintegration theory from \cite{forster2017-TRO}. They again extended this work
 by including LIDAR measurements in \cite{wisth2021vilens}.
 
-The maturity of the before mentionned factor graph optimization libraries certainly played an important role in these recent developments and it seems
+The maturity of the afore mentionned factor graph optimization solver libraries certainly played an important role in these recent developments. It seems
 that tools originally developed in the SLAM community are making their way in the legged robot community. Software libraries are becoming more
-generalist, more precise and based on Lie theory \cite{sola2018micro}, they handle more nicely the specificities of the manifold structure of the problem variables.
-Other project propose to deal with the complexity of maintain......
+generalist, more precise and, based on Lie theory \cite{sola2018micro}, they handle more nicely the specificities of the manifold structure of the problem variables.
+Other project propose to deal with the inherent complexity of multi sensory systems, proposing structures to handle multiple data sources, potentially delayed and at
+different frequencies. Those framework also provide mathematical formulation for most common sensors and higher level interfaces with least square solvers 
+in an effort to bring these techniques to a broader audience \cite{sola2021wolf, blanco2019modular, colosi2020plug}.
 
 
 
-General purpose graph estimation frameworks: \cite{sola2021wolf}, \cite{blanco2019modular}, \cite{colosi2020plug}
+\section{Summary and perspectives}
+- Proprio filters mature and standard tool, 
+- centroidal less explored and loosely coupled with proprio est
+- smoothing and mapping framework matures and starting to be applied to legged robots
+- centroidal estimation not applied to smoothing and mapping
 
-
-
-% \cite{lu1997globally} ?
+Place to explain motivation/plan of the thesis?
