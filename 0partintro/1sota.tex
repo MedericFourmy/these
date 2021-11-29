@@ -26,6 +26,12 @@ and \textit{loosely coupled} approach that divide the estimation in several step
 following steps.
 
 
+"Indeed, most today’s approaches to reconstruct orientations with
+a gyrometer/accelerometer sensors without contact information, have to put an erroneous model on the linear acceleration, 
+for example considered as Gaussian white noise for Kalman Filter- ing [9] or as high-frequency signal for complementary filtering [10]."
+-> importance of rotation position coupling
+
+
 
 
 
@@ -38,7 +44,7 @@ can be computed through forward kinematics. Integrated over time, the relative d
 often referred to as \textit{leg odometry} (by analogy with wheel odometry). This computation is very fast and is readily available in libraries such as \cite{carpentier2019pinocchio, hereid2017frost}. It uses
 readings from the articulations/joints encoders as well as the robot kinematic model. Encoders, usually placed before the reduction step of the actuators
 are very accurate (... for solo \cite{grimminger2020open}) except for certain technologies such as [cite]. The main sources of uncertainty usually comes from
-modeling inaccuracies may be difficult to model such as approximate segment lengths [cite calibration paper VBonnet], segments flexibilities \cite{vigne2018estimation}, 
+modeling inaccuracies may be difficult to model such as approximate segment lengths \improvement[inline]{segment lenght calibration ref?}, segments flexibilities \cite{vigne2018estimation}, 
 joint backlash \cite{fallon2014drift} etc. \cite{bloesch2018technical} makes the distinction between three ways in which the kinematic information can be "inserted" as data fusion, 
 which classification we will borrow in this thesis. 
 
@@ -142,32 +148,62 @@ virtual joints and fused with using the robot whole body dynamics and the linear
 
 %%%%%%%%%%
 \section{Dynamic centroidal estimation}
-Dynamic centroidal estimation, that is to say estimation of the center of mass position, angular momentum and their derivatives, is often treated as a separate problem in 
-the legged robotics literature. For most of the works, the assumption is made that the position, orientation and velocity of the base is given by another 
-estimator. Given the kinodynamic model of the robot, it is easy to compute the centroidal quantities by summing contributions of the different segments. However,
-models are biased and this bias is a nonlinear function of the system joint configuration which is hard to model. Balance algorithms rely heavily on centroidal quantities [cite] which makes 
-an unbiased estimation critical. This fosters the use of more complex algorithms by fusing kinematic and other dynamical information sources.
-This problem was closely scrutinized in the biomechanics literature where mass distributions of human subjects are even harder to obtain. 
-Assuming the contacts all lie on the same plane, the ZMP (or center of pressure \cite{sardain2004forces}) is defined as the point
-where the moment component of the resulting wrench is aligned with the normal axis of the plane. Neglecting the angular momentum of the system, it gives an approximate measure of the
-the  
+Legged robots are highly nonlinear systems that rely heavily on contact forces between their end effector and the environment to realize stable locomotion. 
+The effect of these forces is dictated by the underactuated dynamics equations, also known as Newton/Euler equations, which state the the variation of the 
+system momentum is equal to the external wrench applied to the robot. Though these equations may appear simple, many reduced order models are based directly on 
+various levels of approximations \cite{kajita20013d, wieber2006trajectory, carpentier2016versatile} to derive predictive
+control algorithm, for locomotion for instance. However these equations assume knowledge centroidal quantities of the system at control frequency, 
+namely the position of the center of mass, angular momentum and their derivatives. It is therefore crucial to implement accurate and efficient estimators of these quantities.
 
-\cite{stephens2011state} and \cite{atkeson2012state} ponder the use of simplified dynamical models 
-such as the Linear Inverse Pendulum Model as an process model for a \KalmanF. Ground reaction measurements are needed for the computation of the Center of Pressure, which only requires [FInd the citation, Xinjelifu???].
-\cite{atkeson2012state} explores a first exploitation of the full body dynamics of a planar five link robot in simulation.
+Assuming that the state of the base and joint configurations are perfectly known (up to linear and angular accelerations), it is theoretically possible 
+to compute centroidal quantities using the kinematic model of the robot and the repartition of mass in the different segments. 
+However, this model is most often obtained from CAD models that may be or may become innacurate after repeated use of the platform and require a calibration of
+the platform \cite{ayusawa2008identification, bonnet2019overview} \improvement[inline]{mass distribution calibration refs?}. This problem was closely scrutinized in the biomechanics literature where mass distributions of human subjects coupled with 
+motion capture data \improvement[inline]{biomechanics ref?} provide biased geometric CoM measurement. A second kind of information comes from measurements of the external
+wrench. Forces provide the CoM accelerations while moments relate to the CoM position through a line called the central axis which passes only approximately by
+the CoM because of angular momentum variations due to gesticulation \cite{wieber2006holonomy}. Moreover, the wrench measurements are usually noisy
+and require the presence of expensive deformation gauge sensors at each contact point. A complete analysis of the observability of the particularities
+of the different information sources along with an observability analysis can be found in \cite{carpentier2016center}.
+
+This fosters the use of more complex algorithms by fusing kinematic and external wrench measurements. \cite{stephens2011state} proposes to use the 
+Linear Inverse Pendulum Model (LIPM) as process model to an EKF which also include kinematic measurements \improvement[inline]{Do not understand where the process input = 
+derivative of the CoP comes from!}. Model errors in the form of a CoM position measurement offset and external forces are added to the formulation and it is shown that
+either of these quantities is observable. \cite{atkeson2012state} ponders the use of a more complete planar sagital dynamical model by comparing it to the LIPM model
+without introducing model biases was done in \cite{stephens2011state}, instead relying on tuning filter covariances to alleviate their effects. 
+Simulation show that the LIPM seems more able to cope with model errors but performances on the 
+real robot show similar results. One of the benefits of this model is that forces measurements can be sumerized by the Center of Pressure (CoP) 
+(or ZMP \cite{sardain2004forces}) which is defined as the point where the moment component of the resulting wrench is aligned with the normal axis of the plane.
+The computation of this point only actually requires the contact normal force and horizontal moments, which is unsurprisingly \improvement[inline]{find a synonym} the kind of
+sensor present on the Atlas robot. A centroidal estimator similar to \cite{stephens2011state} was implemented in \cite{xinjilefu2015center} and made possible
+a fall detection algorithm which prevented a fall during CMU team DARPA robotic challenge finals. \cite{piperakis2016non, piperakis2018nonlinear} implemented a similar 
+EKFs estimator based respectively on and on a fly-wheel process model. The NAO robot used for the experiments being equipped with a single axis ground reaction sensor,
+the process model has to be used again in the measurement model equations linked to the estimated external force disturbances.   
+\cite{benallegue2015estimation} also proposed to use a LIPM process but with a fixed contact point. It is tightly fused with IMU 
+measurements and kinematic information in order to jointly estimate centroidal quantities 
+and a joint flexibility at the ankle under external force disturbances. The particularity of this approach is to avoid the need for force sensors but
+it is restricted to motions with fixed rigid contacts with the ground such as during manipulation.
+
+Previous methods were almost all based on simplified linear models which makes them heavily coupled to the used control schemed (LIPM). Indeed an inaccurate process model
+would otherwise likely lead to unstable error dynamics. \cite{xinjilefu2014dynamic} implemented an Quadradic Optimization based estimator using the whole body dynamics
+of the humanoid robot, IMU and kinematic measurements. Modelling error variable at the generalized torque level was introduce as a state variable as well as external wrench at known contacts. 
+The QP framework has the particularity to enforce inequality constraints on state variables such as joint limits and the unilateral contact contraint on the vertical force.
+\cite{rotella2015humanoid} proposes instead to use the Newton/Euler dynamics which are exact 
+and a tractable element of the whole body dynamics. The authors build several estimators by fusing six axis force/torques sensors and kinematic measurements in an EKF. 
+These estimators introduce offsets on CoM position and linear momentum as well as an external 6D wrench disturbance. A nonlinear observability analysis is conducted 
+and shows that either the biases or the external wrench are observable. 
+
+\cite{carpentier2016center} offers a different viewpoint by proposing a frequency analysis of the information sources for centroidal estimation. The model
+assumes the presence of wrench sensors at the contacts and does not explicitly model kinematic bias and external disturbances. Instead it relies on a complementary filter
+to filter out problematic frequency bands in each signal, like for instance lower frequencies of the kinematic measurement in order to remove its slowly varying bias. 
+\cite{bailly2019recursive} extended the methodology to include CoM acceleration and angular momentum derivative in the estimation variables. Both works showed to outperform
+a simple EKF by offering an unbiased CoM position estimate.
+In \cite{bailly2021optimal}, the same author proposed to used Differential Dynamic Programming, an algorithm usually used as a Optimal Control Problem solver.
+This algorithm estimated the same quantities as \cite{bailly2019recursive} by solving a Maximum A Posteriori problem on a sliding window of states sampled at IMU frequency, 
+which permits to back-propagate information from future to the past. The approachecompared favorably to both previous work \cite{bailly2019recursive} and a simple EKF.
 
 
 
-\cite{stephens2011state}
-\cite{atkeson2012state}
-\cite{rotella2015humanoid}
-\cite{xinjilefu2015center}
-\cite{carpentier2016center}
-\cite{benallegue2018model}
-\cite{piperakis2018nonlinear}
-\cite{bailly2019recursive}
-\cite{hawley2019external}
-\cite{bailly2021optimal}
+
 
 %%%%%%%%%%
 \section{Environment awareness}
@@ -290,6 +326,7 @@ kinematic factor by directly using the integrated odometry from the onboard prop
 odometry by using a sparse 3D landmark map. In a following work \cite{wisth2020preintegrated}, the proprioceptive odometry factor was adapted
 to include a slowly variable bias on odometry measurements by adapting the preintegration theory from \cite{forster2017-TRO}. They again extended this work
 by including LIDAR measurements in \cite{wisth2021vilens}.
+
 
 The maturity of the afore mentionned factor graph optimization solver libraries certainly played an important role in these recent developments. It seems
 that tools originally developed in the SLAM community are making their way in the legged robot community. Software libraries are becoming more
