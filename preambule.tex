@@ -4,8 +4,10 @@
 %% Réglage des fontes et typo    
 \usepackage[utf8]{inputenc}		% LaTeX, comprend les accents !
 \usepackage[T1]{fontenc}
+\usepackage[english, french]{babel}
 
-\usepackage{xcolor}
+
+\usepackage[dvipsnames]{xcolor}  % Coloured text etc.
 \usepackage{graphicx}
 \usepackage{mathrsfs}
 
@@ -157,6 +159,18 @@
   citecolor=red,
   pagebackref=false,
   ]{hyperref} %Créera automatiquement les liens internes au PDF
+
+% TODO notes
+\usepackage{xargs}                      % Use more than one optional parameter in a new commands
+\usepackage[dvipsnames]{xcolor}  % Coloured text etc.
+% 
+\usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
+\newcommandx{\unsure}[2][1=]{\todo[linecolor=red,backgroundcolor=red!25,bordercolor=red,#1]{#2}}
+\newcommandx{\change}[2][1=]{\todo[linecolor=blue,backgroundcolor=blue!25,bordercolor=blue,#1]{#2}}
+\newcommandx{\info}[2][1=]{\todo[linecolor=OliveGreen,backgroundcolor=OliveGreen!25,bordercolor=OliveGreen,#1]{#2}}
+\newcommandx{\improvement}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
+\newcommandx{\thiswillnotshow}[2][1=]{\todo[disable,#1]{#2}}
+
 
 % include all bib files separately.
 % to use wildecard upgrade biber to 2.13
