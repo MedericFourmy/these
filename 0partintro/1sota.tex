@@ -209,10 +209,9 @@ with respect to a known map.
 
  
 \cite{hornung2014monte} proposed to apply Monte Carlo Localization using LIDAR measurements by using a highly efficient global octomap datastructure \cite{hornung2013octomap}.
-The algorithm was validated on a NAO humanoid robot and used a learned leg odometry motion model.
+The algorithm was validated on a NAO humanoid robot and used a learned leg odometry motion model, ptich and roll information from the IMU as well as an edge based vision measurement model.
 The MIT team \cite{fallon2014drift} used the same method but replaced the motion model by an inertial kinematics proprioceptive filter. 
 
-This provided a faster localization with respect to the known global octomap \cite{hornung2013octomap}, . 
 LIDAR can also be used as an odometry by matching point clouds taken at successive timestamps with ICP. However, this procedure is time consuming 
 which represents a burden to integrate them with online embedded filters, due to time delays. \cite{nobili2017heterogeneous} solves this issue by keeping a
 buffer of past belief state of the EKF, a method on which is based the Pronto framework \cite{camurri2020pronto}.
