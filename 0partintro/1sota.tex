@@ -205,8 +205,14 @@ While a camera system benefits from low cost and hardware integration difficulty
 may cause some difficulties to such systems, such as shadows being mistaken for solid edges (Figure 8. of \cite{fallon2014drift}).
 During the DARPA robotic challenge [cite?] where robots had to autonomously traverse a challenging environments while performing task at known given checkpoints, 
 many teams [really?] at the LIDAR as a localization procedure [cite, cite cite]. Oftentimes, the ICP algorithm is used to localize the robot 
-with respect to a known map. Taking another route, the MIT team \cite{fallon2014drift} managed to integrate LIDAR measurements directly as position update in a proprioceptive
-filter. This provided a faster localization with respect to the known global octomap \cite{hornung2013octomap}, which was built on the static robot at the beginning of operations. 
+with respect to a known map.
+
+ 
+\cite{hornung2014monte} proposed to apply Monte Carlo Localization using LIDAR measurements by using a highly efficient global octomap datastructure \cite{hornung2013octomap}.
+The algorithm was validated on a NAO humanoid robot and used a learned leg odometry motion model.
+The MIT team \cite{fallon2014drift} used the same method but replaced the motion model by an inertial kinematics proprioceptive filter. 
+
+This provided a faster localization with respect to the known global octomap \cite{hornung2013octomap}, . 
 LIDAR can also be used as an odometry by matching point clouds taken at successive timestamps with ICP. However, this procedure is time consuming 
 which represents a burden to integrate them with online embedded filters, due to time delays. \cite{nobili2017heterogeneous} solves this issue by keeping a
 buffer of past belief state of the EKF, a method on which is based the Pronto framework \cite{camurri2020pronto}.
@@ -275,13 +281,13 @@ computational cost ratio. Most of state of the art visual SLAM framework now fol
 In order to robustify visual SLAM/odometry systems in cases of adverse situations, IMU provides a complementary high rate odometry information which can 
 be debiased by tightly coupling the mapping and the inertial odometry. A careful preintegration \cite{lupton-09,forster2017-TRO} of these high 
 rate measurements had to be developped in the context of smoothing in order for the optimization to remain tractable. The core idea of this algorithm has 
-since been applied to other information sources such as drone thruster [cite Scaramuzza] commands in the context of external force estimation.
+since been applied to other information sources such as drone thruster commands \cite{nisar2019vimo} to make external force estimation possible.
 
 Very recently, a two teams started to apply factor graph optimization principles a general framework for legged robot estimation. At Michigan University, \cite{hartley2018legged} 
 proposed to fuse IMU preintegration with a novel kinematic factor by adding the contact foot pose in the optimized states, to \cite{bloesch2013state,rotella2014state}. 
 SVO \cite{forster2014svo} was also use to integrate camera measurements as relative pose. The estimation framwork was based on GTSAM framework \cite{dellaert2012factor}
 and tests were conducted on a Cassie bipedal robot. In \cite{hartley2018hybrid}, the same authors extended 
-modified the kinematic factor formulation [EXPLAIN]. Another team at Oxford robotic group [NAME], \cite{wisth2019robust} proposed to replace the modelled 
+modified the kinematic factor formulation [EXPLAIN]. Dynamic Robot Systems Group at Oxford proposed in \cite{wisth2019robust} to replace the modelled 
 kinematic factor by directly using the integrated odometry from the onboard proprioceptive filter of the ANYmal robot. Stereo vision was also used as a source of
 odometry by using a sparse 3D landmark map. In a following work \cite{wisth2020preintegrated}, the proprioceptive odometry factor was adapted
 to include a slowly variable bias on odometry measurements by adapting the preintegration theory from \cite{forster2017-TRO}. They again extended this work
