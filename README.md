@@ -10,7 +10,7 @@ pdflatex these
 
 ## TO DO
 - robot family portraits?
-- cite end to end estimation+control?
+- cite end to end ML estimation+control?
 
 ## TO DEFINE
 

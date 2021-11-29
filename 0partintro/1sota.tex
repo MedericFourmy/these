@@ -173,7 +173,7 @@ such as the Linear Inverse Pendulum Model as an process model for a \KalmanF. Gr
 \section{Environment awareness}
 Any useful task that an autonomous robot might operate on involves some level of environment awareness. For ground vehicles, 
 this problem is most often tackled with exteroceptive sensors such as camera, depth camera and LIDARs.
-The environment might be known through a previous mapping procedure like Structure from Motion \cite{triggs1999bundle} or mapped on the fly but a major limiting 
+The environment might be known through a previous mapping procedure like Structure from Motion (SfM) \cite{triggs1999bundle} or mapped on the fly but a major limiting 
 factor is the real-time requirements. Applications can be such as localization with respect to a known map \cite{dellaert1999monte},
 following a known path \cite{furgale2010visual}, Simultaneous Localization And Mapping \cite{aulinas2008slam, cadena2016past}, object detection and pose retrieval [Survey?], 
 autonomous exploration [cite?]... A intermediate case is the one of visual/LIDAR odometry in which a local representation of the environment is built
@@ -253,29 +253,38 @@ keeps a trajectory of past states which are regularly re-optimized in the least 
 joint distribution. Many ad hoc efficient solvers such as\cite{grisetti2011g2o, dellaert2012factor, ila2017slam++, ceres-solver} have been developed 
 over the years to leverage the specific sparsity of the SLAM problem.
 
-While the first successful online visual SLAM algorithm was implemented using an EKF \cite{davison2007monoslam}, a breakthrough happened with the 
+While the first successful online monocular visual SLAM algorithm was implemented using an EKF \cite{davison2007monoslam}, a breakthrough happened with the 
 Parallel Tracking And Mapping system \cite{klein2009parallel} which separated the visual tracking of features and camera motion from the 
-mapping in separate processes.
+mapping in separate processes. Mapping was handled by bundle adjusting sparse features, a method which was previously reserved for offline 
+structure for motion pipelines \cite{triggs1999bundle} which made possible Augmented Reality applications in limited spaces. 
+A great wealth of papers following these two methodologies were subsenquently published. \cite{strasdat2012visual} provided a thorough comparison 
+of the two approaches and concluded that the graph optimization was superior in that it had for most tested datasets the greatest precision to 
+computational cost ratio.
 
-SLAM least square solvers: 
+In order to robustify visual SLAM/odometry systems in cases of adverse situations, IMU provides a complementary high rate odometry information which can 
+be debiased by tightly coupling the mapping and the inertial odometry. A careful preintegration \cite{lupton-09,forster2017-TRO} of these high 
+rate measurements had to be developped in the context of smoothing in order for the optimization to remain tractable. The core idea of this algorithm has 
+since been applied to other information sources such as drone thruster [cite Scaramuzza] commands in the context of external force estimation.
+
+Very recently, a two teams started to apply factor graph optimization principles a general framework for legged robot estimation. At Michigan University, \cite{hartley2018legged} 
+proposed to fuse IMU preintegration with a novel kinematic factor by adding the contact foot pose in the optimized states, to \cite{bloesch2013state,rotella2014state}. 
+SVO \cite{forster2014svo} was also use to integrate camera measurements as relative pose. The estimation framwork was based on GTSAM framework \cite{dellaert2012factor}
+and tests were conducted on a Cassie bipedal robot. In \cite{hartley2018hybrid}, the same authors extended 
+modified the kinematic factor formulation [EXPLAIN]. Another team at Oxford robotic group [NAME], \cite{wisth2019robust} proposed to replace the modelled 
+kinematic factor by directly using the integrated odometry from the onboard proprioceptive filter of the ANYmal robot. Stereo vision was also used as a source of
+odometry by using a sparse 3D landmark map. In a following work \cite{wisth2020preintegrated}, the proprioceptive odometry factor was adapted
+to include a slowly variable bias on odometry measurements by adapting the preintegration theory from \cite{forster2017-TRO}. They again extended this work
+by including LIDAR measurements in \cite{wisth2021vilens}.
+
+The maturity of the before mentionned factor graph optimization libraries certainly played an important role in these recent developments and it seems
+that tools originally developed in the SLAM community are making their way in the legged robot community. Software libraries are becoming more
+generalist, more precise and based on Lie theory \cite{sola2018micro}, they handle more nicely the specificities of the manifold structure of the problem variables.
+Other project propose to deal with the complexity of maintain......
+
+
 
 General purpose graph estimation frameworks: \cite{sola2021wolf}, \cite{blanco2019modular}, \cite{colosi2020plug}
 
-Dévoloppement des dernières années ont apporté:
-Plus précis, plus rapide, plus généraliste
-
-Donner des précisions sur la précision apportée par les maths manifolds
-
-Evoquer l'aspect Factor graph qui est important dans cette partie de la biblio
-
-Dernier paragraphe: Wisth+Michigan
-
-\cite{hartley2018legged}
-\cite{hartley2018hybrid} -> new hybrid contact factor
 
 
-\cite{dellaert2017factor}
-
-\cite{buchanan2021learning} -> Learning Inertial Odometry for Dynamic Legged Robot State Estimation
-\cite{lu1997globally}
-\cite{strasdat2012visual}
+% \cite{lu1997globally} ?
