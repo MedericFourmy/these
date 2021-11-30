@@ -1,54 +1,54 @@
-% \chapter{Preintegrated sensors}
-% \minitoc
+\chapter{Preintegrated sensors}
+\minitoc
 
-% \cite{buchanan2021learning} -> Learning Inertial Odometry for Dynamic Legged Robot State Estimation
+\cite{buchanan2021learning} -> Learning Inertial Odometry for Dynamic Legged Robot State Estimation
 
 
-% \section{Motion integration}
-% First, as a motivational example, we will look at a simple 2D integration motion integration problem. 
-% Let's define the state of our robot as the pose $\T{w}{b} \in \SE (2) or \SE(3)$. 
-% Let's assume we have a source of odometry, coming from wheel encoders for instance, providing velocity measurements in the base frame 
-% $\bfz_k = [\vel{b}{}, \angvel{b}{}]_k$. Now, to update our current estimate of the state, we just have integrate during dt (one step) 
-% using the matrix exponential, as seen in ..., to create a intantaneous relative transformation $\delta_k$ and then compose it with our previous step:
+\section{Motion integration}
+First, as a motivational example, we will look at a simple 2D integration motion integration problem. 
+Let's define the state of our robot as the pose $\T{w}{b} \in \SE (2) or \SE(3)$. 
+Let's assume we have a source of odometry, coming from wheel encoders for instance, providing velocity measurements in the base frame 
+$\bfz_k = [\vel{b}{}, \angvel{b}{}]_k$. Now, to update our current estimate of the state, we just have integrate during dt (one step) 
+using the matrix exponential, as seen in ..., to create a intantaneous relative transformation $\delta_k$ and then compose it with our previous step:
 
-% \begin{equation}
-%     \begin{split}
-%         &\delta_k = \Exp(\bfz_k * dt) 
-%         \\
-%         &\T{}{k} = \T{}{k} \delta_k
-%     \end{split}
-% \end{equation}
+\begin{equation}
+    \begin{split}
+        &\delta_k = \Exp(\bfz_k * dt) 
+        \\
+        &\T{}{k} = \T{}{k} \delta_k
+    \end{split}
+\end{equation}
 
-% Now, assume that we a set of such measurements between 2 \KFs $i$j and $j$ $\mathcal{Z_{ij}} = [\tilde\bfz_k]_{i..j}$. 
-% For high frequency sensors, integration is costly. We want to do it once and for all.
-% We need to integrate the measurements the two \KFs timestamp in order to obtain a single measurement and derive a factor out of it.
-% In this example, this is simply done by composing the $\delta_k$ recursively one at a time.
+Now, assume that we a set of such measurements between 2 \KFs $i$j and $j$ $\mathcal{Z_{ij}} = [\tilde\bfz_k]_{i..j}$. 
+For high frequency sensors, integration is costly. We want to do it once and for all.
+We need to integrate the measurements the two \KFs timestamp in order to obtain a single measurement and derive a factor out of it.
+In this example, this is simply done by composing the $\delta_k$ recursively one at a time.
 
-% \begin{equation}
-%     \T{}{j} = \T{}{i} \prod_{k=i}{j}\delta_k = \T{}{i} \tilde\Delta_{ij}
-% \end{equation}
+\begin{equation}
+    \T{}{j} = \T{}{i} \prod_{k=i}{j}\delta_k = \T{}{i} \tilde\Delta_{ij}
+\end{equation}
 
-% Then a residual can be created using the $\Log$ operator:
+Then a residual can be created using the $\Log$ operator:
 
-% \begin{equation}
-%     \bfr(\T{}{i}, \T{}{j}) = \Log(\T{}{i}^{-1}\T{}{j} \tilde\Delta_{ij})
-% \end{equation}
+\begin{equation}
+    \bfr(\T{}{i}, \T{}{j}) = \Log(\T{}{i}^{-1}\T{}{j} \tilde\Delta_{ij})
+\end{equation}
 
-% However, in some cases, those velocity measurements are biased, due to a modelling error (different encoder wheel raidus). 
-% To obtain meaningful estimations, we need to model this bias and include it in our estimation problem. If we consider a simple additive bias in our example
-% $\tilde\bfz_k = \bfz_k + \bfb$, we see that the ensulting(?) $\tilde\Delta(\bfb)$ measurements depend on $\bfb$ in a non trivial way. Therefore,
-% each time a numerical comes up with a new estimate for $\bfb$, to compute the exact $\tilde\Delta(\bfb)$, the integration of $\mathcal{Z_{ij}}$ 
-% needs to be recomputed which is computationaly costly. As we will see in the next section, this is solved by linearizing $\tilde\Delta(\bfb)$ with respect to $\bfb$ around
-% the bias $\ol\bfb$ that was estimated at the time of the integration. 
+However, in some cases, those velocity measurements are biased, due to a modelling error (different encoder wheel raidus). 
+To obtain meaningful estimations, we need to model this bias and include it in our estimation problem. If we consider a simple additive bias in our example
+$\tilde\bfz_k = \bfz_k + \bfb$, we see that the ensulting(?) $\tilde\Delta(\bfb)$ measurements depend on $\bfb$ in a non trivial way. Therefore,
+each time a numerical comes up with a new estimate for $\bfb$, to compute the exact $\tilde\Delta(\bfb)$, the integration of $\mathcal{Z_{ij}}$ 
+needs to be recomputed which is computationaly costly. As we will see in the next section, this is solved by linearizing $\tilde\Delta(\bfb)$ with respect to $\bfb$ around
+the bias $\ol\bfb$ that was estimated at the time of the integration. 
 
-% On the other end, for other kind of sensors (such as IMUs), it is harder to make the distinction between a delta quantity only depending on raw measurement (and an occasional estimated bias).
-% We have therefore to find special coordinate systems in which to integrate measurements in order to obtain an efficient algorithm. To obtain a factor, we also need to consider integrate 
-% noise odometry noise at each step to obtain the total covariance of the integrated motion.
+On the other end, for other kind of sensors (such as IMUs), it is harder to make the distinction between a delta quantity only depending on raw measurement (and an occasional estimated bias).
+We have therefore to find special coordinate systems in which to integrate measurements in order to obtain an efficient algorithm. To obtain a factor, we also need to consider integrate 
+noise odometry noise at each step to obtain the total covariance of the integrated motion.
 
-% These foundational ideas introduced in \cite{lupton-09}
+These foundational ideas introduced in \cite{lupton-09}
   
 
-% \section{Generalized preintegration}
-% \section{IMU preintegration}
-% \section{IMU preintegration on Lie groups}
-% \section{External force preintegration}
+\section{Generalized preintegration}
+\section{IMU preintegration}
+\section{IMU preintegration on Lie groups}
+\section{External force preintegration}
