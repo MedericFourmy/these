@@ -31,35 +31,35 @@
 %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%
 
-Rotella 
-- Legged robots benefits and challenges
-- Need to estimate quantities that are not directly measurable -> data fusion
-- questions about which sensors should be used for which platforms 
-    -> poundering needs vs constraints (costs, weight, processing cost for embedded platforms)
+% Rotella 
+% - Legged robots benefits and challenges
+% - Need to estimate quantities that are not directly measurable -> data fusion
+% - questions about which sensors should be used for which platforms 
+%     -> poundering needs vs constraints (costs, weight, processing cost for embedded platforms)
 
-Dinesh
-- Need for redundant sensing -> example of living beings (inner ear, vision, kinestesis
+% Dinesh
+% - Need for redundant sensing -> example of living beings (inner ear, vision, kinestesis
 
-Sola:
-- State a clear objective and describe the different terms
-- "hardware vs intelligence driven approaches" 
-    -> more expensive hardware enable easier preprocessing (expensive IMUs = good attitude)
-- very short reading guide: sketch the organisation of the thesis
+% Sola:
+% - State a clear objective and describe the different terms
+% - "hardware vs intelligence driven approaches" 
+%     -> more expensive hardware enable easier preprocessing (expensive IMUs = good attitude)
+% - very short reading guide: sketch the organisation of the thesis
 
-Vallve:
-- adapting the robot to the env rather than the other way around (motivation for autonomous systems AND legged robots)
-- applications without offline maps available (because difficult to access, too expensive...) 
-    -> example of the search and rescue DARPA subterran challenge
-- Idea: compare DARPA 14 to DARPA 20 -> focus on real time exploration and SLAM, large scale problems
+% Vallve:
+% - adapting the robot to the env rather than the other way around (motivation for autonomous systems AND legged robots)
+% - applications without offline maps available (because difficult to access, too expensive...) 
+%     -> example of the search and rescue DARPA subterran challenge
+% - Idea: compare DARPA 14 to DARPA 20 -> focus on real time exploration and SLAM, large scale problems
 
-Bloesch:
-- motivation for legged robots: extend range of robotic applications
-- recent sucesses -> cite a bunch of recent legged robots (a lot now...)
-- Central role of state est -> prerequisite for other tasks like stabilization (high bandwidth est of attitude, vel, com)
-, predictive control, planning contacts etc.
-- High reliability spec -> need for redundancy (Bloesch says "simple estimators" with "low complexity", quite the opposit actually)
-- Short talk about inertial sensors: can provide attitude alone but fast drifting deadreckoning for position and velocity that has to be mitigated by sensor fusion.
-- cameras: nice because low weight and complexity wrt LIDARS (even though now low cost depth sensor)
-- vision based state est: impressive and various results. Benefits from increased robustness using IMU (only for short periods of time)
-    -> shortly describe why both are very complimentary. Kinematics adds more information and increases robustness of approaches.
-Remark: under represented works about semantic informations about the scene (nod to CosySLAM)
+% Bloesch:
+% - motivation for legged robots: extend range of robotic applications
+% - recent sucesses -> cite a bunch of recent legged robots (a lot now...)
+% - Central role of state est -> prerequisite for other tasks like stabilization (high bandwidth est of attitude, vel, com)
+% , predictive control, planning contacts etc.
+% - High reliability spec -> need for redundancy (Bloesch says "simple estimators" with "low complexity", quite the opposit actually)
+% - Short talk about inertial sensors: can provide attitude alone but fast drifting deadreckoning for position and velocity that has to be mitigated by sensor fusion.
+% - cameras: nice because low weight and complexity wrt LIDARS (even though now low cost depth sensor)
+% - vision based state est: impressive and various results. Benefits from increased robustness using IMU (only for short periods of time)
+%     -> shortly describe why both are very complimentary. Kinematics adds more information and increases robustness of approaches.
+% Remark: under represented works about semantic informations about the scene (nod to CosySLAM)
