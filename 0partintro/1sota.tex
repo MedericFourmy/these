@@ -1,5 +1,19 @@
-\chapter{Legged robot state estimation}
-State estimation for legged robots 
+\chapter{Legged robot state estimation: a literature review}
+State estimation for legged robots covers a wide variety of problems that are usually solved using independent communicating estimators.
+Quantities of interest include the base states, centroidal states as well as a representation of the environment. The base refers to a reference
+frame rigidly attached to the main body of the robot like the pelvis that is sometimes identical to the main robot IMU frame or that is the 
+root of the multibody kinematic tree. Its estimated state mainly include the position and velocity of the origin of the frame as well as its orientation
+with respect to an inertial frame referred to as the world frame. The estimation of these states is handled by proprioceptive estimators relying 
+mainly on inertial and kinematic measurements. Centroidal states refer to the center of mass, angular momentum and their derivatives. The center 
+of mass is a virtual point which position is expressed in the world frame and is by definition the barycenter of the robot segment masses. Centroidal
+estimators include measurements using the kinematic model as well as the dynamics of the system. In order to obtain non drifting estimates,
+exteroceptive sensors are needed to obtain relative measurements with respect to a representation of the environments. A more recent type of estimator
+based on graph optimization originally developed in the SLAM community has also recently been adapted for legged robots and promises to offer a general
+framework for a tightly coupled, multimodal estimation, fusioning previously more loosely estimators. 
+
+This chapter gives thematically structure overview of these different aspects. 
+
+\improvement[inline]{Sketch of the reference frames overlaid with 3D model of solo}
 
 
 %%%%%%%%%%
@@ -125,7 +139,7 @@ exceeds a certain threshold, called friction coefficient. This coefficient is ge
 
 The most generally available information are the planned contacts, which may be assumed to be generally respected in nominal operation. 
 This method is not optimal and suffers in the presence of unknown events such as changes in terrain heights and slips but is straightforward to implement and 
-does not require extra sensors. The weights of feet nearby their swing phases can being carefully reduced close to contact switches \cite{leziart2021, bledt2018contact}. 
+does not require extra sensors. The weights of feet nearby their swing phases can being carefully reduced close to contact switches \cite{leziart2021implementation, bledt2018contact}. 
 Most high end humanoid robots however \cite{stasse2017talos, englsberger2014overview} are equipped with strain gauge at their feet that can fairly accurately measure the ground reaction forces (GRFs). 
 Though often biased depending on temperature, those can be used as a proxy to stable contact by setting a reasonably large threshold \cite{fallon2014drift}. 
 This method is an approximation of checking the coulomb cone.
@@ -296,7 +310,8 @@ buffer of past belief state of the EKF, a method on which is based the Pronto fr
 
 \subsection{Reconstruction for footstep planning}
 Even though some legged robots designs and controllers \cite{reher2019dynamic, bledt2018cheetah} are robust to some extent of terrain uncertainty, having information about the local
-shape of the environment is crucial to their safe operation. For instance, contact planners such as \cite{tonneau2018efficient} need a collection of convex surfaces defined as ????
+shape of the environment is crucial to their safe operation. For instance, the guide path implemented in contact planner \cite{tonneau2018efficient} uses the complete 3D structure of the environment
+provided as an .stl file while a mixed integer contact planner like \cite{tonneau2020sl1m} uses a list of vertex tuples representing convex planar surfaces.
 Most reconstruction implementations rely on a depth sensor to obtain these representations.
 
 An interesting representation is to build grid-based \textit{elevation maps}, which associates a probabilistic distribution to the height of each 2D cell. 
