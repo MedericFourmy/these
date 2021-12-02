@@ -5,7 +5,7 @@ frame rigidly attached to the main body of the robot like the pelvis that is som
 root of the multibody kinematic tree. Its estimated state mainly include the position and velocity of the origin of the frame as well as its orientation
 with respect to an inertial frame referred to as the world frame. The estimation of these states is handled by proprioceptive estimators relying 
 mainly on inertial and kinematic measurements. Centroidal states refer to the center of mass, angular momentum and their derivatives. The center 
-of mass is a virtual point which position is expressed in the world frame and is by definition the barycenter of the robot segment masses. Centroidal
+of mass is a virtual point whose position is expressed in the world frame and is by definition the barycenter of the robot segment masses. Centroidal
 estimators include measurements using the kinematic model as well as the dynamics of the system. In order to obtain non drifting estimates,
 exteroceptive sensors are needed to obtain relative measurements with respect to a representation of the environments. A more recent type of estimator
 based on graph optimization originally developed in the SLAM community has also recently been adapted for legged robots and promises to offer a general
@@ -40,8 +40,7 @@ often referred to as \textit{leg odometry} (by analogy with wheel odometry). Thi
 readings from the articulations/joints encoders as well as the robot kinematic model. Encoders, usually placed before the reduction step of the actuators
 are very accurate (... for solo \cite{grimminger2020open}) except for certain technologies such as [cite]. The main sources of uncertainty usually comes from
 modeling inaccuracies may be difficult to model such as approximate segment lengths \improvement[inline]{segment lenght calibration ref?}, segments flexibilities \cite{vigne2018estimation}, 
-joint backlash \cite{fallon2014drift} and flexibilities \cite{koolen2016design} etc. \cite{bloesch2018technical} makes the distinction between three ways in which the kinematic information can be "inserted" as data fusion, 
-which classification we will borrow in this thesis. 
+joint backlash \cite{fallon2014drift} and flexibilities \cite{koolen2016design} etc. \cite{bloesch2018technical} makes the distinction between three measurement models for the kinematic information which will define the structure of this section. 
 
 
 \textit{Feet matching} is the earliest example of leg odometry to be used in the leg robotics literature. Pioneered by \cite{roston1991dead} 
@@ -57,11 +56,11 @@ applications to hexapods (or more feet) or to very slow gaits for quadrupeds.
 \textit{Single foot matching} is also possible for humanoid robots as the 6D contact constraints at each foot directly produces 6D 
 relative measurements \cite{flayols2017experimental,xinjilefu2014decoupled,johnson2015team} after fixing the position of the contact by computing forward kinematics 
 at the beginning of the stance phase using the current base estimate. This approach is less investigated for point feet robots and was only 
-demonstrated in its most general form (to the best of our knowledge) in \cite{fourmy2021contact}.
+demonstrated in its most general form (to the best of our knowledge) in my work \cite{fourmy2021contact}. Another work published later this year \cite{kim2021legged} also include this factor formulation along with a null velocity factor. 
 
 \textit{Instantaneous relative pose} between the base and the foot can also be directly used as a residual in the estimator. This formulation
 was introduced in \cite{bloesch2013state, bloesch2013stateSlippery} for a point feet quadruped as relative position. It was subsequently adapted for a humanoid robot \cite{rotella2014state}, 
-which 6D stance foot constraint permits to add orientation information. In this formulation, states variables corresponding to the robot feet pose have to 
+whose 6D stance foot constraint permits to add orientation information. In this formulation, states variables corresponding to the robot feet pose have to 
 be added to the estimator. This approach was adopted by other groups such as \cite{hartley2018legged, hartley2018hybrid, hartley2020contact} and \cite{bledt2018cheetah}.
 Potential undetected slips and rolls of the foot are model in this context as a random walk on stance foot position. In the \KalmanF context, this is represented 
 by a process noise on the feet position dynamics, which is an important tuning parameter.
@@ -176,7 +175,7 @@ Similarly, for some robotic system, forward kinematic can suffer from encoder no
 augment the capabilities of their estimator by adding extra sensor modalities or directly modeling the model biases (mainly flexibilities).
 
 One source of error comes from joint velocities measurement, especially for hydraulic robots. Encoders measuring joint angles are usually placed 
-at the actuator level which makes for a very precise angle estimation if subsequent reduction steps are present. It is then acceptable to numerically 
+at the actuator level which produces a very precise angle estimation if subsequent reduction steps are present. It is then acceptable to numerically 
 differentiate and slightly filter those values to use them for joint impedance control for instance. However, hydraulic
 actuators do not include those reduction steps and fall victim to important joint velocity noise, which can degrade feedback control.
 \cite{xinjilefu2014decoupled} proposes to use the dynamic model of the robot and joint torques to obtain filters on the joint angles and velocities
@@ -230,7 +229,7 @@ One of the benefits of this model is that forces measurements can be summarized 
 (or ZMP \cite{sardain2004forces}) which is defined as the point where the moment component of the resulting wrench is aligned with the normal axis of the plane.
 The computation of this point only actually requires the contact normal force and horizontal moments, which is coincidingly the kind of
 sensor present on the Atlas robot. A centroidal estimator similar to \cite{stephens2011state} was implemented in \cite{xinjilefu2015center} and made possible
-a fall detection algorithm which prevented a fall during CMU team DARPA robotic challenge finals. \cite{piperakis2016non, piperakis2018nonlinear} implemented a similar 
+a fall detection algorithm that prevented a fall during CMU team DARPA robotic challenge finals. \cite{piperakis2016non, piperakis2018nonlinear} implemented a similar 
 EKFs estimator based respectively on and on a fly-wheel process model. The NAO robot used for the experiments being equipped with a single axis ground reaction sensor,
 the process model has to be used again in the measurement model equations linked to the estimated external force disturbances.   
 \cite{benallegue2015estimation} also proposed to use a LIPM process but with a fixed contact point. It is tightly fused with IMU 
@@ -314,7 +313,7 @@ shape of the environment is crucial to their safe operation. For instance, the g
 provided as an .stl file while a mixed integer contact planner like \cite{tonneau2020sl1m} uses a list of vertex tuples representing convex planar surfaces.
 Most reconstruction implementations rely on a depth sensor to obtain these representations.
 
-An interesting representation is to build grid-based \textit{elevation maps}, which associates a probabilistic distribution to the height of each 2D cell. 
+An interesting representation is to build grid-based \textit{elevation maps}, that associates a probabilistic distribution to the height of each 2D cell. 
 This is a simplified representation of the 3D environment, that does not take terrain slopes into account for instance, but provides interesting computational features. 
 For rover applications, \cite{kleiner2007real} argues that building a globally consistent elevation map is too costly and instead switch the representation to the local robot frame. 
 The map is constantly updated using two sources of information: range measurements that refine the visible parts of the map while the and wheel odometry increases uncertainty using heuristic
@@ -322,7 +321,7 @@ based on the traveled distance. \cite{fankhauser2014robot, fankhauser2018probabi
 was also improved by including horizontal uncertainty due to the robot relative motion. A costly map fusion process which computes lower and upper bound on the elevations
 is decoupled from the sensor updates and can be computed intermittently at the discretion of the user. 
 
-An extension of the elevation grid map is to represent occupied 3D space as an 3D occupancy voxel map, which can be efficiently stored using an octomap.
+An extension of the elevation grid map is to represent occupied 3D space as an 3D occupancy voxel map, which can be efficiently stored using an Octomap.
 While \cite{hornung2014monte, fallon2014drift} only used this representation as prior for online localization, it was used for online foot planning in \cite{winkler2015planning, mastalli2015line}. 
 
 \cite{kolter2009stereo} adopts a mesh representation built from point-clouds aligned twice a seconds off-board using ICP initialized by proprioceptive odometry and filled with
@@ -353,20 +352,20 @@ such as drone navigation: Factor Graph optimization, also known as simply "graph
 also used when a limited window of past state are kept in the estimator, the old ones being marginalized. The earliest example \cite{lu1997globally} 
 proposed to obtain globally consistent 2D LIDAR range scan alignments by minimizing cost function over a trajectory of 2D poses constrained by LIDAR scans and wheel odometry.
 While the Bayesian filter summarizes the accumulated information about the current estimated state and its cross-correlations as a single probabilistic distribution, 
-Factor Graph optimization keeps a trajectory of arbitrarily spaced past states which are regularly re-optimized in the least square sense, by finding the so called 
+Factor Graph optimization keeps a trajectory of arbitrarily spaced past states that are regularly re-optimized in the least square sense, by finding the so called 
 Maximum A Posterio over the trajectory joint distribution. Many ad hoc efficient solvers such as \cite{grisetti2011g2o, dellaert2012factor, ila2017slam++, ceres-solver} have been developed 
 over the years to leverage the specific sparsity of the SLAM problem.
 
 While the first successful online monocular visual SLAM algorithm was implemented using an EKF \cite{davison2007monoslam}, a breakthrough happened with the 
-Parallel Tracking And Mapping system \cite{klein2009parallel} which separated the visual tracking of features and camera motion from the 
-mapping in separate processes. Mapping was handled by bundle adjusting sparse features, a method which was previously reserved for offline 
+Parallel Tracking And Mapping system \cite{klein2009parallel} that separated the visual tracking of features and camera motion from the 
+mapping in separate processes. Mapping was handled by bundle adjusting sparse features, a method that was previously reserved for offline 
 structure for motion pipelines \cite{triggs1999bundle} which made possible Augmented Reality applications in limited spaces. 
 A great wealth of papers following these two methodologies were subsequently published. \cite{strasdat2012visual} provided a thorough comparison 
 of the two approaches and concluded that the graph optimization was superior in that it had the greatest precision to 
-computational cost ratio, for most tested datasets. Most of state of the art visual SLAM framework now follow this methodology 
+computational cost ratio, for most tested datasets. Most of the state of the art visual SLAM framework now follow this methodology 
 \cite{forster2017-TRO, mur2015orb, qin2018vins, leutenegger2015keyframe, ferrera2021ov}.
 
-In order to robustify visual SLAM/odometry systems in cases of adverse situations, IMU provides a complementary high rate odometry information which can 
+In order to robustify visual SLAM/odometry systems in cases of adverse situations, IMU provides a complementary high rate odometry information that can 
 be debiased by tightly coupling the mapping and the inertial odometry. A careful preintegration \cite{lupton-09,forster2017-TRO} of these high 
 rate measurements had to be developed in the context of smoothing in order for the optimization to remain tractable. The core idea of this algorithm has 
 since been applied to other information sources such as drone thrust commands \cite{nisar2019vimo} to make external force estimation possible.
@@ -380,9 +379,10 @@ modified the kinematic factor formulation, taking into account uncertainty induc
 odometry by using a sparse 3D landmark map. In a following work \cite{wisth2020preintegrated}, the proprioceptive odometry factor was adapted
 to include a slowly variable bias on odometry measurements by adapting the preintegration theory from \cite{forster2017-TRO}. They again extended this work
 by including LIDAR measurements in \cite{wisth2021vilens}.
+\cite{kim2021legged} also implemented a inertial kinematic proprioceptive smoothing estimator on the MIT Cheetah, mitigating slipping of the feet by removing kinematic measurements which residual errors exceed a certain threshold.    
 
 
-The maturity of the afore mentionned factor graph optimization solver libraries certainly played an important role in these recent developments. It seems
+The maturity of the afore mentioned factor graph optimization solver libraries certainly played an important role in these recent developments. It seems
 that tools originally developed in the SLAM community are making their way in the legged robot community. Software libraries are becoming more
 generalist, more precise and, based on Lie theory \cite{sola2018micro}, they handle more nicely the specificities of the manifold structure of the problem variables.
 Other project propose to deal with the inherent complexity of multi sensory systems, proposing principled ways to handle multiple data sources, potentially asynchronous and at
