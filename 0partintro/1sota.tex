@@ -39,14 +39,14 @@ can be computed through forward kinematics. Integrated over time, the relative d
 often referred to as \textit{leg odometry} (by analogy with wheel odometry). This computation is very fast and is readily available in libraries such as \cite{carpentier2019pinocchio, hereid2017frost}. It uses
 readings from the articulations/joints encoders as well as the robot kinematic model. Encoders, usually placed before the reduction step of the actuators
 are very accurate (... for solo \cite{grimminger2020open}) except for certain technologies such as [cite]. The main sources of uncertainty usually comes from
-modeling inaccuracies may be difficult to model such as approximate segment lengths \improvement[inline]{segment lenght calibration ref?}, segments flexibilities \cite{vigne2018estimation}, 
+modeling inaccuracies may be difficult to model such as approximate segment lengths \improvement[inline]{segment length calibration ref?}, segments flexibilities \cite{vigne2018estimation}, 
 joint backlash \cite{fallon2014drift} and flexibilities \cite{koolen2016design} etc. \cite{bloesch2018technical} makes the distinction between three measurement models for the kinematic information which will define the structure of this section. 
 
 
 \textit{Feet matching} is the earliest example of leg odometry to be used in the leg robotics literature. Pioneered by \cite{roston1991dead} 
 \footnote{An earlier example might exist in \cite{waldron1986adaptive} even though the technical report is unclear about the method they used: 
 "Leg-position feedback is used from legs in support phase for the purpose of correcting for gyro and integration drift in the inertial reference system."},
-multiple feet matching provides a relative 6D pose between timesteps during which at least three feet are in stable contact with the ground.
+multiple feet matching provides a relative 6D pose between moments during which at least three feet are in stable contact with the ground.
 For point feet robots (such as most quadrupeds), the problem %is akin to the Iterative Closest Point \cite{besl1992method} (ICP) algorithm in which correspondences between 3D points are known and 
 is an instance of the orthogonal Procrustes problem.
 Follow up works adapted the method to smaller hexapods \cite{lin2005leg} and began to fuse it with other sensors such as GPS \cite{gassmann2005localization, cobano2008location} 
@@ -62,7 +62,7 @@ demonstrated in its most general form (to the best of our knowledge) in my work 
 was introduced in \cite{bloesch2013state, bloesch2013stateSlippery} for a point feet quadruped as relative position. It was subsequently adapted for a humanoid robot \cite{rotella2014state}, 
 whose 6D stance foot constraint permits to add orientation information. In this formulation, states variables corresponding to the robot feet pose have to 
 be added to the estimator. This approach was adopted by other groups such as \cite{hartley2018legged, hartley2018hybrid, hartley2020contact} and \cite{bledt2018cheetah}.
-Potential undetected slips and rolls of the foot are model in this context as a random walk on stance foot position. In the \KalmanF context, this is represented 
+Potential undetected slips and rolls of the foot are model in this context as a random walk on stance foot position. In the \KalmanF context, this is represented
 by a process noise on the feet position dynamics, which is an important tuning parameter.
 
 When a single point foot is in contact with the ground, the leg can move around the three remaining rotational degrees of freedom without changing encoder measurements.
@@ -96,8 +96,8 @@ Many types of observer designs have been put to test on legged robots propriocep
 most are continuous Bayesian filters such as variants of the \KalmanF \cite{kalman1960new} and complementary filters. While a complete history of 
 the evolution of proprioceptive filters is instructive, this has been treated exhaustively by other authors \cite{bloesch2017state, camurri2017multisensory}. 
 It is however interesting to delve into a particular dichotomy between different estimators implemented in recent works. Those can be 
-roughly divided in \textit{tightly coupled} approaches which try to capture all statistical cross correlations between the estimated states
-and \textit{loosely coupled} approach that divide the estimation in several steps, the results being successively taken as fixed priors to the 
+roughly divided in \textit{tightly coupled} approaches, which try to capture all statistical cross correlations between the estimated states,
+and \textit{loosely coupled} approach, which divide the estimation in several steps whose results are being successively taken as fixed priors to the 
 following steps.
 
 The tightly coupled approach was introduced in works like \cite{chilian2011multisensor}, but \cite{bloesch2013state} was the most decisive step.
@@ -112,7 +112,7 @@ This new kind of estimator exhibits a larger pool of convergence compared to the
 On the other end, many successful proprioceptive algorithms rely on loosely coupled filters, where the robot orientation is pre-computed
 independently by a first filter. For instance, the CMU \cite{feng2015optimization} and IHMC \cite{johnson2015team} teams explain that they
 implemented tightly coupled nonlinear estimators for the early trials, based on ad hoc implementations of the proprioceptive filter but ended up using 
-the orientation estimation provided by the ATLAS IMU without modification. In this case, the IMU was a tactical grade fiber optic model which made sense. 
+the orientation estimation provided by the ATLAS IMU without modification. This was helped by the fact that the IMU was a tactical grade fiber optic model. 
 \cite{flayols2017experimental} proposed an experimental comparison of decoupled proprioceptive filters for \HRP{2}. For both, a complementary filter estimates 
 the orientation of the base from IMU measurements only. The second step is either a straightforward \KalmanF on the position and velocity. 
 The second is an ad hoc two stage weighting algorithm: first orientation weighting between the IMU and both feet, then position and velocity measurements 
@@ -122,10 +122,7 @@ stage complementary filter for \cite{leziart2021implementation}.
 All in all, the choice in favor of either of these options depends on the sensor modalities available on the platform. A very high end IMU such as the ATLAS fiber optics
 IMU will be able to compute a very consistent orientation and even biases inside its internal filter using an approximate motion model. On the other end,
 a lower quality IMU may require data fusion from sources such as leg odometry, given that this source of information is good enough. However, progress in 
-miniaturization and production of MEMS based IMUs which equip most legged robots nowadays seem to guide to the use of stages approaches using MEMS, 
-for quadruped robots at least \cite{bledt2018cheetah, leziart2021implementation} to develop simple baseline estimators.
-
-
+miniaturization and production of MEMS based IMUs, which equip most legged robots nowadays, seem to guide to the use of stages approach for quadruped robots \cite{bledt2018cheetah, leziart2021implementation}.
 
 
 
@@ -137,8 +134,8 @@ planar feet, the six degrees of freedom are constrained. Slipping appears when t
 exceeds a certain threshold, called friction coefficient. This coefficient is generally unknown as it depends on the the nature of the feet of the robot but also of the contact.
 
 The most generally available information are the planned contacts, which may be assumed to be generally respected in nominal operation. 
-This method is not optimal and suffers in the presence of unknown events such as changes in terrain heights and slips but is straightforward to implement and 
-does not require extra sensors. The weights of feet nearby their swing phases can being carefully reduced close to contact switches \cite{leziart2021implementation, bledt2018contact}. 
+This method suffers in the presence of unknown events such as changes in terrain heights and feet slips but is straightforward to implement and 
+does not require extra sensors. When in contact, the closer to the swing phase contact switch, the lower weights on the feet in the estimator can be put \cite{leziart2021implementation, bledt2018contact}. 
 Most high end humanoid robots however \cite{stasse2017talos, englsberger2014overview} are equipped with strain gauge at their feet that can fairly accurately measure the ground reaction forces (GRFs). 
 Though often biased depending on temperature, those can be used as a proxy to stable contact by setting a reasonably large threshold \cite{fallon2014drift}. 
 This method is an approximation of checking the coulomb cone.
@@ -157,11 +154,11 @@ This problem is not trivial and practical solutions seem to hesitate between sim
 The problem with simple heuristic is that they neglect the temporal aspect of the data stream and that their parameters (though few in numbers) may be hard to tune.
 Bayesian filters on the other hand provides a more fine tuned control of the modeled aspects of the problem, at the expense of complex manual parameter tuning.
 One thread of research tries to alleviate the need for tuning by relying on data based approaches. \cite{camurri2017probabilistic} introduces a probabilistic 
-contact detector using only joint torques, expressed as a logistic regression, supervised learning problem. The detectors provide a probability distribution on feet contacts which is used to ponder kinematic
+contact detector using only joint torques, expressed as a logistic regression, supervised learning problem. The detectors provide a probability distribution on feet contacts that is used to ponder kinematic
 measurements of an tightly coupled proprioceptive filter. The method outperforms a baseline based on threshold selection. However, the method seems to require manual annotation of datasets and 
 fits different threshold for each type of gait. The model may certainly suffer from different terrains and robot loads. 
 \cite{rotella2018unsupervised} cluster fuzzy contact states by training in an unsupervised fashion for simulated data of a humanoid robot. The datasets are augmented
-with IMU measurements at the feet which are removed at evaluation time. The resulting estimator odometry system is shown to outperform one based on contact force classification
+with IMU measurements at the feet that are removed at evaluation time. The resulting estimator odometry system is shown to outperform one based on contact force classification
 but was not validated on real hardware. More recently, \cite{lin2021deep} proposed to use a deep network to infer contact states using a buffer of 150ms of raw IMU, 
 encoder and kinematic measurements. The emphasis is put in training the estimator in many different ground type in outside extended environment using an MIT Mini Cheetah. Ground truth is generated
 by finding a region around the local minimum of low pass feet height trajectories in the hip frames. The estimator provides a reliable source of contact information 
@@ -175,7 +172,7 @@ Similarly, for some robotic system, forward kinematic can suffer from encoder no
 augment the capabilities of their estimator by adding extra sensor modalities or directly modeling the model biases (mainly flexibilities).
 
 One source of error comes from joint velocities measurement, especially for hydraulic robots. Encoders measuring joint angles are usually placed 
-at the actuator level which produces a very precise angle estimation if subsequent reduction steps are present. It is then acceptable to numerically 
+at the actuator level. They produce a very precise angle estimation when subsequent reduction steps are present. It is then acceptable to numerically 
 differentiate and slightly filter those values to use them for joint impedance control for instance. However, hydraulic
 actuators do not include those reduction steps and fall victim to important joint velocity noise, which can degrade feedback control.
 \cite{xinjilefu2014decoupled} proposes to use the dynamic model of the robot and joint torques to obtain filters on the joint angles and velocities
@@ -220,13 +217,13 @@ and require the presence of expensive deformation gauge sensors at each contact 
 of these different information sources along with an observability analysis can be found in \cite{carpentier2016center}.
 
 This fosters the use of more complex algorithms by fusing kinematic and external wrench measurements. \cite{stephens2011state} proposes to use the 
-Linear Inverse Pendulum Model (LIPM) as process model to an EKF which also include kinematic measurements \improvement[inline]{Do not understand where the process input = 
+Linear Inverse Pendulum Model (LIPM) as process model to an EKF that also includes kinematic measurements \improvement[inline]{Do not understand where the process input = 
 derivative of the CoP comes from!}. Model errors in the form of a CoM position measurement offset and external forces are added to the formulation and it is shown that
 either of these quantities is observable. \cite{atkeson2012state} ponders the use of a more complete planar sagital dynamical model by comparing it to the LIPM model
 without introducing model biases was done in \cite{stephens2011state}, instead relying on tuning filter covariances to alleviate their effects. 
 Simulation show that the LIPM seems more able to cope with model errors but performances on the real robot show similar results. 
 One of the benefits of this model is that forces measurements can be summarized by the Center of Pressure (CoP) 
-(or ZMP \cite{sardain2004forces}) which is defined as the point where the moment component of the resulting wrench is aligned with the normal axis of the plane.
+(or ZMP \cite{sardain2004forces}). The CoP is defined as the point where the moment component of the resulting wrench is aligned with the normal axis of the plane.
 The computation of this point only actually requires the contact normal force and horizontal moments, which is coincidingly the kind of
 sensor present on the Atlas robot. A centroidal estimator similar to \cite{stephens2011state} was implemented in \cite{xinjilefu2015center} and made possible
 a fall detection algorithm that prevented a fall during CMU team DARPA robotic challenge finals. \cite{piperakis2016non, piperakis2018nonlinear} implemented a similar 
@@ -237,11 +234,11 @@ measurements and kinematic information in order to jointly estimate centroidal q
 and a joint flexibility at the ankle under external force disturbances. The particularity of this approach is to avoid the need for force sensors but
 it is restricted to motions with fixed rigid contacts with the ground such as during manipulation.
 
-Previous methods were almost all based on simplified linear models which makes them heavily coupled to the used control schemed (LIPM). Indeed an inaccurate process model
+Previous methods were almost all based on simplified linear models which makes them heavily coupled to the used control schemed (a LIPM based pattern generator \cite{kajita20013d}). Indeed an inaccurate process model
 would otherwise likely lead to unstable error dynamics. \cite{xinjilefu2014dynamic} implemented an Quadratic Optimization (QP) based estimator using the whole body dynamics
 of the humanoid robot, IMU and kinematic measurements. A modeling error at the generalized torque level was introduce as a state variable as well as external wrench at known contacts. 
 The QP framework has the particularity to enforce inequality constraints on state variables such as joint limits and the unilateral contact constraint on the vertical force.
-\cite{rotella2015humanoid} proposes instead to use the Newton/Euler dynamics which are exact and a tractable element of the whole body dynamics. 
+\cite{rotella2015humanoid} proposes instead to use the Newton/Euler dynamics, which are exact and a tractable element of the whole body dynamics. 
 The authors build several estimators by fusing six axis force/torques sensors and kinematic measurements in an EKF. 
 These estimators introduce offsets on CoM position and linear momentum as well as an external 6D wrench disturbance. A nonlinear observability analysis is conducted 
 and shows that either the biases or the external wrench are observable. 
@@ -318,7 +315,7 @@ This is a simplified representation of the 3D environment, that does not take te
 For rover applications, \cite{kleiner2007real} argues that building a globally consistent elevation map is too costly and instead switch the representation to the local robot frame. 
 The map is constantly updated using two sources of information: range measurements that refine the visible parts of the map while the and wheel odometry increases uncertainty using heuristic
 based on the traveled distance. \cite{fankhauser2014robot, fankhauser2018probabilistic} adapted these ideas to legged robots. The map grid probabilistic representation
-was also improved by including horizontal uncertainty due to the robot relative motion. A costly map fusion process which computes lower and upper bound on the elevations
+was also improved by including horizontal uncertainty due to the robot relative motion. A costly map fusion process that computes lower and upper bound on the elevations
 is decoupled from the sensor updates and can be computed intermittently at the discretion of the user. 
 
 An extension of the elevation grid map is to represent occupied 3D space as an 3D occupancy voxel map, which can be efficiently stored using an Octomap.
@@ -359,7 +356,7 @@ over the years to leverage the specific sparsity of the SLAM problem.
 While the first successful online monocular visual SLAM algorithm was implemented using an EKF \cite{davison2007monoslam}, a breakthrough happened with the 
 Parallel Tracking And Mapping system \cite{klein2009parallel} that separated the visual tracking of features and camera motion from the 
 mapping in separate processes. Mapping was handled by bundle adjusting sparse features, a method that was previously reserved for offline 
-structure for motion pipelines \cite{triggs1999bundle} which made possible Augmented Reality applications in limited spaces. 
+structure for motion pipelines \cite{triggs1999bundle}, which made possible Augmented Reality applications in limited spaces. 
 A great wealth of papers following these two methodologies were subsequently published. \cite{strasdat2012visual} provided a thorough comparison 
 of the two approaches and concluded that the graph optimization was superior in that it had the greatest precision to 
 computational cost ratio, for most tested datasets. Most of the state of the art visual SLAM framework now follow this methodology 
@@ -379,7 +376,7 @@ modified the kinematic factor formulation, taking into account uncertainty induc
 odometry by using a sparse 3D landmark map. In a following work \cite{wisth2020preintegrated}, the proprioceptive odometry factor was adapted
 to include a slowly variable bias on odometry measurements by adapting the preintegration theory from \cite{forster2017-TRO}. They again extended this work
 by including LIDAR measurements in \cite{wisth2021vilens}.
-\cite{kim2021legged} also implemented a inertial kinematic proprioceptive smoothing estimator on the MIT Cheetah, mitigating slipping of the feet by removing kinematic measurements which residual errors exceed a certain threshold.    
+\cite{kim2021legged} also implemented a inertial kinematic proprioceptive smoothing estimator on the MIT Cheetah, mitigating slipping of the feet by removing kinematic measurements whose residual errors exceed a certain threshold.    
 
 
 The maturity of the afore mentioned factor graph optimization solver libraries certainly played an important role in these recent developments. It seems
