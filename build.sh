@@ -1,5 +1,7 @@
 #!/bin/bash
 
+nojustin=false
+
 # Parse input arguments
 while [[ "$#" -gt 0 ]]; do
     case $1 in

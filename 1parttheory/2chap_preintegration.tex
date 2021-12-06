@@ -1,9 +1,6 @@
 \chapter{Preintegrated sensors}
 \minitoc
 
-\cite{buchanan2021learning} -> Learning Inertial Odometry for Dynamic Legged Robot State Estimation
-
-
 % \section{Motion integration}
 % First, as a motivational example, we will look at a simple 2D integration motion integration problem. 
 % Let's define the state of our robot as the pose $\T{w}{b} \in \SE (2) or \SE(3)$. 
@@ -51,19 +48,20 @@
 In this section we will introduce the IMU measurement model and describe a way in which we may naively integrate these measurements between \keyframes.
 We will then explain the observation that lead to the development of the IMU preintegration algorithm in \cite{lupton-09}.
 
-Let's consider the estimation of a robot base pose and velocity in an the world frame. Among available sensors, the IMU measurements are known to be noisy, 
-biased and affected by the gravity. Without loss of generality, we assume that the IMU frame is identical to the base frame in the following developments.
+Let's consider the estimation of a robot base pose and velocity in the world frame. We will assume neglect effects due the rotation of the earth [cite] which
+is a common simplification in robotic scenarios.  Without loss of generality, we assume that the IMU frame is identical to the base frame in the following developments.
+Among available sensors, the IMU measurements are known to be noisy, biased and affected by the gravity.
 
 \begin{equation}
     \begin{split}
     \angvelm{}{} &= \angvel{B}{WB} + \bias_{\angvel{}{}} + \noise_{\angvel{}{}} 
     \\
-    \accm{}{}    &= \Rot{B}{W} \grav \acc{B}{WB} + \bias_{\acc{}{}} + \noise_{\acc{}{}} 
+    \accm{}{}    &= \Rot{B}{W} \grav + \acc{B}{WB} + \bias_{\acc{}{}} + \noise_{\acc{}{}} 
     \end{split}
     \label{eq:imu_meas_model}
 \end{equation}
     
-Other sensors can help estimate imu biases so we include them in the estimator state.
+Other sensors can help estimate IMU biases so we include them in the estimator state.
 
 \begin{equation}
     \bfx = [\posi{W}{WB}, \vel{W}{WB}, \Rot{W}{B}, \bias_{\bfa}, \bias_{\angvel{}{}}]
@@ -72,16 +70,15 @@ Other sensors can help estimate imu biases so we include them in the estimator s
 \end{equation}
 
 Once the IMU has been started, these biases slowly change over time, depending on the quality of the IMU used. This change is almost always modeled 
-as a random walk which is close to the observed behavior for rather short periods of time \footnote{Random walk tends stochastically to infinite values
-while biases are observed to have bounded values}. A simple dynamical model based on strapdown integration of IMU measurements can then be derived.
+as a random walk which is close to the observed behavior for rather short periods of time \cite{hussen2015low}. A simple dynamical model based on strapdown integration of IMU measurements can then be derived.
 
 \begin{equation}
     \begin{split}
-    \dot{\posi{}{}} &= \vel{}{}  \\
-    \dot{\vel{}{}} &= \acc{W}{WB} \\
-    \dot{\Rot{}{}} &= \Rot{}{} [\angvel{B}{WB}]_{\times} \\
-    \dot{\bias}_{\bfa} &= \noise_{\bfa}  \\
-    \dot{\bias}_{\angvel{}{}} &= \noise_{\angvel{}{}} \\
+    \dot{\posi{}{}} = \vel{}{}  ~~~~~~~
+    \dot{\vel{}{}} = \acc{W}{WB} ~~~~~~~
+    \dot{\Rot{}{}} = \Rot{}{} [\angvel{B}{WB}]_{\times} ~~~~~~~
+    \dot{\bias}_{\bfa} = \noise_{\bfa}  ~~~~~~~
+    \dot{\bias}_{\angvel{}{}} = \noise_{\angvel{}{}} ~~~~~~~
     \end{split}
     \label{eq:imu_dyn_conti}
 \end{equation}
@@ -91,89 +88,105 @@ explicit Euler integration scheme results in the discrete dynamics:
 
 \begin{equation}
     \begin{split}
-    \Rot{}{}^{k+1}  &= \Rot{}{}^{k}Exp((\angvelm{}{}^k - \bias_{\angvel{}{}^k} - \noise_{\angvel{}{}^k})dt)
+    \Rot{}{}^{k+1}  &= \Rot{}{}^{k}\Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^k - \noise_{\angvel{}{}}^k)dt)
     \\
-    \vel{}{}^{k+1}  &= \vel{}{}^{k} + \grav dt + \Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}^k} - \noise_{\acc{}{}^k})dt
+    \vel{}{}^{k+1}  &= \vel{}{}^{k} + \grav dt + \Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)dt
     \\
     \posi{}{}^{k+1} &= \posi{}{}^{k} + \vel{}{}^{k}dt + \frac{1}{2}\grav dt^2 
-    + \frac{1}{2}\Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}^k} - \noise_{\acc{}{}^k})dt^2
+    + \frac{1}{2}\Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)dt^2
     \end{split}
     \label{eq:imu_dyn_disc}
 \end{equation}
     
-Now, these equations relate variables variables between two state variables at IMU frequency. To include these measurements in our smoothing estimator,
+Now, these equations relate variables variables between two state variables sampled at IMU frequency. To include these measurements in our smoothing estimator,
 one solution would be to introduce new variables at the rate of the IMU. However, the size of the problem to solve would grow very quickly. A better option
-is to integrate IMU measurements during extended periods of time. If we simply integrate in world frame by unfurling \ref{eq:imu_dyn_disc} between i and j, integrating
-the sequence of IMU measurements $\mathcal{Z}_{ij}$, we obtain
-the following equations:
-
+is to integrate IMU measurements during extended periods of time. If we simply integrate the sequence of IMU measurements between timestamps 
+$t_i$ and $t_j$ $\mathcal{Z}_{ij}$ by unfurling \ref{eq:imu_dyn_disc}, we obtain the following equations:
+%
 \begin{equation}
     \begin{split}
-    \Rot{}{}^{j}  &= \Rot{}{}^{i} \prod_{k=i}^{j-1} Exp((\angvelm{}{}^k - \bias_{\angvel{}{}^k} - \noise_{\angvel{}{}^k})dt) \\
-    \vel{}{}^{j}  &= \vel{}{}^{i} + \sum_{k=i}^{j-1} \Big[\grav dt + \Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}^k} - \noise_{\acc{}{}^k})dt \Big]  \\
-    \posi{}{}^{j} &= \posi{}{}^{i} + \sum_{k=i}^{j-1} \Big[\vel{}{}^{k}dt + \frac{1}{2}\grav dt^2 
-    + \frac{1}{2}\Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}^k} - \noise_{\acc{}{}^k})dt^2 \Big]
+    \Rot{}{}^{j}  &= \Rot{}{}^{i} \prod_{k=i}^{j} \Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^k - \noise_{\angvel{}{}}^k)dt) \\
+    \vel{}{}^{j}  &= \vel{}{}^{i} + \sum_{k=i}^{j} \Big[\grav dt + \Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)dt \Big]  \\
+    \posi{}{}^{j} &= \posi{}{}^{i} + \sum_{k=i}^{j} \Big[\vel{}{}^{k}dt + \frac{1}{2}\grav dt^2 
+    + \frac{1}{2}\Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)dt^2 \Big]
     \end{split}
     \label{eq:IMUIntij}
 \end{equation}
-
-We could then directly derive a factor with an error function defined as
-$e(\bfx_i, \bfx_j) = \bfDelta_{\bfx}(\bfx_i, \bfx_j)  \ominus  \bfDelta_{\mathcal{Z}_{ij}}(\bias_{\acc{}{}}^i, \bias_{\angvel{}{}}^j)$
-assuming biases stay constant during $\Delta_{ij}$  where 
-
+%
+Assuming IMU biases stay constant during $\Delta t_{ij}$, 
+\begin{equation*}
+    \bias^i \triangleq [\bias_{\acc{}{}}^i, \bias_{\angvel{}{}}^i] = [\bias_{\acc{}{}}^k, \bias_{\angvel{}{}}^k]  ~~~ \forall k \in [i..j]
+\end{equation*}
+we could then directly derive a factor with an error function defined as
+$e(\bfx^i, \bfx^j) = \bfDelta_{\bfx}(\bfx^i, \bfx^j)  \ominus  \bfDelta_{\mathcal{Z}_{ij}}(\bias^i, \bfx^i)$
+  where 
+%
 \begin{align}
-    \bfDelta_{\bfx}(\bfx_i, \bfx_j) = 
+    \bfDelta_{\bfx}(\bfx^i, \bfx^j) = 
     \begin{bsmallmatrix}
     \Rot{}{}^{i,T} \Rot{}{}^{j}  \\
     \vel{}{}^{j}  - \vel{}{}^{i}  \\
     \posi{}{}^{j} - \posi{}{}^{i}
     \end{bsmallmatrix}
 \end{align}
-
+%
 and 
-
+%
 \begin{align}
-    \bfDelta_{\mathcal{Z}_{ij}}(\bias_{\acc{}{}}^i, \bias_{\angvel{}{}}^j, \bfx_i) = 
+    \bfDelta_{\mathcal{Z}_{ij}}(\bias^i, \bfx_i) = 
     \begin{bsmallmatrix}
-    \prod_{k=i}^{j-1} Exp((\angvelm{}{}^k - \bias_{\angvel{}{}^i})dt)  \\
-    \sum_{k=i}^{j-1} \Big[\grav dt + \Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}^k} - \noise_{\acc{}{}^k})dt \Big]  \\
-    \sum_{k=i}^{j-1} \Big[\vel{}{}^{k}dt + \frac{1}{2}\grav dt^2 
-    + \frac{1}{2}\Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}^i})dt^2 \Big]
+    \prod_{k=i}^{j} \Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^i)dt)  \\
+    \sum_{k=i}^{j} \Big[\grav dt + \Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^i - \noise_{\acc{}{}}^k)dt \Big]  \\
+    \sum_{k=i}^{j} \Big[\vel{}{}^{k}dt + \frac{1}{2}\grav dt^2 
+    + \frac{1}{2}\Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^i)dt^2 \Big]
     \end{bsmallmatrix}
 \end{align}
-
+%
 Both quantities are recomputed at each evaluation of the residual by the nonlinear solver. $\bfDelta_{\bfx}(\bfx_i, \bfx_j)$ is fairly quick to compute.
-However $\bfDelta_{\mathcal{Z}_{ij}}(\bias_{\acc{}{}}^i, \bias_{\angvel{}{}}^j, \bfx_i)$ formulation requires to reintegrate the whole buffer of measurements which
+However $\bfDelta_{\mathcal{Z}_{ij}}(\bias^i, \bfx_i)$ formulation requires to reintegrate the whole buffer of measurements which
 is highly inefficient. This is due to the dependency on velocity, orientation and biases at timestamp $i$. However the terms of equation \ref{eq:IMUIntij} can 
-be rearranged (proof in the annex -> TODO) differently to give:
-
+be rearranged (proof in the annex -> TODO) to give:
+%
+% WITH NOISE
+% \begin{equation}
+%     \begin{split}
+%     \bfDelta \Rot{}{ij} &\triangleq  \Rot{}{}^{i,T} \Rot{}{}^{j} =  \prod_{k=i}^{j} \Exp((\angvelm{}{}^k - \bias_{\angvel{}{}^k} - \noise_{\angvel{}{}^k})dt) \\
+%     \bfDelta \vel{}{ij} &\triangleq \Rot{}{}^{i,T} (\vel{}{j} - \vel{}{i} - g \Delta t_{ij}) 
+%     = \prod_{k=i}^{j} \bfDelta \Rot{}{ik} \Exp((\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)dt)  \\
+%     \bfDelta \posi{}{ij} &\triangleq \Rot{}{}^{i,T}(\posi{}{}^j - \posi{}{}^i - \vel{}{}^i \Delta t_{ij} - \frac{1}{2} \grav \Delta t_{ij}^2) 
+%     = \sum_{k=i}^{j} \Big[\bfDelta \vel{}{ik}dt +  \frac{1}{2} \bfDelta \Rot{}{ik} (\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)dt^2 \Big]
+%     \end{split}
+%     \label{eq:IMUPreintij}
+% \end{equation}
+%
 \begin{equation}
     \begin{split}
-    \bfDelta \Rot{}{ik} &\triangleq  \Rot{}{}^{i,T} \Rot{}{}^{j} =  \prod_{k=i}^{j-1} Exp((\angvelm{}{}^k - \bias_{\angvel{}{}^k} - \noise_{\angvel{}{}^k})dt) \\
-    \bfDelta \vel{}{ik} &\triangleq \Rot{}{}^{i,T} (\vel{}{j} - \vel{}{i} - g \Delta t_{ij}) 
-    = \prod_{k=i}^{j-1} \bfDelta \Rot{}{ik} Exp((\accm{}{}^k - \bias_{\acc{}{}^k} - \noise_{\acc{}{}^k})dt)  \\
-    \bfDelta \posi{}{ik} &\triangleq \Rot{}{}^{i,T}(\posi{}{}^j - \posi{}{}^i - \vel{}{}^i \Delta t_{ij} - \frac{1}{2} \grav \Delta t_{ij}^2) 
-    = \sum_{k=i}^{j-1} \Big[\bfDelta \vel{}{ik}dt +  \frac{1}{2} \bfDelta \Rot{}{ik} (\accm{}{}^k - \bias_{\acc{}{}^k} - \noise_{\acc{}{}^k})dt^2 \Big]
+    \bfDeltaR_{ij} &\triangleq  \Rot{}{}^{i,T} \Rot{}{}^{j} =  \prod_{k=i}^{j} \Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^i)dt) \\
+    \bfDeltav_{ij} &\triangleq \Rot{}{}^{i,T} (\vel{}{j} - \vel{}{i} - \grav \Delta t_{ij}) 
+    = \prod_{k=i}^{j} \bfDeltaR_{ik} \Exp((\accm{}{}^k - \bias_{\acc{}{}}^i)dt)  \\
+    \bfDeltap_{ij} &\triangleq \Rot{}{}^{i,T}(\posi{}{}^j - \posi{}{}^i - \vel{}{}^i \Delta t_{ij} - \frac{1}{2} \grav \Delta t_{ij}^2) 
+    = \sum_{k=i}^{j} \Big[\bfDeltav_{ik}dt +  \frac{1}{2} \bfDeltaR_{ik} (\accm{}{}^k - \bias_{\acc{}{}}^i)dt^2 \Big]
     \end{split}
     \label{eq:IMUPreintij}
 \end{equation}
-
-where we define $\bfDelta \Rot{}{ik} \triangleq \Rot{}{i,T} \Rot{}{k}$
-We then overwrites our delta notations as $\bfDelta_{\bfx}(\bfx_i, \bfx_j) = \bfDelta_{\mathcal{Z}_{ij}}(\bias_{\acc{}{}}^i, \bias_{\angvel{}{}}^j)$
+%
+where we define $\bfDeltaR_{ik} \triangleq \Rot{}{i,T} \Rot{}{k}$.
+We then overwrites our delta notations as $\bfDelta_{\bfx,ij}(\bfx_i, \bfx_j) = \bfDelta_{\mathcal{Z}_{ij}}(\bias^i)$
 which lifts the dependency of the right hand term on the initial state $\bfx_i$. However the bias terms in \ref{eq:IMUPreintij} still enforce the repeated 
 reintegration of the measurements buffer. Instead, the right hand side can be integrated once using biases estimates at the time where we begin to integrate them that
-we note $\biasbar_i$. Then, we can approximate changes due to the reestimation of $\bias_i$ using a first order approximation 
+we note $\biasbar_i$. Then, we can approximate changes due to the newly estimated bias $\bias_i$ using a first order approximation 
 $\bfDelta_{\mathcal{Z}_{ij}}(\bias^i) = \bar{\bfDelta}_{\mathcal{Z}_{ij}} \boxplus (\bfJ^{\bfDelta_{\mathcal{Z}_{ij}}}_{\bias_i} (\bias^i - \biasbar^i))$.
 
-These two observations were first made by Lupton \cite{lupton-09}, whose formulation relied on Euler angles, and were later formalized on \SO(3) using Lie theory
-by \cite{forster2017-TRO}. 
 
-TOEXPLAIN:
-- noise propa has to be done -> leads to very cumbersome formulas
-- recursive formulation
-- can be extended to other sensors -> generalized preintegration
+These two observations were first made by Lupton \cite{lupton-09}, whose formulation relied on Euler angles, and were later formalized on \SO(3) using Lie theory
+by \cite{forster2017-TRO}. The above equations are not directly useful for the implementation of preintegration. We need first to derive a recursive formulation 
+of the problem. IMU noise propagation also needs to be explicited in order to obtain covariances associated to the factor error. In the next section, we will take 
+a step back and derive a pre-integration generalized to other high rate odometry type sensors.
 
 \section{Generalized preintegration}
+% Copy from centroidal est est
+
+
 \section{IMU preintegration}
 \section{IMU preintegration on Lie groups}
 \section{External force preintegration}
