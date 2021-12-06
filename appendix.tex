@@ -1,0 +1,74 @@
+\appendix
+
+\chapter{Pre-integration details}
+\section{Justification of \cite{forster2017-TRO} delta formulas}
+We detail here how the delta formulas of equation \ref{eq:IMUPreintim} can be derived from \ref{eq:IMUIntim}.
+
+The rotation one is easy to get, multiplying by $\Rot{}{}^{i,T}$:
+\begin{equation}
+    \DR_{im} \triangleq \Rot{}{}^{i,T} \Rot{}{}^{m} = \prod_{k=i}^{m} \Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^k - \noise_{\angvel{}{}}^k)\dt)
+    \label{eq:IMUDeltaR}
+\end{equation}
+
+The velocity is as well quite easy, by defining $\Dt_{im} \triangleq \sum_{k=i}^{m} \dt = (m-i)\dt$:
+\begin{equation}
+    \Dv_{im} \triangleq \Rot{}{}^{i,T} (\vel{}{m} - \vel{}{i} - g \Dt_{im}) 
+    = \prod_{k=i}^{m} \DR_{ik} \Exp((\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)\dt)
+    \label{eq:IMUDeltav}
+\end{equation}
+
+The position delta requires more calculations. First, inject equation \ref{eq:IMUDeltav} in the position equation of \ref{eq:IMUIntim} then rearrange and reorder the terms.
+
+\begin{equation}
+\begin{split}
+\posi{}{}^{m} - \posi{}{}^{i} &= \sum_{k=i}^{m} \Big[
+(\vel{}{}^i + \grav \Dt_{ik} + \Rot{}{}^i \Dv_{ik})\dt 
++ \frac{1}{2}\grav \dt^2 + \frac{1}{2}\Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)\dt^2 \Big]
+\\
+&= \vel{}{}^i \Dt_{im} + 
+\grav\sum_{k=i}^{m} \Dt_{ik} \dt + \frac{1}{2}\grav \sum_{k=i}^{m} \dt^2 +
+\Rot{}{}^i\sum_{k=i}^{m} \Big[\Dv_{ik}\dt +  \frac{1}{2} \DR_{ik} (\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)\dt^2 \Big]
+\\
+&= \vel{}{}^i \Dt_{im} + 
+\grav \sum_{k=i}^{m} (\Dt_{ik} \dt + \frac{1}{2}\dt^2) +
+\Rot{}{}^i\sum_{k=i}^{m} \Big[\Dv_{ik}\dt +  \frac{1}{2} \DR_{ik} (\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)\dt^2 \Big]
+\end{split}
+\end{equation}
+
+We will simplify the gravity term that we will call $\mathcal{G}t_{im}$. Noting that:
+
+\begin{equation*}
+    \sum_{k=i}^{m}k = \sum_{k=1}^{m}k - \sum_{k=1}^{i-1}k = \frac{m(m-1)}{2} - \frac{i(i-1)}{2} 
+\end{equation*}
+
+we can deduce that:
+
+\begin{equation*}
+\begin{split}
+\mathcal{G}t_{im} 
+&= \dt \sum_{k=i}^{m}(\Dt_{ik} + \frac{1}{2}\dt) = \dt \sum_{k=i}^{m}((k -i)\dt + \frac{1}{2}\dt)
+\\
+&= \dt \Big[ \sum_{k=i}^{m} [ k \dt - i(m-i)\dt ] + \frac{1}{2}\Dt_{im}  \Big] 
+\\
+&= \dt \Big[ \frac{\dt}{2} (m(m-1) - i(i-1) - 2i(m-1)) + \frac{1}{2}\Dt_{im} \Big] 
+\\
+&= \dt \Big[ \frac{\dt}{2} (i^2 - 2im + m^2 + i - m) + \frac{1}{2}\Dt_{im} \Big] 
+\\
+&= \dt \Big[ \frac{1}{2} (m-i)^2dt - \frac{1}{2}(m - i)\dt + \frac{1}{2}\Dt_{im} \Big]
+\\
+&= \frac{1}{2} (m-i)^2dt^2 = \frac{1}{2} \Dt_{im}^2
+\end{split}
+\end{equation*}
+Multiplying by $\Rot{}{}^{i,T}$ and reordering the terms, we can finally define a position delta quantity:
+
+\begin{equation}
+    \Dp_{im} \triangleq \Rot{}{}^{i,T}(\posi{}{}^m - \posi{}{}^i - \vel{}{}^i \Dt_{im} - \frac{1}{2} \grav \Dt_{im}^2) = 
+    \sum_{k=i}^{m} \Big[\Dv_{ik}\dt +  \frac{1}{2} \DR_{ik} (\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)\dt^2 \Big]
+\end{equation}
+
+
+
+\section{Jacobians of force/torque pre-integration}
+
+TODO
+
