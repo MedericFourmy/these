@@ -51,7 +51,8 @@
 In this section we will introduce the IMU measurement model and describe a way in which we may naively integrate these measurements between \keyframes.
 We will then explain the observation that lead to the development of the IMU pre-integration algorithm in \cite{lupton-09}.
 
-Let's consider the estimation of a robot base pose and velocity in the world frame. We will assume neglect effects due the rotation of the earth [cite] which
+Let's consider the estimation of a robot base pose and velocity in the world frame. We will neglect effects due the rotation of the earth by assuming 
+that $W$ is an inertial frame \cite{forster2017-TRO}, which
 is a common simplification in robotic scenarios.  Without loss of generality, we assume that the IMU frame is identical to the base frame in the following developments.
 Among available sensors, the IMU measurements are known to be noisy, biased and affected by the gravity.
 
@@ -73,8 +74,9 @@ Other sensors can help estimate IMU biases so we include them in the estimator s
 \end{equation}
 
 Once the IMU has been started, these biases slowly change over time, depending on the quality of the IMU used. This change is almost always modeled 
-as a random walk which is close to the observed behavior for rather short periods of time \cite{hussen2015low}. A simple dynamical model based on strapdown integration of IMU measurements can then be derived.
-
+as a random walk which is close to the observed behavior for rather short periods of time \cite{hussen2015low}.
+A dynamical model based on strapdown integration of IMU measurements can then be derived.
+%
 \begin{equation}
     \begin{split}
     \dot{\posi{}{}} = \vel{}{}  ~~~~~~~
@@ -85,7 +87,7 @@ as a random walk which is close to the observed behavior for rather short period
     \end{split}
     \label{eq:imu_dyn_conti}
 \end{equation}
-
+%
 Introducing the measurement equations \ref{eq:imu_meas_model} in continuous dynamics \ref{eq:imu_dyn_conti} and using a zero order hold
 explicit Euler integration scheme results in the discrete dynamics:
 
@@ -102,7 +104,7 @@ explicit Euler integration scheme results in the discrete dynamics:
 \end{equation}
     
 Now, these equations relate variables variables between two state variables sampled at IMU frequency. To include these measurements in our smoothing estimator,
-one solution would be to introduce new variables at the rate of the IMU. However, the size of the problem to solve would grow very quickly. A better option
+one solution would be to introduce new variables at the rate of the IMU. However, the size of the problem would grow very quickly. A better option
 is to integrate IMU measurements during extended periods of time. If we simply integrate the sequence of IMU measurements between timestamps 
 $t_i$ and $t_m$ $\mathcal{Z}_{im}$ by unfurling \ref{eq:imu_dyn_disc}, we obtain the following equations:
 %
@@ -120,6 +122,13 @@ Assuming IMU biases stay constant during $\Dt_{im}$,
 \begin{equation*}
     \bias^i \triangleq [\bias_{\acc{}{}}^i, \bias_{\angvel{}{}}^i] \approx [\bias_{\acc{}{}}^k, \bias_{\angvel{}{}}^k]  ~~~ \forall k \in [i..j]
 \end{equation*}
+% \begin{equation*}
+%     \bias_i \triangleq [\bias_{\acc{}{}i}, \bias_{\angvel{}{}i}] \approx [\bias_{\acc{}{}k}, \bias_{\angvel{}{}k}]  ~~~ \forall k \in [i..j]
+% \end{equation*}
+% \begin{equation*}
+%     \bias_i \triangleq [\bias_{\acc{}{},i}, \bias_{\angvel{}{},i}] \approx [\bias_{\acc{}{},k}, \bias_{\angvel{}{},k}]  ~~~ \forall k \in [i..j]
+% \end{equation*}
+%
 we could then directly derive a factor with an error between the expected delta $\hat\bfDelta_{im}$ and the measured delta $\bfDelta_{im}$ defined as:
 % $e(\bfx^i, \bfx^j) = \bfDelta_{\bfx}(\bfx^i, \bfx^j)  \ominus  \bfDelta_{\mathcal{Z}_{im}}(\bias^i, \bfx^i)$
 %   where 
@@ -214,10 +223,10 @@ This was the main contribution of paper my paper \cite{fourmy2021contact}.
 We perform pre-integration incrementally as follows. 
 First, $\ol\bfDelta_{ii}$ is initialized to the null motion. 
 Its covariance $\bfSigma^\Delta_{ii}$ and the Jacobian $\mjac{\bm\delta_i}{\bfb_i}$ are set to zero. 
-At each reception of sensor data $\tilde\bfz_k$ at $t_k$, we integrate during $\delta t$ to obtain the delta corresponding to a single data sample
+At each reception of sensor data $\tilde\bfz_k$ at $t_k$, we integrate during $\dt$ to obtain the delta corresponding to a single data sample
 %
 \begin{align}
-\bm\delta_k = f(\tilde\bfz_k, \ol\bfb_i, \delta t)~, 
+\bm\delta_k = f(\tilde\bfz_k, \ol\bfb_i, \dt)~, 
 \label{equ:data2delta}
 \end{align}
 
@@ -229,6 +238,7 @@ This single delta is integrated onto the delta pre-integrated so far using the d
 \label{equ:deltaPlusDelta}
 \end{align}
 
+which is represented in figure \ref{fig:delta_time}.
 %with Jacobians $\mjac{\ol\bfDelta_{ik}}{\ol\bfDelta_{ij}}$ and $\mjac{\ol\bfDelta_{ik}}{\bm\delta_k}$. 
 The Jacobian of the pre-integrated delta with respect to biases, as well as the delta covariance, are also pre-integrated
 
@@ -251,13 +261,13 @@ The pre-integrated $\ol\bfDelta_{im}$ is used at the end of the pre-integration 
     \bfr_{im} = (\ol\bfDelta_{im} \oplus \mjac{\bfDelta_{im}}{\bfb_i}(\bfb_i-\ol\bfb_i) ) \ominus \hat\bfDelta_{im}
 \end{align}
 
-where $\bfb_i$ is the current bias value,  $\hat\bfDelta_{im}=\bfx_k\boxminus\bfx_i$ is the expected delta between KFs, and $\{\op,\om\}$ are the composite
+where $\bfb_i$ is the current bias value,  $\hat\bfDelta_{im}=\bfx^m\boxminus\bfx^i$ is the expected delta between KFs, and $\{\op,\om\}$ are the composite
  plus and minus operators described in \cite{sola2018micro}. 
 That is, $\{\op,\om\}$ are $\{+,-\}$ for vectors, and for rotations we have $\bfR\op\bm\theta\te\bfR\Exp(\bm\theta)$ and $\bfR_2\om\bfR_1\te\Log(\bfR_1\tr\bfR_2)$. 
-The residual clearly depends on the KF states $\bfx_i,\bfx_m$ and the bias $\bfb_i$. It has an associated covariance  $\bfSigma^\Delta_{im}$.
+The residual clearly depends on the KF states $\bfx^i,\bfx^m$ and the bias $\bfb_i$. It has an associated covariance  $\bfSigma^\Delta_{im}$.
 
 
-\subsection{IMU pre-integration factor $\bfr^{I}$}
+\subsubsection{IMU pre-integration factor $\bfr^{I}$}
 
 The states involved in this integration are the base states $\bfx_b = [\posi{}{}, \bfv, \Rot{}{}]$ with deltas $\bfDelta=[\Dp,\Dv,\DR]$. 
 The IMU produces biased and noisy measurements $\tilde\bfz = [\tilde\bfa, \tilde{\bf\omega}]$ of the base proper acceleration and angular velocity, 
@@ -270,9 +280,9 @@ The pre-integration method in  \cite{forster2017-TRO} can be put in the formalis
     \delta\bfp\\\delta\bfv\\\delta\bfR
     \end{bmatrix}_k =
     \begin{bmatrix}
-    \tfrac12(\tilde\bfa-\bfb_a-\noise_a)\delta t^2 \\
-    (\tilde\bfa-\bfb_a-\noise_a)\delta t \\
-    \Exp((\tilde{\bm\omega}-\bfb_\omega-\noise_\omega)\delta t)
+    \tfrac12(\tilde\bfa-\bfb_a-\noise_a)\dt^2 \\
+    (\tilde\bfa-\bfb_a-\noise_a)\dt \\
+    \Exp((\tilde{\bm\omega}-\bfb_\omega-\noise_\omega)\dt)
     \end{bmatrix}_k
 \end{align}
 
@@ -295,6 +305,7 @@ Full details can be found in \cite[Section 3.4]{atchuthan-18-thesis}.
 
 
 \section{IMU pre-integration on Lie groups}
+In \cite{fourmy2019absolute}, we showed that an alternative formulation of IMU preintegration on Lie groups was possible.
 
 
 \section{External force pre-integration}
@@ -350,14 +361,12 @@ Assuming constant forces during each interval $\dt$
 the integration of \eqref{eq:NewtonEuler} yields the discrete dynamic model for the centroidal states:
 %
 \begin{equation}
-\small
 \begin{split}
-\COM_{k} &= \COM_{k-1} + \COMd_{k-1} \delta t+\frac{1}{2} \bfg \delta t^2 + \frac{1}{2m} \Rot{}{k-1} \sum_L \Rot{B}{Lk} (\forcem{}{Lk} - \noise_{f}) \delta t^2
+\COM^{k} &= \COM^{k-1} + \COMd^{k-1} \dt+\frac{1}{2} \bfg \dt^2 + \frac{1}{2m} \Rot{}{}^{k-1} \sum_L \Rot{B}{L}^k (\forcem{}{L}^k - \noise_{f}) \dt^2
 \\
-\COMd_{k}&= \COMd_{k-1} + \bfg \delta t + \frac{1}{m} \Rot{}{k} \sum_L\Rot{B}{Lk} (\forcem{}{Lk} - \noise_{f}) \delta t 
+\COMd^{k}&= \COMd^{k-1} + \bfg \dt + \frac{1}{m} \Rot{}{k} \sum_L\Rot{B}{Lk} (\forcem{}{Lk} - \noise_{f}) \dt 
 \\
-\AM_{k} &= \AM_{k-1} +\Rot{}{k} \sum_L (\posi{B}{Lk}  - \posim{B}{Ck} +  \bias_{ck} + \noise_{c}) \times \Rot{B}{Lk}(\forcem{}{Lk} - \noise_{f}) 
- \delta t
+\AM^{k} &= \AM^{k-1} +\Rot{}{}^k \sum_L (\posi{B}{L}^k  - \posim{B}{C}^k +  \bias_{c}^k + \noise_{c}) \times \Rot{B}{L}^k(\forcem{}{L}^k - \noise_{f}) \dt
 \end{split}
 \label{eq:COMDiscrete}
 \end{equation}
@@ -365,7 +374,7 @@ the integration of \eqref{eq:NewtonEuler} yields the discrete dynamic model for 
 Analogously to the IMU case, it is possible to pre-integrate force measurements to derive a factor on the states $\bfx_c=[\COM, \COMd, \AM, \Rot{}{}]$ using deltas $\D_c=[\D\COM, \D\COMd, \D\AM, \DR]$. The rotation measured by the gyroscope has to be included too for the pre-integration to work. In this case, the bias vector is $\bias = [\bias_c, \bias_{\omega}]$. We define measurements  $\bfz_k$ to be:
 %
 \begin{equation}
-\bfz_k = \left[ \posim{B}{Ck}, \angvelm{}{k}, \left[\forcem{}{Lk}, \posim{B}{Lk}, \Rotm{B}{Lk} \right]_{L=1\dots4}\right]
+\bfz^k = \left[ \posim{B}{C}^k, \angvelm{}{k}, \left[\forcem{}{L}^k, \posim{B}{L}^k, \Rotm{B}{L}^k \right]_{L=1\dots4}\right]
 \end{equation}
 
 The following operators are enough to particularize the  method in \secRef{sec:general-preint} to the contact forces case.
@@ -373,15 +382,15 @@ Integrating $\bfz_k$ during $\dt$ yields $\bm\delta_k$ in \eqref{equ:data2delta}
 %
 \begin{equation}
 \small
-    \bm\delta_{k}(\bfz_k, \bfb_i, \dt) =
+    \bm\delta_{k}(\bfz^k, \bfb^i, \dt) =
     \begin{bmatrix}
-    \frac{1}{2m} \sum_l \Rotm{B}{Lk} \forcem{}{Lk} \delta t^2
+    \frac{1}{2m} \sum_l \Rotm{B}{Lk} \forcem{}{Lk} \dt^2
     \\
-    \frac{1}{m} \sum_l \Rotm{B}{Lk} \forcem{}{Lk} \delta t 
+    \frac{1}{m} \sum_l \Rotm{B}{Lk} \forcem{}{Lk} \dt 
     \\
-    (\sum_l \posim{B}{Lk} - (\posim{B}{Ck} - \bias_c) \times (\Rotm{B}{Lk} \forcem{}{Lk} ))\delta t
+    (\sum_l \posim{B}{Lk} - (\posim{B}{Ck} - \bias_c) \times (\Rotm{B}{Lk} \forcem{}{Lk} ))\dt
     \\
-    \Exp((\angvelm{}{k} - \bias_{\omega})\delta t)
+    \Exp((\angvelm{}{k} - \bias_{\omega})\dt)
     \end{bmatrix}
 \normalsize
 \end{equation}
@@ -412,9 +421,9 @@ The expected delta $\D_{ik}=\bfx_k\boxminus\bfx_i$ between KFs $ik$ reads
 \end{bmatrix}
 =
 \begin{bmatrix}
-	{\Rot{}{i}}\tr (\COM_k - \COM_i - \COMd_i \Delta t_{ik})
+	{\Rot{}{i}}\tr (\COM_k - \COM_i - \COMd_i \dt_{ik})
 	\\
-	{\Rot{}{i}}\tr (\COMd_{k} - \COMd_{i} - \bfg \Delta t_{ik})
+	{\Rot{}{i}}\tr (\COMd_{k} - \COMd_{i} - \bfg \dt_{ik})
 	\\
 	{\Rot{}{i}}\tr (\AM_{k} - \AM_{i})
 	\\
@@ -428,9 +437,9 @@ Finally, the propagation of the state $\bfx_i$ to $\bfx_k$ using $\D_{ik}$, whic
 \begin{equation}
 	\bfx_k = \bfx_i \boxplus \D_{ik} =
 	\begin{bmatrix}
-	\COM_i + \COMd_i \Delta t_{ik} + \Rot{}{i} \Delta \COM_{ik} + \frac{1}{2} \bfg \Delta t_{ik}^2
+	\COM_i + \COMd_i \dt_{ik} + \Rot{}{i} \Delta \COM_{ik} + \frac{1}{2} \bfg \dt_{ik}^2
 	\\
-	\COMd_i + \Rot{}{i} \Delta \COMd_{ik} + g \Delta t_{ik}
+	\COMd_i + \Rot{}{i} \Delta \COMd_{ik} + g \dt_{ik}
 	\\
 	\AM_i + \Rot{}{i} \Delta \AM_{ik}
 	\\
