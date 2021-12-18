@@ -14,3 +14,10 @@ Use `build.sh` and `clean.sh` scripts
 - base, base state
 - body
 - world
+
+## Sketch TODO
+- base/worl/robot frames
+- kinematic information types
+- preintegration algo (as an algo)
+- kinematic chain for the robot calibration
+- kinematic chain for objectslam

@@ -36,14 +36,28 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Apparence globale             
-\usepackage[top=3cm, bottom=2cm, left=3cm, right=3cm,
-			headheight=15pt]{geometry} 
-\usepackage{fancyhdr}			% Entête et pieds de page
-	\pagestyle{fancy}			% Indique que le style de la page sera justement fancy
-	\lfoot[\thepage]{} %gauche du pied de page
-	\cfoot{} %milieu du pied de page
-	\rfoot[]{\thepage} %droite du pied de page
-	\fancyhead[RO, LE] {}	
+\usepackage[top=3cm, bottom=2cm, left=3cm, right=3cm, headheight=15pt]{geometry} 
+
+% Header footer
+% E for even page
+% O for odd page
+% L for left side
+% C for centered
+% R for right side
+\usepackage{fancyhdr}	
+	\pagestyle{fancy}
+  \fancyhf{} %clears the header and footer, otherwise the elements of the default "plain" page style will appear
+  % \rhead{Overleaf}
+  % \lhead{Guides and tutorials}
+  % \rfoot{Page \thepage}
+  \fancyhead[LE,RO]{Overleaf}
+  \fancyhead[RE,LO]{Guides and tutorials}
+  \fancyfoot[CE,CO]{\leftmark}
+  \fancyfoot[LE,RO]{\thepage}
+  
+  \renewcommand{\headrulewidth}{2pt}
+  \renewcommand{\footrulewidth}{1pt}
+  
 \usepackage{enumerate}
 \usepackage{enumitem}
 \usepackage[section]{placeins}	% Place un FloatBarrier à chaque nouvelle section
