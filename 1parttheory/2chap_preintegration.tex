@@ -88,7 +88,7 @@ A dynamical model based on strapdown integration of IMU measurements can then be
     \label{eq:imu_dyn_conti}
 \end{equation}
 %
-Introducing the measurement equations \ref{eq:imu_meas_model} in continuous dynamics \ref{eq:imu_dyn_conti} and using a zero order hold
+Introducing the measurement equations \eqRef{eq:imu_meas_model} in continuous dynamics \eqRef{eq:imu_dyn_conti} and using a zero order hold
 explicit Euler integration scheme results in the discrete dynamics:
 
 \begin{equation}
@@ -106,7 +106,7 @@ explicit Euler integration scheme results in the discrete dynamics:
 Now, these equations relate variables variables between two state variables sampled at IMU frequency. To include these measurements in our smoothing estimator,
 one solution would be to introduce new variables at the rate of the IMU. However, the size of the problem would grow very quickly. A better option
 is to integrate IMU measurements during extended periods of time. If we simply integrate the sequence of IMU measurements between timestamps 
-$t_i$ and $t_m$ $\mathcal{Z}_{im}$ by unfurling \ref{eq:imu_dyn_disc}, we obtain the following equations:
+$t_i$ and $t_m$ $\mathcal{Z}_{im}$ by unfurling \eqRef{eq:imu_dyn_disc}, we obtain the following equations:
 %
 \begin{equation}
     \begin{split}
@@ -120,7 +120,7 @@ $t_i$ and $t_m$ $\mathcal{Z}_{im}$ by unfurling \ref{eq:imu_dyn_disc}, we obtain
 %
 Assuming IMU biases stay constant during $\Dt_{im}$, 
 \begin{equation*}
-    \bias^i \triangleq [\bias_{\acc{}{}}^i, \bias_{\angvel{}{}}^i] \approx [\bias_{\acc{}{}}^k, \bias_{\angvel{}{}}^k]  ~~~ \forall k \in [i..j]
+    \bias^i \triangleq [\bias_{\acc{}{}}^i, \bias_{\angvel{}{}}^i] \approx [\bias_{\acc{}{}}^k, \bias_{\angvel{}{}}^k]  ~~~ \forall k \in [i..m]
 \end{equation*}
 % \begin{equation*}
 %     \bias_i \triangleq [\bias_{\acc{}{}i}, \bias_{\angvel{}{}i}] \approx [\bias_{\acc{}{}k}, \bias_{\angvel{}{}k}]  ~~~ \forall k \in [i..j]
@@ -156,7 +156,7 @@ and
 %
 Both quantities are recomputed at each evaluation of the residual by the nonlinear solver. $\bfDelta_{\bfx}(\bfx_i, \bfx_m)$ is fairly quick to compute.
 However $\bfDelta_{\mathcal{Z}_{im}}(\bias^i, \bfx_i)$ formulation requires to reintegrate the whole buffer of measurements which
-is highly inefficient. This is due to the dependency on velocity, orientation and biases at timestamp $i$. However the terms of equation \ref{eq:IMUIntij} can 
+is highly inefficient. This is due to the dependency on velocity, orientation and biases at timestamp $i$. However the terms of equation \eqRef{eq:IMUIntij} can 
 be rearranged (proof in the annex -> TODO) to give:
 %
 % WITH NOISE
@@ -174,9 +174,9 @@ be rearranged (proof in the annex -> TODO) to give:
 \begin{equation}
     \begin{split}
     \DR_{im} &\triangleq  \Rot{}{}^{i,T} \Rot{}{}^{m} =  \prod_{k=i}^{m} \Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^i)\dt) \\
-    \Dv_{im} &\triangleq \Rot{}{}^{i,T} (\vel{}{j} - \vel{}{i} - \grav \Dt_{im}) 
+    \Dv_{im} &\triangleq \Rot{}{}^{i,T} (\vel{}{m} - \vel{}{i} - \grav \Dt_{im}) 
     = \prod_{k=i}^{m} \DR_{ik} \Exp((\accm{}{}^k - \bias_{\acc{}{}}^i)\dt)  \\
-    \Dp_{im} &\triangleq \Rot{}{}^{i,T}(\posi{}{}^j - \posi{}{}^i - \vel{}{}^i \Dt_{im} - \frac{1}{2} \grav \Dt_{im}^2) 
+    \Dp_{im} &\triangleq \Rot{}{}^{i,T}(\posi{}{}^m - \posi{}{}^i - \vel{}{}^i \Dt_{im} - \frac{1}{2} \grav \Dt_{im}^2) 
     = \sum_{k=i}^{m} \Big[\Dv_{ik}\dt +  \frac{1}{2} \DR_{ik} (\accm{}{}^k - \bias_{\acc{}{}}^i)\dt^2 \Big]
     \end{split}
     \label{eq:IMUPreintij}
@@ -184,7 +184,7 @@ be rearranged (proof in the annex -> TODO) to give:
 %
 where we define $\DR_{ik} \triangleq \Rot{}{i,T} \Rot{}{k}$.
 We then overwrites our delta notations as $\bfDelta_{\bfx,im}(\bfx_i, \bfx_m) = \bfDelta_{\mathcal{Z}_{im}}(\bias^i)$
-which lifts the dependency of the right hand term on the initial state $\bfx_i$. However the bias terms in \ref{eq:IMUPreintij} still enforce the repeated 
+which lifts the dependency of the right hand term on the initial state $\bfx_i$. However the bias terms in \eqRef{eq:IMUPreintij} still enforce the repeated 
 reintegration of the measurements buffer. Instead, the right hand side can be integrated once using biases estimates at the time where we begin to integrate them that
 we note $\biasbar_i$. Then, we can approximate changes due to the newly estimated bias $\bias_i$ using a first order approximation.
 % $\bfDelta_{\mathcal{Z}_{im}}(\bias^i) = \bar{\bfDelta}_{\mathcal{Z}_{im}} \oplus (\bfJ^{\bfDelta_{\mathcal{Z}_{im}}}_{\bias_i} (\bias^i - \biasbar^i))$.
@@ -197,6 +197,8 @@ a step back and derive a pre-integration generalized to other proprioceptive sen
 
 
 \section{Generalized pre-integration}
+\label{sec:general-preint}
+
 
 Pre-integration refers to the integration of high rate proprioceptive sensory data in an efficient way in the context of factor graphs. 
 It was initially developed to deal with IMU measurements \cite{lupton-09, forster2017-TRO}. 
@@ -227,7 +229,7 @@ At each reception of sensor data $\tilde\bfz_k$ at $t_k$, we integrate during $\
 %
 \begin{align}
 \bm\delta_k = f(\tilde\bfz_k, \ol\bfb_i, \dt)~, 
-\label{equ:data2delta}
+\label{eq:data2delta}
 \end{align}
 
 using the bias $\ol\bfb_i$ available in KF $i$. 
@@ -235,10 +237,10 @@ This single delta is integrated onto the delta pre-integrated so far using the d
 
 \begin{align}
 \ol\bfDelta_{ik} = \ol\bfDelta_{ij} \circ \bm\delta_k~. 
-\label{equ:deltaPlusDelta}
+\label{eq:deltaPlusDelta}
 \end{align}
 
-which is represented in figure \ref{fig:delta_time}.
+which is represented in figure \figRef{fig:delta_time}.
 %with Jacobians $\mjac{\ol\bfDelta_{ik}}{\ol\bfDelta_{ij}}$ and $\mjac{\ol\bfDelta_{ik}}{\bm\delta_k}$. 
 The Jacobian of the pre-integrated delta with respect to biases, as well as the delta covariance, are also pre-integrated
 
@@ -250,7 +252,7 @@ The Jacobian of the pre-integrated delta with respect to biases, as well as the 
 \end{align}
 
 where $\mjac{\bm\delta_k}{\bfb_i}$, $\mjac{\bm\delta_k}{\bfz_k}$, $\mjac{\bfDelta_{ik}}{\bfDelta_{ij}}$ and $\mjac{\bfDelta_{ik}}{\bm\delta_k}$ 
-are the Jacobians $\mjac{y}{x}=\partial y/\partial x$ of (\ref{equ:data2delta},\ref{equ:deltaPlusDelta}), computed according to Lie theory \cite{sola2018micro}.
+are the Jacobians $\mjac{y}{x}=\partial y/\partial x$ of (\eqRef{eq:data2delta},\eqRef{eq:deltaPlusDelta}), computed according to Lie theory \cite{sola2018micro}.
 
 
 \subsubsection{Residual definition}
@@ -273,29 +275,29 @@ The states involved in this integration are the base states $\bfx_b = [\posi{}{}
 The IMU produces biased and noisy measurements $\tilde\bfz = [\tilde\bfa, \tilde{\bf\omega}]$ of the base proper acceleration and angular velocity, 
 with bias $\bfb = [\bias_{a}, \bias_{\omega}]$ and noise $\noise = [\noise_{a}, \noise_{\omega}]$. 
 
-The pre-integration method in  \cite{forster2017-TRO} can be put in the formalism above by realizing that defining $\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqref{equ:data2delta} as
+The pre-integration method in  \cite{forster2017-TRO} can be put in the formalism above by realizing that defining $\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta} as
 
 \begin{align}
-    \bm\delta_k = \begin{bmatrix}
+    \bm\delta^k = \begin{bmatrix}
     \delta\bfp\\\delta\bfv\\\delta\bfR
-    \end{bmatrix}_k =
+    \end{bmatrix}^k =
     \begin{bmatrix}
     \tfrac12(\tilde\bfa-\bfb_a-\noise_a)\dt^2 \\
     (\tilde\bfa-\bfb_a-\noise_a)\dt \\
     \Exp((\tilde{\bm\omega}-\bfb_\omega-\noise_\omega)\dt)
-    \end{bmatrix}_k
+    \end{bmatrix}^k
 \end{align}
 
-and the composition law $\bfDelta_{ik}=\bfDelta_{ij}\circ\bm\delta_k$ in \eqref{equ:deltaPlusDelta} as
+and the composition law $\bfDelta^{ik}=\bfDelta^{ij}\circ\bm\delta^k$ in \eqRef{eq:deltaPlusDelta} as
 
-\begin{align} \label{equ:composition_delta}
+\begin{align} \label{eq:composition_delta}
     \begin{split}
-    \Dp_{ik} 
-    &= \Dp_{ij} + \Dv_{ij}\dt + \DR_{ij}\dpp_{k} \\
+    \Dp^{ik} 
+    &= \Dp^{ij} + \Dv^{ij}\dt + \DR^{ij}\dpp^{k} \\
     \Dv_{ik} 
-    &= \Dv_{ij} + \DR_{ij}\dv_{k} \\
-    \DR_{ik} 
-    &= \DR_{ij}\dR_{k} 
+    &= \Dv^{ij} + \DR^{ij}\dv^{k} \\
+    \DR^{ik} 
+    &= \DR^{ij}\dR^{k} 
     \end{split}
 \end{align}
 
@@ -326,7 +328,7 @@ is the position in world frame of the robot base (typically, the torso or in our
 to the world and $\qa$ are the joint configuration of the actuated joints. 
 %We will subsequently use the notation $\prescript{X}{}{[\cdot]}_Y$ to denote vectorial quantities of frame $Y$ expressed in frame $X$. A tilde $\Tilde{[\cdot]}$ denotes a noisy measurement.
 
-While~\eqref{eq:wbdyn} represents the whole dynamics, a subpart of it is of particular importance for legged robots.
+While~\eqRef{eq:wbdyn} represents the whole dynamics, a subpart of it is of particular importance for legged robots.
 The centroidal dynamics is written by the two equations:
 %
 \begin{equation}
@@ -336,7 +338,7 @@ The centroidal dynamics is written by the two equations:
 \end{equation}
 %
 where $\COM,\AM$ are the position of the Center of Mass (CoM) and Angular Momentum (AM) around the CoM (both expressed in world frame), $m$ is the robot total mass, 
-and the $\posi{}{l}$ are the positions of the contact points in world frame. The centroidal dynamics is an exact part of \eqref{eq:wbdyn} and more deeply reveals 
+and the $\posi{}{l}$ are the positions of the contact points in world frame. The centroidal dynamics is an exact part of \eqRef{eq:wbdyn} and more deeply reveals 
 the underactuation: the robot can move only if applying the proper forces to the environment, as the joint torques alone cannot lead to any modification 
 of CoM or AM.
 
@@ -351,51 +353,54 @@ As observed in~\cite{carpentier2016center}, a proper fusion of the force measure
 
 \subsection{Force pre-integration factor}
 
-The Newton-Euler equations \eqref{eq:NewtonEuler} relate the evolution of the CoM and AM due to gravity, external forces and torques. 
+The Newton-Euler equations \eqRef{eq:NewtonEuler} relate the evolution of the CoM and AM due to gravity, external forces and torques. 
 In the case of a legged robot with punctual contact feet, only forces $\forcem{}{L}$ are applied at each limb contact $L$, with no torque. 
 We assume that at each  limb contact we have access to noisy local force measurements $\forcem{}{L} = \force{L}{L} + \noise_f$. 
-To transform them into the body frame $b$, we compute $\Rot{B}{L}(\qa)  \in SO(3)$ and $\posi{B}{L}(\qa) \in \Reals^3 $ from the joint configuration $\qa  \in \Reals^{12}$. 
-The lever arm $(\posi{}{L}-\bias_c)$ in \eqref{eq:NewtonEuler} uses a measurement of the CoM position in base frame $ \posi{B}{C}(\qa) \in \Reals^3$. 
-This measure is biased due to inaccuracies in the robot model and therefore we add a bias variable to be estimated, $\bias_c \in \Reals^3$ so that $\posim{B}{C} = \posi{B}{C} + \bias_c + \noise_c$.
+To transform them into the body frame $b$, we compute $\Rotm{}{L} \triangleq \Rot{B}{L}(\qa)  \in SO(3)$ and $\posim{}{L} \triangleq \posi{B}{L}(\qa) \in \Reals^3 $ from the joint configuration $\qa  \in \Reals^{12}$. 
+The lever arm $(\posi{}{L}-\bias_c)$ in \eqRef{eq:NewtonEuler} uses a measurement of the CoM position in base frame $ \posi{B}{C}(\qa) \in \Reals^3$. 
+This measure is biased due to inaccuracies in the robot model and therefore we add a bias variable to be estimated, $\bias_c \in \Reals^3$ so that $\posim{}{C} = \posi{B}{C}(\qa) + \bias_c + \noise_c$.
 Assuming constant forces during each interval $\dt$ 
-the integration of \eqref{eq:NewtonEuler} yields the discrete dynamic model for the centroidal states:
+the integration of \eqRef{eq:NewtonEuler} yields the discrete dynamic model for the centroidal states:
 %
 \begin{equation}
 \begin{split}
-\COM^{k} &= \COM^{k-1} + \COMd^{k-1} \dt+\frac{1}{2} \bfg \dt^2 + \frac{1}{2m} \Rot{}{}^{k-1} \sum_L \Rot{B}{L}^k (\forcem{}{L}^k - \noise_{f}) \dt^2
+\COM^{k} &= \COM^{k-1} + \COMd^{k-1} \dt+\frac{1}{2} \bfg \dt^2 + \frac{1}{2m} \Rot{}{}^{k-1} \sum_L \Rotm{}{L}^k (\forcem{}{L}^k - \noise_{f}) \dt^2
 \\
-\COMd^{k}&= \COMd^{k-1} + \bfg \dt + \frac{1}{m} \Rot{}{k} \sum_L\Rot{B}{Lk} (\forcem{}{Lk} - \noise_{f}) \dt 
+\COMd^{k}&= \COMd^{k-1} + \bfg \dt + \frac{1}{m} \Rot{}{}^k \sum_L\Rotm{}{L}^k (\forcem{}{L}^k - \noise_{f}) \dt 
 \\
-\AM^{k} &= \AM^{k-1} +\Rot{}{}^k \sum_L (\posi{B}{L}^k  - \posim{B}{C}^k +  \bias_{c}^k + \noise_{c}) \times \Rot{B}{L}^k(\forcem{}{L}^k - \noise_{f}) \dt
+\AM^{k} &= \AM^{k-1} +\Rot{}{}^k \sum_L (\posim{}{L}^k  - \posim{}{C}^k +  \bias_{c}^k + \noise_{c}) \times \Rotm{}{L}^k(\forcem{}{L}^k - \noise_{f}) \dt
 \end{split}
 \label{eq:COMDiscrete}
 \end{equation}
 %
-Analogously to the IMU case, it is possible to pre-integrate force measurements to derive a factor on the states $\bfx_c=[\COM, \COMd, \AM, \Rot{}{}]$ using deltas $\D_c=[\D\COM, \D\COMd, \D\AM, \DR]$. The rotation measured by the gyroscope has to be included too for the pre-integration to work. In this case, the bias vector is $\bias = [\bias_c, \bias_{\omega}]$. We define measurements  $\bfz_k$ to be:
+Analogously to the IMU case, it is possible to pre-integrate force measurements to derive a factor on the states 
+$\bfx_c=[\COM, \COMd, \AM, \Rot{}{}]$ using deltas $\D_c=[\D\COM, \D\COMd, \D\AM, \DR]$. 
+The rotation measured by the gyroscope has to be included too for the pre-integration to work. 
+In this case, the bias vector is $\bias = [\bias_c, \bias_{\omega}]$. We define measurements  $\bfz^k$ to be:
 %
 \begin{equation}
-\bfz^k = \left[ \posim{B}{C}^k, \angvelm{}{k}, \left[\forcem{}{L}^k, \posim{B}{L}^k, \Rotm{B}{L}^k \right]_{L=1\dots4}\right]
+\bfz^k = \left[ \posim{}{C}^k, \angvelm{}{}^k, \left[\forcem{}{L}^k, \posim{}{L}^k, \Rotm{}{L}^k \right]_{L=1..4}\right]
 \end{equation}
 
 The following operators are enough to particularize the  method in \secRef{sec:general-preint} to the contact forces case.
-Integrating $\bfz_k$ during $\dt$ yields $\bm\delta_k$ in \eqref{equ:data2delta} as
+Integrating $\bfz_k$ during $\dt$ yields $\bm\delta_k$ in \eqRef{eq:data2delta} as
 %
 \begin{equation}
 \small
-    \bm\delta_{k}(\bfz^k, \bfb^i, \dt) =
+    \bm\delta^{k}(\bfz^k, \bfb^i, \dt) =
     \begin{bmatrix}
-    \frac{1}{2m} \sum_l \Rotm{B}{Lk} \forcem{}{Lk} \dt^2
+    \frac{1}{2m} \sum_l \Rotm{}{L}^k \forcem{}{L}^k \dt^2
     \\
-    \frac{1}{m} \sum_l \Rotm{B}{Lk} \forcem{}{Lk} \dt 
+    \frac{1}{m} \sum_l \Rotm{}{L}^k \forcem{}{L}^k \dt 
     \\
-    (\sum_l \posim{B}{Lk} - (\posim{B}{Ck} - \bias_c) \times (\Rotm{B}{Lk} \forcem{}{Lk} ))\dt
+    (\sum_l \posim{}{L}^k - (\posim{}{C}^k - \bias_c) \times (\Rotm{}{L}^k \forcem{}{L}^k ))\dt
     \\
     \Exp((\angvelm{}{k} - \bias_{\omega})\dt)
     \end{bmatrix}
 \normalsize
 \end{equation}
 %
-and the delta composition law in \eqref{equ:deltaPlusDelta} as
+and the delta composition law in \eqRef{eq:deltaPlusDelta} as
 %
 \begin{equation}
     \D \circ \bm\delta = 
@@ -412,20 +417,20 @@ and the delta composition law in \eqref{equ:deltaPlusDelta} as
     \label{eq:DeltaDTCompo}
 \end{equation}
 %
-The expected delta $\D_{ik}=\bfx_k\boxminus\bfx_i$ between KFs $ik$ reads
+The expected delta $\D^{ik}=\bfx^k\boxminus\bfx^i$ between KFs $i$ and $k$ reads
 %
 \begin{equation}
-\D_{ik} =
+\D^{ik} =
 \begin{bmatrix}
-   \D\COM_{ik} \\ \D\COMd_{ik} \\ \D\AM_{ik} \\ \D\Rot{}{ik}
+   \D\COM^{ik} \\ \D\COMd^{ik} \\ \D\AM^{ik} \\ \D\Rot{}{}^{ik}
 \end{bmatrix}
 =
 \begin{bmatrix}
-	{\Rot{}{i}}\tr (\COM_k - \COM_i - \COMd_i \dt_{ik})
+	{\Rot{}{i}}\tr (\COM^k - \COM^i - \COMd^i \Dt^{ik})
 	\\
-	{\Rot{}{i}}\tr (\COMd_{k} - \COMd_{i} - \bfg \dt_{ik})
+	{\Rot{}{i}}\tr (\COMd^{k} - \COMd^{i} - \bfg \Dt^{ik})
 	\\
-	{\Rot{}{i}}\tr (\AM_{k} - \AM_{i})
+	{\Rot{}{i}}\tr (\AM^{k} - \AM^{i})
 	\\
 {\Rot{}{i}}\tr \Rot{}{k}
 \end{bmatrix}
@@ -435,15 +440,15 @@ The expected delta $\D_{ik}=\bfx_k\boxminus\bfx_i$ between KFs $ik$ reads
 Finally, the propagation of the state $\bfx_i$ to $\bfx_k$ using $\D_{ik}$, which can be used to retrieve a state at any time $k$ between KFs in the trajectory, is
 %
 \begin{equation}
-	\bfx_k = \bfx_i \boxplus \D_{ik} =
+	\bfx^k = \bfx^i \boxplus \D^{ik} =
 	\begin{bmatrix}
-	\COM_i + \COMd_i \dt_{ik} + \Rot{}{i} \Delta \COM_{ik} + \frac{1}{2} \bfg \dt_{ik}^2
+	\COM^i + \COMd^i \Dt^{ik} + \Rot{}{}^i \Delta \COM^{ik} + \frac{1}{2} \bfg \Dt^{ik,2}
 	\\
-	\COMd_i + \Rot{}{i} \Delta \COMd_{ik} + g \dt_{ik}
+	\COMd^i + \Rot{}{}^i \Delta \COMd^{ik} + \grav \Dt^{ik}
 	\\
-	\AM_i + \Rot{}{i} \Delta \AM_{ik}
+	\AM^i + \Rot{}{}^i \Delta \AM^{ik}
 	\\
-	\Rot{}{i} \DR_{ik}
+	\Rot{}{i} \DR^{ik}
 	\end{bmatrix}
 \end{equation}
 %

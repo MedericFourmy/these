@@ -5,7 +5,7 @@
 \section{General factor}
 Let's assume that an algorithm provides us $\Tm{C}{O} \in \SE(3)$, a measurement the pose of an element 
 of the scene with an attached frame $O$ with respect to the camera frame $C$ located at the Camera optical frame.
-The kinematic chain of the problem described in \ref{fig:camera_object_chain} unrolls as 
+The kinematic chain of the problem described in \figRef{fig:camera_object_chain} unrolls as 
 $\T{W}{O} = \T{W}{B}\T{B}{C}\T{C}{O}$ where W and B correspond to the world and body frames.
 Given measurement $\Tm{C}{O}$, this relation can therefore be turned into a residual relating 
 the robot pose, the camera extrinsics and the object pose:
@@ -62,7 +62,7 @@ is in general hard to differentiate. Instead if we consider the inverse function
 
 that maps the relative pose to the projection of the tag in the image, a rather simple jacobian expression can be derived using the chain rule, as follows.
 
-Let's defined the marker corner coordinates in the marker frame, like shown in \fig \ref{fig:tag_coordinate_frame}:
+Let's defined the marker corner coordinates in the marker frame, like shown in \fig \figRef{fig:tag_coordinate_frame}:
 
 \begin{equation}
     c =

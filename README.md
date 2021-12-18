@@ -18,6 +18,7 @@ Use `build.sh` and `clean.sh` scripts
 ## Sketch TODO
 - base/worl/robot frames
 - kinematic information types
+- Exp/Log map
 - preintegration algo (as an algo)
 - kinematic chain for the robot calibration
 - kinematic chain for objectslam
