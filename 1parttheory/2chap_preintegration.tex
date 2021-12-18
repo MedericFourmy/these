@@ -135,23 +135,23 @@ we could then directly derive a factor with an error between the expected delta 
 %
 \begin{align}
     \hat\bfDelta_{im}(\bfx^i, \bfx^m) = 
-    \begin{bsmallmatrix}
+    \begin{bmatrix}
     \Rot{}{}^{i,T} \Rot{}{}^{m}  \\
     \vel{}{}^{m}  - \vel{}{}^{i}  \\
     \posi{}{}^{m} - \posi{}{}^{i}
-    \end{bsmallmatrix}
+    \end{bmatrix}
 \end{align}
 %
 and 
 %
 \begin{align}
     \bfDelta_{im}(\bias^i, \bfx_i) = 
-    \begin{bsmallmatrix}
+    \begin{bmatrix}
     \prod_{k=i}^{m} \Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^i)\dt)  \\
     \sum_{k=i}^{m} \Big[\grav \dt + \Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^i - \noise_{\acc{}{}}^k)\dt \Big]  \\
     \sum_{k=i}^{m} \Big[\vel{}{}^{k}\dt + \frac{1}{2}\grav \dt^2 
     + \frac{1}{2}\Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^i)\dt^2 \Big]
-    \end{bsmallmatrix}
+    \end{bmatrix}
 \end{align}
 %
 Both quantities are recomputed at each evaluation of the residual by the nonlinear solver. $\bfDelta_{\bfx}(\bfx_i, \bfx_m)$ is fairly quick to compute.
@@ -306,14 +306,207 @@ Full details can be found in \cite[Section 3.4]{atchuthan-18-thesis}.
 
 
 
+
+
+%
+%
+%
+%
 \section{IMU pre-integration on Lie groups}
 In \cite{fourmy2019absolute}, we showed that an alternative formulation of IMU preintegration on Lie groups was possible.
+We introduce a new matrix Lie group representation of
+the IMU deltas. The complete IMU pre-integration theory,
+including the computation of the residual, is based on this
+new Lie structure. The theoretical material for the Lie
+development in this section can be found in the report \cite{sola2018micro}.
+% For some developments and formulae related to the particular
+% IMU case, please refer to the appendix.
+
+\subsection{Lie Group formulation}
+
+We propose a matrix form of the Lie group of IMU deltas as,
+%
+\begin{align}\label{equ:delta_Lie}
+\D &= 
+\begin{bmatrix}
+\DR & \Dv & \Dp \\
+\bf0 & 1 & \Dt \\
+\bf0 & 0 & 1
+\end{bmatrix} \in \cD \subset \bbR^{5\times 5}
+~.
+\end{align}
+
+Group identity, inverse and composition stem from regular matrix identity, inverse (with $\DR\inv=\DR\tr$) and product,
+
+\begin{align}
+\D_\cE&=\begin{bmatrix}
+\bfI & \bf0 & \bf0 \\
+\bf0 & 1 & 0 \\
+\bf0 & 0 & 1 
+\end{bmatrix} = \bfI_{5\times5}
+\label{equ:identity}
+\\
+\D\inv &= \begin{bmatrix}
+\DR\tr & -\DR\tr\Dv & -\DR\tr(\Dp-\Dv\Dt) \\
+\bf0 & 1 & -\Dt \\
+\bf0 & 0 & 1
+\end{bmatrix} 
+\label{equ:inverse}
+\\
+\D\cdot\bm\delta 
+&= 
+\begin{bmatrix}
+\DR\dR & \Dv + \DR\dv & \Dp+\Dv\dt + \DR\dpp \\
+\bf0 & 1 & \Dt+\dt \\
+\bf0 & 0 & 1
+\end{bmatrix}
+~.
+\label{equ:composition}
+\end{align}
+%
+% Comparing against \eqsRef{equ:composite_identity}{equ:composite_composition} we observe that this matrix Lie group is exactly equivalent to the classical IMU deltas above.
+
+
+
+\subsubsection{Lie algebra \texorpdfstring{$\mathfrak{d}$}{d} and exponential map}
+
+The Lie algebra elements $\bftau\hhat$ and their isomorphic Cartesian $\bftau$ have the forms
+%
+\begin{align}\label{equ:lie_algebra}
+    \bftau\hhat &= \begin{bsmallmatrix}
+    \hatx{\bth} & \bfrho & \bfupsilon \\
+    \bf0 & 0 & \Dt \\
+    \bf0 & 0 & 0
+    \end{bsmallmatrix} \in \mathfrak{d}
+    ,&
+    \bftau &= \begin{bsmallmatrix}
+    \bfrho \\ \bfupsilon \\ \bth \\ \Dt
+    \end{bsmallmatrix}
+    \te \begin{bsmallmatrix}
+    \bfv\Dt \\ \bfa\Dt \\ \bw\Dt \\ \Dt
+    \end{bsmallmatrix} 
+    \in \bbR^{10}
+    ,
+\end{align}
+%
+with $\bfv\te\dot\Dp$, $\bfa\te\dot\Dv$ and $\hatx{\bw}\te\DR\tr\dot\DR$.
+Operators $\wedge$ and $\vee$ are defined so that $\bftau\hhat=(\bftau)\hhat$ and $\bftau=(\bftau\hhat)\vvee$.
+
+The exponential map transfers tangent elements to the group; the logarithmic map is its inverse,
+%
+\begin{align}
+    \D &= \Exp(\bftau) \te \exp(\bftau\hhat) = \begin{bsmallmatrix}
+    \Exp(\bth) & \bfQ\bfupsilon & \bfQ\bfrho+\bfP\bfupsilon\Dt \\
+    \bf0 & 1 & \Dt \\
+    \bf0 & 0 & 1
+    \end{bsmallmatrix} %\in\cD 
+    \label{equ:exp}
+    \\
+    \bftau &= \Log(\D) \te \log(\D)\vvee = \begin{bsmallmatrix}
+    \bfQ\inv(\Dp-\bfP\bfQ\inv\Dv\Dt) \\
+    \bfQ\inv\Dv \\
+    \Log(\DR) \\
+    \Dt 
+    \end{bsmallmatrix} %\in \bbR^{10}
+    \label{equ:log}
+\end{align}
+%
+where $\Log()$ is obtained by identifying terms in \eqRef{equ:delta_Lie} and \eqRef{equ:exp}.
+Matrices $\bfP$ and $\bfQ$ are provided in the appendix.
+
+
+\subsubsection{Jacobians, uncertainty}
+\label{sec:uncertainty}
+
+For general functions $f:\cM\to\cN;y=f(x)$, we propagate uncertainty normally via the Jacobians $\mjac{y}{x}\te\dpar{y}{x}$, \ie, $\bfSigma_y=\mjac{y}{x}\,\bfSigma_x\,\mjac{y}{x}\tr$. 
+These Jacobians map the tangent spaces of the mannifolds $\cM,\cN$ at $x$ and $y$, and in case of vector spaces they resort to the classical Jacobian.
+They also satisfy the chain rule, which we use extensively in our developments.
+We provide ample reference and justification of this approach in the technical report \cite{sola2018micro}.
+
+A comment is however necessary for the present IMU case.
+It relates to the uncertainty of the last component of the tangent space \eqRef{equ:lie_algebra}, which is the time $\Dt$. This component has no uncertainty by definition. 
+Having it in the covariances would imply singularity and result in the risk of a number of well-known numerical issues. 
+We therefore systematically marginalize this time component out of the covariances, simply by removing the last row and column. 
+
+
+
+
+
+\subsubsection{Delta Lie group IMU factor residual}
+Computation of the residual in the case of the Lie Delta group formulation follows the steps defined in \secRef{sec:general-preint}.
+However, since the Delta is directly defined as a Lie group, the formulation is actually simplified because  ... 
+Use the pre-integrated Jacobian $\mjac{\D_{im}}{\bfb}$ to correct the pre-integrated delta $\ol\D_{im}$ to account for the new bias estimate $\bfb_i\neq\ol\bfb_i$,
+
+\begin{align}
+    \D_{im}(\bfb_i) &= \ol\D_{im}\cdot\Exp(\mjac{\D_{im}}{\bfb}(\bfb_i-\ol\bfb_i)) 
+    ~.
+\end{align}
+
+Use \eqRef{equ:delta} as $\boxminus$ to compute the expected delta from  $\bfx_i$ to $\bfx_m$,
+
+\begin{align}
+    \widehat\D_{im}(\bfx_i,\bfx_m) &= \bfx_m \boxminus \bfx_i 
+    ~.
+\end{align}
+Compute the residual in the  tangent of $\cD$ at $\D_{im}$,
+
+\begin{align}
+    \bfr^\Delta_{im}(\bfx_i,\bfx_m,\bfb_i) &= \Log(\D_{im}(\bfb_i)\inv \cdot \widehat\D_{im}(\bfx_i,\bfx_m)) \in \bbR^9
+~,
+\end{align}
+
+and drop the $\Dt$ part from the residual after the $\Log()$ ---see comment in \secRef{sec:uncertainty}.
+In this last equation, the general $\oplus$ operator is simply the traditional Lie group "minus" operator defined in [cite sola eq ...] applied
+between the corrected preintegration delta and the expected delta.
+
+
+
+\subsection{IMU Lie group versus Forster's method}
+
+Mathematically, and disregarding methodology, the main difference between our method and Forster's \cite{forster2017-TRO} is to be found in the exponential map. 
+To see it, let us consider small rotation increments $\bth=\bw\dt$ captured at each single IMU sample. 
+In such cases, the matrices $\bfP,\bfQ$ appearing in the exponential map \eqRef{equ:exp} and detailed in \eqRef{equ:RQP} can be approximated by $\bfP\approx\tfrac12\bfI$ and $\bfQ\approx\bfI$.
+The exponential becomes,
+%
+\begin{align}
+    \Exp\left(\begin{bsmallmatrix}
+    \bf0 \\ \bfa \\ \bw \\ 1
+    \end{bsmallmatrix}\dt\right) \approx \begin{bsmallmatrix}
+    \Exp(\bw\dt) & \bfa\dt & \tfrac12\bfa\dt^2 \\
+    \bf0 & 1 & \dt \\
+    \bf0 & 0 & 1
+    \end{bsmallmatrix}
+~,
+\end{align}
+%
+where we find the terms $\bfa\dt$ and $\tfrac12\bfa\dt^2$, which should sound familiar from Forster's method. 
+In effect, with this approximation, if we now compact all the steps \eqsRef{equ:pre_calibration}{equ:pre_composition} of our integration into a cumulative expression,
+%
+\begin{align}
+    \D_{ik} = \prod_{j=i+1}^k \Exp\left(\begin{bsmallmatrix}
+    \bf0 \\ (\bfa_j-\bfa_{bi}) \\ (\bw_j-\bw_{bi}) \\ 1
+    \end{bsmallmatrix}\dt\right)
+~,
+\end{align}
+%
+it is possible (although tedious) to show that both Forster's and our method are exactly equivalent when $\bw\dt\to0$.
+% , which is usually a valid hypothesis.
+% These differences should not constitute an argument against Forster, since in practice we typically have extremely small steps $\bw\dt$ and the approximation holds very well.
+
+
+
+
+
+
+
 
 
 \section{External force pre-integration}
 In this section we apply the generalized pre-integration algorithm to the problem of using measured external
 forces applied on a legged robot in a smoothing estimator. We propose to integrate the underactuated that we first recall. Then 
-we derive the specificities of the pre-integration of external forces of a poly-articulated system.
+we derive the specificities of the pre-integration of external forces of a poly-articulated system. This is the main theoretical contribution
+of our paper \cite{fourmy2021contact}.
+
 
 \subsection{Centroidal kinematics}
 The robot dynamics is described by the well-known:
