@@ -211,7 +211,7 @@ Dependence on other small-varying parameters $\bfb$ such as sensor bias is linea
 Then we can pre-integrate $\ol\bfDelta_{im}\te\bfDelta_{im}(\ol\bfb)$ once during data gathering, and use it to define residuals that are later evaluated many times by the optimizer.
 This was the main contribution of paper my paper \cite{fourmy2021contact}.
 
-\subsubsection{Delta pre-integration}
+\subsection{Delta pre-integration}
 
 \begin{figure}[tb]
     \centering
@@ -255,7 +255,7 @@ where $\mjac{\bm\delta_k}{\bfb_i}$, $\mjac{\bm\delta_k}{\bfz_k}$, $\mjac{\bfDelt
 are the Jacobians $\mjac{y}{x}=\partial y/\partial x$ of (\eqRef{eq:data2delta},\eqRef{eq:deltaPlusDelta}), computed according to Lie theory \cite{sola2018micro}.
 
 
-\subsubsection{Residual definition}
+\subsection{Residual definition}
 
 The pre-integrated $\ol\bfDelta_{im}$ is used at the end of the pre-integration to define the residual
 
@@ -269,10 +269,11 @@ That is, $\{\op,\om\}$ are $\{+,-\}$ for vectors, and for rotations we have $\bf
 The residual clearly depends on the KF states $\bfx^i,\bfx^m$ and the bias $\bfb_i$. It has an associated covariance  $\bfSigma^\Delta_{im}$.
 
 
-\subsubsection{IMU pre-integration factor $\bfr^{I}$}
+
+\subsection{IMU pre-integration}
 
 The states involved in this integration are the base states $\bfx_b = [\posi{}{}, \bfv, \Rot{}{}]$ with deltas $\bfDelta=[\Dp,\Dv,\DR]$. 
-The IMU produces biased and noisy measurements $\tilde\bfz = [\tilde\bfa, \tilde{\bf\omega}]$ of the base proper acceleration and angular velocity, 
+The IMU produces biased and noisy measurements $\tilde\bfz = [\tilde\bfa, \tilde{\bfomega}]$ of the base proper acceleration and angular velocity, 
 with bias $\bfb = [\bias_{a}, \bias_{\omega}]$ and noise $\noise = [\noise_{a}, \noise_{\omega}]$. 
 
 The pre-integration method in  \cite{forster2017-TRO} can be put in the formalism above by realizing that defining $\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta} as
@@ -284,7 +285,7 @@ The pre-integration method in  \cite{forster2017-TRO} can be put in the formalis
     \begin{bmatrix}
     \tfrac12(\tilde\bfa-\bfb_a-\noise_a)\dt^2 \\
     (\tilde\bfa-\bfb_a-\noise_a)\dt \\
-    \Exp((\tilde{\bm\omega}-\bfb_\omega-\noise_\omega)\dt)
+    \Exp((\tilde{\bfomega}-\bfb_\omega-\noise_\omega)\dt)
     \end{bmatrix}^k
 \end{align}
 
@@ -373,18 +374,18 @@ Group identity, inverse and composition stem from regular matrix identity, inver
 The Lie algebra elements $\bftau\hhat$ and their isomorphic Cartesian $\bftau$ have the forms
 %
 \begin{align}\label{equ:lie_algebra}
-    \bftau\hhat &= \begin{bsmallmatrix}
+    \bftau\hhat &= \begin{bmatrix}
     \hatx{\bth} & \bfrho & \bfupsilon \\
     \bf0 & 0 & \Dt \\
     \bf0 & 0 & 0
-    \end{bsmallmatrix} \in \mathfrak{d}
+    \end{bmatrix} \in \mathfrak{d}
     ,&
-    \bftau &= \begin{bsmallmatrix}
+    \bftau &= \begin{bmatrix}
     \bfrho \\ \bfupsilon \\ \bth \\ \Dt
-    \end{bsmallmatrix}
-    \te \begin{bsmallmatrix}
+    \end{bmatrix}
+    \te \begin{bmatrix}
     \bfv\Dt \\ \bfa\Dt \\ \bw\Dt \\ \Dt
-    \end{bsmallmatrix} 
+    \end{bmatrix} 
     \in \bbR^{10}
     ,
 \end{align}
@@ -395,19 +396,19 @@ Operators $\wedge$ and $\vee$ are defined so that $\bftau\hhat=(\bftau)\hhat$ an
 The exponential map transfers tangent elements to the group; the logarithmic map is its inverse,
 %
 \begin{align}
-    \D &= \Exp(\bftau) \te \exp(\bftau\hhat) = \begin{bsmallmatrix}
+    \D &= \Exp(\bftau) \te \exp(\bftau\hhat) = \begin{bmatrix}
     \Exp(\bth) & \bfQ\bfupsilon & \bfQ\bfrho+\bfP\bfupsilon\Dt \\
     \bf0 & 1 & \Dt \\
     \bf0 & 0 & 1
-    \end{bsmallmatrix} %\in\cD 
+    \end{bmatrix} %\in\cD 
     \label{equ:exp}
     \\
-    \bftau &= \Log(\D) \te \log(\D)\vvee = \begin{bsmallmatrix}
+    \bftau &= \Log(\D) \te \log(\D)\vvee = \begin{bmatrix}
     \bfQ\inv(\Dp-\bfP\bfQ\inv\Dv\Dt) \\
     \bfQ\inv\Dv \\
     \Log(\DR) \\
     \Dt 
-    \end{bsmallmatrix} %\in \bbR^{10}
+    \end{bmatrix} %\in \bbR^{10}
     \label{equ:log}
 \end{align}
 %
@@ -442,7 +443,7 @@ Use the pre-integrated Jacobian $\mjac{\D_{im}}{\bfb}$ to correct the pre-integr
     ~.
 \end{align}
 
-Use \eqRef{equ:delta} as $\boxminus$ to compute the expected delta from  $\bfx_i$ to $\bfx_m$,
+Use [Forster delta def] \eqRef{equ:delta} as $\boxminus$ to compute the expected delta from  $\bfx_i$ to $\bfx_m$,
 
 \begin{align}
     \widehat\D_{im}(\bfx_i,\bfx_m) &= \bfx_m \boxminus \bfx_i 
@@ -456,7 +457,7 @@ Compute the residual in the  tangent of $\cD$ at $\D_{im}$,
 \end{align}
 
 and drop the $\Dt$ part from the residual after the $\Log()$ ---see comment in \secRef{sec:uncertainty}.
-In this last equation, the general $\oplus$ operator is simply the traditional Lie group "minus" operator defined in [cite sola eq ...] applied
+In this last equation, the composite minus operator $\oplus$ is simply the traditional Lie group "minus" operator defined in [cite sola eq ...] applied
 between the corrected preintegration delta and the expected delta.
 
 
@@ -469,13 +470,13 @@ In such cases, the matrices $\bfP,\bfQ$ appearing in the exponential map \eqRef{
 The exponential becomes,
 %
 \begin{align}
-    \Exp\left(\begin{bsmallmatrix}
+    \Exp\left(\begin{bmatrix}
     \bf0 \\ \bfa \\ \bw \\ 1
-    \end{bsmallmatrix}\dt\right) \approx \begin{bsmallmatrix}
+    \end{bmatrix}\dt\right) \approx \begin{bmatrix}
     \Exp(\bw\dt) & \bfa\dt & \tfrac12\bfa\dt^2 \\
     \bf0 & 1 & \dt \\
     \bf0 & 0 & 1
-    \end{bsmallmatrix}
+    \end{bmatrix}
 ~,
 \end{align}
 %
@@ -483,9 +484,9 @@ where we find the terms $\bfa\dt$ and $\tfrac12\bfa\dt^2$, which should sound fa
 In effect, with this approximation, if we now compact all the steps \eqsRef{equ:pre_calibration}{equ:pre_composition} of our integration into a cumulative expression,
 %
 \begin{align}
-    \D_{ik} = \prod_{j=i+1}^k \Exp\left(\begin{bsmallmatrix}
+    \D_{ik} = \prod_{j=i+1}^k \Exp\left(\begin{bmatrix}
     \bf0 \\ (\bfa_j-\bfa_{bi}) \\ (\bw_j-\bw_{bi}) \\ 1
-    \end{bsmallmatrix}\dt\right)
+    \end{bmatrix}\dt\right)
 ~,
 \end{align}
 %
