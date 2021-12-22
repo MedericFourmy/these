@@ -8,6 +8,8 @@ Use `build.sh` and `clean.sh` scripts
 - robot family portraits?
 - cite end to end ML estimation+control?
 - automatize term definition/lexicon
+- Camurri Thesis Table 2.1 extended for all legged robot estimation cited papers
+    -> split between base est and centroidal est?  
 
 ## TO DEFINE
 - pose
