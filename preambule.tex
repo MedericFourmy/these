@@ -86,7 +86,8 @@
 \usepackage{arydshln}
 
 % Images
-\usepackage{subfigure}
+% \usepackage{subfigure}  % outdated! will yield random errors "Missing number, treated as zero"
+\usepackage{subcaption}
 
 % Algo
 \usepackage{algorithm}
@@ -165,14 +166,19 @@
 % recommended when using biblatex with babel
 \usepackage{csquotes}
 
-%% Navigation dans le document
+% \usepackage{varioref}       % to ref "far away" labels
+
+% Create interal document links
 \usepackage[pdftex,
   pdfborder={0 0 0},
   colorlinks=true,
   linkcolor=blue,
   citecolor=red,
   pagebackref=false,
-  ]{hyperref} %Créera automatiquement les liens internes au PDF
+  ]{hyperref} 
+
+% \usepackage{cleveref}  % use \cref instead of \ref   --  BUG   
+
 
 % TODO notes
 \usepackage{xargs}                      % Use more than one optional parameter in a new commands

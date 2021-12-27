@@ -420,3 +420,64 @@ in an effort to bring these techniques to a broader audience \cite{sola2021wolf,
 - centroidal estimation not applied to smoothing and mapping
 
 Place to explain motivation/plan of the thesis?
+
+
+
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.8\textwidth]{figures/robot_kinematic_types.pdf}
+%     \caption{Sketch of robot kinematics}
+% \end{figure}
+
+\newcommand{\fakeimage}{{\fboxsep=-\fboxrule\fbox{\rule{0pt}{3cm}\hspace{4cm}}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+% many "%" symbols used to avoid extra space added by latex compiler
+% see https://tex.stackexchange.com/questions/42968/reduction-of-space-between-two-sub-figures
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{.33\linewidth}
+        \label{fig:kin_point_matching}
+        \centering
+        \includegraphics[width=\textwidth]{figures/robot_kinematic_types_point_matching.pdf}
+        \caption{Point feet matching}
+    \end{subfigure}%
+        \hfill
+    \begin{subfigure}{.33\linewidth}
+        \label{fig:kin_point_vel}
+        \centering
+        \includegraphics[width=\textwidth]{figures/robot_kinematic_types_point_vel.pdf}
+        \caption{Point feet linear velocity}
+    \end{subfigure}%
+       \hfill
+    \begin{subfigure}{.33\linewidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/robot_kinematic_types_point_direct.pdf}
+        \caption{Point feet direct}
+    \end{subfigure}%
+    
+    \bigskip
+    \begin{subfigure}{.33\linewidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/robot_kinematic_types_flat_matching.pdf}
+        \caption{Flat feet matching}
+    \end{subfigure}%
+        \hfill
+    \begin{subfigure}{.33\linewidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/robot_kinematic_types_flat_vel.pdf}
+        \caption{Flat feet twist}
+    \end{subfigure}%
+        \hfill
+    \begin{subfigure}{.33\linewidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/robot_kinematic_types_flat_direct.pdf}
+        \caption{Flat feet direct}
+    \end{subfigure}%
+    %
+    \caption{Kinematic measurement types [TODO]
+        }
+\end{figure}
