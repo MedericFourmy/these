@@ -1,36 +1,68 @@
-\chapter{Legged robot state estimation: a literature review}
+\chapter{State estimation for legged robots: a literature review}
 %
-The field of legged robots state estimation covers a wide variety of problems related to balance control and navigation of multibody systems.
-Estimated quantities of interest include the base states, centroidal states as well as a representation of the environment, depending on the application. 
+The field of state estimation for autonomous systems is at the frontier between many fields including automation, probability theory, non linear estimation etc.
+The general aim is to design and implement computationally tractable algorithms using noisy causal sensor measurements that can be embedded in feedback controlled systems.
+With the advent of digital computers and the theoretical breakthroughs of Kalman \cite{kalman1960new} among others, a vast family of observers has been developed 
+\cite{fujii2013extended, wan2001unscented} [cite Information filter]. Applications range the full scope of autonomous systems from spacecraft guidance \cite{mcgee1985discovery} 
+to autonomous underwater vehicle navigation \cite{leonard2016autonomous}. Each application has its own specific sets of requirements, depending on the physical
+nature of the system and its environment, available sensors and embedded computation power. Legged robots in particular require a high frequency (kHz) 
+and low latency estimates owing to the inherent instability of the dynamical system. Moreover they interact with the environment through 
+intermittent contacts to move around which require to plan in advance the motion using Model Predictive Control (MPC). These tight requirements 
+have given birth to a wealth of research works are now commonly used in commercial products \cite{hutter2016anymal}.
 
-The base refers to a reference frame rigidly attached to the main body of the robot. We are most often interested in the estimation of the position, velocity 
-and orientation of this frame in an inertial frame called the world. 
-In fact, using this estimation and other quantities directly measurable (such as joint angles), the state of any part of the multibody
-system can be recovered using forward kinematics. The estimation of these states is handled by proprioceptive estimators relying 
-mainly on inertial and kinematic measurements. 
+We will focus our review on works applying state estimation theory on legged robots, which include mainly quadrupeds and humanoid robots. The first part will 
+be centered around proprioceptive estimation of the robot main body. We will then examine the estimation of centroidal quantities. The use of exteroceptive sensors
+to obtain information from the robot environment will then be described. Finally, we will see that a new class of optimization based estimator is a promising alternative
+to filtering based methods.
 
-Centroidal states refer to the center of mass, angular momentum and their derivatives. The center 
-of mass (barycenter of the robot segment masses) is a virtual point which is the main control variable for locomotion. Centroidal
-estimators fuse the robot kinematic model, which is often assumed to be biased, with various dynamical models of the system. 
+\section{Definitions}
+Let's first introduce terms and key concepts that are commonly used in the legged robot estimation literature.
 
-Exteroceptive sensors (cameras, depth cameras, LIDARs...) are needed to obtain non drifting estimates of the robot pose. 
-They are used either to localize with respect to a known map or to build a representation of the environment online, that the robot can use to plan contact for instance. 
+\textit{Legged robot} are poly-articulated systems that use a set end effectors (commonly referred to as feet whatever their nature) to move their main body
+by pushing on its environment. The kinematic chain of the robot is modeled as a graph composed of fixed shape segments (aka. links) 
+linked together by articulations (aka. joints). Joints come in various forms (revolute, prismatic, ball...) and can be actuated or not.
+The \textit{base} refers to a reference frame rigidly attached to the main body of the robot (often the trunk for quadrupeds and the pelvis for humanoids). 
+We are most often interested in the estimation of the position, velocity and orientation of this frame with regard to an inertial \textit{world} frame, which is called the \textit{base state}. 
+This estimation is the main focus in most of legged robot estimation literature. In fact, knowing the base base and other quantities directly measurable (such as joint angles), 
+and assuming a perfect robot model, the state of any part of the multibody system can be recovered using forward kinematics. 
 
-These problems are often compartmentalized in the literature. Separate estimators are developed tackling each problem and communicate their results as priors for the others. 
-This approach often makes the problem more computationally tractable and may reduce the software complexity by dividing code bases. However, from the estimation
-point of view this approach may result in sub-optimal, even inconsistent estimators by neglecting cross correlations between variables. In particular,
-coupling odometry sources with environment reconstruction has been widely explored in the SLAM literature, which has shifted to estimators based on batch optimization.
-This technique has recently been making its way into the legged robot literature.
+The \textit{centroidal state} refer to the center of mass, angular momentum and their derivatives. The center 
+of mass (barycenter of the robot segment masses) is a virtual point that is the main control variable for locomotion. 
+%Centroidal estimators fuse the robot kinematic model, which is often assumed to be biased, with various dynamical models of the system. 
 
-This chapter gives a thematically structured overview of these different aspects. 
+\textit{Proprioceptive} sensors measure values about the internal state the robot. For legged robots, they include joint encoders, strain gauges measuring 
+either joint torques or end effector torques, dedicated feet contact sensors and Inertial Measurement Units (IMUs). These sensors do not directly provide information
+about the external robot environment and can therefore only be used to compute a drifting pose of the robot, the odometry \footnote{The status of an IMU is debatable
+since an accelerometer measures the external gravity vectors which can be used to infer an approximate but non drifting orientation. It is however often considered 
+a proprioceptive sensor in the legged robot literature \cite{rotella2018unsupervised,scona2017direct,yang2019state,lin2021deep}}. 
+
+\textit{Exteroceptive} sensors (cameras, depth cameras, LIDARs...) provide information about the environment of the robot.  
+They are needed to obtain non drifting estimates of the robot pose. 
+They are used either to localize with respect to a map or to build a representation of the environment online, that the robot can use to plan contact for instance. 
+
+% TOO OPINIONATED RIGHT OF THE BAT -> need to present more the logic of the chapter
+% These problems are often compartmentalized in the literature. Separate estimators are developed tackling each problem and communicate their results as priors for the others. 
+% This approach often makes the problem more computationally tractable and may reduce the software complexity by dividing code bases. However, from the estimation
+% point of view this approach may result in sub-optimal, even inconsistent estimators by neglecting cross correlations between variables. In particular,
+% coupling odometry sources with environment reconstruction has been widely explored in the SLAM literature, which has shifted to estimators based on batch optimization.
+% This technique has recently been making its way into the legged robot literature.
 
 
 
-\improvement[inline]{Sketch of the reference frames overlaid with 3D model of solo}
-
+\begin{figure}
+    \centering
+    \label{fig:solo_frames}
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/solo_frames.pdf}
+    \caption{Solo 12 \cite{grimminger2020open} important reference frames}
+\end{figure}
+    
 
 %%%%%%%%%%
 \section{Proprioceptive base estimation}
+
+
+
 We refer to proprioceptive base estimation for any state observer purely relying on proprioceptive sensors to estimate base frame states. 
 The base is a frame rigidly attached to the main body of the polyarticulate system, serving
 as the root of its kinematic chains. For legged robots, proprioceptive sensors include Inertial Measurement Units (IMUs), joint encoders, sometimes strain gauges at the 
@@ -54,6 +86,7 @@ which are very accurate (... for solo \cite{grimminger2020open}). The main sourc
 modeling inaccuracies may be difficult to model such as approximate segment lengths \improvement[inline]{segment length calibration ref?}, segments flexibilities \cite{vigne2018estimation}, 
 joint backlash \cite{fallon2014drift} and flexibilities \cite{koolen2016design} etc. 
 \cite{bloesch2018technical} makes the distinction between three measurement models for the kinematic information which will define the structure of this section. 
+Those measurement models are summarized in \figRef{fig:kin_models}.
 
 
 \textit{Feet matching} is the earliest example of leg odometry to be used in the leg robotics literature. Pioneered by \cite{roston1991dead} 
@@ -89,6 +122,55 @@ use these types of measurements in conjunction with \textit{instantaneous relati
 \cite{fallon2014drift} argues that in the case of an erroneous kinematic model (backlash, flexibilities), using exclusively direct velocity measurements
 prevents the estimator to become inconsistent when another source of position measurement is present (such as LIDAR localization).  
 
+%%%%%%%%%%%%%%%%%%%%%%%%
+% many "%" symbols used to avoid extra space added by latex compiler
+% see https://tex.stackexchange.com/questions/42968/reduction-of-space-between-two-sub-figures
+%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}
+    \centering
+    \begin{subfigure}{.33\linewidth}
+        \label{fig:kin_point_matching}
+        \centering
+        \includegraphics[width=\textwidth]{figures/robot_kinematic_types_point_matching.pdf}
+        \caption{Point feet matching}
+    \end{subfigure}%
+        \hfill
+    \begin{subfigure}{.33\linewidth}
+        \label{fig:kin_point_vel}
+        \centering
+        \includegraphics[width=\textwidth]{figures/robot_kinematic_types_point_vel.pdf}
+        \caption{Point feet linear velocity}
+    \end{subfigure}%
+       \hfill
+    \begin{subfigure}{.33\linewidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/robot_kinematic_types_point_direct.pdf}
+        \caption{Point feet direct}
+    \end{subfigure}%
+    
+    \bigskip
+    \begin{subfigure}{.33\linewidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/robot_kinematic_types_flat_matching.pdf}
+        \caption{Flat feet matching}
+    \end{subfigure}%
+        \hfill
+    \begin{subfigure}{.33\linewidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/robot_kinematic_types_flat_vel.pdf}
+        \caption{Flat feet twist}
+    \end{subfigure}%
+        \hfill
+    \begin{subfigure}{.33\linewidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/robot_kinematic_types_flat_direct.pdf}
+        \caption{Flat feet direct}
+    \end{subfigure}%
+    %
+    \caption{Kinematic measurement models [TODO]
+        }
+    \label{fig:kin_models}
+\end{figure}
 
 
 \subsection{Filter based data fusion}
@@ -413,71 +495,9 @@ in an effort to bring these techniques to a broader audience \cite{sola2021wolf,
 
 
 
-\section{Summary and perspectives}
-- Proprio filters mature and standard tool, 
-- centroidal less explored and loosely coupled with proprio est
-- smoothing and mapping framework matures and starting to be applied to legged robots
-- centroidal estimation not applied to smoothing and mapping
+% \section{Summary and perspectives}
+% - Proprio filters mature and standard tool, 
+% - centroidal less explored and loosely coupled with proprio est
+% - smoothing and mapping framework matures and starting to be applied to legged robots
+% - centroidal estimation not applied to smoothing and mapping
 
-Place to explain motivation/plan of the thesis?
-
-
-
-
-% \begin{figure}
-%     \centering
-%     \includegraphics[width=0.8\textwidth]{figures/robot_kinematic_types.pdf}
-%     \caption{Sketch of robot kinematics}
-% \end{figure}
-
-\newcommand{\fakeimage}{{\fboxsep=-\fboxrule\fbox{\rule{0pt}{3cm}\hspace{4cm}}}}
-
-%%%%%%%%%%%%%%%%%%%%%%%%
-% many "%" symbols used to avoid extra space added by latex compiler
-% see https://tex.stackexchange.com/questions/42968/reduction-of-space-between-two-sub-figures
-%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{figure}
-    \centering
-    \begin{subfigure}{.33\linewidth}
-        \label{fig:kin_point_matching}
-        \centering
-        \includegraphics[width=\textwidth]{figures/robot_kinematic_types_point_matching.pdf}
-        \caption{Point feet matching}
-    \end{subfigure}%
-        \hfill
-    \begin{subfigure}{.33\linewidth}
-        \label{fig:kin_point_vel}
-        \centering
-        \includegraphics[width=\textwidth]{figures/robot_kinematic_types_point_vel.pdf}
-        \caption{Point feet linear velocity}
-    \end{subfigure}%
-       \hfill
-    \begin{subfigure}{.33\linewidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/robot_kinematic_types_point_direct.pdf}
-        \caption{Point feet direct}
-    \end{subfigure}%
-    
-    \bigskip
-    \begin{subfigure}{.33\linewidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/robot_kinematic_types_flat_matching.pdf}
-        \caption{Flat feet matching}
-    \end{subfigure}%
-        \hfill
-    \begin{subfigure}{.33\linewidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/robot_kinematic_types_flat_vel.pdf}
-        \caption{Flat feet twist}
-    \end{subfigure}%
-        \hfill
-    \begin{subfigure}{.33\linewidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/robot_kinematic_types_flat_direct.pdf}
-        \caption{Flat feet direct}
-    \end{subfigure}%
-    %
-    \caption{Kinematic measurement types [TODO]
-        }
-\end{figure}
