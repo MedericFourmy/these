@@ -247,7 +247,7 @@ As we saw, a critical part of legged robot estimation is the integration of kine
 assumption of those methods is that the stable contacts are known a priori. The definition of a stable contact depends on the system: for quadruped that 
 are usually equipped with point-feet, three positional degrees of freedom are blocked, the leg only being able to rotate around the contact point; 
 while for a humanoid robot with planar feet, the six degrees of freedom are constrained. Slipping appears when the contact forces go outside of the Coulomb friction cone, 
-that is when the ratio $f_{\parallel}/f_{\perp}$ (where ${\parallel}$ and ${\perp}$ correspond to the tangential and normal components of the contact force) 
+that is when the ratio $f_{\parallel}/f_{\perp}$ (where $f_{\parallel}$ and $f_{\perp}$ correspond to the tangential and normal components of the contact force) 
 exceeds a certain threshold, called friction coefficient. 
 This coefficient is generally unknown as it depends on the the nature of the foot and ground surface properties.
 
@@ -301,6 +301,7 @@ and generalizes better to different environments. It does not provides covarianc
 % Additional information, either from physical models assumptions or external measurements, must be added to the filter to make the biases and the states observable
 % together.
 
+% New one
 We have seen in \secRef{sec:proprio_filters} that most legged robot proprioceptive filters rely on the robot kinematics in order to bound the drift of the integration
 of the inertial odometry and debias IMU raw measurements. However, to obtain consistent filters, special care has to be taken to ensure that the kinematic
 measurements are not themselves biased. Mainly two main issues have been identified and addressed so far in the literature: inaccuracies in the joint velocities derived from
@@ -343,8 +344,8 @@ coupled estimators, to which this thesis would like to contribute.
 %%%%%%%%%%
 \section{Dynamic centroidal estimation}
 %
-Legged robots are highly nonlinear systems that rely heavily on contact forces between their end effector and the environment to realize stable locomotion. 
-The effect of these forces is dictated by the underactuated dynamics equations, also known as Newton/Euler equations, which state that the variation of the 
+Legged robots are highly nonlinear systems need contact forces between their end effector and the environment to realize stable locomotion. 
+The effect of these forces is dictated by the Newton/Euler equations, also known as the underactuated dynamics, which state that the variation of the 
 system momentum is equal to the external wrench applied to the robot. Though these equations may appear simple, they introduce a nonlinear coupling 
 between the CoM position and the angular momentum. Many reduced order models are based directly on 
 various levels of approximation of these equations \cite{kajita20013d, wieber2006trajectory, carpentier2016versatile} to derive predictive
@@ -359,70 +360,71 @@ the platform \cite{ayusawa2008identification, ayusawa2014identifiability, bonnet
 This problem was closely scrutinized in the biomechanics literature where mass distributions often come from standardized anthropomorphic tables \cite{de1996adjustments}. 
 A second kind of information comes from measurements of the external wrench. 
 Forces provide the CoM accelerations while moments relate to the CoM position through a line called the central axis. This line passes only approximately by
-the CoM because of gesticulation induced angular momentum variations \cite{wieber2006holonomy}. Moreover, the wrench measurements are usually noisy
+the CoM because of gesticulation \cite{wieber2000modelisation} induced angular momentum variations \cite{wieber2006holonomy}. Moreover, the wrench measurements are usually noisy
 and require the presence of expensive deformation gauge sensors at each contact point. A complete analysis of the particularities
 of these different information sources along with an observability analysis can be found in \cite{carpentier2016center}.
 
-This fosters the use of more complex algorithms by fusing kinematic and external wrench measurements. \cite{stephens2011state} proposes to use the 
-Linear Inverse Pendulum Model (LIPM) as process model to an EKF that also includes kinematic measurements \improvement[inline]{I do not understand where the process input = 
-derivative of the CoP comes from!}. Model errors in the form of a CoM position measurement offset and external forces are added to the formulation and it is shown that
-either of these quantities is observable. \cite{atkeson2012state} ponders the use of a more complete planar sagital dynamical model by comparing it to the LIPM model
-without introducing model biases was done in \cite{stephens2011state}, instead relying on tuning filter covariances to alleviate their effects. 
+This fosters the use of more complex algorithms by fusing kinematic and external wrench measurements. Stephens \cite{stephens2011state} proposes to use the 
+Linear Inverse Pendulum Model (LIPM) as process model to an EKF that also includes kinematic measurements. Model errors in the form of a CoM position measurement 
+offset and external forces are added to the formulation and it is shown that either of these quantities is observable. 
+Xinjilefu \cite{atkeson2012state} ponders the use of a more complete planar sagital dynamical model by comparing it to the LIPM model
+without introducing model biases as was done in Stephens \cite{stephens2011state}, instead relying on tuning filter covariances to alleviate their effects. 
 Simulation show that the LIPM seems more able to cope with model errors but performances on the real robot show similar results. 
-One of the benefits of this model is that forces measurements can be summarized by the Center of Pressure (CoP) 
+One of the benefits of this model is that force measurements can be summarized by the Center of Pressure (CoP) 
 (or ZMP \cite{sardain2004forces}). The CoP is defined as the point where the moment component of the resulting wrench is aligned with the normal axis of the plane.
 The computation of this point only requires the contact normal force and horizontal moments, which is coincidingly the kind of
-sensor present on the Atlas robot. A centroidal estimator similar to \cite{stephens2011state} was implemented in \cite{xinjilefu2015center} and made possible
-a fall detection algorithm that prevented a fall during CMU team DARPA robotic challenge finals. \cite{piperakis2016non, piperakis2018nonlinear} implemented a similar 
-EKFs estimator based respectively on a LIPM and on a fly-wheel process model. The NAO robot used for the experiments being equipped with a single axis ground reaction sensor,
+sensor present on the Atlas robot. A centroidal estimator similar to that of Stephens \cite{stephens2011state} was implemented later implemented in the same team 
+\cite{xinjilefu2015center} and made possible a fall detection algorithm that prevented a fall during CMU team DARPA robotic challenge finals. 
+Similar EKF based estimators using respectively a LIPM and a fly-wheel process model were later implemented on a NAO robot \cite{piperakis2016non, piperakis2018nonlinear}. 
+The robot used for the experiments being equipped with a single axis ground reaction sensor,
 the process model has to be used again in the measurement model equations linked to the estimated external force disturbances.   
-\cite{benallegue2015estimation} also proposed to use a LIPM process but with a fixed contact point. It is tightly fused with IMU 
-measurements and kinematic information in order to jointly estimate centroidal quantities 
-and a joint flexibility at the ankle under external force disturbances. The particularity of this approach is to avoid the need for force sensors but
-it is restricted to motions with fixed rigid contacts with the ground such as during manipulation.
+A LIPM process can also be used with a fixed contact point assumption \cite{benallegue2015estimation}. By a tight fusion with IMU 
+measurements and kinematic information, centroidal quantities can jointly be estimated with a joint flexibility at the ankle under external force disturbances. 
+The particularity of this approach is to avoid the need for force sensors but it is restricted to motions with fixed rigid contacts with the ground 
+such as during manipulation.
 
-Previous methods were almost all based on simplified dynamical models which makes them heavily coupled to the used control schemed (a LIPM based pattern generator \cite{kajita20013d}). 
-In fact, an inaccurate process model would otherwise likely lead to unstable error dynamics. 
-\cite{xinjilefu2014dynamic} implemented an Quadratic Optimization (QP) based estimator using the whole-body dynamics
+While previously mentioned works relied on approximated dynamical models, we must acknowledge that 
+% Previous methods were almost all based on simplified dynamical models which makes them heavily coupled to the used control schemed (a LIPM based pattern generator \cite{kajita20013d}). 
+% In fact, 
+an inaccurate process model must lead to a biased estimation. 
+Later works tried instead to use exact dynamical models. In a first time, Xinjilefu \cite{xinjilefu2014dynamic} implemented an estimator using the whole-body dynamics
 of the humanoid robot, IMU and kinematic measurements. A generalized torque slack variable was introduce to represent the dynamical model errors. 
 External wrench at the feet is also a state variable as the measurement model on this quantity is only partial (only normal force and pitch+roll torque are measured). 
-The QP framework has the particularity to enforce inequality constraints on state variables. It is used to model joint limits and the positivity of normal ground reaction forces 
+They formulated the estimator as a QP using this generic formulation to enforce inequality constraints on state variables. It is used to model joint limits and the positivity of normal ground reaction forces 
 (the robot can only push on the ground).
-\cite{rotella2015humanoid} proposes instead to use the Newton/Euler dynamics, which are exact and a tractable element of the whole-body dynamics. 
+Rotella \cite{rotella2015humanoid} proposes instead to use the Newton/Euler dynamics, which are exact an exact part of the whole-body dynamics. 
 The authors build several estimators by fusing six axis force/torques sensors and kinematic measurements in an EKF. 
 These estimators introduce offsets on CoM position and linear momentum as well as an external 6D wrench disturbance. A nonlinear observability analysis is conducted 
 and shows that either the biases or the external wrench are observable. 
 
-\cite{carpentier2016center} offers a different viewpoint by proposing a frequency analysis of the information sources used for centroidal estimation. The model
+Carpentier \cite{carpentier2016center} chose a different viewpoint by proposing a frequency analysis of the information sources used for centroidal estimation. The model
 assumes the presence of wrench sensors at the contacts and does not require to explicitly model kinematic bias and external disturbances. Instead it relies on a complementary filter
 to filter out problematic frequency bands in each signal. For instance, kinematic measurement are high passed filtered in order to remove its slowly varying bias. 
-\cite{bailly2019recursive} extends this methodology to include CoM acceleration and angular momentum derivative in the estimation variables. Both works showed to outperform
+Bailly \cite{bailly2019recursive} extends this methodology to include CoM acceleration and angular momentum derivative in the estimation variables. Both works showed to outperform
 a simple EKF by offering an unbiased CoM position estimate.
-In \cite{bailly2021optimal}, the same author propose to use Differential Dynamic Programming (DDP), an algorithm traditionally used as a Optimal Control Problem solver \cite{mastalli2020crocoddyl}.
-This algorithm estimated the same quantities as \cite{bailly2019recursive} by solving a Maximum A Posteriori (MAP) problem on a sliding window of states sampled at IMU frequency, 
+The same author \cite{bailly2021optimal} propose to use Differential Dynamic Programming (DDP), an algorithm traditionally used as a Optimal Control Problem solver \cite{mastalli2020crocoddyl}.
+This algorithm estimated the same quantities as the previous work of the author \cite{bailly2019recursive} by solving a Maximum A Posteriori (MAP) problem on a sliding window of states sampled at IMU frequency, 
 which permits to back-propagate information from future to the past. The approach compared favorably to both previous work \cite{bailly2019recursive} and a simple EKF.
-
-
-
 
 
 %%%%%%%%%%
 \section{Environment awareness}
-Any useful task that an autonomous robot might operate on involves some level of environment awareness. For ground robots, 
-this problem is most often tackled with exteroceptive sensors such as camera, depth camera and LIDARs.
-The environment might be known through a previous mapping procedure like Structure from Motion (SfM) \cite{triggs1999bundle} or mapped on the fly, but a major limiting 
-factor is the real-time requirement. Applications can be such as localizing with respect to a known map \cite{dellaert1999monte},
+Any useful task undertaken by an autonomous robot involves some level of environment awareness, even for partially teleoperated robots \cite{koolen2016design}. 
+For ground robots, this problem is most often tackled with exteroceptive sensors such as camera, depth camera and LIDARs.
+The environment might be known through a previous mapping procedure like Structure from Motion (SfM) \cite{triggs1999bundle} or mapped on the fly. 
+Applications can be such as localizing with respect to a known map \cite{dellaert1999monte},
 following a previously traversed path without a metric map \cite{furgale2010visual}, Simultaneous Localization And Mapping \cite{aulinas2008slam, cadena2016past}, object detection and pose retrieval \cite{du2021vision}, 
-autonomous exploration \cite{rouvcek2019darpa, kulkarni2021autonomous}... A intermediate case is the one of visual/LIDAR odometry in which a local representation of the environment is built
-only in order to provide a precise odometry source \cite{scaramuzza2011visual} and is later discarded. 
+autonomous exploration \cite{rouvcek2019darpa, kulkarni2021autonomous}... A intermediate case is the one of visual/LIDAR odometry in which a local representation of the environment is built in order to provide a precise odometry source \cite{scaramuzza2011visual} and is later discarded. 
 
 The particularity of legged platforms is that they interact through intermittent contacts to move themselves, usually using predefined cyclic gaits. While some controllers are 
-robust enough so that a purely proprioceptive estimation provides enough feedback even in complex environments \cite{tan2018sim, lee2020learning}, having even a rough estimate of 
+robust enough so that a purely proprioceptive estimation provides enough feedback even in complex environments \cite{tan2018sim, lee2020learning}, having en estimate of 
 the terrain shape may help planning steps. Moreover, multicontact approaches \cite{carpentier2017multi, henze2017multi} in which arms of a humanoid may also be used 
 for locomotion are a promising way to increase the range of possible movements and reduce energy consumption. 
 
-We will first explore how classical exteroceptive based navigation techniques are applied to legged robots and then delve into the specificities of the 
-terrain mapping for contact planification.
+The literature related to these questions is immensely vast and goes largely beyond the scope of this thesis, although the formal underlying methods are closely related,
+as we will see in \secRef{sec:sota_factor_graph}. Moreover, we will see that our ambition and latest results tend to merge legged estate estimation with
+exteroceptive localization and mapping at large. We will We will quickly review the most relevant works, first focusing on localization eg. for navigation then 
+on dense mapping for contact planning. 
 
 \subsection{Localization and mapping}
 IMU/kinematics fusion inherently drifts in position and yaw orientation. For teleoperated tasks, this drift may not be problematic as the balance control loop
@@ -490,35 +492,40 @@ However, the map in this case was only used for localization.
 %%%%%%%%%%
 \section{Factor Graph optimization}
 \label{sec:sota_factor_graph}
-As we have previously, the largest part of the legged robotics state estimation literature consists in fusing sensor modalities using various 
+As we have previously discussed, the largest part of the legged robotics state estimation literature consists in fusing sensor modalities using various 
 implementations of the Bayesian and complementary filters. The core of those systems consists in a tightly or loosely-coupled IMU/kinematics proprioceptive
 filter. Then, either this proprioception is used as an odometry prior to a SLAM system or the exteroceptive sensors serves to localize with respect to a known map,
 making position and yaw observable.
 
 A different kind of estimator has been investigated over the last decades in the visual/LIDAR SLAM community and has become predominant in applications
-such as drone navigation: Factor Graph optimization, also known as simply "graph optimization" or online batch estimation. While the Bayesian filter summarizes 
-the accumulated information about the current estimated state and its cross-correlations as a single probabilistic distribution, 
+such as drone navigation: \textit{factor graph optimization}, also known as simply \textit{graph optimization} or \textit{online batch estimation}. 
+While the Bayesian filter summarizes  the accumulated information about the current estimated state and its cross-correlations as a single probabilistic distribution, 
 Factor Graph optimization keeps a trajectory of arbitrarily spaced past states that are regularly re-optimized in the least square sense, by finding the so called 
-Maximum A Posterio over the trajectory joint distribution. The terms smoothing and mapping or sliding window estimator are also used when a limited window of past state are kept 
+Maximum A Posteriori over the trajectory joint distribution. The terms smoothing and mapping or sliding window estimator are also used when a limited window of past state are kept 
 in the estimator, the old ones being marginalized. The earliest example \cite{lu1997globally} proposed to obtain globally consistent 2D LIDAR range 
 scan alignments by minimizing a cost function over a trajectory of 2D poses constrained by LIDAR scans and wheel odometry.
  Many ad hoc efficient solvers such as \cite{grisetti2011g2o, dellaert2012factor, ila2017slam++, ceres-solver} have been developed 
 over the years to leverage the specific sparsity of the SLAM problem.
 
 While the first successful online monocular visual SLAM algorithm was implemented using an EKF \cite{davison2007monoslam}, a breakthrough happened with the 
-Parallel Tracking And Mapping system \cite{klein2009parallel} that proposed to split the visual tracking of features and camera motion from the 
-mapping in separate processes. Mapping was handled by bundle adjusting sparse features, a method that was previously reserved for offline 
-structure for motion pipelines \cite{triggs1999bundle}. This method enabled Augmented Reality applications in limited spaces. 
-A great wealth of papers following these two methodologies were subsequently published. \cite{strasdat2012visual} provided a thorough comparison 
-of the two approaches and concluded that the graph optimization was superior in that it had the greatest precision to 
-computational cost ratio, for most benchmarks. Most of the state of the art visual SLAM framework now follow this methodology 
+Parallel Tracking And Mapping (PTAM) system \cite{klein2009parallel} that proposed to split the visual tracking of features and camera motion from the 
+mapping in separate processes. Mapping was handled by the bundle adjustment of sparse features, a method that was previously reserved for offline SfM 
+pipelines \cite{triggs1999bundle}. PTAM enabled Augmented Reality applications in limited spaces. 
+A great wealth of papers following both methodologies were subsequently published. A thorough comparison 
+of the two approaches \cite{strasdat2012visual} concluded that the graph optimization was superior in that it had the greatest precision to 
+computational cost ratio, for most benchmarks. Most of the state of the art visual SLAM framework now follow a factor graph approach 
 \cite{forster2017-TRO, mur2015orb, qin2018vins, leutenegger2015keyframe, ferrera2021ov}.
 
+\subsection{Theoretical intro to factor graphs}
+...
+
+\subsection{Visual-Inertial odometry}
 In order to robustify visual SLAM/odometry systems in cases of adverse situations, IMUs provide a complementary high rate odometry information that can 
 be debiased by tightly coupling mapping and odometry. A careful preintegration \cite{lupton-09,forster2017-TRO} of these high 
 rate measurements had to be developed in the context of smoothing in order for the optimization to remain tractable. The core idea of this algorithm has 
 since been applied to other information sources such as drone thrust commands \cite{nisar2019vimo} to make external force estimation possible.
 
+\subsection{Factor Graph estimation for legged robots}
 Very recently, two teams started to apply factor graph optimization principles as a general framework for legged robot estimation. At Michigan University, \cite{hartley2018legged} 
 proposed to fuse IMU preintegration with a novel kinematic factor by adding the contact foot pose in the optimized states, similarly to \cite{bloesch2013state,rotella2014state}. 
 Semi-direct Visual Odometry \cite{forster2014svo} was also use to integrate camera measurements as relative pose. The estimation framework was based on GTSAM framework \cite{dellaert2012factor}
