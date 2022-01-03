@@ -124,6 +124,7 @@ use these types of measurements in conjunction with \textit{instantaneous relati
 one may argue \cite{fallon2014drift} that in the case of an erroneous kinematic model (backlash, flexibilities), using exclusively direct velocity measurements
 prevents the estimator to become inconsistent when another source of position measurement is present (such as LIDAR localization). 
 
+% CONLU
 % Nicola's mini conclu -> more about the loosely/tightly-coupled dichotomy
 % The methods listed here are the basis of most legged robot estimators, and we will use a similar structure in our work. Many different details are 
 % considered, with various impact on the performances. In general, the reported works are difficult to directly extend die to the simplicity of the 
@@ -151,6 +152,7 @@ prevents the estimator to become inconsistent when another source of position me
     \end{subfigure}%
        \hfill
     \begin{subfigure}{.33\linewidth}
+        \label{fig:kin_point_direct}
         \centering
         \includegraphics[width=\textwidth]{figures/robot_kinematic_types_point_direct.pdf}
         \caption{point-feet direct}
@@ -158,24 +160,30 @@ prevents the estimator to become inconsistent when another source of position me
     
     \bigskip
     \begin{subfigure}{.33\linewidth}
+        \label{fig:kin_flat_matching}
         \centering
         \includegraphics[width=\textwidth]{figures/robot_kinematic_types_flat_matching.pdf}
         \caption{Flat feet matching}
     \end{subfigure}%
         \hfill
     \begin{subfigure}{.33\linewidth}
+        \label{fig:kin_flat_vel}
         \centering
         \includegraphics[width=\textwidth]{figures/robot_kinematic_types_flat_vel.pdf}
         \caption{Flat feet twist}
     \end{subfigure}%
         \hfill
     \begin{subfigure}{.33\linewidth}
+        \label{fig:kin_flat_direct}
         \centering
         \includegraphics[width=\textwidth]{figures/robot_kinematic_types_flat_direct.pdf}
         \caption{Flat feet direct}
     \end{subfigure}%
     %
-    \caption{Kinematic measurement models [TODO]
+    \caption{Legged robots kinematic measurement models classification. Red arrows are used for the residuals derived for each model using encoder measurements and contact information. 
+    orange elements correspond to the state variables affected by these residuals. Figures (\subref{fig:kin_point_matching}),(\subref{fig:kin_point_vel}),(\subref{fig:kin_point_direct}) are models
+    for point feet robot, a model commonly used for quadrupeds. Figures (\subref{fig:kin_flat_matching}),(\subref{fig:kin_flat_vel}),(\subref{fig:kin_flat_direct}) are flat feet based models,
+    commonly used for humanoid robots. The green rotational arrow represents gyroscope measurements that used in addition to encoders for the point-feet linear velocity model (\subref{fig:kin_point_vel}).
         }
     \label{fig:kin_models}
 \end{figure}
@@ -183,18 +191,6 @@ prevents the estimator to become inconsistent when another source of position me
 
 \subsection{Filter based data fusion}
 \label{sec:proprio_filters}
-
-% MEH -> tried to write a "history of proprioception estimators" but too long and too confusing/boring...
-% Some early work on legged robot observers focused on orientation estimation for balance feedback control \cite{rehbinder2000nonlinear} on one side
-% and leg odometry on the other side \cite{roston1991dead, lin2005leg}. To the best of our knowledge, the first system to use leg odometry in conjunction
-% with another sensors was \cite{gassmann2005localization}. However, due to the important inaccuracies of the GPS measurements, the position updates led to
-% "unusable position estimations" for most experiments. A similar work by \cite{cobano2008location} used a Differential GPS setup which provided much more precise 
-% position measurement (variance of less that 1cm), leg odometry being able to smoothen the 2D localization.   
-% Authors of \cite{lin2005leg} wrote a follow up paper that was the first to propose fusing leg odometry
-% with IMU measurements of the RHex hexabpode using an EKF by separating translational and orientational quantities in separate filters. 
-% \cite{chilian2011multisensor} also proposed to fuse a multiple-matching leg odometry with IMU measurements, as well as visual odometry. 
-% An information filter is implemented using strap-down IMU integration as a process model while updates consist in IMU derived pitch and roll, 
-% relative poses from leg and visual odometries.
 
 Many types of observer designs have been put to test on legged robots proprioceptive estimation. The problem being Markovian in nature,
 most are continuous Bayesian filters such as variants of the \KalmanF \cite{kalman1960new} and complementary filters. While a complete history of 
@@ -285,6 +281,8 @@ encoder and kinematic measurements. The emphasis is put on training the estimato
 by finding a region around the local minimum of low passed feet height trajectories in the hip frames. The estimator provides a reliable source of contact information 
 and generalizes better to different environments. It does not provides covariances about the contacts, contrary to \cite{camurri2017probabilistic}.  
 
+% CONLU
+
 
 
 \subsection{Kinematic model inaccuracies mitigation}
@@ -339,6 +337,9 @@ These works advocate for the addition of many different sensor sources in the es
 capabilities of legged systems and to benefit from cheap, distributed, low consumption sensors. Ideally, we could see the evolution of legged
 robot estimation going toward whole body perception. In our opinion, the main limiting factor to that goal is the mathematical formulation of efficient tightly
 coupled estimators, to which this thesis would like to contribute.  
+
+
+% CONCLU
 
 
 %%%%%%%%%%
@@ -406,6 +407,8 @@ The same author \cite{bailly2021optimal} propose to use Differential Dynamic Pro
 This algorithm estimated the same quantities as the previous work of the author \cite{bailly2019recursive} by solving a Maximum A Posteriori (MAP) problem on a sliding window of states sampled at IMU frequency, 
 which permits to back-propagate information from future to the past. The approach compared favorably to both previous work \cite{bailly2019recursive} and a simple EKF.
 
+% CONCLU
+
 
 %%%%%%%%%%
 \section{Environment awareness}
@@ -457,6 +460,8 @@ which leads to time delays with respect to other measurement sources, which is a
 \cite{nobili2017heterogeneous} solves this issue by keeping a buffer of past belief state of the EKF, a method on which is 
 based the Pronto framework \cite{camurri2020pronto}.
 
+% CONCLU
+
 
 
 \subsection{Reconstruction for footstep planning}
@@ -486,7 +491,8 @@ shown to be of equivalent quality to that of a LIDAR and used as an input to a f
 In order handle local loopy trajectories better than Kintinuous, Elastic Fusion \cite{whelan2016elasticfusion} was shown to be usable on humanoid platforms \cite{scona2017direct}. 
 However, the map in this case was only used for localization.
 
-
+% CONCLU
+Not considered in our work
 
 
 %%%%%%%%%%
