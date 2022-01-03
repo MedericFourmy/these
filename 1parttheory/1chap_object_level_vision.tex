@@ -62,7 +62,8 @@ is in general hard to differentiate. Instead if we consider the inverse function
 
 that maps the relative pose to the projection of the tag in the image, a rather simple jacobian expression can be derived using the chain rule, as follows.
 
-Let's defined the marker corner coordinates in the marker frame, like shown in \fig \figRef{fig:tag_coordinate_frame}:
+Let's defined the marker corner coordinates in the marker frame, like shown in \fig \figRef{fig:tag_coordinate_frame}. As a convention (used by 
+\cite{wang2016iros, collins2014infinitesimal}) we order the corners counter-clockwise starting from bottom left (looking straight at the tag). 
 
 \begin{equation}
     c =
@@ -70,20 +71,19 @@ Let's defined the marker corner coordinates in the marker frame, like shown in \
     c_1 \\ c_2 \\ c_3 \\ c_4
     \end{pmatrix}
     ~~
-    c_1 =  \begin{pmatrix} -1 \\ -1 \\ 0 \end{pmatrix}
+    c_1 =  \begin{pmatrix} -\frac{w}{2} \\ \frac{w}{2} \\ 0 \end{pmatrix}
     ~ 
-    c_2 =  \begin{pmatrix} 1 \\ -1 \\ 0 \end{pmatrix}
+    c_2 =  \begin{pmatrix} \frac{w}{2} \\ \frac{w}{2} \\ 0 \end{pmatrix}
     ~
-    c_3 =  \begin{pmatrix} 1 \\ 1 \\ 0 \end{pmatrix}
+    c_3 =  \begin{pmatrix} \frac{w}{2} \\ -\frac{w}{2} \\ 0 \end{pmatrix}
     ~
-    c_4 =  \begin{pmatrix} -1 \\ 1 \\ 0 \end{pmatrix}
-\end{equation}
-which coordinates have been rescaled by a factor $\frac{w}{2}$, that will be reintroduced later.
+    c_4 =  \begin{pmatrix} -\frac{w}{2} \\ -\frac{w}{2} \\ 0 \end{pmatrix}
+\end{equation}.
 
 %
 \begin{figure}
     \centering
-    \includegraphics[width=0.4\textwidth]{figures/tag_coordinate_frame.png}
+    \includegraphics[width=0.5\textwidth]{figures/tag12_frame.pdf}
     \caption{Dummy tag image, annotate with coordinates }
     \label{fig:tag_coordinate_frame}
 \end{figure}
@@ -127,13 +127,11 @@ while the euclideanization jacobian is found to be
 Finally, we can stack the 4 jacobians to get the full jacobian to be used for covariance propagation.
 \begin{equation}
     J \triangleq J^{\bfx}_{\T{C}{O}}=
-    \frac{w}{2}
     \begin{pmatrix}
     J^{\bfx_1}_{\T{C}{O}} \\ J^{\bfx_2}_{\T{C}{O}} \\ J^{\bfx_3}_{\T{C}{O}} \\ J^{\bfx_4}_{\T{C}{O}}
     \end{pmatrix}
     ~ \in \Reals^{8 \times 6}
-\end{equation}
-reintroduction the $\frac{w}{2}$ factor common to the 4 corners. 
+\end{equation}.. 
 
 
 We therefore have the covariance propagation equation $Q_{\bfx} = J Q_{\T{C}{O}} J^T$. 
