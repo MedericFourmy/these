@@ -51,7 +51,7 @@ can be computed through forward kinematics. Integrated over time, the relative d
 often referred to as \textit{leg odometry} (by analogy with wheel odometry). This computation is very fast thanks to libraries such as \cite{carpentier2019pinocchio, hereid2017frost}. It uses
 readings from the joints encoders as well as the robot kinematic model. In systems with actuator reduction steps, encoders are usually placed before the reduction step 
 which are very accurate (... for solo \cite{grimminger2020open}). The main sources of uncertainty usually comes from
-modeling inaccuracies may be difficult to model such as approximate segment lengths \improvement[inline]{segment length calibration ref?}, segments flexibilities \cite{vigne2018estimation}, 
+modeling inaccuracies may be difficult to model such as approximate segment lengths \cite{bonnet2019overview}, segments flexibilities \cite{vigne2018estimation}, 
 joint backlash \cite{fallon2014drift} and flexibilities \cite{koolen2016design} etc. 
 \cite{bloesch2018technical} makes the distinction between three measurement models for the kinematic information which will define the structure of this section. 
 
