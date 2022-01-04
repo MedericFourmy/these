@@ -62,8 +62,8 @@ is in general hard to differentiate. Instead if we consider the inverse function
 
 that maps the relative pose to the projection of the tag in the image, a rather simple jacobian expression can be derived using the chain rule, as follows.
 
-Let's defined the marker corner coordinates in the marker frame, like shown in \fig \figRef{fig:tag_coordinate_frame}. As a convention (used by 
-\cite{wang2016iros, collins2014infinitesimal}) we order the corners counter-clockwise starting from bottom left (looking straight at the tag). 
+Let's defined the marker corner coordinates in the marker frame, like shown in \fig \figRef{fig:tag_coordinate_frame}. As a convention 
+\cite{wang2016iros} we order the corners counter-clockwise starting from bottom left (looking straight at the tag). 
 
 \begin{equation}
     c =
@@ -84,7 +84,7 @@ Let's defined the marker corner coordinates in the marker frame, like shown in \
 \begin{figure}
     \centering
     \includegraphics[width=0.5\textwidth]{figures/tag12_frame.pdf}
-    \caption{Dummy tag image, annotate with coordinates }
+    \caption{Apriltag local coordinate systems and corners conventions \cite{wang2016iros}}
     \label{fig:tag_coordinate_frame}
 \end{figure}
 
