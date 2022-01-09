@@ -265,7 +265,7 @@ as well as the contact normal, is generally hard to infer. The authors propose a
 far from the median. A similar choice is made by \cite{bloesch2013stateSlippery} in which Unscented \KalmanF velocity updates are rejected as outliers if their innovation exceeds a threshold.  
 More recent papers try to fuse these different sources of information in Bayes filters. \cite{hwangbo2016probabilistic} and subsequently \cite{jenelten2019dynamic} fuse 
 the kinodynamic models of the robot, IMU measurements, joint encoders values (and their first and second-order differentiation) as well as
-joint torques in a discrete Hidden Markov Model (HMM) where contact states are binary values. A HMM is used over a continuous Bayes filter because the feet state are modeled as taking a finite set of values: either in contact or not.
+joint torques in a discrete Hidden Markov Model (HMM) where contact states are binary values. A HMM is used instead of a continuous Bayes filter because the feet state are modeled as taking a finite set of values: either in contact or not.
 They build separate filters for contact and slip detections and demonstrate walking on ice with an 
 \mbox{ANYmal-C} using a special controller. A similar approach formulated as a \KalmanF directly estimates contact probabilities \cite{bledt2018contact}. 
 It questions previous works that assume the availability  \cite{hwangbo2016probabilistic} or negligibility \cite{camurri2017probabilistic} of joint angular 
@@ -586,14 +586,6 @@ The maturity of the aforementioned factor graph optimization solver libraries ce
 that tools originally developed in the SLAM community are making their way in the legged robot community. Software libraries are becoming more
 generalist, more precise and, based on Lie theory \cite{sola2018micro}, they handle more nicely the specificities of the manifold structure of the problem variables.
 Other projects propose to deal with the inherent complexity of multi-sensory systems, proposing principled ways to handle multiple data sources, potentially asynchronous and at
-different frequencies. Those frameworks also provide a mathematical formulation for most common sensor models and higher level interfaces with least square solvers 
+different frequencies. Those frameworks also provide a mathematical formulation for most common sensor models and higher level interfaces with least-square solvers 
 in an effort to bring these techniques to a broader audience \cite{sola2021wolf, blanco2019modular, colosi2020plug}.
-
-
-
-% \section{Summary and perspectives}
-% - Proprio filters mature and standard tool, 
-% - centroidal less explored and loosely-coupled with proprio est
-% - smoothing and mapping framework matures and starting to be applied to legged robots
-% - centroidal estimation not applied to smoothing and mapping
 
