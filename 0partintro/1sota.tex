@@ -3,7 +3,7 @@
 The field of state estimation for autonomous systems is at the frontier between many fields including automation, probability theory, nonlinear estimation etc.
 The general aim is to design and implement computationally tractable algorithms using noisy causal sensor measurements that can be embedded in feedback-controlled systems.
 With the advent of digital computers and the theoretical breakthroughs of Kalman \cite{kalman1960new} among others, a vast family of observers has been developed 
-\cite{fujii2013extended, wan2001unscented} [cite Information filter]. Applications range the full scope of autonomous systems from spacecraft guidance \cite{mcgee1985discovery} 
+\cite{smith1962application, bellantoni1967square, wan2001unscented, thrun2004simultaneous}. Applications range the full scope of autonomous systems from spacecraft guidance \cite{mcgee1985discovery} 
 to autonomous underwater vehicle navigation \cite{leonard2016autonomous}. Each application has its own specific sets of requirements, depending on the physical
 nature of the system and its environment, available sensors, and embedded computation power. Legged robots in particular require a high frequency (kHz) 
 and low latency estimates owing to the inherent instability of the dynamical system. Moreover, they interact with the environment through 
@@ -24,7 +24,7 @@ by pushing on its environment. The kinematic chain of the robot is modeled as a 
 linked together by articulations (aka. joints). Joints come in various forms (revolute, prismatic, ball...) and can be actuated or not.
 The \textit{base} refers to a reference frame rigidly attached to the main body of the robot (often the trunk for quadrupeds and the pelvis for humanoids). 
 We are most often interested in the estimation of the position, velocity, and orientation of this frame with regard to an inertial \textit{world} frame, which is called the \textit{base state}. 
-An example of these frames is given for the Solo robot in \figRef{{fig:solo_frames}}.
+An example of these frames is given for the Solo robot in \figRef{fig:solo_frames}.
 This estimation is the main focus in most of legged robot estimation literature. In fact, knowing the base and other quantities directly measurable (such as joint angles), 
 and assuming a perfect robot kinematic model, the state of any part of the poly-articulated system can be recovered using forward kinematics. Rigid body algorithms
 \cite{featherstone2014rigid} provide methods to efficiently compute the center of mass, linear and angular momentum of the  poly-articulated systems. These computations
@@ -114,7 +114,7 @@ was introduced in \cite{bloesch2013state, bloesch2013stateSlippery} for a point-
 adapted for a humanoid robot \cite{rotella2014state}, whose 6D foot constraint permitted to add orientation information. In this formulation, 
 states variables corresponding to the robot feet pose have to 
 be added to the estimator. This approach was adopted by several other groups \cite{hartley2018legged, hartley2018hybrid, hartley2020contact, bledt2018cheetah}.
-Potential undetected slips and rolls of the foot are modelled in this context as a random walk on stance foot position \cite{bloesch2013state,rotella2014state}. When the estimator is formulated as a 
+Potential undetected slips and rolls of the foot are modeled in this context as a random walk on stance foot position \cite{bloesch2013state,rotella2014state}. When the estimator is formulated as a 
 \KalmanF \cite{kalman1960new}, this phenomenon is represented by a process noise on the feet position dynamics, which is a crucial parameter that the user needs to tune.
 
 When a single point foot is in contact with the ground, the leg can move around the three remaining rotational degrees of freedom without changing encoder measurements.
@@ -387,7 +387,7 @@ sensor present on the Atlas robot.
 Stephens \cite{stephens2011state} proposes to use the LIPM for the process model to an EKF 
 that also includes kinematic measurements. Model errors in the form of a CoM position measurement 
 offset and external forces are added to the formulation and it is shown that either of these quantities is observable. 
-Xinjilefu \cite{atkeson2012state} ponders the use of a more complete planar sagital dynamical model by comparing it to the LIPM model
+Xinjilefu \cite{xinjilefu2012state} ponders the use of a more complete planar sagital dynamical model by comparing it to the LIPM model
 without introducing model biases as was done in Stephens \cite{stephens2011state}. It instead relies on tuning filter covariances to alleviate their effects. 
 Simulation shows that the LIPM seems more able to cope with model errors but performances on the real robot show similar results. 
 One of the benefits of this model is that force measurements can be summarized by the Center of Pressure (CoP) (aka. Zero Moment Point (ZMP) \cite{sardain2004forces}).
@@ -468,9 +468,15 @@ Localization with respect to a fixed map also proposed \cite{fallon2014drift} bu
 to represent a closed static industrial environment, the final trials happened in a semi-opened outside place with an important moving crowd on one side, making
 LIDAR localization very noisy. 
 
-\cite{hornung2014monte} proposed to apply Monte Carlo Localization using LIDAR measurements by using a highly efficient global Octomap data structure \cite{hornung2013octomap}.
+\cite{hornung2014monte} proposed to apply Monte Carlo Localization using depth measurements (LIDAR) thanks to a highly efficient data structure called Octomap \cite{hornung2013octomap}.
 The algorithm is validated on a NAO humanoid robot and used a learned leg odometry motion model, pitch and roll information from the IMU as well as an edge-based vision measurement model.
-The MIT team \cite{fallon2014drift} uses the same method but replaced the motion model with an inertial kinematics proprioceptive filter. 
+The MIT team \cite{fallon2014drift} uses the same method but replaced the motion model with an inertial kinematics proprioceptive filter. Other occupancy mapping algorithms 
+such as Bayesian generalized kernel OctoMap (BGKOctoMap) \cite{doherty2017bayesian} try to infer unobserved parts of the of map by considering correlations between grid cells. This inference model
+as the interesting property to smoothly transition to sanely defined prior (like a uniform probability distribution) while keeping similar computation time as the Octomap.
+BGKOctoMap is generalized to jointly infer the probabilistic occupancy grid and semantic information using stereo camera and LIDAR information \cite{gan2020bayesian}. 
+Potential for legged robot navigation was demonstrated with a dataset taken outdoor on a Cassie robot.  
+Semantic information prior come from a Convolutional neural network fine-tuned to manually labeled pictures taken in the same kind of environment.
+
 
 LIDAR can also be used as an odometry source by matching point clouds taken at successive timestamps with ICP. However, this procedure is time-consuming 
 and leads to time delays with respect to other measurement sources, which is generally a problem for Bayes filters. 
@@ -494,7 +500,8 @@ the local robot frame \cite{kleiner2007real}.
 The map is constantly updated using two sources of information: range measurements that refine the visible parts of the map; wheel odometry that increases uncertainty on the map 
 using heuristics based on the traveled distance. \cite{fankhauser2014robot, fankhauser2018probabilistic} adapted these ideas to legged robots. The map grid probabilistic representation
 was also improved by including horizontal uncertainty due to the robot's relative motion. A costly map fusion process that computes lower and upper bound on the elevations
-is decoupled from the sensor updates and can be computed intermittently at the discretion of the user. 
+is decoupled from the sensor updates and can be computed intermittently at the discretion of the user. This system was recently integrated in a reactive planning system
+\cite{huang2021efficient} able to navigate outdoor uneven terrain with a biped using LIDAR data.  
 
 An extension of the elevation grid map is to represent occupied 3D space as an 3D occupancy voxel map, which can be efficiently stored using an Octomap.
 While \cite{hornung2014monte, fallon2014drift} only used this representation as prior for online localization, it was used for online foot planning in \cite{winkler2015planning, mastalli2015line}. 
@@ -535,15 +542,17 @@ over the years to leverage the specific sparsity of the SLAM problem.
 
 While the first successful online monocular visual SLAM algorithm was implemented using an EKF \cite{davison2007monoslam}, a breakthrough happened with the 
 Parallel Tracking And Mapping (PTAM) system \cite{klein2009parallel} that proposed to split the visual tracking of features and camera motion from the 
-mapping in separate processes. This new modularity enabled the use of a specific algorithm for the mapping part: Bundle Adjustment \cite{triggs1999bundle} of sparse features, a method that was previously reserved for offline SfM 
-pipelines . PTAM enabled Augmented Reality applications in limited spaces. Bundle Adjustment is actually a special case of a more general estimation algorithm called graph optimimzation which has several conceptual and computational advantages over filtering.
-A great wealth of papers following both methodologies were subsequently published. A thorough comparison 
+mapping in separate processes. This new modularity enabled the use of a specific algorithm for the mapping part: Bundle Adjustment \cite{triggs1999bundle} of sparse 
+features, a method that was previously reserved for offline SfM pipelines. PTAM enabled Augmented Reality applications in limited spaces. Bundle Adjustment 
+is actually a special case of a more general estimation algorithm called factor graph optimimzation which has several conceptual and computational advantages over filtering.
+A great wealth of papers following either filtering or graph optimization were subsequently published. A thorough comparison 
 of the two approaches \cite{strasdat2012visual} concluded that the graph optimization was computationally superior in that it had the greatest precision to 
 computational cost ratio, for most benchmarks. Most of the state-of-the-art visual SLAM framework now follow a factor graph approach 
 \cite{forster2017-TRO, mur2015orb, qin2018vins, leutenegger2015keyframe, ferrera2021ov}.
 
+
 \subsection{Very short intro intro to factor graphs}
-...
+The reasons for graph optimization success are
 
 Advantages of factor graphs: 
 - tight coupled

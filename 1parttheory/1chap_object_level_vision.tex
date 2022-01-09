@@ -38,9 +38,9 @@ Appart from designing more precise and more efficient algorithm for fiducial mar
 
 Instead of directly obtaining Jacobians from the PnP algorithms, we found that a natural way to proceed is to take the opposite 
 direction. It should somehow be possible, knowing the marker size and the relative pose measurement, and assuming pixel noise, to
-recover $\Cov_{OV}$. A simple model of this noise is to assume isotropic gaussian noise on the pixels. If we stack four pixel (the four tag corners) 
+recover $\Cov_{OV}$. A simple model of this noise is to assume isotropic Gaussian noise on the pixels. If we stack four pixel (the four tag corners) 
 $\bfx_i = [u_i, v_i] \in \Reals^2$ and we stack then in the vector $\bfx = [\bfx_1 \bfx_2 \bfx_3 \bfx_4]$, we have therefore that
-$\bfx$ is corrupted by a gaussian noise $\Cov_{\bfx} = \sigma_{x}^2 \bfI$, where $\sigma_{x}$ usually takes values of 1 or 2 pixels.
+$\bfx$ is corrupted by a Gaussian noise $\Cov_{\bfx} = \sigma_{x}^2 \bfI$, where $\sigma_{x}$ usually takes values of 1 or 2 pixels.
 PnP algorithm provides us with a function $pnp$ defined as:
 
 \begin{equation}
@@ -142,6 +142,10 @@ Knowing that the pixel noise covariance is isotropic as explained above, this eq
 \begin{equation}
 Q_{\T{C}{O}} = \sigma_{\bfx}^2(J^T J)^{-1}    
 \end{equation}
+
+Note that the derivations above are not limited to a square tag with four corners and could in theory be used for any object defined as
+a set of point in its local coordinate system.
+
 
 
 

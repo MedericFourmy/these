@@ -17,6 +17,9 @@ Use `build.sh` and `clean.sh` scripts
 - body
 - world
 
+## COMMONLY used abreviations -> to define?
+- wrt.
+
 ## Sketch TODO
 - base/worl/robot frames
 - kinematic information types

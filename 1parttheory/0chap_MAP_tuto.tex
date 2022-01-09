@@ -1,20 +1,116 @@
-\chapter{Tutorial on MAP estimation}
+\chapter{Tutorial on Factor graph state estimation}
 \minitoc
 
-Mix of Barfoot, Sola, Kaess etc.
+Let us explicit the terms prevent in this chapter's title. 
 
-\section{Geometry}
-Notations
-Lie theory primer
+The \textit{state} of the robot is a set of variables of particular interest to the roboticist, be it for control, parameter identification etc.
+Those quantities may not directly measurable, due to their physical nature (an angular momentum sensor would be hard to imagine) or because sensor data
+is too noisy, biased or impractical to obtain (eg. GPS for localization is very bad close to flat surfaces because of beam reflections). 
+Those latent variables can however be estimated by fusing multiple sensors data using a state estimator (aka. observer in automation). In the context of 
+a probabilistic estimator, these are random variables. Most state estimator work with variables which sample state is continuous. The goal is then 
+to find the probability density of those states.
 
-\section{Probabilities}
-Primer of Probabilities
-    PDF
-    Bayes rule
-    Gaussian special properties
-Probabilities on Lie algebra
+Taking the Bayesian perspective, the most general problem is to find a distribution over the random state variables $\mathcal{X}$ given a set 
+of measurements $\mathcal{Z}$, $p(\mathcal{X} | \mathcal{Z})$ which is known as the \textit{posterior}. 
+The Bayes law represents this exact inference:
 
-\section{Estimation as factor graph optimization}
-MAP problem as Factor graph
-NLLS problems
-NLLS on Lie groups
+\begin{equation}
+    p(\mathcal{X} | \mathcal{Z}) = \frac{p(\mathcal{Z} | \mathcal{X}) p(\mathcal{X})}{p(\mathcal{Z})} 
+\end{equation}
+
+$p(\mathcal{Z} | \mathcal{X})$ is the measurement model that can be obtained through modeling, also called the \textit{likelihood} of the observation. 
+$p(\mathcal{X})$ is a \textit{prior} that we have on the state variable distribution. This may include for instance knowledge about the initial state of the robot or
+a approximate value of parameters that we seek to estimate.
+The \textit{partition constant} $p(\mathcal{Z})$ can be thought of as a global normalization constant (\cite{koller2009probabilistic}, chapter 20 ) in case 
+the $\mathcal{Z}$ random variable is observed, which is our case. In general, this term is computationally intractable to compute. Exact inference is 
+therefore rarely undertaken, instead relying on approximate inference methods such as variational inference (\cite{koller2009probabilistic}, chapter 11) 
+or sampling (\cite{koller2009probabilistic}, chapter 12). In the context of robotics, sampling has been leveraged in the popular particle filter which for 
+tasks such as localization \cite{dellaert1999monte} and SLAM \cite{montemerlo2002fastslam}. Application of variational inference is scarcer, with the notable 
+exceptions of works from Barfoot \cite{barfoot2020exactly, wong2020variational} which derives a graph optimization estimation based on variational inference
+and Lambert \cite{lambert2022recursive} which proposes a recursive variational Gaussian filter.
+
+However full Bayesian inference is not always required in robotics contexts, as we are often mostly interested in the most probable state.
+
+\section{Maximum A Posteriori estimation}
+
+A more popular approach to the estimation problem is to solve the \textit{Maximum A Posteriori} (MAP) problem. Instead of finding the full posterior, we are most often only 
+interested in finding the most likely state which corresponds to solving the optimization problem:
+%
+\begin{equation}
+    \label{eq:MAP_pbe}
+    \mathcal{X}^* \triangleq \argmax_{\mathcal{X}} p(\mathcal{X} | \mathcal{Z}) = \argmax_{\mathcal{X}} p(\mathcal{Z} | \mathcal{X}) p(\mathcal{X}),
+\end{equation}
+%
+$p(\mathcal{Z})$, being constant with respect to $\mathcal{X}$.
+
+Additional assumptions have to be made in order to obtain a numerical implementation of this problem.
+First, the measurements $\mathcal{Z} = \{z_0, z_1, ..., z_N\} $ are a set of individual sensor observations that are supposed to be conditionally 
+independent from each other, so that the likelihood function can be factorized. Each factor represents the measurement model associated to the 
+observation $z_i$ and depending only on a subset $S_i$ of the state variables $\mathcal{X}_{S_i}$. 
+Secondly, these measurement models are assumed to multivariate Gaussian distributions:
+%
+\begin{equation}
+    p(z_i | \mathcal{X}_{S_i}) = \frac{1}{\sqrt{2\pi\Sigma_i}} ~ \exp(- \frac{1}{2} (||h(\mathcal{X}_{S_i}) - z_i)||_{\Sigma_i}) \triangleq K_i~\phi_i(\mathcal{X}_{S_i})
+\end{equation}
+%
+where h is a (potentiality) nonlinear function of the state variables corresponding to the measurement expectation, $\Sigma_i$ is the covariance of the observation noise,
+$\phi_i(\mathcal{X}_{S_i})$ is the un-normalized likelihood of the measurement,
+and 
+\begin{equation*}
+    ||h(\mathcal{X}_{S_i}) - z_i)||_{\Sigma_i} = (h(\mathcal{X}_{S_i}) - z_i) \Sigma_i^{-1} (h(\mathcal{X}_{S_i}) - z_i)    
+\end{equation*}
+is known as the Mahalanobis distance. 
+We can recognize than solving \ref{eq:MAP_pbe} is equivalent to minimizing the negative log likelihood of the posterior.
+
+\begin{align}
+    \mathcal{X}^* 
+    &= \argmin_{\mathcal{X}} - \log p(\mathcal{Z} | \mathcal{X}_{S_i}) ~&\mbox{\small MAP problem definition}\\
+    &= \argmin_{\mathcal{X}} - \log p(\mathcal{Z} | \mathcal{X}) p(\mathcal{X}) ~&\mbox{\small Unaffected Partition constant}\\
+    &= \argmin_{\mathcal{X}} - \log \prod^{N} p(z_i | \mathcal{X_{S_i}}) p(\mathcal{X}) ~&\mbox{\small Conditional independences}\\
+    &= \argmin_{\mathcal{X}} - \log \prod^{N} \phi_i(X_{S_i}) \phi_i(X_{0}) ~&\mbox{\small Likelihood factors}\\
+    &= \argmin_{\mathcal{X}} \sum^{N} ||r_i(X_{S_i})||_{\Sigma_i}^2 + ||r_i(X_{0})||_{\Sigma_0}^2 ~&\mbox{\small Gaussian measurement models}\\
+\end{align}
+
+Thus, solving the MAP problem boils with the aforementioned hypothesis boils down to solving a nonlinear least square problem. 
+A vast part of the literature on MAP estimation has been dedicated to the implementation of efficient solvers. Most of them are 
+gradient based algorithm, typically some variation of the Gauss-Newton algorithm, such as the Levenberg-Marquardt algorithm.
+
+
+\section{Factor Graphs: a visual language for robotics estimation}
+
+
+
+
+
+% Koller MAP:
+% So far, we have dealt solely with conditional probability queries. However, MAP queries, which
+% we defined in section 2.1.5, are also very useful in a variety of applications. As a reminder, a MAP
+% query aims to find the most likely assignment to all of the (non-evidence) variables. A marginal
+% MAP query aims to find the most likely assignment to a subset of the variables, marginalizing
+% out over the rest.
+
+
+
+% Mix of Barfoot, Sola, Kaess etc.
+
+% \section{Geometry}
+% Notations
+% Lie theory primer
+
+% \section{Probabilities}
+% Primer of Probabilities
+%     PDF
+%     Bayes rule
+%     Gaussian special properties
+% Probabilities on Lie algebra
+
+% \section{Estimation as factor graph optimization}
+% MAP problem as Factor graph
+% NLLS problems
+% NLLS on Lie groups
+
+
+
+
+% In a Markov Random Field (= Factor Graph), the factors encode an unnormalized distribution
+% Cite Daphne Koller for more general graphical model operations
