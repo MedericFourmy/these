@@ -86,8 +86,11 @@
 \usepackage{color}
 \usepackage{arydshln}
 
-% Images
-% \usepackage{subfigure}  % outdated! will yield random errors "Missing number, treated as zero"
+% Figures
+% subcaption provides subfigure & subtable environments and \subcaptionbox command (2 equivalent ways to proceed)
+% subfigure env is based on the minipage
+% \subcaptionbox is based on \parbox
+% "Please note: This package is incompatible with the subfigure and subfig packages." from CTAN doc
 \usepackage{subcaption}
 
 % Algo
@@ -200,8 +203,8 @@
 \addbibresource{bibfiles/contact-detection.bib}
 \addbibresource{bibfiles/exteroceptive.bib}
 \addbibresource{bibfiles/factor-graph-est.bib}
-\addbibresource{bibfiles/fiducial.bib}
 \addbibresource{bibfiles/improving-kin.bib}
+\addbibresource{bibfiles/object-level.bib}
 \addbibresource{bibfiles/online-smoothing.bib}
 \addbibresource{bibfiles/planning.bib}
 \addbibresource{bibfiles/preintegration.bib}

@@ -514,7 +514,7 @@ tightly couple motion/step planning and terrain reconstruction.
 shown to be of equivalent quality to that of a LIDAR and used as an input to a feasible contact surface segmentation algorithm selecting planar convex regions of uneven cinder blocks. 
 In order to handle local loopy trajectories better than Kintinuous, Elastic Fusion \cite{whelan2016elasticfusion}, which is a surfel-based dense depth vision system, 
 was shown to be usable on humanoid platforms \cite{scona2017direct}. The system augmented the Elastic Fusion algorithm by adding 
-proprioceptive odometry term to the solved least squares system, using a heuristic to increase the weight of proprioception in visually degenerate situations. The 
+proprioceptive odometry term to the solved nonlinear least-squares (NLLS) problem, using a heuristic to increase the weight of proprioception in visually degenerate situations. The 
 dense reconstruction is accurate up to 2cm, which is enough for motion planning. However, in this case, the map was only used for localization.
 
 % CONCLU
@@ -533,7 +533,7 @@ making position and yaw observable.
 A different kind of estimator has been investigated over the last decades in the visual/LIDAR SLAM community and has become predominant in applications
 such as drone navigation: \textit{factor graph optimization}, also known as simply \textit{graph optimization}. 
 While the Bayes filter summarizes  the accumulated information about the current estimated state and its cross-correlations as a single probabilistic distribution, 
-Factor Graph optimization keeps a trajectory of arbitrarily spaced past states that are regularly re-optimized in the least square sense, by finding the so-called 
+Factor Graph optimization keeps a trajectory of arbitrarily spaced past states that are regularly re-optimized in the least-square sense, by finding the so-called 
 Maximum A Posteriori over the trajectory joint distribution. The terms smoothing and mapping or sliding window estimator are also used when a limited window of past states are kept 
 in the estimator, the old ones being marginalized. The earliest example \cite{lu1997globally} proposed to obtain globally consistent 2D LIDAR range 
 scan alignments by minimizing a cost function over a trajectory of 2D poses constrained by LIDAR scans and wheel odometry.
@@ -586,6 +586,6 @@ The maturity of the aforementioned factor graph optimization solver libraries ce
 that tools originally developed in the SLAM community are making their way in the legged robot community. Software libraries are becoming more
 generalist, more precise and, based on Lie theory \cite{sola2018micro}, they handle more nicely the specificities of the manifold structure of the problem variables.
 Other projects propose to deal with the inherent complexity of multi-sensory systems, proposing principled ways to handle multiple data sources, potentially asynchronous and at
-different frequencies. Those frameworks also provide a mathematical formulation for most common sensor models and higher level interfaces with least-square solvers 
+different frequencies. Those frameworks also provide a mathematical formulation for most common sensor models and higher level interfaces with NNLS solvers 
 in an effort to bring these techniques to a broader audience \cite{sola2021wolf, blanco2019modular, colosi2020plug}.
 

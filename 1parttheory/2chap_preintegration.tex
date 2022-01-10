@@ -256,11 +256,13 @@ are the Jacobians $\mjac{y}{x}=\partial y/\partial x$ of (\eqRef{eq:data2delta},
 
 
 \subsection{Residual definition}
+\label{sec:preint_residual}
 
 The pre-integrated $\ol\bfDelta_{im}$ is used at the end of the pre-integration to define the residual
 
 \begin{align}
     \bfr_{im} = (\ol\bfDelta_{im} \oplus \mjac{\bfDelta_{im}}{\bfb_i}(\bfb_i-\ol\bfb_i) ) \ominus \hat\bfDelta_{im}
+    \label{eq:preint_residual}
 \end{align}
 
 where $\bfb_i$ is the current bias value,  $\hat\bfDelta_{im}=\bfx^m\boxminus\bfx^i$ is the expected delta between KFs, and $\{\op,\om\}$ are the composite
