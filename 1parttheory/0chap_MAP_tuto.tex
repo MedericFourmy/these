@@ -1,11 +1,11 @@
-\chapter{Tutorial on Factor graph state estimation}
+\chapter{Tutorial on factor graph state estimation}
 \minitoc
 
 Let us explicit the terms prevent in this chapter's title. 
 
 The \textit{state} of the robot is a set of variables of particular interest to the roboticist, be it for control, parameter identification, etc.
 Those quantities may not directly measurable, due to their physical nature (an angular momentum sensor would be hard to imagine) or because sensor data
-is too noisy, biased, or impractical to obtain (eg. GPS for localization is very bad close to flat surfaces because of beam reflections). 
+is too noisy, biased, or impractical to obtain (\eg GPS for localization is very bad close to flat surfaces because of beam reflections). 
 Those latent variables can however be estimated by fusing multiple sensors data using a state estimator (aka. observer in automation). In the context of 
 a probabilistic estimator, these are random variables. Most state estimators work with variables which sample state is continuous. The goal is then 
 to find the probability density of those states.
@@ -23,38 +23,42 @@ $p(\mathcal{X})$ is a \textit{prior} that we have on the state variable distribu
 an approximate value of parameters that we seek to estimate.
 The \textit{partition constant} $p(\mathcal{Z})$ can be thought of as a global normalization constant (\cite{koller2009probabilistic}, chapter 20 ) in case 
 the $\mathcal{Z}$ random variable is observed, which is our case. In general, this term is computationally intractable to compute. Exact inference is 
-therefore rarely undertaken, instead relying on approximate inference methods such as variational inference (\cite{koller2009probabilistic}, chapter 11) 
-or sampling (\cite{koller2009probabilistic}, chapter 12). In the context of robotics, sampling has been leveraged in the popular particle filter which for 
-tasks such as localization \cite{dellaert1999monte} and SLAM \cite{montemerlo2002fastslam}. Application of variational inference is scarcer, with the notable 
+therefore rarely undertaken, instead relying on approximate inference methods. In the context of robotics, sampling (\cite{koller2009probabilistic}, chapter 11) has been 
+leveraged in the popular recursive particle filter which for tasks such as localization \cite{dellaert1999monte} and SLAM \cite{montemerlo2002fastslam}. A very interesting
+property of this approximation is the fact that any kind of posterior distributions can be modelled, in particular multimodal distributions which can be useful
+for problems such as the kidnapped robot problem \cite{dellaert1999monte}. Application of variational inference is scarcer, with the notable 
 exceptions of works from Barfoot \cite{barfoot2020exactly, wong2020variational} which derives a graph optimization estimation based on variational inference
-and Lambert \cite{lambert2022recursive} which proposes a recursive variational Gaussian filter.
+and Lambert \cite{lambert2022recursive} which proposes a recursive variational Gaussian filter. The idea here is to fit a candidate distribution 
+(usually gaussian) so as to minimize the Kullback-Leibert divergence between the posterior and the candidate distribution.
 
-However full Bayesian inference is not always required in robotics contexts, as we are often mainly interested in the most probable state.
+A more popular approach to the estimation problem is to solve the \textit{Maximum A Posteriori} (MAP) problem.
 
 \section{Maximum A Posteriori estimation}
 
-A more popular approach to the estimation problem is to solve the \textit{Maximum A Posteriori} (MAP) problem. Instead of finding the full posterior, we are most often only 
-interested in finding the most likely state which corresponds to solving the optimization problem:
+Instead of finding the full posterior, an efficient way to characterise the posterior distribution is to find its mode, that is the states that 
+result in the highest posterior probability. The estimation problem is in this case a unconstrained optimization problem:
 %
 \begin{equation}
     \label{eq:MAP_pbe}
     \mathcal{X}^* \triangleq \argmax_{\mathcal{X}} p(\mathcal{X} | \mathcal{Z}) = \argmax_{\mathcal{X}} p(\mathcal{Z} | \mathcal{X}) p(\mathcal{X}),
 \end{equation}
 %
-$p(\mathcal{Z})$, being constant with respect to $\mathcal{X}$.
+
+Notice that $p(\mathcal{Z})$ does not appear on the right side since it is constant with respect to $\mathcal{X}$.
+States variables $\mathcal{X}$ in our case are a collection of random variables $\{\mathcal{X}_i\}_{i \in [0..N]}$ that each relate to a physical quantity of 
+interest (\eg the initial robot position, constant camera parameters, orientation of an object in the scene, IMU biases, etc.). Measurements $\mathcal{Z}$ are 
+similarly a collection of individual sensor measurements $\{\bfz_i\}_{i \in [0..M]}$.
 
 Additional assumptions have to be made in order to obtain a numerical implementation of this problem.
-First, the measurements $\mathcal{Z} = \{\bfz_0, \bfz_1, ..., \bfz_N\} $, which are a set of individual sensor observations, that are supposed to be conditionally 
-independent of each other, so that the likelihood function can be factorized. 
+First, the measurements are supposed to be conditionally independent of each other, so that the likelihood function can be factorized. 
 %
 \begin{equation}
     p(\mathcal{Z} | \mathcal{X}) p(\mathcal{X}) = \prod^{N} p(\bfz_i | \mathcal{X}_{S_i}) p(\mathcal{X}_0)
 \end{equation}
 %
-Each factor represents the measurement model associated to the 
-observation $\bfz_i$ and depending only on a subset $S_i$ of the state variables $\mathcal{X}_{S_i}$. 
+Each factor represents the measurement model associated to the  observation $\bfz_i$ and depending only on a subset $S_i$ of the state variables $\mathcal{X}_{S_i}$. 
 $\mathcal{X}_0$ denotes the subset of random variables on which we have nonuniform prior.
-Secondly, these measurement models are assumed to multivariate Gaussian distributions:
+Secondly, the measurements are assumed to be corrupted by multivariate Gaussian noise:
 %
 \begin{equation}
     p(\bfz_i | \mathcal{X}_{S_i}) = \frac{1}{\sqrt{2\pi\Sigma_i}} ~ \exp(- \frac{1}{2} (||\bfr_i(X_{S_i})||_{\Sigma_i}) \triangleq K_i~\phi_i(\mathcal{X}_{S_i})
@@ -65,10 +69,10 @@ $\phi_i(\mathcal{X}_{S_i})$ is the un-normalized measurement likelihoods called 
 and 
 %
 \begin{equation*}
-    ||\bfr_i(X_{S_i})||_{\Sigma_i} = \bfr_i(X_{S_i}) \Sigma_i^{-1} \bfr_i(X_{S_i})    
+    ||\bfr_i(X_{S_i})||^2_{\Sigma_i} = \bfr_i(X_{S_i}) \Sigma_i^{-1} \bfr_i(X_{S_i})    
 \end{equation*}
 %
-is known as the Mahalanobis distance. 
+is known as the squared Mahalanobis distance. 
 Residuals $\bfr_i(X_{S_i})$ can generally be formulated as a difference between a \textit{expectation function} $\bfh$ and the actual measurements
 %
 \begin{equation}
@@ -96,12 +100,24 @@ Recognizing than maximizing the likelihood in \eqRef{eq:MAP_pbe} is equivalent t
     &= \argmin_{\mathcal{X}} \sum^{N} ||\bfr_i(\mathcal{X}_{S_i})||_{\Sigma_i}^2 + ||\bfr_0(\mathcal{X}_{0})||_{\Sigma_0}^2 ~&\mbox{\small Gaussian measurement models}\\
 \end{align}
 
-Thus, solving the MAP problem with the aforementioned hypothesis boils down to solving a nonlinear least-squares (NLLS) problem. 
-A vast part of the literature on MAP estimation has been dedicated to the implementation of efficient solvers. Most of them are 
+Thus, solving the MAP problem with the aforementioned hypothesis boils down to solving a nonlinear weighted least-squares (NLLS) problem.
+The weights are the inverse of the measurement covariances: the more uncertain a measurement is, the higher its covariance and, therefore, the lower its influence
+on the weighted squared residuals sum. 
+
+An important question to ask is how confident are we in our MAP estimate? Even if our priors and measurements models are not Gaussian, the posterior distribution
+is in general gaussian (unless all measurements models are linear). The region near the peak of the posterior is often nearly Gaussian in shape.
+The curvature around the mode is described by the weighted Hessian of the sum of squared residual, which is a big sparse matrix computed by the optimizer.
+The Hessian is actually the information matrix of the problem, so that finding the covariance of the MAP estimate resolves to inverting a sparse positive definite 
+matrix. This way, we can approximate our posterior by a multivariate Gaussian, which is referred to as the Quadratic or Laplacian approximation 
+(\cite{mcelreath2018statistical}, section 2.4.2). MAP inference is then a two step process: first find the mode of the posterior (the MAP), then "fit
+ a gaussian" on this mode. To constrast this approach with aforementioned approximations, variational inference as applied in Barfoot et al. 
+ \cite{barfoot2020exactly} for instance fit both the mean an the covariance of a Gaussian model as a result of a single optimization problem.
+
+A vast part of the literature on MAP estimation has been dedicated to the implementation of efficient ad hoc NLLS solvers. Most of them are 
 gradient-based algorithm, typically some variation of the Gauss-Newton algorithm, such as the Levenberg-Marquardt algorithm \cite{boyd2004convex}.
 
 
-\section{Factor Graphs: a visual language for robotics estimation}
+\section{factor graphs: a visual language for robotics estimation}
 A crucial aspect of solving the MAP problem is the factorizibility of the likelihood function. This represents the fact that the problem
 exhibits a particular structure that has important computational implications. Let's consider the toy example represented in \figRef{fig:toy_problem}. 
 We wish to estimate the trajectory of a differential robot, that is its states at chosen timestamps called \textit{\keyframes}, and \textit{landmarks} which are elements of the 
@@ -122,7 +138,7 @@ transformations between \keyframes, and an exteroceptive sensor, which provides 
         \caption{\label{fig:toy_factor}}
     \end{subfigure}%
     \caption{(\subref{fig:toy_problem}): toy estimation problem, a differential drive robot equipped with an odometer moves in 
-    an scene with landmarks represented by stars. \subref{fig:toy_factor}): Factor Graph representation the problem, the estimated variables are represented by circles 
+    an scene with landmarks represented by stars. \subref{fig:toy_factor}): factor graph representation the problem, the estimated variables are represented by circles 
     (blue for robot \keyframe, green for landmarks) and factors by squares (orange for odometry, black for exteroceptive sensor).}
 \end{figure}
 
@@ -139,16 +155,16 @@ The factorization of the likelihood of \eqRef{eq:likelihood_factorization} in th
     &{\color{Black} \phi_3({\color{Blue} \bfx_1}, {\color{Green} l_1}) \phi_4({\color{Blue} \bfx_2}, {\color{Green} l_1}, {\color{Green} l_2}) \phi_5({\color{Blue} \bfx_3}, {\color{Green} l_2})} \\ 
 \end{align}
 %
-This factorization can be represented as a \textit{Factor Graph} as seen in \ref{fig:toy_factor}. 
-Factor Graphs are popular graphical models \cite{koller2009probabilistic} that can describe a vast family of statistical models \cite{loeliger2004introduction}.
-A Factor Graph in the most general sense is a bipartite graph that represents the factorization of a function of several variables. 
+This factorization can be represented as a \textit{factor graph} as seen in \ref{fig:toy_factor}. 
+factor graphs are popular graphical models \cite{koller2009probabilistic} that can describe a vast family of statistical models \cite{loeliger2004introduction}.
+A factor graph in the most general sense is a bipartite graph that represents the factorization of a function of several variables. 
 We adopt the visual notation commonly found in robotics: round nodes for variables, square nods for factors, edges represent the dependency 
 of each factor on a subset of variables. Over the last two decades, they have grown in popularity among roboticists as a visual language to describe 
-estimation problems \cite{dellaert2017factor} and planning problem \cite{dong2016motion}. Dellaert and Kaess \cite{dellaert2006square} were the first to
-recognize the link between NLLS problems and Factor graph.
+estimation problems \cite{dellaert2017factor} and planning problems \cite{dong2016motion}. Dellaert and Kaess \cite{dellaert2006square} were the first to
+recognize the link between NLLS problems and factor graph.
 
 Many specialized solvers \cite{grisetti2011g2o, dellaert2012factor, ila2017slam++} have been implemented that exploit the sparse structure of these 
-problems. A discussion of the particularities of Factor Graph based NNLS solvers can be found in [CITE sola course] \cite{dellaert2017factor}.
+problems. A discussion of the particularities of factor graph-based NNLS solvers can be found in [CITE sola course] \cite{dellaert2017factor}.
 
 
 % \section{Lie groups primers}

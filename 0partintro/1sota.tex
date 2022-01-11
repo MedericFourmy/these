@@ -45,7 +45,7 @@ a proprioceptive sensor in the legged robot literature \cite{rotella2018unsuperv
 They are needed to obtain non-drifting estimates of the robot pose. 
 They are used either to localize with respect to a map or to build a representation of the environment online, that the robot can use to plan contact for instance. 
 
-These measurement sources convey wildly different types of information and arrive at various frequencies (eg. tens of Hertz for cameras, kiloHertz for encoders). 
+These measurement sources convey wildly different types of information and arrive at various frequencies (\eg tens of Hertz for cameras, kiloHertz for encoders). 
 In this work, we assume that they are reasonably well time-synchronized. Measurements are generally \textit{noisy} and sometimes \textit{biased}. High levels of noise can 
 come from the lower quality of the sensor (a low-cost MEMS IMU gyroscope exhibits much more noise than a high-end fiber-optic gyroscope) or from the process to obtain the
 data (joint velocities measurements are obtained by numerical differentiation of the encoder measurements). Noise can be either filtered using classical finite impulse 
@@ -445,7 +445,7 @@ for locomotion are a promising way to increase the range of possible movements a
 
 The literature related to these questions is immensely vast and goes largely beyond the scope of this thesis, although the formal underlying methods are closely related,
 as we will see in \secRef{sec:sota_factor_graph}. Moreover, we will see that our ambition and latest results tend to merge legged estate estimation with
-exteroceptive localization and mapping at large. We will quickly review the most relevant works, first focusing on localization eg. for navigation, then 
+exteroceptive localization and mapping at large. We will quickly review the most relevant works, first focusing on localization \eg for navigation, then 
 on dense mapping for contact planning. 
 
 \subsection{Localization and mapping}
@@ -533,7 +533,7 @@ making position and yaw observable.
 A different kind of estimator has been investigated over the last decades in the visual/LIDAR SLAM community and has become predominant in applications
 such as drone navigation: \textit{factor graph optimization}, also known as simply \textit{graph optimization}. 
 While the Bayes filter summarizes  the accumulated information about the current estimated state and its cross-correlations as a single probabilistic distribution, 
-Factor Graph optimization keeps a trajectory of arbitrarily spaced past states that are regularly re-optimized in the least-square sense, by finding the so-called 
+Factor Graph optimization keeps a trajectory of arbitrarily spaced past states that are regularly re-optimized in the least-squares sense, by finding the so-called 
 Maximum A Posteriori over the trajectory joint distribution. The terms smoothing and mapping or sliding window estimator are also used when a limited window of past states are kept 
 in the estimator, the old ones being marginalized. The earliest example \cite{lu1997globally} proposed to obtain globally consistent 2D LIDAR range 
 scan alignments by minimizing a cost function over a trajectory of 2D poses constrained by LIDAR scans and wheel odometry.
@@ -553,6 +553,8 @@ computational cost ratio, for most benchmarks. Most of the state-of-the-art visu
 
 \subsection{Very short intro intro to factor graphs}
 The reasons for graph optimization success are
+
+% Barfoot state est 4.3.4 Discussion
 
 Advantages of factor graphs: 
 - tight coupled
