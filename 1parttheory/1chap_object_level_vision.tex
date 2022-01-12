@@ -273,13 +273,13 @@ by an index $\alpha$ and associated with an object candidate $O_{\alpha}$ and it
     \begin{subfigure}{.5\textwidth} % this sets the figure to be max half the width of the page
         \centering
         % include first image
-        \includegraphics[width=.9\linewidth]{figures/convergence_1.png}  % this sets the image to fill 90% of the available space -> 45% of the line width in total. 
+        \includegraphics[width=.9\linewidth]{figures/cosyslam/convergence_1.png}  % this sets the image to fill 90% of the available space -> 45% of the line width in total. 
         % \caption{\label{fig:cosypose-convergence_1}}
     \end{subfigure}
     \begin{subfigure}{.5\textwidth}
         \centering
         % include second image
-        \includegraphics[width=.9\linewidth]{figures/convergence_2.png}  
+        \includegraphics[width=.9\linewidth]{figures/cosyslam/convergence_2.png}  
         % \caption{\label{fig:cosypose-convergence_2}}
     \end{subfigure}
 
@@ -287,7 +287,7 @@ by an index $\alpha$ and associated with an object candidate $O_{\alpha}$ and it
     \begin{subfigure}{\textwidth}
         \centering
         % include first image
-        \includegraphics[width=.45\linewidth]{figures/convergence_3.png}   % this width should be half of the width of the other two images
+        \includegraphics[width=.45\linewidth]{figures/cosyslam/convergence_3.png}   % this width should be half of the width of the other two images
         % \caption{\label{fig:cosypose-convergence_3}}
         
     \end{subfigure}
@@ -406,7 +406,7 @@ Our trained models show an expected behavior regarding this parameter: the globa
 %
 \begin{figure}[h]
   \centering 
-  \includegraphics[width=0.8\textwidth]{figures/empirical_err.png}
+  \includegraphics[width=0.8\textwidth]{figures/cosyslam/empirical_err.png}
   \caption{The norm of the translation error returned by the models of three different objects with respect to $r$, the distance between the camera and the object. 
             The other parameters $\theta$, $\phi$ and $s$ are fixed to the average values of our training data. }
   \label{fig:empirical_err}
@@ -439,3 +439,32 @@ A more quantitative evaluation can be deduced from table \tabRef{table:empirical
     \caption{A quantitative evaluation of our models, these values are computed on test samples that were not used for training. }
     \label{table:empirical_models}
 \end{table}
+
+
+
+\subsection{Retraining with stairs}
+In order to produce a realistic SLAM scenario in the context of walking legged robots, we retrained CosyPose with staircases present in our lab.
+We made a textured mesh of a stair step used in our experimental platform. This textured mesh was used both for training and using the trained model. 
+The generation of photorealistic synthetic data was handled by BlenderProc \cite{denninger2019blenderproc}. The render and compare loop uses PyBullet\cite{coumans2021}.
+
+\begin{figure}[t] % never [h!] in IEEE
+    \centering
+    \begin{subfigure}[]{{.49\linewidth}}
+        \centering
+        \includegraphics[width=3.5cm]{figures/cosyslam/0006.png} 
+    \end{subfigure}
+    \begin{subfigure}[]{{.49\linewidth}}
+        \centering
+        \includegraphics[width=3.5cm]{figures/cosyslam/0006_proj.png} 
+    \end{subfigure}
+    \caption{On the left, a picture of our climbing module at LAAS and on the right the 3D model of the stair projected according to CosyPose measurements on the same picture}%
+    \label{fig:cosypose-ycbv}%
+\end{figure}
+
+We generate 10.000 synthetic images that are labeled with the pose ground truth by design of the scene in Blender. We retrain the three modalities of CosyPose: 
+the Mask-RCNN detector, the coarse pose estimator and the pose refiner. We slightly tune the training parameters used for the object from the BOP challenge as 
+the scale is different: the stair is $1m \times 0.3m \times 0.07m$ whereas a T-LESS object is never wider than $10cm$. 
+Thus, we generate training data on $10m \times 10m$ scenes, and we increase the noise used to train the refiner.  
+
+An illustration of the performances of CosyPose on a set of 3 stair steps is given on Fig.~\ref{fig:cosypose-ycbv}: 
+the pose of each step is here independently estimated which leads to local accuracy but global inconsistency. 

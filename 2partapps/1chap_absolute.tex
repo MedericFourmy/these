@@ -1,4 +1,6 @@
 \chapter{Fiducial marker based visual inertial SLAM}
+\minitoc
+
 
 Results presented in this section are taken from our published work \cite{fourmy2019absolute}.
 
@@ -13,7 +15,7 @@ model~\cite{bledt2018cheetah,rotella2018unsupervised}, and by augmenting the odo
 
 %\begin{figure}[tb]
 %\centering
-%\includegraphics[width=0.7\linewidth]{figures/HRP2_compact_crop.jpg}
+%\includegraphics[width=0.7\linewidth]{figures/absolute/HRP2_compact_crop.jpg}
 %\caption{HRP2 robot with which were conducted the experiments. The head was replaced by our visual inertial system %described in section \ref{sec:} (note that the stereo camera of the robot is not used)}
 %\label{fig:HRP2}
 %\end{figure}
@@ -66,14 +68,12 @@ that would typically arise in the humanoid contact (leg odometry based on coders
 Both inertial and visual factors are processed in a factor graph resulting into a nonlinear maximum-likelihood optimization problem, solved with Ceres~\cite{ceres-solver}.
 
 
-
-
 \section{Problem statement}
 % \section{State estimation for the humanoid}
 
 \begin{figure}
     \centering
-    \includegraphics[scale=0.9]{figures/graph}
+    \includegraphics[scale=0.9]{figures/absolute/graph}
     \caption{A typical fraction of the factor graph, involving state blocks corresponding to keyframes $\bfx_i=(\bfp_i,\bfv_i,\bfR_i)$, biases $\bfb_i$ and landmark poses $\bfl_n$. 
     IMU factors (blue) relate consecutive keyframes and the IMU biases.
     The lower branch controls bias drift along time.
@@ -119,4 +119,105 @@ on large datasets consisting only of smooth motions.
 
 \subsection{Results}
 
-\subsubsection{Experimental setup}
+\subsection{Experimental setup}
+We have gathered several datasets in the experimental arena of the humanoid robots at LAAS-CNRS, a 3D environment about $10m \times 5m$ made of flat floor, stairs of various slopes and a 30cm wide beam.
+The robot environment was augmented with about 20 fiducial ``April-tag'' markers (about 20 cm width).
+The tags have been randomly dispatched in the environment.
+They are fixed during a run, but may vary significantly between two sets of data, and their locations are not calibrated ---that is, we do not have ground-truth localization of the tags.
+
+Each dataset is composed of 3 sequences:
+\begin{itemize}
+    \item a sequence of RGB images captured at 33 Hz
+    \item a sequence of IMU measures captured at 200 Hz
+    \item a sequence of motion-capture (MoCap) at 200Hz measurements used as ground truth.
+\end{itemize}
+
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[scale=0.5]{figures/absolute/xy_loop_twice.eps}
+    \caption{Two loops of the experimental field with camera in hand}
+    \label{fig:xy_loop_twice}
+\end{figure}
+
+%
+\begin{table}[t]
+    \centering
+    \caption{Datasets description and results}
+    \begin{tabular}{c|c|c|c|c}
+        Description & Duration & Length & MTE$^1$ & STE$^2$ \\
+        \hline
+        \hline
+        Handheld loop & 59.0\,\textrm{s} & 20.6\,\textrm{m} & 29.0 & 11.3  \\
+        \hline
+        HRP2 turns then walks & 59.9\,\textrm{s} & 12.87\,\textrm{m} & 30.9 & 15.7 \\
+        \hline
+        HRP2 climbs stairs & 47.1\,\textrm{s} & 6.25\,\textrm{m} & 13.9 & 6.3 \\
+        \hline
+        HRP2 descends stairs & \, 19.39\textrm{s} & \, 2.62\textrm{m} & 30.4 & 11.8 \\
+        \hline
+        \multicolumn{5}{l}{$^1$ Mean translation error [mm]} \\
+        \multicolumn{5}{l}{$^2$ Std. dev. of translation error [mm]} 
+    \end{tabular}
+    \label{tab:datasets}
+\end{table}
+
+
+The visual-inertial sensor (VIS) is comprised of a Memsic IMU running at 200 Hz and an Imagine Source camera.
+IMU and camera are hardware synchronized: the image acquisition is triggered by a micro-controller (STM32) synchronized with the IMU.
+We have validated that there is less than 2 ms synchronization error by the hardware (shutter time) and that this delay is stable.
+The camera and the IMU are collocated, with less than 10 cm of distance between IMU and camera focal. 
+Although our implementation of the least-squares estimator is able to calibrate the sensors, we have not tried to calibrate the camera-to-IMU extrinsic parameters.
+In each sequence, we have taken care that the camera is navigating in a comfortably-dense field of tags, even if it may not have always a tag in its field of view.
+The motion-capture data have been obtained from a calibrated 3D marker attached to the camera and are synchronized in post-process by maximizing the velocity norm 
+cross-correlation between MoCap and estimated state sequences.
+% The datasets are available at \url{https://gepgitlab.laas.fr/loco-3d/wolf-data/}.
+%In order to gather datasets to test our estimator, we designed a Visual Inertial System (VIS) comprised of a Memsic IMU running at 200Hz synchronized through a 
+% micro-controller (STM32) with an Imagine Source camera which captures are hardware triggered. Noises parameters of the IMU were estimated using the 
+% Allanvariance method described in \cite{el2007analysis}.
+%We recorded several datasets in which the camera was either handheld or mounted on the head of a HRP2 humanoid robot. Rosbags for the datasets are available at 
+% [url]. A ground truth is also provided thanks to a [brand name] motion capture system (mocap) recording the system pose at 200Hz.
+%
+\begin{figure*}
+     \centering
+     \begin{subfigure}[b]{0.49\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/absolute/terr_loop_twice.eps}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.49\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/absolute/terr_stairs1.eps}
+     \end{subfigure}
+     \\
+    \begin{subfigure}[b]{0.49\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/absolute/terr_robot1_walking.eps}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.49\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/absolute/terr_descending2.eps}
+     \end{subfigure}
+     
+    \caption{Translation estimation error (cm) as a function of time (s). In the clock-wise sens, starting from the top-left corner, the datasets are handheld camera, stairs climbing, stairs descending and walking on flat ground. RGB colors correspond to xyz axes.}
+    \label{fig:results}
+\end{figure*}
+%
+%
+\subsection{Localization precision}
+%
+We consider four datasets which are summarized in table \ref{tab:datasets}. They cover different tasks on which a consistent estimation of the robot movement is necessary. The first one is a relatively long sequence consisting of two loops with the VIS handheld. This is used to test the long term localization of the robot, which is interesting for navigation. Secondly, we made the LAAS Gepetto team HRP2 walk and turn around on a short distance to evaluate the resilience of the filter to the vibrations of the robot. Finally, two more challenging datasets are recorded while the robot is climbing and descending stairs. Especially on the latter, the locomotion causes impacts that on one hand bring the IMU close to its dynamic range saturation, and on the other hand provokes images with motion blur. Note that during these experiments, the estimator was not used for feedback control. In order to compare our results with the ground truth, we used methods described in \cite{zhangtutorial} to align trajectories given that 4 DoFs are unobservable in VI estimation.
+For each case, key frames are created at a frequency of 6.6 Hz (every 5 images) if tags are detected in the corresponding image.
+%
+\begin{figure}[!t]
+    \centering
+    \includegraphics[scale=0.35]{figures/absolute/vz_descending_onestep.eps}
+    \caption{Descending stairs (one step): the robot first lowers its center of mass and then touches the next step with results in vibrations from the impact.}
+    \label{fig:vz_descending_onestep}
+\end{figure}
+%
+Figure \ref{fig:results} presents a quantitative evaluation of the translational errors. In all cases, our estimator achieves errors consistently below a few centimeters. The biggest errors are obtained for the walking datasets where the two humps correspond to phases where the robot is turning on itself and sees landmarks that it will not see again later in the trajectory.
+
+A high rate estimation of a humanoid robot velocity and in particular of its center of mass is critical for balance controllers. It can be recovered from motion capture through numerical differentiation of the positions, but this results in a quite noisy time series. It is especially visible when hard impacts make the robot shake at approximately 10 Hz. The estimated velocity follows a familiar oscillatory damped system behaviour while the mocap estimation is more erratic. In this sense, our estimator seems to be more fit for feedback control than the use of the MoCap.
+

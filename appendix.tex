@@ -67,6 +67,193 @@ Multiplying by $\Rot{}{}^{i,T}$ and reordering the terms, we can finally define 
 \end{equation}
 
 
+\section{Elements of the IMU delta matrix Lie group}
+
+
+\subsection{Tangent space and Lie algebra \texorpdfstring{$\mathfrak{d}$}{d}}
+\cite{sola2018micro}
+Following \cite{sola2018micro}, the tangent space of $\cD$ at the point $\D$ is found by taking the time derivative of the group constraint, $\D\inv\D = \bfI$.
+Noting $\dot{\bullet} \te \dpar{\bullet}{t}$, this yields 
+% the tangent space constraint, $\D\inv\dot\D+\dot{(\D\inv)}\D=0$.
+% This gives 
+after a few manipulations
+%
+\begin{align}\label{equ:constr}
+\D\inv\dot\D 
+&=
+\begin{bsmallmatrix}
+\hatx{\bw} & ~~\DR\tr\bfa~~ & \DR\tr(\bfv-\Dv) \\
+\bf0 & 0 & 1 \\
+\bf0 & 0 & 0 
+\end{bsmallmatrix}
+~,
+\end{align}
+%
+with $\bfv \te \dot\Dp$, $\bfa \te \dot\Dv$ and $\hatx{\bw} \te \DR\tr\dot\DR$.
+% The equation above defines the tangent space at the point $\D$. 
+The Lie algebra $\mathfrak{d}$ is the tangent space at the identity $\D=\bfI$.
+Its elements $\bm\nu\hhat 
+\te \dot\D |_{\D=\bfI}$ and their isomorphics $\bm\nu$ in Cartesian space are given by, % $\D=\bfI$, so
+%
+\begin{align}
+\bm\nu\hhat 
+% \te \dot\D |_{\D=\bfI}
+&=
+\begin{bsmallmatrix}
+\hatx{\bw} & \bfa & \bfv \\
+\bf0 & 0 & 1 \\
+\bf0 & 0 & 0 
+\end{bsmallmatrix} \in \mathfrak{d}
+~~~\xrightleftharpoons[\wedge]{~\vee~}~~~ 
+\bm\nu=\begin{bsmallmatrix}
+\bfv \\ \bfa \\ \bw \\ 1
+\end{bsmallmatrix} \in\bbR^{10}
+~.
+\end{align}
+%
+This tangent $\bm\nu\hhat$ corresponds to the `velocity' of the group element. 
+Any point in the Lie algebra can be obtained after moving at constant velocity during a period $\Dt$, that is, $\bftau\hhat=\bm\nu\hhat\Dt\in\mathfrak{d}$ ---see \eqRef{equ:lie_algebra}.
+%
+\subsection{The exponential map}
+\subsubsection{The general case}
+Eq.~\eqRef{equ:constr} can be written as $\dot\D=\D\cdot\bm\nu\hhat$.
+This is an ordinary differential equation whose  integral for constant $\bm\nu$ yields the exponential map \cite{sola2018micro}, $ \D(t) = \exp\left(\bm\nu\hhat t\right)$.
+This gives a direct expression of the integral of information of the type $(\bfv,\bfa,\bw)$ onto the deltas manifold. See below for the $(\bfa,\bw)$ case.
+The closed form of the exponential map is obtained through Taylor expansion (see \eg\ \cite{sola2018micro}\ for examples). 
+At $t=\Dt$ we have,
+%
+\begin{align}
+\D(\Dt) 
+&= \exp(\bm\nu\hhat\Dt) \te \sum_n \frac1{n!}(\bm\nu\hhat\Dt)^n
+~.
+\end{align}
+%
+% with $\bfA=\bftau\hhat\Dt$.
+%
+Exploiting the cyclic pattern of the powers of $\hatx{\bw}$, this results in
+%
+\begin{align}
+\exp\left(\begin{bsmallmatrix}
+\hatx{\bw} & \bfa & \bfv \\
+\bf0 & 0 & 1 \\
+\bf0 & 0 & 0 
+\end{bsmallmatrix}\Dt\right) 
+\!=\! \begin{bsmallmatrix}
+\exp(\hatx{\bw}\Dt) & \bfQ\bfa\Dt\, & \bfQ\bfv\Dt+\bfP\bfa\Dt^2 \\
+\bf0 & 1 & \Dt \\
+\bf0 & 0 & 1
+\end{bsmallmatrix}
+\end{align}
+%
+with (we skip proofs for space reasons)
+%
+\begin{align} \label{equ:RQP}
+% \bfR (\bth)
+%  &= \exp(\hatx{\bth})
+%   = \bfI + \sin\theta\hatx{\bfu} + (1-\cos\theta)\hatx{\bfu}^2\\
+\bfQ (\bth)
+ &= 
+  \bfI + \frac{1-\cos\theta}{\theta}\hatx{\bfu} + \frac{\theta-\sin\theta}{\theta}\hatx{\bfu}^2\\
+\bfP (\bth)
+ &= 
+  \frac12\bfI 
+   + \frac{\theta-\sin\theta}{\theta^2}\hatx{\bfu} 
+   + \frac{\cos\theta + \frac12\theta^2 - 1}{\theta^2}\hatx{\bfu}^2
+~,
+\end{align}
+%
+where  $\bth=\bw\Dt$, $\theta=\norm{\bth}$ and $\bfu=\bth/\theta$ form the angle-axis representation of the rotation step $\bw\Dt$. 
+
+
+\subsubsection{The IMU case of \texorpdfstring{$\bfv=0$}{bfv=0}}
+\label{sec:IMU_case}
+
+We defined the IMU deltas as the motion relative to the free-falling frame, which has initial velocity $\bfv_i$. 
+Thus the tangent velocity $\bfv=\dot\Dp$  is zero at the start of the integration step. 
+%
+Since the exponential $\Exp(\bm\nu\Dt)$ assumes a constant tangent vector $\bm\nu=(\bfv,\bfa,\bw,1)$ during the interval $\Dt$, we have that $\bfv=0$ during the full step. 
+%
+This gives immediately
+%
+\begin{align}
+% \D &= 
+\exp\left(\begin{bsmallmatrix}
+\hatx{\bw} & \bfa & \bf0 \\
+\bf0 & 0 & 1 \\
+\bf0 & 0 & 0 
+\end{bsmallmatrix}\Dt\right) 
+= \begin{bsmallmatrix}
+\exp(\hatx{\bw}\Dt) & ~\bfQ\bfa\Dt~ & \bfP\bfa\Dt^2 \\
+\bf0 & 1 & \Dt \\
+\bf0 & 0 & 1
+\end{bsmallmatrix}
+~.
+\end{align}
+
+
+
+
+\subsection{The adjoint and small adjoint matrices}
+
+%
+Following the general methodology explained in \cite{sola2018micro}, the adjoint matrix is obtained by identifying the linear terms in $\Ad{\D}\bftau=(\D\bftau\hhat\D\inv)\vvee$. We get after long but relatively easy calculations,
+%
+\begin{align}\label{equ:Ad}
+\Ad{\D} &=
+\begin{bsmallmatrix}
+\DR & -\DR\Dt & \hatx{\Dp-\Dv\Dt}\DR & \Dv \\
+\bf0 & \DR & \hatx{\Dv}\DR & \bf0 \\
+\bf0 & \bf0 & \DR & \bf0 \\
+\bf0 & \bf0 & \bf0 & 1
+\end{bsmallmatrix} 
+\quad
+\in\bbR^{10\times10}~.
+\end{align}
+
+
+
+Similarly, from \cite{EADE-18-DERIVATIVE} the small adjoint matrix can be computed by identifying the linear terms in $
+\ad{\bftau}\bfsigma = 
+(\bftau\hhat\bfsigma\hhat-\bfsigma\hhat\bftau\hhat)^\vee
+$
+%
+which  for $\bftau=(\bfrho,\bfupsilon,\bth,\Dt)\in\mathfrak{d}$ yields,
+%
+\begin{align}\label{equ:ad}
+\mathrm{\bf ad}_\bftau = \begin{bsmallmatrix}
+\hatx{\bth} & -\bfI\Dt & \hatx{\bfrho} & \bfupsilon \\
+\bf0 & \hatx{\bth} & \hatx{\bfupsilon} & \bf0 \\
+\bf0 & \bf0 & \hatx{\bth} & \bf0 \\
+\bf0 & \bf0 & \bf0 & 0 
+\end{bsmallmatrix}
+\quad
+\in\bbR^{10\times10}~.
+\end{align}
+
+
+
+
+\subsection{The right Jacobian}
+
+The right Jacobian $\mjac{}{r}$ is the Jacobian of $\Exp()$ as described in \cite{sola2018micro}.
+Lacking at the moment a closed form for it, we take the general methodology for the left Jacobian described in \cite{EADE-18-DERIVATIVE}, and transform it to the right using $\mjac{}{r}(\bftau)=\mjac{}{l}(-\bftau)$ \cite{sola2018micro},
+%
+\begin{align}\label{equ:Jr}
+\mjac{}{r}(\bftau) 
+= \mjac{}{l}(-\bftau) 
+= \sum_i \frac{\ad{-\bftau}^i}{(i+1)!}
+= \sum_i \frac{(-\ad{\bftau})^i}{(i+1)!}
+% ~
+% \in\bbR^{10\times10}
+~.
+\end{align}
+%
+This sum can be truncated at the desired degree of accuracy.
+
+
+
+
+
 
 \section{Jacobians of force/torque pre-integration}
 
