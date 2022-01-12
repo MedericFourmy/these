@@ -29,7 +29,7 @@ property of this approximation is the fact that any kind of posterior distributi
 for problems such as the kidnapped robot problem \cite{dellaert1999monte}. Application of variational inference is scarcer, with the notable 
 exceptions of works from Barfoot \cite{barfoot2020exactly, wong2020variational} which derives a graph optimization estimation based on variational inference
 and Lambert \cite{lambert2022recursive} which proposes a recursive variational Gaussian filter. The idea here is to fit a candidate distribution 
-(usually gaussian) so as to minimize the Kullback-Leibert divergence between the posterior and the candidate distribution.
+(usually Gaussian) so as to minimize the Kullback-Leibert divergence between the posterior and the candidate distribution.
 
 A more popular approach to the estimation problem is to solve the \textit{Maximum A Posteriori} (MAP) problem.
 
@@ -40,7 +40,7 @@ result in the highest posterior probability. The estimation problem is in this c
 %
 \begin{equation}
     \label{eq:MAP_pbe}
-    \mathcal{X}^* \triangleq \argmax_{\mathcal{X}} p(\mathcal{X} | \mathcal{Z}) = \argmax_{\mathcal{X}} p(\mathcal{Z} | \mathcal{X}) p(\mathcal{X}),
+    \mathcal{X}^{MAP} \triangleq \argmax_{\mathcal{X}} p(\mathcal{X} | \mathcal{Z}) = \argmax_{\mathcal{X}} p(\mathcal{Z} | \mathcal{X}) p(\mathcal{X}),
 \end{equation}
 %
 
@@ -92,7 +92,7 @@ Thus, the posterior probability is proportional to a product of individual facto
 Recognizing than maximizing the likelihood in \eqRef{eq:MAP_pbe} is equivalent to minimizing the negative log-likelihood.
 %
 \begin{align}
-    \mathcal{X}^* 
+    \mathcal{X}^{MAP} 
     &= \argmin_{\mathcal{X}} - \log p(\mathcal{Z} | \mathcal{X}) ~&\mbox{\small MAP problem definition}\\
     &= \argmin_{\mathcal{X}} - \log p(\mathcal{Z} | \mathcal{X}) p(\mathcal{X}) ~&\mbox{\small Unaffected Partition constant}\\
     &= \argmin_{\mathcal{X}} - \log \prod^{N} p(\bfz_i | \mathcal{X}_{S_i}) p(\mathcal{X}_0) ~&\mbox{\small Conditional independences}\\
@@ -104,20 +104,27 @@ Thus, solving the MAP problem with the aforementioned hypothesis boils down to s
 The weights are the inverse of the measurement covariances: the more uncertain a measurement is, the higher its covariance and, therefore, the lower its influence
 on the weighted squared residuals sum. 
 
-An important question to ask is how confident are we in our MAP estimate? Even if our priors and measurements models are not Gaussian, the posterior distribution
-is in general gaussian (unless all measurements models are linear). The region near the peak of the posterior is often nearly Gaussian in shape.
-The curvature around the mode is described by the weighted Hessian of the sum of squared residual, which is a big sparse matrix computed by the optimizer.
+An important question to ask is how confident are we in our MAP estimate? Even if our priors and measurements models are Gaussian distribution, the posterior distribution
+is not in general Gaussian (unless all measurements models are linear). The region near the peak of the posterior is, however, often nearly Gaussian in shape.
+The curvature around the mode is described by the weighted Hessian $\bfH$ of the sum of squared residual, which is a big sparse matrix computed by the optimizer.
 The Hessian is actually the information matrix of the problem, so that finding the covariance of the MAP estimate resolves to inverting a sparse positive definite 
-matrix. This way, we can approximate our posterior by a multivariate Gaussian, which is referred to as the Quadratic or Laplacian approximation 
-(\cite{mcelreath2018statistical}, section 2.4.2). MAP inference is then a two step process: first find the mode of the posterior (the MAP), then "fit
- a gaussian" on this mode. To constrast this approach with aforementioned approximations, variational inference as applied in Barfoot et al. 
+matrix. This way, we can approximate our posterior by a multivariate Gaussian, which mean is the mode value and covariance is the problem hessian inverse. 
+
+\begin{equation}
+    p(\mathcal{X} | \mathcal{Z}) \approx \text{Gauss}(\mathcal{X}^{MAP}; \bfH^{-1})
+    \label{eq:map_laplace}
+\end{equation}
+
+This referred to as the Quadratic or Laplace approximation (\cite{mcelreath2018statistical}, section 2.4.2). MAP inference is then a two step process: 
+first find the mode of the posterior (the MAP), then "fit a Gaussian" on this mode. 
+To constrast this approach with aforementioned approximations, variational inference as applied in Barfoot et al. 
  \cite{barfoot2020exactly} for instance fit both the mean an the covariance of a Gaussian model as a result of a single optimization problem.
 
 A vast part of the literature on MAP estimation has been dedicated to the implementation of efficient ad hoc NLLS solvers. Most of them are 
 gradient-based algorithm, typically some variation of the Gauss-Newton algorithm, such as the Levenberg-Marquardt algorithm \cite{boyd2004convex}.
 
 
-\section{factor graphs: a visual language for robotics estimation}
+\section{Factor graphs: a visual language for robotics estimation}
 A crucial aspect of solving the MAP problem is the factorizibility of the likelihood function. This represents the fact that the problem
 exhibits a particular structure that has important computational implications. Let's consider the toy example represented in \figRef{fig:toy_problem}. 
 We wish to estimate the trajectory of a differential robot, that is its states at chosen timestamps called \textit{\keyframes}, and \textit{landmarks} which are elements of the 
@@ -139,7 +146,7 @@ transformations between \keyframes, and an exteroceptive sensor, which provides 
     \end{subfigure}%
     \caption{(\subref{fig:toy_problem}): toy estimation problem, a differential drive robot equipped with an odometer moves in 
     an scene with landmarks represented by stars. \subref{fig:toy_factor}): factor graph representation the problem, the estimated variables are represented by circles 
-    (blue for robot \keyframe, green for landmarks) and factors by squares (orange for odometry, black for exteroceptive sensor).}
+    (blue for robot \keyframe, green for landmarks) and factors by squares (orange for odometry, black for exteroceptive sensor, red for the prior).}
 \end{figure}
 
 In this case, the state variables are $\mathcal{X} = \{ \bfx_1, \bfx_2, \bfx_3, l_1, l_2\}$ %and measurements $\mathcal{Z} = \{ z_{o,1}, z_{o,2}, z_{e,1}, z_{e,2}\}$
@@ -150,9 +157,9 @@ The factorization of the likelihood of \eqRef{eq:likelihood_factorization} in th
 %
 \begin{align}
     p(\mathcal{X} | \mathcal{Z}) \propto 
-    &{\color{Red} \phi_0({\color{Blue} \bfx_{0}})} \\ 
-    &{\color{Orange} \phi_1({\color{Blue} \bfx_1}, {\color{Blue} \bfx_2}) \phi_2({\color{Blue} \bfx_2}, {\color{Blue} \bfx_3})} \\ 
-    &{\color{Black} \phi_3({\color{Blue} \bfx_1}, {\color{Green} l_1}) \phi_4({\color{Blue} \bfx_2}, {\color{Green} l_1}, {\color{Green} l_2}) \phi_5({\color{Blue} \bfx_3}, {\color{Green} l_2})} \\ 
+    ~&{\color{Red} \phi_0({\color{Blue} \bfx_{0}})} \\ 
+    ~&{\color{Orange} \phi_1({\color{Blue} \bfx_1}, {\color{Blue} \bfx_2}) \phi_2({\color{Blue} \bfx_2}, {\color{Blue} \bfx_3})} \\ 
+    ~&{\color{Black} \phi_3({\color{Blue} \bfx_1}, {\color{Green} l_1}) \phi_4({\color{Blue} \bfx_2}, {\color{Green} l_1}, {\color{Green} l_2}) \phi_5({\color{Blue} \bfx_3}, {\color{Green} l_2})} \\ 
 \end{align}
 %
 This factorization can be represented as a \textit{factor graph} as seen in \ref{fig:toy_factor}. 

@@ -1,0 +1,25 @@
+\chapter{Kinematics}
+\minitoc
+
+The last measurement model of importance that we developed in this work
+
+\section{Leg odometry factor}
+Assuming that we have access to an accurate contact detection, for each foot in contact between \keyframes $i$ and $j$, we can write that 
+$\posi{W}{L}^i = \posi{W}{L}^j + \noise_{LO}$ where $\noise_{LO}$ denotes a Gaussian noise accounting for potential slip of the foot and kinematic inaccuracies. 
+This pseudo measurement can be used to derive a 3D factor for each foot $l$ in contact:
+
+\begin{equation}
+    \bfr^{LO}_l(\posi{}{}^i, \Rot{}{}^i, \posi{}{}^j, \Rot{}{}^j) = \posi{}{}^i + \Rot{}{}^i \posim{B}{L}^i - (\posi{}{}^j + \Rot{}{}^j \posim{B}{L}^j)
+\end{equation}
+
+Where $\posim{B}{L}^i$ and $\posi{B}{L}^j$ are the contact positions in base frame at times $i$ and $j$ acquired from $\bfq_a$ via forward kinematics. 
+
+Assuming good contact detection, leg odometry fused with the IMU is enough to properly observe 6 DoF motion with as few as 2 contact feet at a time. 
+Note that contrary to previous works \cite{hartley2018legged, wisth2020preintegrated}, this leg odometry factor does not require gyroscope integration.
+
+\section{Terrain height}
+
+If we have some prior knowledge about the type of 
+
+\section{Kinematic calibration}
+A crucial part of the usability of this measurement model is to be able to compute an unbiased $\posi{B}{L}$ estimation for each foot.

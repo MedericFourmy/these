@@ -7,7 +7,7 @@ to obtain relative poses from objects whose CAD models are known \cite{labbe2020
 models so as to be able to use them in the context of multi-sensor fusion.
 
 We assume that the camera has been calibrated and that the images are corrected against distortions. The camera reference frame
-follows the convention XYZ=Righ-Down-Front.
+follows the convention X-Y-Z = Righ-Down-Front.
 
 \section{General factor}
 Let's assume that an algorithm provides us $\Tm{C}{O} \in \SE(3)$, a measurement of the pose of an element 
@@ -22,13 +22,13 @@ the robot pose, the camera extrinsics, and the object pose:
 \end{equation}
 
 We also assume that we have access to the covariance of this measurement 
-$\Cov_V \in \Reals^{6 \times 6}$. We will now describe two applications of this factor, one using Apriltag fiducial markers and one using 
+\mbox{$\Cov_V \in \Reals^{6 \times 6}$}. We will now describe two applications of this factor, one using Apriltag fiducial markers and one using 
 a deep-learning object pose estimation algorithm.
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.7\textwidth]{figures/fig_kinematic_Cesar.png}
-    \caption{Camera/object kinematic chain from ICRA paper, to replace }
+    \includegraphics[width=0.7\textwidth]{figures/kin_tree_object.pdf}
+    \caption{Kinematic tree of the object/camera measurement model}
     \label{fig:camera_object_chain}
 \end{figure}
 
@@ -37,9 +37,6 @@ a deep-learning object pose estimation algorithm.
 %
 \section{Fiducial marker}
 \subsection{Markers Pose estimation algorithms}
-% Sota on the question
-% Apriltag: \cite{wang2016iros}
-% IPPE: \cite{collins2014infinitesimal}
 
 Fiducial markers are widely used in robotics and Augmented Reality (AR) applications as they provide an easy way to obtain a relative 6D pose 
 between a calibrated camera and the marker. These markers are designed so that they are easily uniquely and robustly identifiable in any scene 
@@ -66,25 +63,25 @@ Usually, when a nonlinear mapping of noise variables from one space to another i
 to obtain a first-order approximation of the propagated uncertainty (\cite{barfoot2017state} Eq. 7.337).  
 Instead of directly obtaining Jacobians from the PnP algorithms, we found that a natural way to proceed is to take the opposite 
 direction. It should somehow be possible, knowing the marker size and the relative pose measurement, and assuming pixel noise, to
-recover $\Cov_{OV}$. A simple model of this noise is to assume isotropic Gaussian noise on the pixels. If we stack four pixel (the four tag corners) 
+recover $\Cov_{O}$. A simple model of this noise is to assume isotropic Gaussian noise on the pixels. If we stack four pixel (the four tag corners) 
 $\bfx_i = [u_i, v_i] \in \Reals^2$ and we stack then in the vector $\bfx = [\bfx_1 \bfx_2 \bfx_3 \bfx_4]$, we have therefore that
-$\bfx$ is corrupted by a Gaussian noise $\Cov_{\bfx} = \sigma_{x}^2 \bfI$, where $\sigma_{x}$ usually takes values of 1 or 2 pixels.
-PnP algorithm provides us with a function $pnp$ defined as:
+$\bfx$ is corrupted by a Gaussian noise $\Cov_{\bfx} = \sigma_{x}^2 \bfI_8$, where $\sigma_{x}$ usually takes values of 1 or 2 pixels.
+PnP algorithm provides us with a function $\text{pnp}$ defined as:
 
 \begin{equation}
     \begin{split}
-        f: \Reals^8 &\rightarrow SE(3) \\
-                           \bfx &\rightarrow \T{C}{O} = pnp_w(\bfx)
+        f: \Reals^8 &\rightarrow \SE(3) \\
+                           \bfx &\rightarrow \T{C}{O} = \text{pnp}_w(\bfx)
     \end{split}
 \end{equation}
 
-where w denotes the dependency on the width of the marker. This $pnp_w$ function implementation depends on the specificities of the PnP algorithm used and  
+where w denotes the dependency on the width of the marker. This $\text{pnp}_w$ function implementation depends on the specificities of the PnP algorithm used and  
 is in general hard to analytically differentiate. Instead, if we consider the inverse function
 
 \begin{equation}
     \begin{split}
-        g: SE(3) &\rightarrow \Reals^8 \\
-                           \T{C}{O} &\rightarrow \bfx = proj_w(\T{C}{O})
+        g: \SE(3) &\rightarrow \Reals^8 \\
+                           \T{C}{O} &\rightarrow \bfx = \text{proj}_w(\T{C}{O})
     \end{split}
 \end{equation}
 
@@ -119,13 +116,13 @@ Let's define the marker corner coordinates in the marker frame, like shown in \f
 Then, assuming that images are corrected (no distortion), the pinpoint camera model gives us that
 
 \begin{equation}
-    \bfx_i = eucl(h_i) = eucl(K\T{C}{O} c_i)
+    \bfx_i = \text{eucl}(h_i) = \text{eucl}(K\T{C}{O} c_i)
 \end{equation}
 for each corner $c_i$, where $h_i$ are the homogeneous coordinates representing the projected corners and $eucl$ is the euclideanization function defined as
 \begin{equation}
     \begin{split}
-        eucl: \Reals^3 &\rightarrow \Reals^2 \\
-        h = \begin{pmatrix}x\\y\\z\end{pmatrix} &\rightarrow \bfx = \begin{pmatrix}x/z\\y/z\end{pmatrix}
+        \text{eucl}: \Reals^3 &\rightarrow \Reals^2 \\
+        \bfh = \begin{pmatrix}x\\y\\z\end{pmatrix} &\rightarrow \bfx = \begin{pmatrix}x/z\\y/z\end{pmatrix}
     \end{split}
 \end{equation}
 
@@ -162,13 +159,13 @@ Finally, we can stack the 4 jacobians to get the full jacobian to be used for co
 \end{equation}.
 
 
-We therefore have the covariance propagation equation $Q_{\bfx} = J Q_{\T{C}{O}} J^T$. 
+We therefore have the covariance propagation equation $\Cov_{\bfx} = J \Cov_{\T{C}{O}} J^T$. 
 This equation must be inverted in order to recover the needed covariance. $J$ being non square, 
 we have to use the pseudo inverse to write: $\Cov_{\T{C}{O}} = J^{T,\dagger} \Cov_{\bfx} J^{\dagger}$. 
 Given that the pixel noise covariance is isotropic as explained above, this equation simplifies to:
 
 \begin{equation}
-Q_{\T{C}{O}} = \sigma_{\bfx}^2(J^T J)^{-1}    
+\Cov_{\T{C}{O}} = \sigma_{\bfx}^2(J^T J)^{-1}    
 \end{equation}
 
 Note that the derivations above are not limited to a square tag with four corners and could in theory be used for any object defined as
@@ -178,10 +175,10 @@ We have therefore a compact model informed by the geometry of the measurement mo
 It is hard to represent graphically the appearance of this uncertainty model from the full 6D covariance. However, we can inspect the positional and orientational
 (respectively 3x3 upper-left and 3x3 lower-right sub-matrices) by representing theme as confidence ellipsoids.
 In fact, for a random variable $x$ with a size $k$ multivariate normal distributions with mean $\mu \in \Reals^3$ and 
-covariance matrix $\Sigma \in \Reals^{3 \times 3}$, the statistics:
+covariance matrix $\Cov \in \Reals^{3 \times 3}$, the statistics:
 %
 \begin{equation}
-    (x - \mu)^T \Sigma^{-1}(x - \mu) = \chi^2
+    (x - \mu)^T \Cov^{-1}(x - \mu) = \chi^2
     \label{eq:chi2}
 \end{equation}
 %
@@ -225,6 +222,17 @@ explains the higher uncertainty on the depth measurement. A similar observation 
 \end{figure}
 
 A quantitative comparison with \cite{urban2016mlpnp} would be interesting as well as an experimental validation campaign.
+
+
+\subsection{Ambiguity in the pose estimation}
+It is well known that the pose extraction from planar markers suffers from an inherent ambiguity between two fairly different rotations as described in 
+\cite{8206468} for instance. One solution is to define the tag factor residual as the pixel error between the detected corners and their projection given 
+current tag pose estimate and let the optimizer find the most probable tag poses given the complete set of measurements. However if one tag is wrongly initialized, 
+the optimizer is not guaranteed to leave the local minimum with new measurements. Our solution is to bring the disambiguation on the front-end side.
+\cite{collins2014infinitesimal} provides an implementation of the PnP problem that retrieves both ambiguous poses. When expressed in camera frame, 
+both solutions share the tag position and differ only in its orientation. We typically want to select the solution with smaller error. 
+However, if the reprojection errors $e_1$ and $e_2$ are too close (we test for $\tfrac{e_2}{e_1} < h$ with $e_1 \leq e_2$ and $h$ an empirical threshold), 
+we increase the rotational part of the covariance matrix by a great factor to prevent a potential wrong tag orientation to influence the estimation.
 
 
 %
@@ -299,16 +307,29 @@ and the prediction of the pose of the object is obtained by composing the $N$ su
 \T{C}{O_{\alpha}} = \T{C}{O_{\alpha},0} \prod_{k=1}^N  \T{O_{\alpha},k-1}{O_{\alpha},k}
 \end{equation}
 
-CosyPose reuses the neural network architecture of DeepIm with a new backbone for feature extraction: Efficient-Net \cite{tan2020efficientnet} with a spatial average pooling layer added after it. Then, it disables the optical flow sub network during the training. A new rotation parametrization is used for the loss function which was introduced in \cite{zhou2020continuity} and which has been shown to bring more stability during training. Then, the focal length of the cropped images is recomputed during training to fit the virtual camera of these images. Finally, the object symmetries are taken into account during training thanks to the \textit{symmetric distance}. Each 3D model $l$ is associated with a set of symmetries $S(l)$, that is the set of transformations that leave the aspect of the object unchanged:
+CosyPose reuses the neural network architecture of DeepIm with a new backbone for feature extraction: Efficient-Net \cite{tan2020efficientnet} 
+with a spatial average pooling layer added after it. Then, it disables the optical flow sub network during the training. 
+A new rotation parametrization is used for the loss function which was introduced in \cite{zhou2020continuity} and which has been shown 
+to bring more stability during training. Then, the focal length of the cropped images is recomputed during training to fit the virtual camera 
+of these images. Finally, the object symmetries are taken into account during training thanks to the \textit{symmetric distance}. 
+Each 3D model $l$ is associated with a set of symmetries $S(l)$, that is the set of transformations that leave the aspect of the object unchanged:
+
 \begin{equation}
     \textit{S}(l) = \left \{ \bfS \in \SE(3) | \forall \bfT \in \SE(3), \mathcal{R}(l,\bfT) = \mathcal{R}(l,\bfT \bfS)\right \}
 \end{equation}
-where $\mathcal{R}(l,\bfT)$ is the rendered image of the object $l$ captured in pose $M$. Given a set of symmetries $S(l)$, we define the symmetric distance $D_l$ which measures the distance between two 6D poses represented by transformation $\bfT_1$ and $\bfT_2$. Given an object $l$ associated to a set $\mathcal{X}_l$ of 3D points $\mathbf{x} \in \mathcal{X}_l$, we have:
+
+where $\mathcal{R}(l,\bfT)$ is the rendered image of the object $l$ captured in pose $M$. Given a set of symmetries $S(l)$, 
+we define the symmetric distance $D_l$ which measures the distance between two 6D poses represented by transformation $\bfT_1$ and $\bfT_2$. 
+Given an object $l$ associated to a set $\mathcal{X}_l$ of 3D points $\mathbf{x} \in \mathcal{X}_l$, we have:
+
 \begin{equation}
     D_l(\bfT_1, \bfT_2) = \underset{\bfS \in \textit{S}(l)}{\text{min}} \frac{1}{|\mathcal{X}_l|} \sum_{\mathbf{x} \in \mathcal{X}_l} ||\bfT_1 S\mathbf{x} - \bfT_2\mathbf{x} ||^2
     \label{eq:distSym}
 \end{equation}
-Equation (\ref{eq:distSym}) measures the average distance between the points of the object model transformed by $\bfT_1$ and $\bfT_2$ according to the symmetry that best aligns the transformed points. In practice, for continuous symmetries  that are rotations around an axis (like for instance for a textureless cylinder), $S(l)$ is discretized using 64 angles.
+
+Equation (\eqRef{eq:distSym}) measures the average distance between the points of the object model transformed by $\bfT_1$ and $\bfT_2$ according to the symmetry 
+that best aligns the transformed points. In practice, for continuous symmetries  that are rotations around an axis (like for instance for a textureless cylinder), 
+$S(l)$ is discretized using 64 angles.
 
 
 \subsection{Empirical covariance estimation}
@@ -320,10 +341,101 @@ Iterative Closest Point output. The methods targeted for deep learning applicati
 is to use an off-the-shelf pose estimation neural network, as it is the case for this paper. For instance, Bayesian Neural Networks \cite{jospin2020hands} 
 need to be trained explicitly for uncertainty prediction while Monte Carlo (MC) Dropout \cite{gal2016dropout} requires multiple forward passes at run-time.
 
-In our work \cite{debeunne2021cosyslam}, we present a practical implementation of a SLAM system based on the design of an off-the-shelf deep learning object 
+In our work CosySLAM \cite{debeunne2021cosyslam}, we present a practical implementation of a SLAM system based on the design of an off-the-shelf deep learning object 
 pose estimation algorithm \cite{labbe2020cosypose}, which empirical results are presented in section [REF]. 
 In order to be able to integrate these measurements with other sensors, we propose a noise model based on empirical data.
 
+\subsubsection{Covariance model}
+
+CosyPose does not provide an evaluation of its uncertainty.
+%
+The two main families of solutions available to estimate uncertainties of neural network predictions consist in MC dropout \cite{gal2016dropout} 
+or Bayesian Neural Network (BNN) \cite{jospin2020hands}. Using BNNs would require to change the architecture of CosyPose and to retrain it. 
+MC dropout would require several forward passes through the network for each iterations, which would be computationally expensive. 
+
+We need to compute the covariance without changing the architecture of the network and at an affordable cost. 
+We propose to make an empirical error model based on polynomial regression in order to compute the covariance matrix. 
+The idea is to parametrize the average error on each $\se(3)$ component returned by CosyPose. We conduct an empirical study on several video 
+sequences that explore the variations of the parameter set for several object types. The error is computed by comparing the $\SE(3)$ transformations 
+between the camera $C$ and an object $O$ returned by CosyPose $\T{C}{O}$ with the same transformation given by a motion capture system. 
+We then use the error predictions of our parametric model as a proxy to the true 6 covariances during model fitting. 
+A different model is fit for each object type due to their diversity of shapes, sizes and textures.
+
+The parameters to compute the error need to represent as much as possible the error sources of CosyPose. 
+To cover the error due to the configuration of the object in space, we need to include the 3D coordinates of the camera in the object frame. 
+We also want to take into account some invariance that can occur by rotating around the object if it is texture-less for example. 
+For this reason, we choose spherical coordinates of the camera origin with respect to the object frame to parametrize the model. 
+Another source of error can be the occlusion of the object in the scene, as well as the motion blur, or any inherent noise in the image. 
+This can affect the quality of the detection and of the pose estimation. Having an idea of the quality of the object detection informs us on the 
+quality of the object representation that may be occluded or blurry. The Mask-RCNN object detector returns a confidence score $s$ for each detection 
+that we will include in our model. This score is the output of the final softmax layer of the detector, which is designed to represent a probability distribution.
+
+% To sum up, we have the following parameters for our error model:
+% \begin{itemize}
+% \item $\displaystyle r = || \posihat{O}{C}||$,
+% \item $\displaystyle \varphi  = \arctan\left(\frac{ \prescript{0}{}{\hat{x}}_C}{\prescript{0}{}{\hat{y}}_C}\right)$,
+% \item $\displaystyle \theta  = \arcsin\left(\frac{\prescript{0}{}{\hat{z}}_C}{r}\right)$,
+% \item $\displaystyle s$ : mask-RCNN softmax output.
+% \end{itemize}
+
+To sum up, our model is parametrized by four values: $r$ - distance, $\varphi$ - azimuth, $\theta$ - elevation, $s$ - Mask-RCNN softmax output. 
+We can then compute the error of CosyPose with respect to the motion capture data: 
+
+\begin{equation}
+    \mathbf{e}  = [\mathbf{e}_{t}, \mathbf{e}_{a}]  \triangleq  \left[~\posihat{O}{C} - \posim{O}{C}, ~ \Log \left(\Rothat{O}{C}^{-1}\Rotm{O}{C}\right)~\right]
+\end{equation}
+
+where $\widehat{\cdot}$ and $\widetilde{\cdot}$ denote quantities obtained from the motion capture system and CosyPose respectively. 
+$\Log$ denotes the logarithm application mapping elements of SO(3) to the $\Reals^3$ representation of its Lie algebra 
+$\so(3)$.
+
+We want to find a polynomial function $f(r, \varphi, \theta, s) \in \mathbb{R}^6$ that returns the error given the set of training data $\{X,E\}$. 
+For each object, we capture a set of video sequences and we compute the error with the motion capture data for each measurement. 
+We then perform polynomial regression with a pipeline in Scikit Learn \cite{scikit-learn}. A simple linear regression leads to a high root-mean-square error (RMSE) 
+on a test dataset. Over degree 3, the model overfits and the high curvature of the polynomial returned high error values outside of the training data range. 
+Thus, a degree 2 polynomial regression seemed to offer a good compromise.  Quantitative results are given in the experimental validation section 
+(see Fig.~\ref{fig:empirical_err} for a few examples of fitted polynomials).
 
 
+\subsubsection{Empirical covariance}
 
+As explained in Sec. II, we have trained empirical models to evaluate the covariance of the estimation of CosyPose. 
+To validate these models, we propose to exhibit a few intuitive observations and a quantitative statistical analysis. 
+One of the parameter involved in our model is the absolute distance between the camera and the object, noted $r$. 
+Our trained models show an expected behavior regarding this parameter: the global error increases when the camera moves away from the object. 
+%
+\begin{figure}[h]
+  \centering 
+  \includegraphics[width=0.8\textwidth]{figures/empirical_err.png}
+  \caption{The norm of the translation error returned by the models of three different objects with respect to $r$, the distance between the camera and the object. 
+            The other parameters $\theta$, $\phi$ and $s$ are fixed to the average values of our training data. }
+  \label{fig:empirical_err}
+\end{figure}
+
+\figRef{fig:empirical_err} sheds light on these phenomena and gives an explicit comparison between the models of different objects. 
+The error of the object from the YCBV dataset seems more stable and smaller than the one of the objects from the T-LESS dataset. 
+This can be explained by the texture of the object and the absence of symmetries: T-LESS objects are known to be more challenging 
+for pose estimation and this is confirmed by our model.
+
+A more quantitative evaluation can be deduced from table \tabRef{table:empirical_models}. The translation error seems to be captured pretty well,
+ as the RMSE is around the centimeter. However, the angular error seems a little less predictable, especially for T-LESS objects which orientation 
+ estimation can suffer from an important measurement noise due to the lack of textures. The $R^2\in[0,1]$ score is the coefficient of determination 
+ and is often used to evaluate statistical models. Its interpretation is subject to debate and cannot conclude to a "good" or a "bad" model. 
+ However, a score higher than 0 demonstrates that our model is more accurate than a simple average model.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+        \hline 
+          & $\displaystyle R^{2}$ & RMSE ang. err. (°) & RMSE trans. err. (cm) \\
+        \hline 
+         YCBV-4 & 0.55 & 5,1 & 0.6 \\
+        \hline 
+         T-LESS-23 & 0.5 & 11.7 & 1.5 \\
+        \hline 
+         T-LESS-26 & 0.68 & 22 & 0.6 \\
+         \hline
+    \end{tabular}
+    \caption{A quantitative evaluation of our models, these values are computed on test samples that were not used for training. }
+    \label{table:empirical_models}
+\end{table}
