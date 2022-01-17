@@ -1,6 +1,8 @@
 \chapter{Preintegrated sensors}
 \minitoc
 
+\label{chp:preintegrated}
+
   
 \section{A motivational example: IMU integration for graph optimization}
 In this section we will introduce the IMU measurement model and explain why integrating these measurements in the world frame does not immediately
@@ -618,6 +620,7 @@ for high angular velocities or sampling rate.  Secondly, the log-likelihood of t
 on the covariance IMU noise covariance propagation, which is severely degraded when the robot trajectory comes close to the singularity. 
 \cite{shen2015tightly}, later improved in \cite{qin2018vins} proposed to use a more precise numerical integration procedure than the default forward Euler used by Forster. 
 Eckenhoff \cite{eckenhoff2019closed} derived closed form solutions of the preintegration equations using various piecewise constant models.
+
 Barrau \cite{barrau2020mathematical} described a coupled matrix Lie group for the propagation of preintegration errors taking into account the earth rotation for aerospace
 inertial navigation system in view. This work was later extended \cite{brossard2021associating} and showed that the linearized bias update is slightly more precise than 
 the work of Forster \cite{forster2017-TRO}. Le Gentil \cite{le2020gaussian} used a different trajectory parametrization framework by formulating the preintegration algorithm 
