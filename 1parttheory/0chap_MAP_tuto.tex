@@ -3,130 +3,409 @@
 
 Let us explicit the terms prevent in this chapter's title. 
 
-The \textit{state} of the robot is a set of variables of particular interest to the roboticist, be it for control, parameter identification, etc.
-Those quantities may not directly measurable, due to their physical nature (an angular momentum sensor would be hard to imagine) or because sensor data
-is too noisy, biased, or impractical to obtain (\eg GPS for localization is very bad close to flat surfaces because of beam reflections). 
-Those latent variables can however be estimated by fusing multiple sensors data using a state estimator (aka. observer in automation). In the context of 
-a probabilistic estimator, these are random variables. Most state estimators work with variables which sample state is continuous. The goal is then 
-to find the probability density of those states.
+The \textit{state} of the robot is a reduced set of variables of particular interest to the roboticist, be it for control, parameter identification, etc.
+Those quantities may not directly measurable, due to their physical nature (the center of mass is a virtual point) or because sensor data
+is too noisy, biased, or impractical to obtain (\eg GPS for localization is bad close to flat surfaces because of beam reflections). 
+Those latent variables can however be estimated by fusing multiple sensors data using a state estimator (aka. observer in automation). 
+The task of \textit{estimation} can then simply be stated as finding the most likely robot state given these measurements. 
 
-Taking the Bayesian perspective, the most general problem is to find a distribution over a collection of random variables $\mathcal{X}$ given a set 
-of measurements $\mathcal{Z}$, $p(\mathcal{X} | \mathcal{Z})$ which is known as the \textit{posterior}. 
+Probabilistic theory applied to signal processing and information theory has been the bedrock of the state estimation theory development.
+In the context of a probabilistic estimator, states are random variables, which, in the robotics context, are mostly continuous. 
+The goal is then to find the probability density of those states.
+Taking the Bayesian perspective, the most general problem is to find a distribution over a collection of random variables $\cX$ given a set 
+of measurements $\cZ$, $p(\cX | \cZ)$, which is known as the \textit{posterior} distribution. 
 The Bayes law represents this exact inference:
 %
 \begin{equation}
-    p(\mathcal{X} | \mathcal{Z}) = \frac{p(\mathcal{Z} | \mathcal{X}) p(\mathcal{X})}{p(\mathcal{Z})} 
+    p(\cX | \cZ) = \frac{p(\cZ | \cX) p(\cX)}{p(\cZ)}.
 \end{equation}
 %
-$p(\mathcal{Z} | \mathcal{X})$ is the measurement model that can be obtained through modeling, also called the \textit{likelihood} of the observation. 
-$p(\mathcal{X})$ is a \textit{prior} that we have on the state variable distribution. This may include for instance knowledge about the initial state of the robot or
+$p(\cZ | \cX)$ is the measurement model that can be obtained through modeling, also called the \textit{likelihood} of the observation. 
+$p(\cX)$ is a \textit{prior} that we have on the state variable distribution. This may include for instance knowledge about the initial state of the robot or
 an approximate value of parameters that we seek to estimate.
-The \textit{partition constant} $p(\mathcal{Z})$ can be thought of as a global normalization constant (\cite{koller2009probabilistic}, chapter 20 ) in case 
-the $\mathcal{Z}$ random variable is observed, which is our case. In general, this term is computationally intractable to compute. Exact inference is 
-therefore rarely undertaken, instead relying on approximate inference methods. In the context of robotics, sampling (\cite{koller2009probabilistic}, chapter 11) has been 
-leveraged in the popular recursive particle filter which for tasks such as localization \cite{dellaert1999monte} and SLAM \cite{montemerlo2002fastslam}. A very interesting
-property of this approximation is the fact that any kind of posterior distributions can be modelled, in particular multimodal distributions which can be useful
-for problems such as the kidnapped robot problem \cite{dellaert1999monte}. Application of variational inference is scarcer, with the notable 
-exceptions of works from Barfoot \cite{barfoot2020exactly, wong2020variational} which derives a graph optimization estimation based on variational inference
-and Lambert \cite{lambert2022recursive} which proposes a recursive variational Gaussian filter. The idea here is to fit a candidate distribution 
-(usually Gaussian) so as to minimize the Kullback-Leibert divergence between the posterior and the candidate distribution.
+The \textit{marginalized likelihood} $p(\cZ) = \int p(\cZ|\cX)p(\cX)d\cX $ can be thought of as a global normalization constant (\cite{koller2009probabilistic}, chapter 20 ) in case 
+the $\cZ$ random variable is observed, which is our case. In general, this term is computationally intractable to compute, since it requires marginalizing
+the likelihood distribution over all possible states. Exact inference is therefore rarely possible, the Bayesian practitioner instead relying on approximate inference methods.
 
-A more popular approach to the estimation problem is to solve the \textit{Maximum A Posteriori} (MAP) problem.
+In the context of robotics, recursive Monte Carlo sampling (\cite{koller2009probabilistic}, chapter 11) has been 
+leveraged in the popular recursive particle filter for tasks such as localization \cite{dellaert1999monte} and SLAM \cite{montemerlo2002fastslam}. A very interesting
+property of this approximation is the fact that multimodal distributions can be modelled, which can be useful
+for multihypothesis problems such as the kidnapped robot problem \cite{dellaert1999monte} or target tracking \cite{gustafsson2002particle}. 
+
+Application of variational inference (\cite{koller2009probabilistic}, chapter 11) is scarcer. The idea here is to search for a candidate distribution 
+(usually a Gaussian) that minimizes the Kullback-Leibert divergence between the posterior and the candidate distribution. Very recent works start 
+to find applications in robotics as alternative to MAP-based graph optimization \cite{barfoot2020exactly, wong2020variational} 
+or to Bayes filtering \cite{lambert2022recursive}. 
+
+A more popular approach to the estimation problem is to find the mode of the mode of the posterior distribution, aka. the \textit{Maximum A Posteriori} (MAP).
+
+
 
 \section{Maximum A Posteriori estimation}
 
-Instead of finding the full posterior, an efficient way to characterise the posterior distribution is to find its mode, that is the states that 
-result in the highest posterior probability. The estimation problem is in this case a unconstrained optimization problem:
+An efficient way to characterize the posterior distribution is to first find its mode, that is the states that 
+result in the highest posterior probability. The estimation problem is, in this case, a unconstrained optimization problem
 %
 \begin{equation}
     \label{eq:MAP_pbe}
-    \mathcal{X}^{MAP} \triangleq \argmax_{\mathcal{X}} p(\mathcal{X} | \mathcal{Z}) = \argmax_{\mathcal{X}} p(\mathcal{Z} | \mathcal{X}) p(\mathcal{X}),
+    \cX^{MAP} \triangleq \argmax_{\cX} p(\cX | \cZ) = \argmax_{\cX} p(\cZ | \cX) p(\cX).
 \end{equation}
 %
 
-Notice that $p(\mathcal{Z})$ does not appear on the right side since it is constant with respect to $\mathcal{X}$.
-States variables $\mathcal{X}$ in our case are a collection of random variables $\{\mathcal{X}_i\}_{i \in [0..N]}$ that each relate to a physical quantity of 
-interest (\eg the initial robot position, constant camera parameters, orientation of an object in the scene, IMU biases, etc.). Measurements $\mathcal{Z}$ are 
-similarly a collection of individual sensor measurements $\{\bfz_i\}_{i \in [0..M]}$.
+Notice that the $p(\cZ)$ term does not appear anymore on the right side since it is constant with respect to $\cX$.
+States variables $\cX$ in our case are a collection of random variables $\{\cX_i\}_{i \in [1..N]}$ that each relate to a physical quantity of 
+interest (\eg the initial robot position, constant camera parameters, orientation of an object in the scene, IMU biases, etc.). Measurements $\cZ$ are 
+similarly a collection of individual sensor measurements $\{\bfz_i\}_{i \in [1..M]}$.
 
 Additional assumptions have to be made in order to obtain a numerical implementation of this problem.
-First, the measurements are supposed to be conditionally independent of each other, so that the likelihood function can be factorized. 
+First, the measurements are supposed to be conditionally independent of each other, so that the likelihood function can be factorized 
 %
 \begin{equation}
-    p(\mathcal{Z} | \mathcal{X}) p(\mathcal{X}) = \prod^{N} p(\bfz_i | \mathcal{X}_{S_i}) p(\mathcal{X}_0)
+    p(\cZ | \cX) p(\cX) =  p(\cX_{S_0}) \prod_{i=1}^{N} p(\bfz_i | \cX_{S_i}).
 \end{equation}
 %
-Each factor represents the measurement model associated to the  observation $\bfz_i$ and depending only on a subset $S_i$ of the state variables $\mathcal{X}_{S_i}$. 
-$\mathcal{X}_0$ denotes the subset of random variables on which we have nonuniform prior.
+Each factor represents the measurement model associated to the  observation $\bfz_i$ and depending only on a subset $S_i$ of the state variables $\cX_{S_i}$. 
+$S_0$ denotes the subset of random variables on which we have nonuniform prior.
 Secondly, the measurements are assumed to be corrupted by multivariate Gaussian noise:
 %
 \begin{equation}
-    p(\bfz_i | \mathcal{X}_{S_i}) = \frac{1}{\sqrt{2\pi\Sigma_i}} ~ \exp(- \frac{1}{2} (||\bfr_i(X_{S_i})||_{\Sigma_i}) \triangleq K_i~\phi_i(\mathcal{X}_{S_i})
+    p(\bfz_i | \cX_{S_i}) = \frac{1}{\sqrt{2\pi\Sigma_i}} ~ \exp(- \frac{1}{2} (||\bfe_i(X_{S_i})||^2_{\Sigma_i}) \triangleq K_i~\phi_i(\cX_{S_i})
 \end{equation}
 %
-where the \textit{residuals} $\bfr_i$ are (potentially) nonlinear functions of the state variables, $K_i$ are constants, $\Sigma_i$ is the covariance of the observation noise,
-$\phi_i(\mathcal{X}_{S_i})$ is the un-normalized measurement likelihoods called \textit{factors},
+where the \textit{residuals} $\bfe_i$ are (potentially) nonlinear functions of the state variables, $K_i$ are constants, $\Sigma_i$ is the covariance of the observation noise,
+$\phi_i(\cX_{S_i})$ is the un-normalized measurement likelihoods called \textit{factors},
 and 
 %
 \begin{equation*}
-    ||\bfr_i(X_{S_i})||^2_{\Sigma_i} = \bfr_i(X_{S_i}) \Sigma_i^{-1} \bfr_i(X_{S_i})    
+    ||\bfe_i(X_{S_i})||_{\Sigma_i} = \sqrt{\bfe_i(X_{S_i}) \Sigma_i^{-1} \bfe_i(X_{S_i})}
 \end{equation*}
 %
 is known as the squared Mahalanobis distance. 
-Residuals $\bfr_i(X_{S_i})$ can generally be formulated as a difference between a \textit{expectation function} $\bfh$ and the actual measurements
+Residuals $\bfe_i(X_{S_i})$ can generally be formulated as a difference between a \textit{expectation function} $\bfh$ and the actual measurements
 %
 \begin{equation}
-    \bfr_i(X_{S_i}) = \bfh(\mathcal{X}_{S_i}) \ominus \bfz_i,
+    \bfe_i(X_{S_i}) = \bfh(\cX_{S_i}) \ominus \bfz_i,
 \end{equation}
 %
 where $\ominus$ is a generalized difference operator,
-although some exceptions may exist (see for instance \eqRef{eq:preint_residual} in \secRef{sec:preint_residual}).
-%
+although some exceptions may exist (see for instance the IMU preintegration residual \eqRef{eq:preint_residual} in \secRef{sec:preint_residual}).
+
 Thus, the posterior probability is proportional to a product of individual factors:
 %
 \begin{equation}
-    p(\mathcal{X} | \mathcal{Z}) \propto \phi_i(X_{S_i}) \phi_0(\mathcal{X}_{0})
+    p(\cX | \cZ) \propto \phi_0(\cX_{S_0}) \prod_{i=1}^{N} \phi_i(X_{S_i}) 
     \label{eq:likelihood_factorization}
 \end{equation}
 %
 Recognizing than maximizing the likelihood in \eqRef{eq:MAP_pbe} is equivalent to minimizing the negative log-likelihood.
 %
 \begin{align}
-    \mathcal{X}^{MAP} 
-    &= \argmin_{\mathcal{X}} - \log p(\mathcal{Z} | \mathcal{X}) ~&\mbox{\small MAP problem definition}\\
-    &= \argmin_{\mathcal{X}} - \log p(\mathcal{Z} | \mathcal{X}) p(\mathcal{X}) ~&\mbox{\small Unaffected Partition constant}\\
-    &= \argmin_{\mathcal{X}} - \log \prod^{N} p(\bfz_i | \mathcal{X}_{S_i}) p(\mathcal{X}_0) ~&\mbox{\small Conditional independences}\\
-    &= \argmin_{\mathcal{X}} - \log \prod^{N} \phi_i(X_{S_i}) \phi_0(\mathcal{X}_{0}) ~&\mbox{\small Factorized likelihood}\\
-    &= \argmin_{\mathcal{X}} \sum^{N} ||\bfr_i(\mathcal{X}_{S_i})||_{\Sigma_i}^2 + ||\bfr_0(\mathcal{X}_{0})||_{\Sigma_0}^2 ~&\mbox{\small Gaussian measurement models}\\
+    \cX^{MAP} 
+    &= \argmin_{\cX} - \log p(\cX | \cZ) &\text{\small MAP problem definition}
+    \\
+    &= \argmin_{\cX} - \log p(\cZ | \cX) p(\cX) &\text{\small Unaffected Partition constant}
+    \\
+    &= \argmin_{\cX} - \log p(\cX_0) \prod_{i=1}^{N} p(\bfz_i | \cX_{S_i})  &\text{\small Conditional independences}
+    \\
+    &= \argmin_{\cX} - \log \phi_0(\cX_{S_0}) \prod_{i=1}^{N} \phi_i(X_{S_i}) &\text{\small Factorized likelihood}
+    \\
+    &= \argmin_{\cX}  \sum_{i=0}^{N} ||\bfe_i(\cX_{S_i})||_{\Sigma_i}^2  &\text{\small Gaussian measurement models}
 \end{align}
 
-Thus, solving the MAP problem with the aforementioned hypothesis boils down to solving a nonlinear weighted least-squares (NLLS) problem.
+Thus, solving the MAP problem with the aforementioned hypotheses boils down to solving a nonlinear weighted least-squares (NLLS) problem.
+Notice that we included the prior in the sum of the residuals, as it is mathematically equivalent to a measurement model even if it conceptually
+comes from a different source of information. 
 The weights are the inverse of the measurement covariances: the more uncertain a measurement is, the higher its covariance and, therefore, the lower its influence
 on the weighted squared residuals sum. 
-
-An important question to ask is how confident are we in our MAP estimate? Even if our priors and measurements models are Gaussian distribution, the posterior distribution
-is not in general Gaussian (unless all measurements models are linear). The region near the peak of the posterior is, however, often nearly Gaussian in shape.
-The curvature around the mode is described by the weighted Hessian $\bfH$ of the sum of squared residual, which is a big sparse matrix computed by the optimizer.
-The Hessian is actually the information matrix of the problem, so that finding the covariance of the MAP estimate resolves to inverting a sparse positive definite 
-matrix. This way, we can approximate our posterior by a multivariate Gaussian, which mean is the mode value and covariance is the problem hessian inverse. 
-
-\begin{equation}
-    p(\mathcal{X} | \mathcal{Z}) \approx \text{Gauss}(\mathcal{X}^{MAP}; \bfH^{-1})
-    \label{eq:map_laplace}
-\end{equation}
-
-This referred to as the Quadratic or Laplace approximation (\cite{mcelreath2018statistical}, section 2.4.2). MAP inference is then a two step process: 
-first find the mode of the posterior (the MAP), then "fit a Gaussian" on this mode. 
-To constrast this approach with aforementioned approximations, variational inference as applied in Barfoot et al. 
- \cite{barfoot2020exactly} for instance fit both the mean an the covariance of a Gaussian model as a result of a single optimization problem.
 
 A vast part of the literature on MAP estimation has been dedicated to the implementation of efficient ad hoc NLLS solvers. Most of them are 
 gradient-based algorithm, typically some variation of the Gauss-Newton algorithm, such as the Levenberg-Marquardt algorithm \cite{boyd2004convex}.
 
 
+
+
+
+%
+%
+%
+%
+%
+%
+%
+\section{Gauss-Newton algorithm}
+In this section, we will give a brief introduction to a commonly used way to solve the MAP problem expressed as a NNLS: the Gauss-Newton algorithm.
+For now, we will assume that state variables and measurements all live in vector spaces to simplify the derivations. For many practical robotics applications,
+some state variables such as rotation matrices live in more complex manifolds. We will go over this issue in section section. 
+The section is based on tutorials such as \cite{dellaert2017factor,sola2017course}. 
+
+\subsection{Derivation of the Gauss-Newton step}
+First, we will simplify notations by dropping dependencies on state variables $X_{S_i}$ where evident to lighten notations. 
+Secondly, we will make a simple change of variables. The weighted squared residuals can be expressed as:
+\begin{equation}
+    ||\bfe_i||^2_{\Sigma_i} = \bfe_i \Sigma_i^{-1} \bfe_i 
+    = (\Sigma_i^{-\frac{1}{2}}\bfe_i)^T\Sigma_i^{-\frac{1}{2}}\bfe_i
+    = ||\Sigma_i^{-\frac{1}{2}}\bfe_i||^2 = ||\bfr_i||^2
+\end{equation}
+where $\bfr_i(X_{S_i}) \triangleq \Sigma_i^{-\frac{1}{2}}\bfe_i(X_{S_i})$ can be interpreted as a whitened residual. $\Sigma_i^{-\frac{1}{2}}$ can be obtained
+from the Cholesky factorization of $\Sigma_i^{-1}$. Therefore, the NLLS MAP problem can simply be written:
+
+\begin{equation}
+    \cX^{MAP} = \argmin_{\cX} \cL(\cX) \triangleq||\bfr||^2 = \sum_i^{i=N} ||\bfr_i({\cX_{S_i}})||^2 
+\end{equation}
+were $\bfr$ is a vector of vertically stacked residuals (column vectors) and the cost function $\cL(\cX)$ is simply the squared norm 
+of the residual vector. Let's assume we have a current estimate of the state variables $\check{\cX}$.
+Each residual can be linearized with respect to this estimate:
+
+\begin{equation}
+    \bfr_i(\cX_{S_i}) = \bfr_i(\check{\cX}_{S_i} + \Delta \bfx_i) \approx \check{\bfr}_i + \check{\bfJ}_i \Delta \bfx_i
+\end{equation}
+
+where $\check{J}_i$ is the jacobian of the residual at $\check{\cX}_{S_i}$: 
+
+\begin{equation*}
+    \check{\bfJ}_i \triangleq \left.\frac{\partial \bfr_i}{\partial \cX_{S_i}}\right|_{\check{\cX}_{S_i}}
+\end{equation*}
+
+We also stack up the $\Delta \bfx_i$ column vectors as $\Delta \bfx \in \Reals^N$ and the residual jacobians at the linearization point 
+$\check{\bfJ} \in \Reals^{M \times N}$ so that the linearized cost function writes:  
+%
+\begin{equation}
+    \cL(\check{\cX} + \Delta \bfx) 
+    \approx ||\check{\bfr} + \bfJ \Delta \bfx||^2 
+    = \check{\cL} +  \check{\bfr}^T \check{\bfJ} \Delta \bfx + \frac{1}{2}\Delta \bfx^T \check{\bfJ}^T \check{\bfJ} \Delta \bfx 
+    \triangleq \cF(\Delta \bfx)
+\end{equation}.
+
+We now drop the $\check{\cdot}$ notation to lighten notations $\cF(\Delta \bfx)$ is therefore a local parabolic approximation of 
+$\cL$ around the current estimate and $\bfH \triangleq \bfJ^T \bfJ$ is the approximate Hessian of $\cL$ 
+\footnote{See \cite{sola2017course} Section 4.2.1 for more details on the nature of the approximation.}. Note that by construction, $\bfH$ is always 
+semi-definite positive.
+
+The optimal step (Gauss-Newton step) $\Delta \bfx^*$ is found by differentiating $\cF$ with respect to $\Delta \bfx$ and and equaling to 0 
+which gives the linear system of equation:
+\begin{equation}
+    \bfH \Delta \bfx^* = - \bfJ^T \bfr%, \quad \quad \bfA \triangleq \bfH, \quad \quad \bfb \triangleq 
+\end{equation}
+
+Substituting $\bfH$ by its expression, the Gauss Newton step is found by solving the linear system, that is to say inverting $\bfH$:
+
+\begin{equation*}
+    \Delta \bfx_{GN}^* = - \bfH^{-1} \bfJ^T \bfr = - (\bfJ^T \bfJ) \bfJ^T \bfr = -  \bfJ^{+} \bfr
+\end{equation*}
+where $\bfJ^{+}$ is the (right) pseudo inverse of the residual gradient. 
+
+In practice, this matrix $\bfJ^{+}$ is not computed explicitly as more efficient linear system exists. In particular methods based on the Cholesky
+factorization of $\bfH$ and on the QR factorization of $\bfJ$ are commonly used in SLAM since they are able to exploit the sparsity of these
+matrices.
+
+
+\subsection{Gauss-Newton algorithm}
+The Gauss-Newton algorithm is an iterative algorithm to find the minimum of NLLS cost functions that can be decomposed in a series of steps.
+\begin{enumerate}
+    \item Initialize the state estimate at an initial value $\check{\cX} := \cX^0$
+    \item Approximate the cost function $\cL(\cX)$ around the current estimate as a quadratic function
+    \item Find the optimal step $\Delta \bfx^*$ by solving a linear set of equations, as explained above
+    \item Update the current state estimate $\check{\cX} := \check{\cX} + \Delta \bfx^*$
+    \item Loop over steps 1-3 until convergence
+\end{enumerate}
+
+
+
+
+\subsection{Levenberg-Marquadt}
+The Gauss-Newton algorithm is only as valid as the quadratic approximation of its cost function is. Close to the optimum, this approximation
+is quite good and leads to a quadratic convergence of the optimization procedure. If the current estimate is farther from the optimum and the
+local shape of the cost function is flat, that is if the hessian has small eigen values, the resulting step can be too large and lead to a 
+divergent behavior. The Levenberg-Marquadt is an extension of the Gauss-Newton algorithm in which the definition of the $\bfA$ matrix is modified
+to alleviate this phenomenum.
+
+\paragraph{Levenberg}
+Levenberg \cite{levenberg1944method} contribution was to propose to dampen the Hessian by the identity matrix:
+%
+\begin{equation}
+    \Delta \bfx_{L}^* = - \alpha (\bfH^{-1} + \lambda \bfI)^{-1} \bfJ^T \bfr
+\end{equation}
+%
+
+$\alpha$ and $\lambda$ are scalar coefficient that can be tuned depending on the evolution of the cost function. 
+In particular, $\lambda$ controls the amount of damping: for a given $\lambda$ computed step is wrong (the cost function goes up),
+$\lambda$ is increased so that the Hessian influence is diminished. For large values, the steps are close to a gradient descent step.
+$\alpha$ provides a way to tune the size of the gradient steps.
+
+\paragraph{Marquadt}
+Marquadt \cite{marquardt1963algorithm} improves on Levenberg proposition by proposing to dampen not by the Hessian diagonal $\text{diag}(\bfH)$
+instead of the identity matrix. The damping affects each direction of the state differently, depending on the local shape of the cost function:
+%
+\begin{equation}
+    \Delta \bfx_{L}^* = - \alpha (\bfH^{-1} + \lambda \text{diag}(\bfH))^{-1} \bfJ^T \bfr
+\end{equation}
+%
+
+For both cases, the values of $\alpha$ and $\lambda$ are continuously adapted, which can be understood as an implementation of the 
+Trust Region paradigm \cite{boyd2004convex}.
+
+
+\section{Covariance of the estimate}
+
+An important question to ask is how confident are we in our MAP estimate? Even if our priors and measurements models are Gaussian distribution, the posterior distribution
+is not in general Gaussian (unless all measurements models are linear). The region near the peak of the posterior is, however, often nearly Gaussian in shape.
+The curvature around the mode is described by the Hessian the negative log likelihood of the posterior at the MAP estimated state. 
+The Hessian is actually the \textit{information matrix} of the problem, so that finding the covariance of the MAP estimate resolves to inverting a 
+sparse positive definite matrix \footnote{The proof of this statement is out of the scope of this document and can be found in Section 5.1 of 
+\cite{peng2018advanced}}. This Hessian is immediately related to Hessian of the residual vector norm by a factor 2 since:
+
+\begin{equation*}
+    -\log p(\cX|\cZ) = cst + \frac{1}{2}\cL(\cX)
+\end{equation*}
+
+This way, we can approximate our posterior by a multivariate Gaussian, which mean is the mode value and covariance 
+is the problem hessian inverse. 
+
+\begin{equation}
+    p(\cX | \cZ) \approx \text{Gauss}(\cX^{MAP}; 2\bfH^{-1})
+    \label{eq:map_laplace}
+\end{equation}
+
+This referred to as the Quadratic or Laplace approximation (\cite{mcelreath2018statistical}, section 2.4.2). MAP inference is then a two step process: 
+first find the mode of the posterior (the MAP), then "fit a Gaussian" on this mode. 
+To contrast this approach with aforementioned approximations, variational inference as applied in Barfoot et al. 
+ \cite{barfoot2020exactly} for instance fit both the mean an the covariance of a Gaussian model as a result of a single optimization problem.
+
+ We can illustrate the Laplace approximation with a one dimensional toy problem (borrowed from Barfoot \cite{barfoot2017state}, section 4.1.1).
+
+ \begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/barfoot_stereo.png}
+    \caption{Stereo depth estimation toy model \cite{barfoot2017state}}
+    \label{fig:barfoot_stereo}
+ \end{figure}
+
+%
+The problem is stated as estimating the depth $x \in \Reals$ of a landmark in the scene with a nonlinear camera model (see \figRef{fig:barfoot_stereo})
+%
+\begin{equation}
+    y = \frac{fb}{x} + n_y
+\end{equation}
+%
+where $y=u - v$ is a disparity measurements ($u$ and $v$ are pixels corresponding to the projection of the landmark in each camera), $f$ is the focal
+length of the cameras (in pixels), $b$ is the horizontal distance between cameras (the baseline, in meters), a $n_y$ is a the measurements noise (in pixels).
+We assume that the measurement noise is Gaussian: $y \approx \Gaussian{0}{\sigma_y^2}$. We also assume that we have a prior knowledge about the 
+estimated value $x_p$, with a standard deviation of $\sigma_p$.
+
+To ground the problem we will assign sensible values to the problem (same as \cite{barfoot2017state}):
+
+\begin{gather*}
+    x_{true} = 22~[m], \quad x_p = 20~[m], \quad \sigma_p = 3~[m] \\
+    f = 400~[pixels], \quad b = 0.1~[m], \quad \sigma_y = 0.3~[pixels]   
+\end{gather*}
+
+where $x_{true}$ is the true depth that we seek to estimate.
+
+Notice that the prior standard deviation is quite, showing a great uncertainty about the prior value. We simulate noisy measurements by drawing samples 
+$\cY = {Y}_{i \in [1..N]}$ of the measurement model using $x_{true}$ (we drew $N=10$ measurements). For a low dimensional problem such as this one, 
+it is possible to compute the full posterior distribution $p(x|\cY)$ by numerical integration, which is referred to as the "grid approximation" by 
+\cite{mcelreath2018statistical}. We can make this computation almost arbitrarily precise since the computation are quite cheap. The prior and density distribution are represented in \figRef{fig:MAP_stereo1D}. Applying the Laplacian approximation to
+compute a posterior approximation involves minimizing the negative log likelihood:
+
+\begin{equation}
+    \frac{1}{2 \sigma_p^2}(x - x_p)^2 + \frac{1}{2\sigma_y^2} \sum_{i=1}^N (\frac{fb}{x} - y_i)
+\end{equation}
+
+Finding the MAP and approximating the covariance deviation of $x$, we can plot the MAP posterior along its numerical computation in \ref{fig:MAP_stereo1D}. 
+Both computation result in largely overlapping functions: the main mass of the real posterior density function is captured by the Laplacian approximation.
+However, notice that the real posterior distribution is not symmetrical contrary. This means that, contrary to its Gaussian approximation, the mean of the
+of the real posterior is not equal to its mode. 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/MAP_stereo1D.pdf}
+    \caption{Representation of posterior inference on the toy problem. Dotted black: prior on $x$, 
+    continuous black: numerical "grid" integration of the posterior, continuous red: Laplacian approximation of the posterior. Vertical lines: red=MAP, green=mean of the posterior
+    }
+    \label{fig:MAP_stereo1D}
+ \end{figure}
+
+
+
+
+\section{Lie group for MAP optimization}
+Some of the state variables that we manipulate in robotics are challenging since they do not belong to vector spaces. Some of the equations
+involved in the Gauss-Newton algorithm, in particular the Gauss-Newton step update, cannot be be directly applied without extra care when it is the case.
+In this section we will provide the minimal concepts regarding the use of Lie groups and explain how we can change some of the equations
+to accommodate for the special structure of these variables, in particular rotation matrices.
+
+\subsection{What is a Lie group?}
+Simply stated, a \text{Lie group} is a group which elements live in a smooth manifold.
+
+A \textit{smooth manifold} or differentiable is a topological that can be pictured as a smooth surface embedded in a higher dimensional vector.
+The smoothness property means that each point on this surface corresponds a unique tangent (hyper-)plane (there are no "spikes" on the surface).
+This space is a vector space on which traditional calculus operations are applicable.
+
+A \textit{group} ($\cG$, $\circ$) is a set $\cG$ with a composition law $\circ$ which satisfies the group axioms:
+
+\begin{align}
+    \text{Closure under}~'\circ'~:&~\cX \circ \cY \\ 
+    \text{Associativity}~'\circ'~:&~(\cX \circ \cY) \circ \cZ = \cX \circ (\cY \circ \cZ) \\ 
+    \text{Identity element}~\cE~:&~\cX \circ \cE = \cE \circ \cX = \cX \\ 
+    \text{Inverse}~\cX^{-1}~:&~\cX^{-1} \circ \cX = \cX \circ \cX^{-1} = \cE
+\end{align}
+where, here, $\cX,\cY,\cZ \in \cG$.
+
+Every
+
+
+
+
+interpreted as living on a manifold, which is a surface embedded in a vector space defined by a set of constraints. 
+The $\SO(3)$ manifold is embedded in the 9 dimensional constrained by 6 constraints (column vectors are orthogonal and of norm 1) which defines a 
+a manifold of dimension 3. This manifold is said to be smooth \textit{smooth}, which concretely states that elements of this group can be 
+continuously differentiated (there are no "spikes" on the )
+
+  
+- very short introduction of the exponential map
+- explanation of noise defined on tangent space
+
+\subsection{The $\SO(3)$ example}
+Let's take for example the case of the sets of 3D rotation matrices $\SO(3)$:
+
+\begin{equation*}
+    \SO(3) = \{ \bfR \in \textit{GL}(3,\Reals), \bfR^T \bfR  = \bfI_3.
+\end{equation*}
+where $\textit{GL}(3,\Reals)$ denotes the general linear group of invertible real matrices of size $3 \times 3$.
+
+- Sphere
+- Lie algebra
+- Exponential map + Logarithm
+
+\subsection{Gauss-Newton algorithm on Lie groups}
+
+
+.....
+Then the update rule writes:
+
+\begin{equation}
+    \cX := \cX \circ \Exp(\Delta \bfx)
+\end{equation}
+
+\subsection{Gaussian variables on Lie groups}
+
+CITE Barfoot/Furgale
+Definition of noise 
+
+
+
+%
+%
+%
 \section{Factor graphs: a visual language for robotics estimation}
 A crucial aspect of solving the MAP problem is the factorizibility of the likelihood function. This represents the fact that the problem
-exhibits a particular structure that has important computational implications. Let's consider the toy example represented in \figRef{fig:toy_problem}. 
+exhibits a particular structure that has important computational implications. We will first explain how this factorization can be described 
+visually using a graphical model known as the \textit{Factor Graph} and then link this representation to the sparsity of the matrix involved
+in solving the NLLS problem.
+
+
+\subsection{Factor Graph representation}
+Let's consider the toy example represented in \figRef{fig:toy_problem}. 
 We wish to estimate the trajectory of a differential robot, that is its states at chosen timestamps called \textit{\keyframes}, and \textit{landmarks} which are elements of the 
 environment that are easily detectable. We suppose that this robot is equipped with an odometer, which measurements integrated over time provide relative 
 transformations between \keyframes, and an exteroceptive sensor, which provides relative measurements between \keyframes landmarks.
@@ -149,14 +428,14 @@ transformations between \keyframes, and an exteroceptive sensor, which provides 
     (blue for robot \keyframe, green for landmarks) and factors by squares (orange for odometry, black for exteroceptive sensor, red for the prior).}
 \end{figure}
 
-In this case, the state variables are $\mathcal{X} = \{ \bfx_1, \bfx_2, \bfx_3, l_1, l_2\}$ %and measurements $\mathcal{Z} = \{ z_{o,1}, z_{o,2}, z_{e,1}, z_{e,2}\}$
+In this case, the state variables are $\cX = \{ \bfx_1, \bfx_2, \bfx_3, l_1, l_2\}$ %and measurements $\cZ = \{ z_{o,1}, z_{o,2}, z_{e,1}, z_{e,2}\}$
 We also apply a prior on the pose of the first \keyframe of the trajectory, which can be understood as fixing the frame origin of the reference 
 frame in which the estimation is done.
 
 The factorization of the likelihood of \eqRef{eq:likelihood_factorization} in this example writes:
 %
 \begin{align}
-    p(\mathcal{X} | \mathcal{Z}) \propto 
+    p(\cX | \cZ) \propto 
     ~&{\color{Red} \phi_0({\color{Blue} \bfx_{0}})} \\ 
     ~&{\color{Orange} \phi_1({\color{Blue} \bfx_1}, {\color{Blue} \bfx_2}) \phi_2({\color{Blue} \bfx_2}, {\color{Blue} \bfx_3})} \\ 
     ~&{\color{Black} \phi_3({\color{Blue} \bfx_1}, {\color{Green} l_1}) \phi_4({\color{Blue} \bfx_2}, {\color{Green} l_1}, {\color{Green} l_2}) \phi_5({\color{Blue} \bfx_3}, {\color{Green} l_2})} \\ 
@@ -170,9 +449,35 @@ of each factor on a subset of variables. Over the last two decades, they have gr
 estimation problems \cite{dellaert2017factor} and planning problems \cite{dong2016motion}. Dellaert and Kaess \cite{dellaert2006square} were the first to
 recognize the link between NLLS problems and factor graph.
 
-Many specialized solvers \cite{grisetti2011g2o, dellaert2012factor, ila2017slam++} have been implemented that exploit the sparse structure of these 
-problems. A discussion of the particularities of factor graph-based NNLS solvers can be found in [CITE sola course] \cite{dellaert2017factor}.
+% Many specialized solvers \cite{grisetti2011g2o, dellaert2012factor, ila2017slam++} have been implemented that exploit the sparse structure of these 
+% problems. A discussion of the particularities of factor graph-based NNLS solvers can be found in \cite{dellaert2017factor, sola2017course}.
+
+\subsection{Sparsity of the NLLS problem}
 
 
-% \section{Lie groups primers}
-% - very short introduction of the exponential map
+
+
+
+
+
+
+
+
+
+
+
+\section{Comparison with the EKF}
+
+An important remark to be made is that the traditional Kalman filter can also be derived from the same MAP approximate Bayesian inference (a derivation 
+of Kalman filter equations from MAP solution can be found in \cite{barfoot2017state}, section 3.3.2). What differs is the way the computation of the 
+MAP is undertaken. Instead of solving a NLLS problem, the Kalman filter separates the measurements in two kinds. 
+A process model describing the state dynamics and based on "inputs" (in practice often sensor measurements or random noise) is used to marginalize 
+against the previous state. Then, a set of measurement models update the state based on other sensor data.
+
+The posterior is then summed up by a mean estimate and its associated covariance matrix, that summarizes the correlations of state variables
+accumulated from past states (this covariance matrix is usually dense). For markovian, linear-markovian system, the Kalman filter is the optimal
+estimator. However, the EKF needs to linearize process and measurement models around the current state estimate. This means that if the is initialized
+far from the true state, linearization errors can accumulate over time, which can lead to inconsistent estimates \footnote{This problem is nowadays
+mitigated by an algorithm like the Invariant \KalmanF \cite{barrau2018invariant}}. In contrast, NLLS problems are
+solved using by repeatedly relinearizing around the new more values closer to the optimal.
+

@@ -1,51 +1,6 @@
 \chapter{Preintegrated sensors}
 \minitoc
 
-% \section{Motion integration}
-% First, as a motivational example, we will look at a simple 2D integration motion integration problem. 
-% Let's define the state of our robot as the pose $\T{w}{b} \in \SE (2) or \SE(3)$. 
-% Let's assume we have a source of odometry, coming from wheel encoders for instance, providing velocity measurements in the base frame 
-% $\bfz_k = [\vel{b}{}, \angvel{b}{}]_k$. Now, to update our current estimate of the state, we just have integrate during \dt (one step) 
-% using the matrix exponential, as seen in ..., to create a instantaneous relative transformation $\delta_k$ and then compose it with our previous step:
-
-% \begin{equation}
-%     \begin{split}
-%         &\delta_k = \Exp(\bfz_k * \dt) 
-%         \\
-%         &\T{}{}^k = \T{}{}^k \delta_k
-%     \end{split}
-% \end{equation}
-
-% Now, assume that we a set of such measurements between 2 \KFs $i$j and $j$ $\mathcal{Z_{im}} = [\tilde\bfz_k]_{i..j}$. 
-% For high frequency sensors, integration is costly. We want to do it once and for all.
-% We need to integrate the measurements the two \KFs timestamp in order to obtain a single measurement and derive a factor out of it.
-% In this example, this is simply done by composing the $\delta_k$ recursively one at a time.
-
-% \begin{equation}
-%     \T{}{j} = \T{}{i} \prod_{k=i}{j}\delta_k = \T{}{i} \tilde\Delta_{im}
-% \end{equation}
-
-% Then a residual can be created using the $\Log$ operator:
-
-% \begin{equation}
-%     \bfr(\T{}{i}, \T{}{j}) = \Log(\T{}{i}^{-1}\T{}{j} \tilde\Delta_{im})
-% \end{equation}
-
-% However, in some cases, those velocity measurements are biased, due to a modeling error, for instance a wrong wheel radius. 
-% To obtain meaningful estimations, we need to model this bias and include it in our estimation problem. If we consider a simple additive bias in our example
-% $\tilde\bfz_k = \bfz_k + \bfb$, we see that the resulting $\tilde\Delta(\bfb)$ measurements depend on $\bfb$ in a non trivial way. Therefore,
-% each time a numerical comes up with a new estimate for $\bfb$, to compute the exact $\tilde\Delta(\bfb)$, the integration of $\mathcal{Z_{im}}$ 
-% needs to be recomputed which is computationally costly. As we will see in the next section, this is solved by linearizing $\tilde\Delta(\bfb)$ with respect to $\bfb$ around
-% the bias $\ol\bfb$ that was estimated at the time of the integration. 
-
-% On the other end, for other kind of sensors (such as IMUs), it is harder to make the distinction between a delta quantity only depending on raw measurement (and an occasional estimated bias).
-% We have therefore to find special coordinate systems in which to integrate measurements in order to obtain an efficient algorithm. To obtain a factor, we also need to consider integrate 
-% noise odometry noise at each step to obtain the total covariance of the integrated motion.
-
-% These foundational ideas introduced in \cite{lupton-09}
-
-
-
   
 \section{A motivational example: IMU integration for graph optimization}
 In this section we will introduce the IMU measurement model and explain why integrating these measurements in the world frame does not immediately
@@ -105,7 +60,7 @@ explicit Euler integration scheme during $\dt$ results in the discrete dynamics:
     
 Now, these equations relate variables variables between two state variables sampled at IMU frequency. To include these measurements in our smoothing estimator,
 one solution would be to introduce new variables at the rate of the IMU. However, the size of the problem would grow very quickly. A better option
-is to integrate IMU measurements during extended periods of time. If we simply integrate the sequence of IMU measurements $\mathcal{Z}_{im}$ between timestamps 
+is to integrate IMU measurements during extended periods of time. If we simply integrate the sequence of IMU measurements $\cZ_{im}$ between timestamps 
 $t_i$ and $t_m$ by unfurling \eqRef{eq:imu_dyn_disc}, we obtain:
 %
 \begin{equation}
@@ -130,7 +85,7 @@ Assuming IMU biases stay constant during $\Dt^{im}$,
 % \end{equation*}
 %
 we could then directly derive a factor with an error between the expected delta $\hat\bfDelta_{im}$ and the measured delta $\bfDelta_{im}$ defined as:
-% $e(\bfx^i, \bfx^j) = \bfDelta_{\bfx}(\bfx^i, \bfx^j)  \ominus  \bfDelta_{\mathcal{Z}_{im}}(\bias^i, \bfx^i)$
+% $e(\bfx^i, \bfx^j) = \bfDelta_{\bfx}(\bfx^i, \bfx^j)  \ominus  \bfDelta_{\cZ_{im}}(\bias^i, \bfx^i)$
 %   where 
 %
 \begin{align}
@@ -152,12 +107,13 @@ and
     \sum_{k=i}^{m} \Big[\vel{}{}^{k}\dt + \frac{1}{2}\grav \dt^2 
     + \frac{1}{2}\Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^i)\dt^2 \Big]
     \end{bmatrix}
+    \label{eq:IMUIntim}
 \end{align}
 %
 Both quantities are recomputed at each evaluation of the residual by the nonlinear solver. $\bfDelta_{\bfx}(\bfx_i, \bfx_m)$ is fairly quick to compute.
-However $\bfDelta_{\mathcal{Z}_{im}}(\bias^i, \bfx_i)$ formulation requires to reintegrate the whole buffer of measurements which
+However $\bfDelta_{\cZ_{im}}(\bias^i, \bfx_i)$ formulation requires to reintegrate the whole buffer of measurements which
 is highly inefficient. This is due to the dependency on velocity, orientation and biases at timestamp $i$. However the terms of equation \eqRef{eq:IMUIntij} can 
-be rearranged (proof in the annex -> TODO) to give:
+be rearranged (proof in the annex \secRef{sec:forster_proof}) to give:
 %
 % WITH NOISE
 % \begin{equation}
@@ -173,21 +129,22 @@ be rearranged (proof in the annex -> TODO) to give:
 %
 \begin{equation}
     \begin{split}
-    \DR^{im} &\triangleq  \Rot{}{}^{i,T} \Rot{}{}^{m} =  \prod_{k=i}^{m} \Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^i)\dt) \\
-    \Dv^{im} &\triangleq \Rot{}{}^{i,T} (\vel{}{m} - \vel{}{i} - \grav \Dt^{im}) 
-    = \prod_{k=i}^{m} \DR^{ik} \Exp((\accm{}{}^k - \bias_{\acc{}{}}^i)\dt)  \\
-    \Dp^{im} &\triangleq \Rot{}{}^{i,T}(\posi{}{}^m - \posi{}{}^i - \vel{}{}^i \Dt^{im} - \frac{1}{2} \grav \Dt^{im,2}) 
-    = \sum_{k=i}^{m} \Big[\Dv^{ik}\dt +  \frac{1}{2} \DR^{ik} (\accm{}{}^k - \bias_{\acc{}{}}^i)\dt^2 \Big]
+    \DR^{im} &\triangleq  \Rot{}{}^{i,T} \Rot{}{}^{m} \\
+             &=  \prod_{k=i}^{m} \Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^i)\dt) \\
+    \Dv^{im} &\triangleq \Rot{}{}^{i,T} (\vel{}{m} - \vel{}{i} - \grav \Dt^{im}) \\
+             &= \prod_{k=i}^{m} \DR^{ik} \Exp((\accm{}{}^k - \bias_{\acc{}{}}^i)\dt)  \\
+    \Dp^{im} &\triangleq \Rot{}{}^{i,T}(\posi{}{}^m - \posi{}{}^i - \vel{}{}^i \Dt^{im} - \frac{1}{2} \grav \Dt^{im,2}) \\
+             &= \sum_{k=i}^{m} \Big[\Dv^{ik}\dt +  \frac{1}{2} \DR^{ik} (\accm{}{}^k - \bias_{\acc{}{}}^i)\dt^2 \Big]
     \end{split}
     \label{eq:IMUPreintij}
 \end{equation}
 %
 where we define $\DR^{ik} \triangleq \Rot{}{i,T} \Rot{}{}^k$.
-We then overwrites our delta notations as $\bfDelta_{\bfx,im}(\bfx_i, \bfx_m) = \bfDelta_{\mathcal{Z}_{im}}(\bias^i)$
+We then overwrites our delta notations as $\bfDelta_{\bfx,im}(\bfx_i, \bfx_m) = \bfDelta_{\cZ_{im}}(\bias^i)$
 which lifts the dependency of the right hand term on the initial state $\bfx_i$. However the bias terms in \eqRef{eq:IMUPreintij} still enforce the repeated 
 reintegration of the measurements buffer. Instead, the right hand side can be integrated once using biases estimates at the time where we begin to integrate them that
 we note $\biasbar_i$. Then, we can approximate changes due to the newly estimated bias $\bias_i$ using a first order approximation.
-% $\bfDelta_{\mathcal{Z}_{im}}(\bias^i) = \bar{\bfDelta}_{\mathcal{Z}_{im}} \oplus (\bfJ^{\bfDelta_{\mathcal{Z}_{im}}}_{\bias_i} (\bias^i - \biasbar^i))$.
+% $\bfDelta_{\cZ_{im}}(\bias^i) = \bar{\bfDelta}_{\cZ_{im}} \oplus (\bfJ^{\bfDelta_{\cZ_{im}}}_{\bias_i} (\bias^i - \biasbar^i))$.
 
 These two observations were first made by Lupton \cite{lupton-09}, whose formulation relied on Euler angles, and were later formalized on \SO(3) using Lie theory
 by Forster \cite{forster2017-TRO}. The above equations are not directly useful for the implementation of pre-integration. We need first to derive a recursive formulation 
@@ -320,8 +277,7 @@ the IMU deltas. The complete IMU pre-integration theory,
 including the computation of the residual, is based on this
 new Lie structure. The theoretical material for the Lie
 development in this section can be found in the report \cite{sola2018micro}.
-% For some developments and formulae related to the particular
-% IMU case, please refer to the appendix.
+
 
 \subsection{Lie Group formulation}
 
@@ -413,7 +369,7 @@ The exponential map transfers tangent elements to the group; the logarithmic map
 \end{align}
 %
 where $\Log()$ is obtained by identifying terms in \eqRef{equ:delta_Lie} and \eqRef{equ:exp}.
-Matrices $\bfP$ and $\bfQ$ are provided in the appendix.
+Matrices $\bfP$ and $\bfQ$ are provided in the appendix \ref{sec:IMULieGroup}.
 
 
 \subsubsection{Jacobians, uncertainty}
@@ -428,8 +384,6 @@ A comment is however necessary for the present IMU case.
 It relates to the uncertainty of the last component of the tangent space \eqRef{equ:lie_algebra}, which is the time $\Dt$. This component has no uncertainty by definition. 
 Having it in the covariances would imply singularity and result in the risk of a number of well-known numerical issues. 
 We therefore systematically marginalize this time component out of the covariances, simply by removing the last row and column. 
-
-
 
 
 
@@ -498,10 +452,6 @@ it is possible (although tedious) to show that both Forster's and our method are
 
 
 
-
-
-
-
 \section{External force pre-integration}
 In this section we apply the generalized pre-integration algorithm to the problem of using measured external
 forces applied on a legged robot in a smoothing estimator. We propose to integrate the underactuated that we first recall. Then 
@@ -509,7 +459,8 @@ we derive the specificities of the pre-integration of external forces of a poly-
 of our paper \cite{fourmy2021contact}.
 
 
-\subsection{Centroidal kinematics}
+\subsection{Centroidal dynamics}
+\label{sec:centroidal_dynamics}
 The robot dynamics is described by the well-known:
 \begin{equation}\label{eq:wbdyn}
   \bfM(\q) \vq + h(\q,\vq) = \bm\tau_q + \sum_l \bfJ_l\tr \bff_l
@@ -653,11 +604,27 @@ Finally, the propagation of the state $\bfx_i$ to $\bfx_k$ using $\D_{ik}$, whic
 
 \section{Related works}
 
-\cite{hartley2018legged}
-\cite{wisth2020preintegrated}
-\cite{lupton-09}
-\cite{forster2017-TRO}
-GTSAM new IMU preint (?)
-\cite{eckenhoff2019closed}
-\cite{brossard2021associating}
-\cite{luo2021unified} 
+Pre-integration principles were first proposed by Lupton \cite{lupton-09} to be applied to a smoothing based visual inertial estimator. His work was motivated partly 
+by the fact that previous systems required a precise initialization of position, orientation and velocity (using a specialized routine) to begin to integrate IMU measurements. 
+With this new formulation, Lupton noted that pre-integration of IMU measurements permitted to use measurements immediately and delay initial orientation about the gravity
+vector in particular. 
+This seminal work was quickly adopted by other authors using smoothing filters \cite{carlone2014eliminating}. As pioneering as this work was, it was however 
+limited by the use of Euler angles which problematic geometric properties are notorious. Indelman \cite{Indelman-2013-7768} first proposed to use the exponential of the 
+matrix rotation group instead of Euler integration and to relax the assumptions of a non-rotating and flat earth of Lupton \cite{lupton-09}. Forster \cite{forster2015imu, forster2017-TRO}
+proposed the same formulation using instead quaternions. Various experiments brought to light three main problem with the Euler angle formulation, that are completely absent 
+from the quaternion "on-manifold" formulation. Firstly, first order integration of angular velocities using Euler angles is approximate, which leads to accumulated errors 
+for high angular velocities or sampling rate.  Secondly, the log-likelihood of the angular displacement is not invariant under the action of rigid body transformations, 
+\eg the choice of the world frame influence the results of the estimation. Finally, the well known gimbal lock singularity of Euler angles has a consequence 
+on the covariance IMU noise covariance propagation, which is severely degraded when the robot trajectory comes close to the singularity. 
+\cite{shen2015tightly}, later improved in \cite{qin2018vins} proposed to use a more precise numerical integration procedure than the default forward Euler used by Forster. 
+Eckenhoff \cite{eckenhoff2019closed} derived closed form solutions of the preintegration equations using various piecewise constant models.
+Barrau \cite{barrau2020mathematical} described a coupled matrix Lie group for the propagation of preintegration errors taking into account the earth rotation for aerospace
+inertial navigation system in view. This work was later extended \cite{brossard2021associating} and showed that the linearized bias update is slightly more precise than 
+the work of Forster \cite{forster2017-TRO}. Le Gentil \cite{le2020gaussian} used a different trajectory parametrization framework by formulating the preintegration algorithm 
+in the context of Gaussian Process smoothing. Self calibration of IMU/Camera time offsets was also developped \cite{yang2020analytic}. 
+\cite{luo2021unified} derived a comprehensive collection of motion models depending on the various possible choices of reference frames and motion conditions. 
+
+As we saw the preintegration theory began in the context of visual-inertial odometry. It was however adapted to other high rate sensors such wheel odometry \cite{quan2019tightly}, 
+possibly including self-calibration \cite{deray-19-selfcalib}. In his thesis, Atchuthan (\cite{atchuthan-18-thesis}, Section 4.3) derived the general form of the preintegration 
+equations as a sensor agnostic form that is integrated in state estimation WOLF \cite{sola2021wolf}. As previously mentioned, other team applied preintegration theory in the 
+context of factor graph legged robot state estimation to derive new leg odometry factors \cite{hartley2018legged, wisth2019robust, wisth2020preintegrated}.

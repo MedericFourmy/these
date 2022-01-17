@@ -2,7 +2,8 @@
 
 \chapter{Pre-integration details}
 \section{Justification of \cite{forster2017-TRO} delta formulas}
-We detail here how the delta formulas of equation \eqRef{eq:IMUPreintim} can be derived from \eqRef{eq:IMUIntim}.
+\label{sec:forster_proof}
+We detail here how the delta formulas of equation \eqRef{eq:IMUPreintij} can be derived from \eqRef{eq:IMUIntim}.
 
 The rotation one is easy to get, multiplying by $\Rot{}{}^{i,T}$:
 \begin{equation}
@@ -35,7 +36,7 @@ The position delta requires more calculations. First, inject equation \eqRef{eq:
 \end{split}
 \end{equation}
 
-We will simplify the gravity term that we will call $\mathcal{G}t_{im}$. Noting that:
+We will simplify the gravity term that we will call $\cG t_{im}$. Noting that:
 
 \begin{equation*}
     \sum_{k=i}^{m}k = \sum_{k=1}^{m}k - \sum_{k=1}^{i-1}k = \frac{m(m-1)}{2} - \frac{i(i-1)}{2} 
@@ -45,7 +46,7 @@ we can deduce that:
 
 \begin{equation*}
 \begin{split}
-\mathcal{G}t_{im} 
+\cG t_{im} 
 &= \dt \sum_{k=i}^{m}(\Dt_{ik} + \frac{1}{2}\dt) = \dt \sum_{k=i}^{m}((k -i)\dt + \frac{1}{2}\dt)
 \\
 &= \dt \Big[ \sum_{k=i}^{m} [ k \dt - i(m-i)\dt ] + \frac{1}{2}\Dt_{im}  \Big] 
@@ -68,7 +69,7 @@ Multiplying by $\Rot{}{}^{i,T}$ and reordering the terms, we can finally define 
 
 
 \section{Elements of the IMU delta matrix Lie group}
-
+\label{sec:IMULieGroup}
 
 \subsection{Tangent space and Lie algebra \texorpdfstring{$\mathfrak{d}$}{d}}
 \cite{sola2018micro}

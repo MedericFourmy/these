@@ -315,15 +315,15 @@ of these images. Finally, the object symmetries are taken into account during tr
 Each 3D model $l$ is associated with a set of symmetries $S(l)$, that is the set of transformations that leave the aspect of the object unchanged:
 
 \begin{equation}
-    \textit{S}(l) = \left \{ \bfS \in \SE(3) | \forall \bfT \in \SE(3), \mathcal{R}(l,\bfT) = \mathcal{R}(l,\bfT \bfS)\right \}
+    \textit{S}(l) = \left \{ \bfS \in \SE(3) | \forall \bfT \in \SE(3), \cR(l,\bfT) = \cR(l,\bfT \bfS)\right \}
 \end{equation}
 
-where $\mathcal{R}(l,\bfT)$ is the rendered image of the object $l$ captured in pose $M$. Given a set of symmetries $S(l)$, 
+where $\cR(l,\bfT)$ is the rendered image of the object $l$ captured in pose $M$. Given a set of symmetries $S(l)$, 
 we define the symmetric distance $D_l$ which measures the distance between two 6D poses represented by transformation $\bfT_1$ and $\bfT_2$. 
-Given an object $l$ associated to a set $\mathcal{X}_l$ of 3D points $\mathbf{x} \in \mathcal{X}_l$, we have:
+Given an object $l$ associated to a set $\cX_l$ of 3D points $\mathbf{x} \in \cX_l$, we have:
 
 \begin{equation}
-    D_l(\bfT_1, \bfT_2) = \underset{\bfS \in \textit{S}(l)}{\text{min}} \frac{1}{|\mathcal{X}_l|} \sum_{\mathbf{x} \in \mathcal{X}_l} ||\bfT_1 S\mathbf{x} - \bfT_2\mathbf{x} ||^2
+    D_l(\bfT_1, \bfT_2) = \underset{\bfS \in \textit{S}(l)}{\text{min}} \frac{1}{|\cX_l|} \sum_{\mathbf{x} \in \cX_l} ||\bfT_1 S\mathbf{x} - \bfT_2\mathbf{x} ||^2
     \label{eq:distSym}
 \end{equation}
 

@@ -1,9 +1,14 @@
 \chapter{Kinematics}
 \minitoc
 
-The last measurement model of importance that we developed in this work blablabla
-- First centroidal kinematics related to centroidal est and force preintegration
-- Second Leg odometry
+The most legged-robot specific sensor measurements that we developed are those related to the robot kinematics. 
+The principle is to use the robot kinodynamic model to compute relative placement and velocity of different parts of the robot 
+with respect to the base frame. This computation is done using the vector of configuration of the robot $\qa$ and its derivative $\dqa$ which
+are typically obtained from joint encoders.
+For centroidal quantities, we can compute the CoM position, velocity and the angular momentum.
+For leg odometry, the relative placement of the feet with respect to the base is considered. A special care has to be taken in order to
+obtain non biased measurements. In particular, calibration of the robot kinematic model is of paramount importance. We left dynamic calibration 
+out of the scope of this work.
 
 
 \section{Centroidal kinematics}
@@ -47,10 +52,12 @@ Then, the residual $\bfr^{CK} \in \Reals^9$ is simply expressed as:
 
 
 
-
 \section{Leg odometry}
 Assuming that we have access to an accurate contact detection, for each foot in contact between \keyframes $i$ and $j$, we can write that 
-$\posi{W}{L}^i = \posi{W}{L}^j + \noise_{LO}$ where $\noise_{LO}$ denotes a Gaussian noise accounting for potential slip of the foot and kinematic inaccuracies. 
+$\posi{W}{L}^i = \posi{W}{L}^j + \noise_{LO}$ where $\noise_{LO}$ denotes a Gaussian noise accounting for potential slip of the foot and kinematic inaccuracies 
+$\Gaussian{0}{\sigma_{LO}}$.
+This noise can be modeled as the integration of a white noise on the foot velocity $\noise_v$, which integrated gives a random walk.  
+Its variance after $\Dt$ is $\sigma_{LO} = \sqrt{\Dt} \sigma_v$
 This pseudo measurement can be used to derive a 3D factor for each foot $l$ in contact:
 
 \begin{equation}
@@ -62,9 +69,16 @@ Where $\posim{B}{L}^i$ and $\posi{B}{L}^j$ are the contact positions in base fra
 Assuming good contact detection, leg odometry fused with the IMU is enough to properly observe 6 DoF motion with as few as 2 contact feet at a time. 
 Note that contrary to previous works \cite{hartley2018legged, wisth2020preintegrated}, this leg odometry factor does not require gyroscope integration.
 
+
 \section{Terrain height}
 
-If we have some prior knowledge about the type of 
+If we have prior knowledge about the foot terrain height $h \in \Reals$, it is easy to define, for each foot $l$ in contact, the residual:
+
+\begin{equation}
+    \bfr^h_l = (\posi{}{} \posi{b}{l})_z - h
+\end{equation}
+
+This residual can be assigned with a variance $\sigma_h$ which is hand tuned.
 
 \section{Kinematic calibration}
 A crucial part of the usability of this measurement model is to be able to compute an unbiased $\posi{B}{L}$ estimation for each foot.

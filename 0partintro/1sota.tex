@@ -26,7 +26,7 @@ The \textit{base} refers to a reference frame rigidly attached to the main body 
 We are most often interested in the estimation of the position, velocity, and orientation of this frame with regard to an inertial \textit{world} frame, which is called the \textit{base state}. 
 An example of these frames is given for the Solo robot in \figRef{fig:solo_frames}.
 This estimation is the main focus in most of legged robot estimation literature. In fact, knowing the base and other quantities directly measurable (such as joint angles), 
-and assuming a perfect robot kinematic model, the state of any part of the poly-articulated system can be recovered using forward kinematics. Rigid body algorithms
+and assuming a perfect robot kinematic model, the state of any part of the poly-articulated system can be recovered using \textit{forward kinematics}. Rigid body algorithms
 \cite{featherstone2014rigid} provide methods to efficiently compute the center of mass, linear and angular momentum of the  poly-articulated systems. These computations
 are again based on the robot kinematic model as well as the segments inertia, which we together call the $kinodynamic$ robot model. This model is often 
 found in urdf files (Unified Robot Description Format) which are generated via CAD models.
@@ -429,13 +429,13 @@ which permits to back-propagate information from the future to the past. The app
 \section{Environment awareness}
 Any useful task undertaken by an autonomous robot involves some level of awareness of its environment, even for partially teleoperated robots \cite{koolen2016design}. 
 For ground robots, this problem is most often tackled with exteroceptive sensors such as cameras, depth cameras, and LIDARs.
-The environment might be known through a previous mapping procedure like Structure from Motion (SfM) \cite{triggs1999bundle} or mapped on the fly. 
+The environment might be known through a previous mapping procedure like Structure-from-Motion (SfM) \cite{triggs1999bundle} or mapped on the fly. 
 Applications can be such as localizing with respect to a known map \cite{dellaert1999monte},
-following a previously traversed path without a metric map \cite{furgale2010visual}, Simultaneous Localization And Mapping \cite{aulinas2008slam, cadena2016past}, object detection and pose retrieval \cite{du2021vision}, 
-autonomous exploration \cite{rouvcek2019darpa, kulkarni2021autonomous}... An intermediate case is the one of visual/LIDAR odometry in which a local representation of the environment is built to provide a precise odometry source \cite{scaramuzza2011visual} and is later discarded. 
-
-% Dense semantic mapping
-\cite{gan2020bayesian}
+following a previously traversed path without a metric map \cite{furgale2010visual}, Simultaneous Localization And Mapping 
+\cite{aulinas2008slam, cadena2016past}, object detection and pose retrieval \cite{du2021vision}, autonomous exploration \cite{rouvcek2019darpa, kulkarni2021autonomous}... 
+An intermediate case is the one of visual/LIDAR odometry in which a local representation of the environment is built to provide a 
+precise odometry source \cite{scaramuzza2011visual} and is later discarded. 
+e{gan2020bayesian}
 
 
 The particularity of legged platforms is that they interact through intermittent contacts to move, usually using predefined cyclic gaits. While some controllers are 
@@ -456,7 +456,7 @@ navigation, it becomes critical to have some kind of precise odometry or localiz
 is also incorporated in the filter at the camera rate to minimize the growth of uncertainty before loop closing. \cite{stasse2006real} expends on this concept by also fusing
 kinematic velocity and altitude (known from the planning). Other systems based on sparse features were later developd \cite{ahn2012board, oriolo2012vision, oriolo2016humanoid, kwak20093d}. 
 Visual Teach and Repeat \cite{furgale2010visual} has also been recently brought to quadruped 
-robots \cite{mattamala2021learning}, which opens up practical long-term operations in industrial environments. Some works also propose to use mature visual odometry libraries
+robots \cite{mattamala2021learning, mattamala2022efficient}, which opens up practical long-term operations in industrial environments. Some works also propose to use mature visual odometry libraries
 as black-boxes sources of odometry by integrating them as relative pose measurements \cite{hartley2018legged,hartley2018hybrid}. While it may lead to sub-optimal estimators, 
 this method has the benefit of greatly simplifying the development process.
 
@@ -542,7 +542,7 @@ over the years to leverage the specific sparsity of the SLAM problem.
 
 While the first successful online monocular visual SLAM algorithm was implemented using an EKF \cite{davison2007monoslam}, a breakthrough happened with the 
 Parallel Tracking And Mapping (PTAM) system \cite{klein2009parallel} that proposed to split the visual tracking of features and camera motion from the 
-mapping in separate processes. This new modularity enabled the use of a specific algorithm for the mapping part: Bundle Adjustment \cite{triggs1999bundle} of sparse 
+mapping in separate processes. This new modularity enabled the use of a specific algorithm for the mapping part: Bundle Adjustment \cite{triggs1999bundle, schoenberger2016sfm} of sparse 
 features, a method that was previously reserved for offline SfM pipelines. PTAM enabled Augmented Reality applications in limited spaces. Bundle Adjustment 
 is actually a special case of a more general estimation algorithm called factor graph optimimzation which has several conceptual and computational advantages over filtering.
 A great wealth of papers following either filtering or graph optimization were subsequently published. A thorough comparison 
