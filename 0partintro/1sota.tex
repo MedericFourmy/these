@@ -527,11 +527,13 @@ out of scope. Our main goal is to investigate a new class of estimators based on
 \label{sec:sota_factor_graph}
 As we have previously discussed, the largest part of the legged robotics state estimation literature consists in fusing sensor modalities using various 
 implementations of the Bayesian and complementary filters. The core of those systems consists of a tightly or loosely-coupled IMU/kinematics proprioceptive
-filter. Then, either this proprioception is used as a prior odometry source to a SLAM system or the exteroceptive sensors are used to localize with respect to a known map,
-making position and yaw observable.
-
+filter. Then, either this proprioception is used as a prior odometry source to a SLAM system or the exteroceptive sensors are used to localize 
+with respect to a known map, making position and yaw observable.
 A different kind of estimator has been investigated over the last decades in the visual/LIDAR SLAM community and has become predominant in applications
-such as drone navigation: \textit{factor graph optimization}, also known as simply \textit{graph optimization}. 
+such as drone navigation: \textit{factor graph optimization} (FGO), also known as simply \textit{graph optimization}. 
+
+\section{Visual SLAM transition to graph optimization}
+
 While the Bayes filter summarizes  the accumulated information about the current estimated state and its cross-correlations as a single probabilistic distribution, 
 Factor Graph optimization keeps a trajectory of arbitrarily spaced past states that are regularly re-optimized in the least-squares sense, by finding the so-called 
 Maximum A Posteriori over the trajectory joint distribution. The terms smoothing and mapping or sliding window estimator are also used when a limited window of past states are kept 
@@ -542,33 +544,45 @@ over the years to leverage the specific sparsity of the SLAM problem.
 
 While the first successful online monocular visual SLAM algorithm was implemented using an EKF \cite{davison2007monoslam}, a breakthrough happened with the 
 Parallel Tracking And Mapping (PTAM) system \cite{klein2009parallel} that proposed to split the visual tracking of features and camera motion from the 
-mapping in separate processes. This new modularity enabled the use of a specific algorithm for the mapping part: Bundle Adjustment \cite{triggs1999bundle, schoenberger2016sfm} of sparse 
-features, a method that was previously reserved for offline SfM pipelines. PTAM enabled Augmented Reality applications in limited spaces. Bundle Adjustment 
-is actually a special case of a more general estimation algorithm called factor graph optimimzation which has several conceptual and computational advantages over filtering.
-A great wealth of papers following either filtering or graph optimization were subsequently published. A thorough comparison 
-of the two approaches \cite{strasdat2012visual} concluded that the graph optimization was computationally superior in that it had the greatest precision to 
+mapping in separate processes. This new modularity enabled the use of a specific algorithm for the mapping part: \textit{Bundle Adjustment} (BA) 
+\cite{triggs1999bundle, schoenberger2016sfm} of sparse features, a method that was previously reserved for offline SfM pipelines. 
+PTAM enabled Augmented Reality applications in limited spaces. BA is actually a special case of a more general 
+estimation algorithm called factor graph optimimization which has several conceptual and computational advantages over filtering.
+A great wealth of papers following either Gaussian filtering (which EKF belongs to) or graph optimization were subsequently published. A thorough comparison 
+of the two approaches \cite{strasdat2012visual} concluded that BA was computationally superior in that it had the greatest precision to 
 computational cost ratio, for most benchmarks. Most of the state-of-the-art visual SLAM framework now follow a factor graph approach 
 \cite{forster2017-TRO, mur2015orb, qin2018vins, leutenegger2015keyframe, ferrera2021ov}.
 
+In the context of real-time visual SLAM, the prime conclusion of Strasdat experiments \cite{strasdat2012visual} is that to increase accuracy, it is more
+profitable to increase the number of features than the number of frames. In this regard, the superiority of the graph optimization approach is 
+based on a cost argument: the complexity of BA scales linearly with the number of features while filtering exhibits cubic scaling. A second important argument 
+is that Gaussian filters linearize the nonlinear measurement models only once, around the current estimate. On the contrary, 
+for FGO re-linearization is done at each solver step, the resulting jacobians getting better as the estimate converges
+to the optimal solution. BA is therefore more accurate than its filtering counterpart, especially for nonlinear motion (due to the state rotation matrix).
+The greater cost of Gaussian filtering is due to the explicit computation of the state covariance function, which becomes rapidly dense,
+while FGO keeps the variables' correlations in a sparse information matrix. An advantage of the Gaussian form is direct access to the 
+covariance matrix. This was leveraged in early SLAM systems such as the work of Davison \cite{davison2007monoslam} to perform active tracking: 
+Search for image feature correspondences in a limited uncertainty-aware region. However, modern visual feature front-ends do not tend to
+use active tracking anymore, relying on robust matching (RANSAC) \cite{mur2015orb} or KLT tracking \cite{baker2004lucas, ferrera2021ov}. Another advantage of 
+FGO optimization for visual systems is that the front-end operations (in particular camera pose tracking and feature tracking) can be decoupled
+from the back-end, which implements BA optimization at a lower rate (and usually in a separate thread). This results in a more modular software 
+architecture which can be leveraged to include other "front-ends" treating raw measurements from other sensor modalities. 
 
-\subsection{Very short intro intro to factor graphs}
-The reasons for graph optimization success are
-
-% Barfoot state est 4.3.4 Discussion
-
-Advantages of factor graphs: 
-- tight coupled
-- front/back end architecture allows modular design
-- re-linearization allows to achive better accuracy than EKF-like
-- sparse formulation allows very fast solving
-- graph representation is intuitive and eases up the design of complex multi-sensor estimators
+A very popular modality is to inject IMU measurements into the SLAM system.
 
 
 \subsection{Visual-Inertial odometry}
 To robustify visual SLAM/odometry systems in cases of adverse situations, IMUs provide complementary high rate odometry information that can 
-be debiased by tightly coupling mapping and odometry. A careful preintegration \cite{lupton-09,forster2017-TRO} of these high 
+be debiased by tightly coupling mapping and odometry. Another important feature of visual-inertial estimation is that the orientation absolute 
+pitch an rolls can be observed thanks to the gravity (absolute yaw is unobservable, unless a compass is used). Estimation of the pose and velocity
+of the system can be estimated at the IMU frequency (which is usually an order of magnitude higher than the camera's).
+
+A careful preintegration \cite{lupton-09,forster2017-TRO} of these high 
 rate measurements had to be developed in the context of smoothing for the optimization to remain tractable. The core idea of this algorithm has 
-since been applied to other information sources such as drone thrust commands \cite{nisar2019vimo} to make external force estimation possible.
+since been applied to other information sources such as drone thrust commands \cite{nisar2019vimo} to make external force estimation possible; 
+while we propose in this thesis to preintegrate force/torque measurements present in legged robots.
+A detailed description of the theory of preintegration and discussion of related works is found in \chpRef{chp:preintegrated}.
+
 
 \subsection{Factor Graph estimation for legged robots}
 Very recently, two teams started to apply factor graph optimization principles as a general framework for legged robot estimation. At Michigan University, Hartley \cite{hartley2018legged} 
@@ -576,8 +590,8 @@ proposes to fuse IMU preintegration with a novel kinematic factor by adding the 
 Semi-direct Visual Odometry \cite{forster2014svo} is also used to integrate camera measurements as relative pose. The estimation framework was based on GTSAM framework \cite{dellaert2012factor}
 and tests were conducted on a Cassie bipedal robot. In \cite{hartley2018hybrid}, the same authors extended 
 modified the kinematic factor formulation, taking into account uncertainty induced by contact switches. Dynamic Robot Systems Group at Oxford proposed in 
-\cite{wisth2019robust} to replace a modeled kinematic factor by integrating odometry from the onboard proprioceptive filter of the ANYmal robot. Stereo vision was also used as a source of
-odometry by using a sparse 3D landmark map. In a following work \cite{wisth2020preintegrated}, the proprioceptive odometry factor was adapted
+\cite{wisth2019robust} to replace a modeled kinematic factor by integrating odometry from the onboard proprioceptive filter of the ANYmal robot. Stereo vision was 
+also used as a source of odometry by using a sparse 3D landmark map. In a following work \cite{wisth2020preintegrated}, the proprioceptive odometry factor was adapted
 to include a slowly variable bias on odometry measurements by adapting the preintegration theory from \cite{forster2017-TRO}. They again extended this work
 by including LIDAR measurements in \cite{wisth2021vilens}.
 \cite{kim2021legged} also implemented an inertial kinematic proprioceptive smoothing estimator on the MIT Cheetah, mitigating slipping of the feet by removing kinematic 
