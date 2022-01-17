@@ -10,48 +10,6 @@ For leg odometry, the relative placement of the feet with respect to the base is
 obtain non biased measurements. In particular, calibration of the robot kinematic model is of paramount importance. We left dynamic calibration 
 out of the scope of this work.
 
-
-\section{Centroidal kinematics}
-Use of the kinematic model of the robot to obtain measurements about centroidal quantities of the robot.
-
-We need to relate base states to centroidal quantities to ground their estimate. 
-For that, we can rely on the inertial-kinematic model to compute the CoM position wrt. base frame $\posi{B}{C}(\qa) \in \Reals^3$, the CoM velocity wrt. 
-base frame $\vel{B}{C}(\qa, \dqa) \in \Reals^3$, the inertial matrix $\Inertia(\qa) \in \Reals^{3\times 3}$, and  the kinematic momentum due to gesticulation 
-of the robot limbs $\AM_a(\qa, \dqa) \in \Reals^{3}$. 
-As stated before, the computed CoM position is considered to be affected by Gaussian noise and a slowly varying bias $\posim{B}{C} = \posi{B}{C} + \bfb_{c} + \noise_c$. 
-The angular velocity from the IMU is used and its bias has to be incorporated in the factor $\angvelm{}{} = \angvel{B}{B} + \bfb_{\omega} + \noise_{\omega}$.  
-In the end the equations used to derive the factor are:
-%
-\begin{equation}
-\small
-\begin{split}
-\COM &= \Rot{}{} (\posim{B}{C} -  \bias_{c} - \noise_{c}) + \posi{}{}
-\\
-\COMd &= 
-\vel{}{} + \Rot{}{}((\angvelm{}{} - \bias_{\omega} - \noise_{\omega}) \times (\posim{B}{C} -  \bias_c - \noise_c) 
-\\&~~~~~~+ (\velm{B}{C} - \noise_{v}))
-\\
-\AM &= \Rot{}{}(\Inertia (\angvelm{}{} - \bias_{\omega} - \noise_{\omega}) + \AM_a)
-\end{split}
-\end{equation}
-
-Then, the residual $\bfr^{CK} \in \Reals^9$ is simply expressed as:
-%
-\begin{equation}
-\small
-\bfr^{CK}=
-\begin{bmatrix}
-\posim{B}{C} - (\Rot{}{}^T(\COM - \posi{}{}) + \bias_{c})
-\\
-(\angvelm{}{} - \bias_{\omega}) \times (\posim{B}{C} -  \bias_{p}) + \velm{B}{C} - \Rot{}{}^T(\COMd - \vel{}{})
-\\
-\Inertia (\angvelm{}{} - \bias_{\omega}) + \AM_a - \Rot{}{}^T\AM
-\end{bmatrix}
-\label{eq:CKFactor}
-\end{equation}
-
-
-
 \section{Leg odometry}
 Assuming that we have access to an accurate contact detection, for each foot in contact between \keyframes $i$ and $j$, we can write that 
 $\posi{W}{L}^i = \posi{W}{L}^j + \noise_{LO}$ where $\noise_{LO}$ denotes a Gaussian noise accounting for potential slip of the foot and kinematic inaccuracies 

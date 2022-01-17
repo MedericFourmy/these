@@ -1,0 +1,194 @@
+\chapter{Centroidal dynamics}
+\minitoc
+
+
+\section{Centroidal kinematics}
+Use of the kinematic model of the robot to obtain measurements about centroidal quantities of the robot.
+
+We need to relate base states to centroidal quantities to ground their estimate. 
+For that, we can rely on the inertial-kinematic model to compute the CoM position wrt. base frame $\posi{B}{C}(\qa) \in \Reals^3$, the CoM velocity wrt. 
+base frame $\vel{B}{C}(\qa, \dqa) \in \Reals^3$, the inertial matrix $\Inertia(\qa) \in \Reals^{3\times 3}$, and  the kinematic momentum due to gesticulation 
+of the robot limbs $\AM_a(\qa, \dqa) \in \Reals^{3}$. 
+As stated before, the computed CoM position is considered to be affected by Gaussian noise and a slowly varying bias $\posim{B}{C} = \posi{B}{C} + \bfb_{c} + \noise_c$. 
+The angular velocity from the IMU is used and its bias has to be incorporated in the factor $\angvelm{}{} = \angvel{B}{B} + \bfb_{\omega} + \noise_{\omega}$.  
+In the end the equations used to derive the factor are:
+%
+\begin{equation}
+\small
+\begin{split}
+\COM &= \Rot{}{} (\posim{B}{C} -  \bias_{c} - \noise_{c}) + \posi{}{}
+\\
+\COMd &= 
+\vel{}{} + \Rot{}{}((\angvelm{}{} - \bias_{\omega} - \noise_{\omega}) \times (\posim{B}{C} -  \bias_c - \noise_c) 
+\\&~~~~~~+ (\velm{B}{C} - \noise_{v}))
+\\
+\AM &= \Rot{}{}(\Inertia (\angvelm{}{} - \bias_{\omega} - \noise_{\omega}) + \AM_a)
+\end{split}
+\end{equation}
+
+Then, the residual $\bfr^{CK} \in \Reals^9$ is simply expressed as:
+%
+\begin{equation}
+\small
+\bfr^{CK}=
+\begin{bmatrix}
+\posim{B}{C} - (\Rot{}{}^T(\COM - \posi{}{}) + \bias_{c})
+\\
+(\angvelm{}{} - \bias_{\omega}) \times (\posim{B}{C} -  \bias_{p}) + \velm{B}{C} - \Rot{}{}^T(\COMd - \vel{}{})
+\\
+\Inertia (\angvelm{}{} - \bias_{\omega}) + \AM_a - \Rot{}{}^T\AM
+\end{bmatrix}
+\label{eq:CKFactor}
+\end{equation}
+
+
+
+\section{External force pre-integration}
+In this section we apply the generalized pre-integration algorithm to the problem of using measured external
+forces applied on a legged robot in a smoothing estimator. We propose to integrate the underactuated that we first recall. Then 
+we derive the specificities of the pre-integration of external forces of a poly-articulated system. This is the main theoretical contribution
+of our paper \cite{fourmy2021contact}.
+
+
+\subsection{Centroidal dynamics}
+\label{sec:centroidal_dynamics}
+The robot dynamics is described by the well-known:
+\begin{equation}\label{eq:wbdyn}
+  \bfM(\q) \vq + h(\q,\vq) = \bm\tau_q + \sum_l \bfJ_l\tr \bff_l
+\end{equation}
+where $\q,\vq,\dvq,\bm\tau_q$ are the position, velocity, acceleration and torques of the robot in configuration space,
+$\bff_l$ are the contact forces (written as 3D forces in this paper),
+$\bfM$ is the generalized inertia matrix, $h$ the sum of gravity, Coriolis and centrifugal forces, and $\bfJ_l$ the jacobians of the contact points.
+Because of the underactuated nature of legged robots, the configuration is often separated into $\q=(\posi{W}{B},\Rot{W}{B},\qa)$ where $\posi{W}{B}$ 
+is the position in world frame of the robot base (typically, the torso or in our case the IMU), $\Rot{W}{B}$ the rotation of the base body with respect 
+to the world and $\qa$ are the joint configuration of the actuated joints. 
+%We will subsequently use the notation $\prescript{X}{}{[\cdot]}_Y$ to denote vectorial quantities of frame $Y$ expressed in frame $X$. A tilde $\Tilde{[\cdot]}$ denotes a noisy measurement.
+
+While~\eqRef{eq:wbdyn} represents the whole dynamics, a subpart of it is of particular importance for legged robots.
+The centroidal dynamics is written by the two equations:
+%
+\begin{equation}
+    m \ddot{\bfc} = m \bfg + \sum_l \bff_l \quad , \quad
+\dAM = \sum_l (\posi{}{l} - \COM) \times \bff_l
+\label{eq:NewtonEuler}
+\end{equation}
+%
+where $\COM,\AM$ are the position of the Center of Mass (CoM) and Angular Momentum (AM) around the CoM (both expressed in world frame), $m$ is the robot total mass, 
+and the $\posi{}{l}$ are the positions of the contact points in world frame. The centroidal dynamics is an exact part of \eqRef{eq:wbdyn} and more deeply reveals 
+the underactuation: the robot can move only if applying the proper forces to the environment, as the joint torques alone cannot lead to any modification 
+of CoM or AM.
+
+
+The classical approach in estimation of legged robot state is to first estimate the base state, and then to reconstruct the centroidal state $(\bfc,\dot{\bfc},\AM)$ using the joint position and velocity measurements, and the robot model.
+This assumes that there is no direct measurement of the centroidal state.
+Consequently, we are not be able to recover the exact centroidal state if there is any bias in the robot model.
+
+Yet, we can see from the centroidal dynamics that the force measurements are connected to the variation of the centroidal state.
+As observed in~\cite{carpentier2016center}, a proper fusion of the force measurements with an estimation of the state of the base makes the centroidal state observable.
+
+
+\subsection{Force pre-integration factor}
+
+The Newton-Euler equations \eqRef{eq:NewtonEuler} relate the evolution of the CoM and AM due to gravity, external forces and torques. 
+In the case of a legged robot with punctual contact feet, only forces $\forcem{}{L}$ are applied at each limb contact $L$, with no torque. 
+We assume that at each  limb contact we have access to noisy local force measurements $\forcem{}{L} = \force{L}{L} + \noise_f$. 
+To transform them into the body frame $b$, we compute $\Rotm{}{L} \triangleq \Rot{B}{L}(\qa)  \in SO(3)$ and $\posim{}{L} \triangleq \posi{B}{L}(\qa) \in \Reals^3 $ from the joint configuration $\qa  \in \Reals^{12}$. 
+The lever arm $(\posi{}{L}-\bias_c)$ in \eqRef{eq:NewtonEuler} uses a measurement of the CoM position in base frame $ \posi{B}{C}(\qa) \in \Reals^3$. 
+This measure is biased due to inaccuracies in the robot model and therefore we add a bias variable to be estimated, $\bias_c \in \Reals^3$ so that $\posim{}{C} = \posi{B}{C}(\qa) + \bias_c + \noise_c$.
+Assuming constant forces during each interval $\dt$ 
+the integration of \eqRef{eq:NewtonEuler} yields the discrete dynamic model for the centroidal states:
+%
+\begin{equation}
+\begin{split}
+\COM^{k} &= \COM^{k-1} + \COMd^{k-1} \dt+\frac{1}{2} \bfg \dt^2 + \frac{1}{2m} \Rot{}{}^{k-1} \sum_L \Rotm{}{L}^k (\forcem{}{L}^k - \noise_{f}) \dt^2
+\\
+\COMd^{k}&= \COMd^{k-1} + \bfg \dt + \frac{1}{m} \Rot{}{}^k \sum_L\Rotm{}{L}^k (\forcem{}{L}^k - \noise_{f}) \dt 
+\\
+\AM^{k} &= \AM^{k-1} +\Rot{}{}^k \sum_L (\posim{}{L}^k  - \posim{}{C}^k +  \bias_{c}^k + \noise_{c}) \times \Rotm{}{L}^k(\forcem{}{L}^k - \noise_{f}) \dt
+\end{split}
+\label{eq:COMDiscrete}
+\end{equation}
+%
+Analogously to the IMU case, it is possible to pre-integrate force measurements to derive a factor on the states 
+$\bfx_c=[\COM, \COMd, \AM, \Rot{}{}]$ using deltas $\D_c=[\D\COM, \D\COMd, \D\AM, \DR]$. 
+The rotation measured by the gyroscope has to be included too for the pre-integration to work. 
+In this case, the bias vector is $\bias = [\bias_c, \bias_{\omega}]$. We define measurements  $\bfz^k$ to be:
+%
+\begin{equation}
+\bfz^k = \left[ \posim{}{C}^k, \angvelm{}{}^k, \left[\forcem{}{L}^k, \posim{}{L}^k, \Rotm{}{L}^k \right]_{L=1..4}\right]
+\end{equation}
+
+The following operators are enough to particularize the  method in \secRef{sec:general-preint} to the contact forces case.
+Integrating $\bfz_k$ during $\dt$ yields $\bm\delta_k$ in \eqRef{eq:data2delta} as
+%
+\begin{equation}
+\small
+    \bm\delta^{k}(\bfz^k, \bfb^i, \dt) =
+    \begin{bmatrix}
+    \frac{1}{2m} \sum_l \Rotm{}{L}^k \forcem{}{L}^k \dt^2
+    \\
+    \frac{1}{m} \sum_l \Rotm{}{L}^k \forcem{}{L}^k \dt 
+    \\
+    (\sum_l \posim{}{L}^k - (\posim{}{C}^k - \bias_c^i) \times (\Rotm{}{L}^k \forcem{}{L}^k ))\dt
+    \\
+    \Exp((\angvelm{}{}^k - \bias_{\omega}^i)\dt)
+    \end{bmatrix}
+\normalsize
+\end{equation}
+%
+and the delta composition law in \eqRef{eq:deltaPlusDelta} as
+%
+\begin{equation}
+    \D \circ \bm\delta = 
+    \begin{bmatrix}
+    \D\COM + \D\COMd \dt + \DR  \delta\COM
+    \\
+    \D\COMd + \DR  \delta \COMd
+    \\
+    \D\AM + \DR  \delta \AM
+    \\
+    \DR\dR
+    \end{bmatrix}
+    ~.
+    \label{eq:DeltaDTCompo}
+\end{equation}
+%
+The expected delta $\D^{ik}=\bfx^k\boxminus\bfx^i$ between KFs $i$ and $k$ reads
+%
+\begin{equation}
+\D^{ik} =
+\begin{bmatrix}
+   \D\COM^{ik} \\ \D\COMd^{ik} \\ \D\AM^{ik} \\ \DR^{ik}
+\end{bmatrix}
+=
+\begin{bmatrix}
+	{\Rot{}{}^i}\tr (\COM^k - \COM^i - \COMd^i \Dt^{ik})
+	\\
+	{\Rot{}{}^i}\tr (\COMd^{k} - \COMd^{i} - \bfg \Dt^{ik})
+	\\
+	{\Rot{}{}^i}\tr (\AM^{k} - \AM^{i})
+	\\
+    {\Rot{}{}^i}\tr \Rot{}{}^k
+\end{bmatrix}
+~.
+\end{equation}
+%
+Finally, the propagation of the state $\bfx_i$ to $\bfx_k$ using $\D_{ik}$, which can be used to retrieve a state at any time $k$ between KFs in the trajectory, is
+%
+\begin{equation}
+	\bfx^k = \bfx^i \boxplus \D^{ik} =
+	\begin{bmatrix}
+	\COM^i + \COMd^i \Dt^{ik} + \Rot{}{}^i \Delta \COM^{ik} + \frac{1}{2} \bfg \Dt^{ik,2}
+	\\
+	\COMd^i + \Rot{}{}^i \Delta \COMd^{ik} + \grav \Dt^{ik}
+	\\
+	\AM^i + \Rot{}{}^i \Delta \AM^{ik}
+	\\
+	\Rot{}{}^i \DR^{ik}
+	\end{bmatrix}
+\end{equation}
+%
+%
+%
+%
+
