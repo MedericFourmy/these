@@ -29,9 +29,9 @@ This estimation is the main focus in most of legged robot estimation literature.
 and assuming a perfect robot kinematic model, the state of any part of the poly-articulated system can be recovered using \textit{forward kinematics}. Rigid body algorithms
 \cite{featherstone2014rigid} provide methods to efficiently compute the center of mass, linear and angular momentum of the  poly-articulated systems. These computations
 are again based on the robot kinematic model as well as the segments inertia, which we together call the $kinodynamic$ robot model. This model is often 
-found in urdf files (Unified Robot Description Format) which are generated via CAD models.
+found in URDF files (Unified Robot Description Format) which are generated via CAD models (Computer Aided Design).
 
-The \textit{centroidal state} refer to the center of mass, angular momentum, and their derivatives. The center 
+The \textit{centroidal state} refers to the center of mass, angular momentum, and their derivatives. The center 
 of mass (barycenter of the robot segment masses) is a virtual point that is the main control variable for locomotion. 
 %Centroidal estimators fuse the robot kinematic model, which is often assumed to be biased, with various dynamical models of the system. 
 
@@ -45,7 +45,7 @@ a proprioceptive sensor in the legged robot literature \cite{rotella2018unsuperv
 They are needed to obtain non-drifting estimates of the robot pose. 
 They are used either to localize with respect to a map or to build a representation of the environment online, that the robot can use to plan contact for instance. 
 
-These measurement sources convey wildly different types of information and arrive at various frequencies (\eg tens of Hertz for cameras, kiloHertz for encoders). 
+These measurement sources convey tremendously different types of information and are captured at various frequencies (\eg tens of Hertz for cameras, kiloHertz for encoders). 
 In this work, we assume that they are reasonably well time-synchronized. Measurements are generally \textit{noisy} and sometimes \textit{biased}. High levels of noise can 
 come from the lower quality of the sensor (a low-cost MEMS IMU gyroscope exhibits much more noise than a high-end fiber-optic gyroscope) or from the process to obtain the
 data (joint velocities measurements are obtained by numerical differentiation of the encoder measurements). Noise can be either filtered using classical finite impulse 
@@ -59,10 +59,10 @@ With these few key terms explicated, we can now explore the legged estimation li
 
 \begin{figure}
     \centering
-    \label{fig:solo_frames}
     \centering
     \includegraphics[width=0.6\textwidth]{figures/solo_frames.pdf}
     \caption{Solo 12 \cite{grimminger2020open} important reference frames}
+    \label{fig:solo_frames}
 \end{figure}
     
 
@@ -76,8 +76,8 @@ only its inner ear, kinesthesis and sense of touch. \cite{bloesch2013state,rotel
 that the absolute velocity, pitch, and roll angles as well as IMU biases are observable using only IMU and kinematic measurements when at 
 least one contact is kept with the ground.
 
-The roboticist has to make many design choices when building such a system. Those choices mainly include the way kinematic information is used in the system, 
-the nature of the filter used (tightly-coupled vs loosely-coupled), how to detect stable contacts and whether extra sensors or more complex modeling need 
+The roboticist has to make many design choices when building such a system. Those choices mainly include: the type of kinematic information used, 
+the nature of the observer (tightly-coupled vs loosely-coupled), stable contacts detection , and whether extra sensors or modeling need 
 to be used to mitigate model errors.
  
 
@@ -87,9 +87,9 @@ Once a stable contact (no slipping/tipping) is detected, the relative pose and v
 can be computed through forward kinematics. Integrated over time, the relative displacement of the base of the robot can be inferred, a computation 
 often referred to as \textit{leg odometry} (by analogy with wheel odometry). This computation takes about 1 microsecond thanks to libraries such as \cite{carpentier2019pinocchio, hereid2017frost}. It uses
 readings from the joint encoders as well as the robot kinematic model. In systems with actuator reduction steps, encoders are usually placed before the reduction step 
-to increase (... for solo \cite{grimminger2020open}). Joint velocities are often less precise since they are generally computed from numerical differentiation \cite{rotella2016imu}. 
-The main sources of uncertainty usually come from inaccuracies in the parameters of the kinematic models such as approximate segment lengths, segments flexibilities \cite{vigne2018estimation}, 
-joint backlash \cite{fallon2014drift} and flexibilities \cite{koolen2016design}. 
+to increase accuracy (... for solo \cite{grimminger2020open}). Joint velocities are often less precise since they are generally computed from numerical differentiation \cite{rotella2016imu}. 
+The main sources of uncertainty usually come from inaccuracies in the parameters of the kinematic models such as approximate segment lengths, flexibilities \cite{vigne2018estimation, villa2022addressing}, or 
+joint backlash \cite{fallon2014drift, koolen2016design}. 
 Bloesch \cite{bloesch2018technical} classifies kinematic measurement models in three categories that define the structure of this section. 
 Those measurement models are summarized in \figRef{fig:kin_models}.
 
