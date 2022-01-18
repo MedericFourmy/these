@@ -365,9 +365,13 @@ model.
 For the Wandercraft exoskeleton \cite{harib2018feedback}, flexibilities
 are shown to be spread along the successive segments of the kinematic chain, and can be modeled as punctual, 
 3d rotations with a linear spring behavior \cite{vigne2018estimation}. This work implements an IMU network similar to the ideas of 
-\cite{xinjilefu2016distributed,rotella2016imu} but it uses independent complementary filters for each IMU to recover their absolute orientation. 
+\cite{xinjilefu2016distributed,rotella2016imu} but it uses independent complementary filters for each IMU to recover their tilt (pitch and roll). This complementary
+filter neglects linear accelerations of the IMU before gravity, filtering them as noise.
 These orientations are then used as virtual joints and fused with the robot whole-body dynamics and the linear spring models to recover segments 
-relative orientation and angular velocities.
+relative orientation and angular velocities. In a follow up work \cite{vigne2022movie}, the same authors revisit the linear acceleration negligibility 
+assumption and drop the use of the robot dynamical model. They design an observer to capable to estimate linear acceleration of each IMU of 
+the network by fusing IMU measurements and the linear velocity measurements from the kinematics, which are propagated forward starting from the contacts. 
+The approach is validated with a controller which exhibits a better behavior than the rigid one when human sized and weighted (80kg) dummies are used in the exoskeleton. 
 
 Other kinematic uncertainties are however often present and are harder to model or sense. For instance, the foot of the quadruped used in 
 \cite{bloesch2013state} is spherical but is only modeled as a point. Backlash prevented Fallon \cite{fallon2014drift} to use a direct kinematic 

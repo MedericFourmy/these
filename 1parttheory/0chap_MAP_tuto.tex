@@ -531,7 +531,7 @@ Firstly, properties that make $SO(3)$ a group are immediate from the:
 %
 Let's explicit the manifold structure of $\SO(3)$. First, the topology of its corresponding manifold is the $S^3$ sphere.
 It can be showed \cite{sola2018micro} that taking the time difference of a rotation matrices results in an element of its local tangent space
-$\dot{\Rot{}{}} = \Rot{}{} [\angvel{}{}]_{\times} \in \cT_{\Rot{}{}}\SO(3)$ where $[\angvel{}{}]_{\times}$ is the matrix form of the cross product 
+$\dot{\Rot{}{}} = \Rot{}{} [\angvel{}{}]_{\times} \in \cT_{\Rot{}{}}\SO(3)$ where $[\angvel{}{}]_{\times}$ is the skew-symmetric operator associated to the cross product. 
 $[\angvel{}{}]_{\times} = \angvel{}{} \times \cdot$. The Lie algebra $\so(3)$ is therefore the 3 dimensional vector space of antisymmetric matrices. 
 For a constant $\angvel{}{}$, this defines an ordinary differential equation (ODE) whose solution
 is $\Rot{}{}(t)=\Rot{}{0}\exp([\angvel{}{}]_{\times}t)$ where exp is the matrix exponential:
