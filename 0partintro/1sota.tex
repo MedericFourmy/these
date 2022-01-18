@@ -110,7 +110,7 @@ Once a stable contact (no slipping/tipping) is detected, the relative pose and v
 can be computed through forward kinematics. Integrated over time, the relative displacement of the base of the robot can be inferred, a computation 
 often referred to as \textit{leg odometry} (by analogy with wheel odometry). This computation takes about 1 microsecond thanks to libraries such as \cite{carpentier2019pinocchio, hereid2017frost}. It uses
 readings from the joint encoders as well as the robot kinematic model. In systems with actuator reduction steps, encoders are usually placed before the reduction step 
-to increase accuracy (... for solo \cite{grimminger2020open}). Joint velocities are often less precise since they are generally computed from numerical differentiation \cite{rotella2016imu}. 
+to increase accuracy (precision of 0.002 degrees for solo equipped with optical encoders \cite{grimminger2020open}!). Joint velocities are often less precise since they are generally computed from numerical differentiation \cite{rotella2016imu}. 
 The main sources of uncertainty usually come from inaccuracies in the parameters of the kinematic models such as approximate segment lengths, flexibilities \cite{vigne2018estimation, villa2022addressing}, or 
 joint backlash \cite{fallon2014drift, koolen2016design}. 
 Bloesch \cite{bloesch2018technical} classifies kinematic measurement models in three categories that define the structure of this section. 

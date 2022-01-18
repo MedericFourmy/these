@@ -183,7 +183,7 @@ This was the main contribution of paper my paper \cite{fourmy2021contact}.
 
 We perform pre-integration incrementally as follows. 
 First, $\ol\bfDelta_{ii}$ is initialized to the null motion. 
-Its covariance $\bfSigma_\Delta^{ii}$ and the Jacobian $\mjac{\bm\delta_i}{\bfb_i}$ are set to zero. 
+Its covariance $\Cov_\Delta^{ii}$ and the Jacobian $\mjac{\bm\delta_i}{\bfb_i}$ are set to zero. 
 At each reception of sensor data $\tilde\bfz_k$ at $t_k$, we integrate during $\dt$ to obtain the delta corresponding to a single data sample
 %
 \begin{align}
@@ -206,8 +206,8 @@ The Jacobian of the pre-integrated delta with respect to biases, as well as the 
 \begin{align}
     \mjac{\bfDelta_{ik}}{\bfb_i} &= \mjac{\bfDelta_{ik}}{\bfDelta_{ij}}\mjac{\bfDelta_{ij}}{\bfb_i} 
 + \mjac{\bfDelta_{ik}}{\bm\delta_k}\mjac{\bm\delta_k}{\bfb_i} \\
-    \bfSigma_\Delta^{ik} &= \mjac{\bfDelta_{ik}}{\bfDelta_{ij}}\bfSigma_\Delta^{ij}\mjac{\bfDelta_{ik}}{\bfDelta_{ij}}\tr 
-+ \mjac{\bfDelta_{ik}}{\bm\delta_k}\mjac{\bm\delta_k}{\bfz_k}\bfSigma_\bfz\mjac{\bm\delta_k}{\bfz_k}\tr\mjac{\bfDelta_{ik}}{\bm\delta_k}\tr
+    \Cov_\Delta^{ik} &= \mjac{\bfDelta_{ik}}{\bfDelta_{ij}}\Cov_\Delta^{ij}\mjac{\bfDelta_{ik}}{\bfDelta_{ij}}\tr 
++ \mjac{\bfDelta_{ik}}{\bm\delta_k}\mjac{\bm\delta_k}{\bfz_k}\Cov_\bfz\mjac{\bm\delta_k}{\bfz_k}\tr\mjac{\bfDelta_{ik}}{\bm\delta_k}\tr
 \end{align}
 
 where $\mjac{\bm\delta_k}{\bfb_i}$, $\mjac{\bm\delta_k}{\bfz_k}$, $\mjac{\bfDelta_{ik}}{\bfDelta_{ij}}$ and $\mjac{\bfDelta_{ik}}{\bm\delta_k}$ 
@@ -227,7 +227,7 @@ The pre-integrated $\ol\bfDelta_{im}$ is used at the end of the pre-integration 
 where $\bfb_i$ is the current bias value,  $\hat\bfDelta_{im}=\bfx^m\boxminus\bfx^i$ is the expected delta between KFs, and $\{\op,\om\}$ are the composite
  plus and minus operators described in \cite{sola2018micro}. 
 That is, $\{\op,\om\}$ are $\{+,-\}$ for vectors, and for rotations we have $\bfR\op\bm\theta\te\bfR\Exp(\bm\theta)$ and $\bfR_2\om\bfR_1\te\Log(\bfR_1\tr\bfR_2)$. 
-The residual clearly depends on the KF states $\bfx^i,\bfx^m$ and the bias $\bfb_i$. It has an associated covariance  $\bfSigma_\Delta^{im}$.
+The residual clearly depends on the KF states $\bfx^i,\bfx^m$ and the bias $\bfb_i$. It has an associated covariance  $\Cov_\Delta^{im}$.
 
 
 
@@ -377,7 +377,7 @@ Matrices $\bfP$ and $\bfQ$ are provided in the appendix \ref{sec:IMULieGroup}.
 \subsubsection{Jacobians, uncertainty}
 \label{sec:uncertainty}
 
-For general functions $f:\cM\to\cN;y=f(x)$, we propagate uncertainty normally via the Jacobians $\mjac{y}{x}\te\dpar{y}{x}$, \ie, $\bfSigma_y=\mjac{y}{x}\,\bfSigma_x\,\mjac{y}{x}\tr$. 
+For general functions $f:\cM\to\cN;y=f(x)$, we propagate uncertainty normally via the Jacobians $\mjac{y}{x}\te\dpar{y}{x}$, \ie, $\Cov_y=\mjac{y}{x}\,\Cov_x\,\mjac{y}{x}\tr$. 
 These Jacobians map the tangent spaces of the mannifolds $\cM,\cN$ at $x$ and $y$, and in case of vector spaces they resort to the classical Jacobian.
 They also satisfy the chain rule, which we use extensively in our developments.
 We provide ample reference and justification of this approach in the technical report \cite{sola2018micro}.

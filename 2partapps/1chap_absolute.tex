@@ -93,15 +93,15 @@ In line with the recent works on the subject, we write the MAP optimization as t
 %
 \begin{align}\label{equ:least_squares}
     \bfx^* = \argmin_\bfx 
-    \sum_i \norm{\bfr^I_i(\bfx)}_{\bfSigma^I_i}^2
+    \sum_i \norm{\bfr^I_i(\bfx)}_{\Cov^I_i}^2
     +
-    \sum_j \norm{\bfr^V_j(\bfx)}_{\bfSigma^V_j}^2
+    \sum_j \norm{\bfr^V_j(\bfx)}_{\Cov^V_j}^2
     % +
     % \sum_c \norm{\bfr_c(\bfx)}_{\Sigma_c}^2
 ~,
 \end{align}
 %
-with $\{\bfr^I,\bfSigma^I\}$ and $\{\bfr^V,\bfSigma^V\}$ indicating the residuals and covariances of respectively the inertial (IMU) and visual factors.
+with $\{\bfr^I,\Cov^I\}$ and $\{\bfr^V,\Cov^V\}$ indicating the residuals and covariances of respectively the inertial (IMU) and visual factors.
 These residuals are computed differently depending on the nature of the measurements and the state blocks they relate to. 
 They are described in the following two chapters.
 

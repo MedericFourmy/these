@@ -53,15 +53,15 @@ result in the highest posterior probability. The estimation problem is, in this 
 %
 
 Notice that the $p(\cZ)$ term does not appear anymore on the right side since it is constant with respect to $\cX$.
-States variables $\cX$ in our case are a collection of random variables $\{\cX_i\}_{i \in [1..N]}$ that each relate to a physical quantity of 
+States variables $\cX$ in our case are a collection of random variables $\{\cX_i\}_{i \in [1..n]}$ that each relate to a physical quantity of 
 interest (\eg the initial robot position, constant camera parameters, orientation of an object in the scene, IMU biases, etc.). Measurements $\cZ$ are 
-similarly a collection of individual sensor measurements $\{\bfz_i\}_{i \in [1..M]}$.
+similarly a collection of individual sensor measurements $\{\bfz_i\}_{i \in [1..m]}$.
 
 Additional assumptions have to be made in order to obtain a numerical implementation of this problem.
 First, the measurements are supposed to be conditionally independent of each other, so that the likelihood function can be factorized 
 %
 \begin{equation}
-    p(\cZ | \cX) p(\cX) =  p(\cX_{S_0}) \prod_{i=1}^{N} p(\bfz_i | \cX_{S_i}).
+    p(\cZ | \cX) p(\cX) =  p(\cX_{S_0}) \prod_{i=1}^{n} p(\bfz_i | \cX_{S_i}).
 \end{equation}
 %
 Each factor represents the measurement model associated to the  observation $\bfz_i$ and depending only on a subset $S_i$ of the state variables $\cX_{S_i}$. 
@@ -69,31 +69,32 @@ $S_0$ denotes the subset of random variables on which we have nonuniform prior.
 Secondly, the measurements are assumed to be corrupted by multivariate Gaussian noise:
 %
 \begin{equation}
-    p(\bfz_i | \cX_{S_i}) = \frac{1}{\sqrt{2\pi\Sigma_i}} ~ \exp(- \frac{1}{2} (||\bfe_i(X_{S_i})||^2_{\Sigma_i}) \triangleq K_i~\phi_i(\cX_{S_i})
+    p(\bfz_i | \cX_{S_i}) = \frac{1}{\sqrt{2\pi\Cov_i}} ~ \exp(- \frac{1}{2} (||\bfe_i(\cX_{S_i})||^2_{\Cov_i}) \triangleq K_i~\phi_i(\cX_{S_i})
 \end{equation}
 %
-where the \textit{residuals} $\bfe_i$ are (potentially) nonlinear functions of the state variables, $K_i$ are constants, $\Sigma_i$ is the covariance of the observation noise,
-$\phi_i(\cX_{S_i})$ is the un-normalized measurement likelihoods called \textit{factors},
-and 
+where the \textit{residuals} $\bfe_i(\cX_{S_i}) \in \Reals^{M_i}$ are (potentially) nonlinear functions of the state variables, $K_i \in \Reals$ are constants, 
+$\Cov_i \in \Reals^{M_i \times M_i}$ is the covariance of the observation noise,
+$\phi_i(\cX_{S_i})$ is the un-normalized measurement likelihoods called \textit{factors}, and 
 %
 \begin{equation*}
-    ||\bfe_i(X_{S_i})||_{\Sigma_i} = \sqrt{\bfe_i(X_{S_i}) \Sigma_i^{-1} \bfe_i(X_{S_i})}
+    ||\bfe_i(\cX_{S_i})||_{\Cov_i} = \sqrt{\bfe_i(\cX_{S_i}) \Cov_i^{-1} \bfe_i(X_{S_i})}
 \end{equation*}
 %
 is known as the squared Mahalanobis distance. 
-Residuals $\bfe_i(X_{S_i})$ can generally be formulated as a difference between a \textit{expectation function} $\bfh$ and the actual measurements
+Residuals $\bfe_i$ can generally be formulated as a difference between a \textit{expectation function} $\bfh$ and the actual measurements
 %
 \begin{equation}
-    \bfe_i(X_{S_i}) = \bfh(\cX_{S_i}) \ominus \bfz_i,
+    \bfe_i(\cX_{S_i}) = \bfh(\cX_{S_i}) - \bfz_i,
+    \label{eq:error_expectation}
 \end{equation}
 %
-where $\ominus$ is a generalized difference operator,
+% where $\ominus$ is a generalized difference operator,
 although some exceptions may exist (see for instance the IMU preintegration residual \eqRef{eq:preint_residual} in \secRef{sec:preint_residual}).
 
 Thus, the posterior probability is proportional to a product of individual factors:
 %
 \begin{equation}
-    p(\cX | \cZ) \propto \phi_0(\cX_{S_0}) \prod_{i=1}^{N} \phi_i(X_{S_i}) 
+    p(\cX | \cZ) \propto \phi_0(\cX_{S_0}) \prod_{i=1}^{n} \phi_i(\cX_{S_i}) 
     \label{eq:likelihood_factorization}
 \end{equation}
 %
@@ -105,11 +106,11 @@ Recognizing than maximizing the likelihood in \eqRef{eq:MAP_pbe} is equivalent t
     \\
     &= \argmin_{\cX} - \log p(\cZ | \cX) p(\cX) &\text{\small Unaffected Partition constant}
     \\
-    &= \argmin_{\cX} - \log p(\cX_0) \prod_{i=1}^{N} p(\bfz_i | \cX_{S_i})  &\text{\small Conditional independences}
+    &= \argmin_{\cX} - \log p(\cX_0) \prod_{i=1}^{n} p(\bfz_i | \cX_{S_i})  &\text{\small Conditional independences}
     \\
-    &= \argmin_{\cX} - \log \phi_0(\cX_{S_0}) \prod_{i=1}^{N} \phi_i(X_{S_i}) &\text{\small Factorized likelihood}
+    &= \argmin_{\cX} - \log \phi_0(\cX_{S_0}) \prod_{i=1}^{n} \phi_i(X_{S_i}) &\text{\small Factorized likelihood}
     \\
-    &= \argmin_{\cX}  \sum_{i=0}^{N} ||\bfe_i(\cX_{S_i})||_{\Sigma_i}^2  &\text{\small Gaussian measurement models}
+    &= \argmin_{\cX}  \sum_{i=0}^{n} ||\bfe_i(\cX_{S_i})||_{\Cov_i}^2  &\text{\small Gaussian measurement models}
 \end{align}
 
 Thus, solving the MAP problem with the aforementioned hypotheses boils down to solving a nonlinear weighted least-squares (NLLS) problem.
@@ -135,19 +136,18 @@ gradient-based algorithm, typically some variation of the Gauss-Newton algorithm
 \section{Gauss-Newton algorithm}
 In this section, we will give a brief introduction to a commonly used way to solve the MAP problem expressed as a NNLS: the Gauss-Newton algorithm.
 For now, we will assume that state variables and measurements all live in vector spaces to simplify the derivations. For many practical robotics applications,
-some state variables such as rotation matrices live in more complex manifolds. We will go over this issue in section section. 
-The section is based on tutorials such as \cite{dellaert2017factor,sola2017course}. 
+some state variables such as rotation matrices live in more complex manifolds. The section is based on tutorials such as \cite{dellaert2017factor,sola2017course}. 
 
 \subsection{Derivation of the Gauss-Newton step}
 First, we will simplify notations by dropping dependencies on state variables $X_{S_i}$ where evident to lighten notations. 
 Secondly, we will make a simple change of variables. The weighted squared residuals can be expressed as:
 \begin{equation}
-    ||\bfe_i||^2_{\Sigma_i} = \bfe_i \Sigma_i^{-1} \bfe_i 
-    = (\Sigma_i^{-\frac{1}{2}}\bfe_i)^T\Sigma_i^{-\frac{1}{2}}\bfe_i
-    = ||\Sigma_i^{-\frac{1}{2}}\bfe_i||^2 = ||\bfr_i||^2
+    ||\bfe_i||^2_{\Cov_i} = \bfe_i \Cov_i^{-1} \bfe_i 
+    = (\Cov_i^{-\frac{1}{2}}\bfe_i)^T\Cov_i^{-\frac{1}{2}}\bfe_i
+    = ||\Cov_i^{-\frac{1}{2}}\bfe_i||^2 = ||\bfr_i||^2
 \end{equation}
-where $\bfr_i(X_{S_i}) \triangleq \Sigma_i^{-\frac{1}{2}}\bfe_i(X_{S_i})$ can be interpreted as a whitened residual. $\Sigma_i^{-\frac{1}{2}}$ can be obtained
-from the Cholesky factorization of $\Sigma_i^{-1}$. Therefore, the NLLS MAP problem can simply be written:
+where $\bfr_i(X_{S_i}) \triangleq \Cov_i^{-\frac{1}{2}}\bfe_i(X_{S_i})$ can be interpreted as a whitened residual. $\Cov_i^{-\frac{1}{2}}$ can be obtained
+from the Cholesky factorization of $\Cov_i^{-1}$. Therefore, the NLLS MAP problem can simply be written:
 
 \begin{equation}
     \cX^{MAP} = \argmin_{\cX} \cL(\cX) \triangleq||\bfr||^2 = \sum_i^{i=N} ||\bfr_i({\cX_{S_i}})||^2 
@@ -162,10 +162,12 @@ Each residual can be linearized with respect to this estimate:
 
 where $\check{J}_i$ is the jacobian of the residual at $\check{\cX}_{S_i}$: 
 
-\begin{equation*}
+\begin{equation}
     \check{\bfJ}_i \triangleq \left.\frac{\partial \bfr_i}{\partial \cX_{S_i}}\right|_{\check{\cX}_{S_i}}
-\end{equation*}
+    \label{eq:res_jacobian}
+\end{equation}
 
+We can note $N = \sum_{i=1}^{n}dim(\bfx_i)$ and $M = \sum_{i=1}^{m}dim(\bfe_i)$.
 We also stack up the $\Delta \bfx_i$ column vectors as $\Delta \bfx \in \Reals^N$ and the residual jacobians at the linearization point 
 $\check{\bfJ} \in \Reals^{M \times N}$ so that the linearized cost function writes:  
 %
@@ -197,6 +199,13 @@ where $\bfJ^{+}$ is the (right) pseudo inverse of the residual gradient.
 In practice, this matrix $\bfJ^{+}$ is not computed explicitly as more efficient linear system exists. In particular methods based on the Cholesky
 factorization of $\bfH$ and on the QR factorization of $\bfJ$ are commonly used in SLAM since they are able to exploit the sparsity of these
 matrices.
+
+Taking a Gauss-Newton step then refers to applying the optimal step to get a new estimate:
+
+\begin{equation}
+    \check{\cX} := \check{\cX} + \Delta \bfx^*
+    \label{eq:gaussian_step}
+\end{equation}
 
 
 \subsection{Gauss-Newton algorithm}
@@ -243,6 +252,13 @@ instead of the identity matrix. The damping affects each direction of the state 
 
 For both cases, the values of $\alpha$ and $\lambda$ are continuously adapted, which can be understood as an implementation of the 
 Trust Region paradigm \cite{boyd2004convex}.
+
+
+For very large structure from motion problems, Conjugate Gradient Descent is also used as an alternative to Gauss-Newton derivates, though extra care has to 
+be taken toward the conditioning of the problem Hessian.
+
+
+
 
 
 \section{Covariance of the estimate}
@@ -302,8 +318,8 @@ To ground the problem we will assign sensible values to the problem (same as \ci
 where $x_{true}$ is the true depth that we seek to estimate.
 
 Notice that the prior standard deviation is quite, showing a great uncertainty about the prior value. We simulate noisy measurements by drawing samples 
-$\cY = {Y}_{i \in [1..N]}$ of the measurement model using $x_{true}$ (we drew $N=10$ measurements). For a low dimensional problem such as this one, 
-it is possible to compute the full posterior distribution $p(x|\cY)$ by numerical integration, which is referred to as the "grid approximation" by 
+$\bfy = {Y}_{i \in [1..N]}$ of the measurement model using $x_{true}$ (we drew $N=10$ measurements). For a low dimensional problem such as this one, 
+it is possible to compute the full posterior distribution $p(x|\bfy)$ by numerical integration, which is referred to as the "grid approximation" by 
 \cite{mcelreath2018statistical}. We can make this computation almost arbitrarily precise since the computation are quite cheap. The prior and density distribution are represented in \figRef{fig:MAP_stereo1D}. Applying the Laplacian approximation to
 compute a posterior approximation involves minimizing the negative log likelihood:
 
@@ -328,75 +344,246 @@ of the real posterior is not equal to its mode.
 
 
 
-\section{Lie groups for MAP optimization}
-
-Examples of Riemanian geometry in machine data science \cite{miolane2020geomstats}
-
-
-
+\section{Lie groups for state estimation}
 Some of the state variables that we manipulate in robotics are challenging since they do not belong to vector spaces. Some of the equations
 involved in the Gauss-Newton algorithm, in particular the Gauss-Newton step update, cannot be be directly applied without extra care when it is the case.
-In this section we will provide the minimal concepts regarding the use of Lie groups and explain how we can change some of the equations
-to accommodate for the special structure of these variables, in particular rotation matrices.
+These variables live on smooth manifolds, also known as Riemannian manifols. Many examples of Riemanian geometry in data science and robotics
+\cite{miolane2020geomstats}. Besides, many of these robotics state variables also exhibit a group structure which, together with the smooth manifold
+property, define the so called Lie group.
+In this section we will provide the minimal concepts of smooth manifold and Lie groups that useful to the robotician. In particular, we will show 
+that a limited number of notations can be made to the Gauss-Newton algorithm to accommodate for the special structure of these variables.
 
-\subsection{What is a Lie group?}
-Simply stated, a \text{Lie group} is a group which elements live in a smooth manifold.
+\subsection{Smooth manifold structure}
+A \textit{smooth manifold} $\cM$ or differentiable manifold is a topological space that can be pictured as a smooth surface embedded in a higher dimensional vector space, 
+of dimension $n$.
+The smoothness property means that to each surface point $\bfx$ corresponds a unique tangent (hyper-)plane $\cT_{\bfx}\cM$, called the tangent space 
+(there are no spikes or edges on the surface). The tangent space is a vector space on which traditional calculus operations are applicable. The dimension $m \leq n$ of this 
+vector space is equal to the dimension of the surface as well as the degrees of freedom of its elements.
+The element of tangent space at $\bf_x$, $\bftau\hhat \in \cT_{\bfx}\cM$ can naturally be decomposed as a linear combination 
+of the tangent space basis vectors $E_i$. We can therefore define an element by its coefficient, which is the vector $\bftau \in \Reals^m$, called the cartesian tangent vector.
+The \textit{hat} and \textit{vee} are mutually inverse linear maps permit to pass back and forth from $\cT_{\bfx}\cM$ to $\Reals^m$, which are therfore isomorphic:
 
-A \textit{smooth manifold} or differentiable is a topological that can be pictured as a smooth surface embedded in a higher dimensional vector.
-The smoothness property means that each point on this surface corresponds a unique tangent (hyper-)plane (there are no "spikes" on the surface).
-This space is a vector space on which traditional calculus operations are applicable.
+\begin{align}
+    \text{Hat} ~ :& \quad\quad \Reals^m \rightarrow \cT_{\bfx}\cM; \quad\quad \bftau \rightarrow \bftau\hhat = \sum_{i=1}^m\tau_i E_i  \\
+    \text{Vee} ~ :& \quad\quad \cT_{\bfx}\cM \rightarrow \Reals^m; \quad\quad \bftau\hhat \rightarrow (\bftau\hhat)\vvee = \bftau = \sum_{i=1}^m\tau_i \bfe_i
+\end{align}
+where $\bfe_i$ are basis vectors of $\Reals^m$.
 
+Vector spaces operations such as addition of a vector to a point or subtraction of two vectors do not apply in Riemannian geometry. For instance, if we
+take a point on a sphere (the 2-sphere embedded in the 3 dimensional Euclidean space for instance) and add to it an arbitrary vector, we do not get in general
+a another point on the sphere. These operations have equivalent in the \textit{retraction} and its inverse.
+Retraction pulls an element from the local tangent space back to the manifold as represented in \figRef{fig:manifold}. We denote retraction and its inverse as 
+$\oplus$ and $\ominus$:
+%
+\begin{align}
+            \text{Retraction}~:&\quad\quad \bfx_2 = \bfx_1 \oplus \bftau   \\
+    \text{Retraction inverse}~:&\quad\quad \bftau = \bfx_2 \ominus \bfx_1  \\
+\end{align}
+%
+Note that we informally define the retraction and its inverse as operations dealing with the 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/manifold.pdf}
+    \caption{Manifold, tangent space, retraction and inverse retraction operation}
+\end{figure}
+
+When dealing with a collection of objects $\bfx_i$ living in their respective manifold $\cM^i$, it is often convenient to define a composite manifold
+as the concatenation $\cM_c \triangleq \left<\cM^1, \dots, \cM^M \right>$. The element of this composite manifold is denoted by $\cX$
+The composite equivalent of retract operation $\boxplus$ and 
+its inverse $\boxminus$ retraction to individual elements of the manifold and its tangent space separately:
+
+\begin{equation}
+    \cX=
+    \begin{bmatrix}
+        \bfx^1 \\
+        \vdots \\
+        \bfx^M
+    \end{bmatrix},
+    \quad
+    \cX \boxplus \bftau
+    \begin{bmatrix}
+        \bfx^1 \oplus \bftau_1 \\
+        \vdots \\
+        \bfx^M \oplus \bftau_M
+    \end{bmatrix}
+    \quad
+    \cX_2 \boxminus \cX_1
+    \begin{bmatrix}
+        \bfx^1_2 \ominus \bfx^1_1 \\
+        \vdots \\
+        \bfx^M_2 \ominus \bfx^M_1
+    \end{bmatrix}
+\end{equation}
+
+
+
+\subsection{Back to the MAP optimization problem}
+Elements of the tangent space can be interpreted as steps that we can make to go from one point of the manifold to another.
+This ties closely to the notion of Gaussian steps that we defined earlier. We will now consider that the estimated state $\cX$
+is actually an element of a composite manifold (in which each state variables belongs to its own manifold). In this case, the Gaussian steps of \eqRef{eq:gaussian_step}
+are in the composite manifold tangent space and the step updates writes:
+
+\begin{equation}
+    \check{\cX} := \check{\cX} \boxplus \Delta \bfx^*
+\end{equation}
+
+obtained by solving
+
+\begin{equation}
+    \Delta \bfx^* = \argmin_{\Delta \bfx} ||\bfr(\check{\cX} \oplus \Delta \bfx)||^2.
+\end{equation}
+
+
+Concerning residual formulation in \ref{eq:error_expectation}, if the measurement $\bfz_i$ is itself an element of a manifold, then the cartesian minus needs to be replaced:
+
+\begin{equation}
+    \bfe_i(\cX_{S_i}) = \bfh(\cX_{S_i}) \ominus \bfz_i,
+    \label{eq:error_expectation}
+\end{equation}
+
+Note that many state variables actually belong to vector spaces (such as the robot position), which are trivial manifolds. For those, the $\oplus$ and $\ominus$ operators
+simply reduce to the addition and subtraction of cartesian vectors.  
+
+
+
+\subsection{Uncertainty in manifolds and jacobians}
+Our state variables are random variables approximated by multivariate Gaussian distribution, that can be summarized by their mean vector and covariance matrix.
+These concepts need to be slightly modified to account for the nature manifold nature of some of these. We will see how to define gaussian distribution on manifolds.
+Let's $\tau \in \Reals^m$ be a small perturbation around a point $\bar{\bfx} \in \cM$, so that we can write:
+%
+\begin{equation}
+    \bfx = \bar{\bfx} \oplus \bftau, \quad \bftau = \bfx \ominus \bar{\bfx}
+\end{equation}
+%
+where $\bar{\bfx}$ designate the mean value of the distribution on $\bfx$. 
+We actually define a zero mean "cartesian" gaussian distribution on the tangent space, the covariance being defined as:
+
+\begin{equation}
+    \Cov_{\bfx} = \mathbb{E}[\bftau\bftau^T] = \mathbb{E}[(\bfx \ominus \bar{\bfx})(\bfx \ominus \bar{\bfx})^T] \in \Reals^{m \times m}
+\end{equation}
+where $\mathbb{E}[\cdot]$ denotes the expectation operator.
+By a slight abuse of notation, we note that the manifold distribution is $\bfx \approx \Gaussian{\bfx}{\Cov_{\bfx}}$
+
+As an illustration, the group of unit quaternions $\mathbb{H} = \{ \bfq \in \Reals^4, \bfq \odot \bfq^*=1$ under quaternion multiplication $\odot$ is a manifold  
+(the $S^3$ sphere, n=4 and m=3) \cite{sola2012quaternion}. 
+The tangent space is the set of antisymmetric matrices, which is isomorphic to the angle axis rotation vectors $\angvel{}{} = \omega \bfu \in \Reals^3$.
+If we naively define the covariance matrix of a quaternion as $\mathbb{E}[(\bfx \ominus \bar{\bfx})(\cX \ominus \bar{\cX})^T] \in \Reals^{4 \times 4}$, 
+this covariance matrix is ill-defined. The covariance is instead defined as a $3 \times 3$ real matrix on the angle axis space.
+
+In general, covariances can be propagated through nonlinear function of random variables using the chain rule. For instance, if $\bfx \in \Reals^{n_x}$ and 
+$\bfy \in \Reals^{n_y}$ are cartesian multivariate gaussian distribution related by the nonlinear function $f$, propagating the $\bfx$ covariance 
+$\Cov_{\bfx} \in \Reals^{n_x \times n_x}$ through f writes:
+
+\begin{equation}
+    f~: \bfx \in \Reals^{n_x} \rightarrow \bfy \in \Reals^{n_y}, \quad \quad \Cov_{\bfy} \approx 
+                \left.\frac{D f}{D \bfx} \right|_{\bfx}   \Cov_{\bfx}    \left.\frac{D \bfy}{D \bfx}\right|_{\bfx}^T
+\end{equation}
+
+The same equation applies for random variables $\bfx \in \cM_{\bfx}$ and $\bfy \in \cM_{\bfy}$ living on manifolds. The definition of jacobians has however
+to be redefined as:
+
+\begin{equation}
+    \frac{D f}{D \bfx} \triangleq \lim_{\bftau \to 0} \frac{f(\bfx \oplus \bftau) \ominus f(\bfx)}{\bftau}
+\end{equation}
+
+These jacobians also play a central role in the derivation of the residual jacobians \ref{eq:res_jacobian}.
+Examples of manifold jacobian derivations in the context of Lie groups can be found in \cite{sola2018micro}.  
+
+
+
+\subsection{Lie groups for robotic state estimation}
 A \textit{group} ($\cG$, $\circ$) is a set $\cG$ with a composition law $\circ$ which satisfies the group axioms:
 
 \begin{align}
-    \text{Closure under}~'\circ'~:&~\cX \circ \cY \\ 
-    \text{Associativity}~'\circ'~:&~(\cX \circ \cY) \circ \cZ = \cX \circ (\cY \circ \cZ) \\ 
-    \text{Identity element}~\cE~:&~\cX \circ \cE = \cE \circ \cX = \cX \\ 
-    \text{Inverse}~\cX^{-1}~:&~\cX^{-1} \circ \cX = \cX \circ \cX^{-1} = \cE
+    \text{Closure under}~'\circ'~:&~\bfx \circ \bfy \\ 
+    \text{Associativity}~'\circ'~:&~(\bfx \circ \bfy) \circ \bfz = \bfx \circ (\bfy \circ \bfz) \\ 
+    \text{Identity element}~\cE~:&~\bfx \circ \cE = \cE \circ \bfx = \bfx \\ 
+    \text{Inverse}~\bfx^{-1}~:&~\bfx^{-1} \circ \bfx = \bfx \circ \bfx^{-1} = \cE
 \end{align}
-where, here, $\cX,\cY,\cZ \in \cG$.
+where, here, $\bfx,\bfy,\bfz \in \cG$.
 
-Every
+Simply stated, a \text{Lie group} is a group which elements live in a smooth manifold $\cM$.
 
+As a vector can represent a displacement from one point to an other along a straight line in the euclidean space or directly a point (displacement from the origin),
+an element of a Lie group represents a path from one element to another along a geodesic of the manifold or directly an element of the group 
+(displacement from the identity element $\cE$).
 
+In particular the identity element $\cE$ relates to a notion of a global reference from which each element of the manifold can be compared.
+The tangent space at this element is called the Lie algebra $\mathfrak{m} \triangleq \cT_{\cE}\cM$.
 
-
-interpreted as living on a manifold, which is a surface embedded in a vector space defined by a set of constraints. 
-The $\SO(3)$ manifold is embedded in the 9 dimensional constrained by 6 constraints (column vectors are orthogonal and of norm 1) which defines a 
-a manifold of dimension 3. This manifold is said to be smooth \textit{smooth}, which concretely states that elements of this group can be 
-continuously differentiated (there are no "spikes" on the )
-
-  
-- very short introduction of the exponential map
-- explanation of noise defined on tangent space
-
-\subsection{The $\SO(3)$ example}
-Let's take for example the case of the sets of 3D rotation matrices $\SO(3)$:
-
-\begin{equation*}
-    \SO(3) = \{ \bfR \in \textit{GL}(3,\Reals), \bfR^T \bfR  = \bfI_3.
-\end{equation*}
-where $\textit{GL}(3,\Reals)$ denotes the general linear group of invertible real matrices of size $3 \times 3$.
-
-- Sphere
-- Lie algebra
-- Exponential map + Logarithm
-
-\subsection{Gauss-Newton algorithm on Lie groups}
+Let's compute the retraction operations in the case of Lie groups. We will follow the example of 3D rotations as they are of great use in robotics and provide good
+good intuitions regarding the general behavior of Lie groups.
+The group of 3D rotations is defined as the Special Orthogonal group in 3D: 
+\begin{equation}
+    \SO(3) = \left\{\Rot{}{} \in \text{GL}(n,\Reals) | \Rot{}{}\Rot{}{}^T=\Rot{}{}^T\Rot{}{}=I,~det(R)=1\right\}
+\end{equation}
+under matrix multiplication.
 
 
-.....
-Then the update rule writes:
+Firstly, properties that make $SO(3)$ a group are immediate from the:
+%
+\begin{itemize}
+    \item Closure under the matrix product
+    \item Associativity through the matrix product
+    \item Identity element $\bfI_3$
+    \item Inverse element $\Rot{}{}^{-1} = \Rot{}{}^T$ (from the group definition)
+\end{itemize}
+%
+Let's explicit the manifold structure of $\SO(3)$. First, the topology of its corresponding manifold is the $S^3$ sphere.
+It can be showed \cite{sola2018micro} that taking the time difference of a rotation matrices results in an element of its local tangent space
+$\dot{\Rot{}{}} = \Rot{}{} [\angvel{}{}]_{\times} \in \cT_{\Rot{}{}}\SO(3)$ where $[\angvel{}{}]_{\times}$ is the matrix form of the cross product 
+$[\angvel{}{}]_{\times} = \angvel{}{} \times \cdot$. The Lie algebra $\so(3)$ is therefore the 3 dimensional vector space of antisymmetric matrices. 
+For a constant $\angvel{}{}$, this defines an ordinary differential equation (ODE) whose solution
+is $\Rot{}{}(t)=\Rot{}{0}\exp([\angvel{}{}]_{\times}t)$ where exp is the matrix exponential:
 
 \begin{equation}
-    \cX := \cX \circ \Exp(\Delta \bfx)
+    \exp(\bfA) = \sum_{k=0}^{\infty} \frac{\bfA^k}{k!}
 \end{equation}
 
-\subsection{Gaussian variables on Lie groups}
+For $\SO(3)$ and most other Lie groups, properties of the Lie algebra simplifies the infinite sum of the matrix exponential to a simpler closed form formula. 
+In the $\SO(3)$ case, this formula is known as the Rodriguez equation:
 
-CITE Barfoot/Furgale
-Definition of noise 
+\begin{equation}
+    \Exp(\bftheta) = \exp([\bftheta]_{\times}) = \bfI + [\bfu]_{\times}\sin(\theta) + [\bfu]_{\times}^2(1 - \cos(\theta))
+\end{equation}
+where $\bftheta \triangleq \theta \bfu \in \Reals$ where $\theta$ is the norm of the rotation vector, which is an angle (in radians).
+Finally, we have denoted by $\Exp$ the composition of the $hat$ operator ($\bftheta\hhat \triangleq [\bftheta]_{\times}$). 
+The inverse operation that maps elements from the group to the Lie algebra is defined as the $\Log$ map. A general representation of
+Lie group operation can be found in \figRef{fig:lie_group}
 
+We all of that in mind, the link with the Riemannian manifold terminology becomes clearer. We can compose a rotation with
+an increment $\angvel{\bfx}{}$ taken in the tangent space at $\bfx$ to obtain another rotation: $\Rot{}{2} = \Rot{}{1}\Exp(\angvel{}{12})$.
+This corresponds to the $\oplus$ retraction operator. Conversely, the inverse of the retraction $\ominus$ corresponds to the application of The
+logarithm on the relative rotation as described here:
+
+\begin{align}
+    \Rot{}{2} &= \Rot{}{1}\oplus \angvel{}{12} = \Rot{}{1} \Exp(\angvel{1}{12})  \\ 
+    \angvel{1}{12} &= \Rot{}{2}\ominus \Rot{}{2} = \Log(\Rot{}{1}^T\Rot{}{2}) 
+\end{align}
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{0.85\textwidth}
+        \includegraphics[width=\textwidth]{figures/lie_group.pdf}
+        \caption{Representations of a Lie group including the identity element $\cE$, operations of composition
+        between increments and relations between a tangent space increment at the identity $\prescript{\cE}{}{\bftau}$ 
+        and at the local element $\prescript{\bfx}{}{\bftau}$ through the adjoint matrix $\text{Ad}_{\bfx}$. Figure adapted from \cite{sola2018micro}.}
+        \label{fig:lie_group} 
+    \end{subfigure}
+
+    \begin{subfigure}{0.85\textwidth}
+        \includegraphics[width=\textwidth]{figures/rotation_exp_log.pdf}
+        \caption{Representation of $\SO(3)$ Lie groups operations. Note that we represented frames with different origins
+        for better readability while the group elements only represent pure rotations (no translation).}
+        \label{fig:rotation_exp_log} 
+    \end{subfigure}
+\end{figure}
+
+In robotics terms, $\angvel{1}{12}$ is the axis angle representation of the relative rotation $\delta \Rot{1}{12} = \Rot{}{1}^T\Rot{}{2}$ and
+\textit{local} rotations represent the orientation of reference frames in a \textit{global} world reference frame. The identity element therefore corresponds 
+to the world frame. For Lie group, an additional $\oplus$ operator exists which retracts and compose vectors at the Lie algebra instead of
+the local algebra, the left-$\oplus$ while the local one is called the right-$\oplus$. The Adjoint $\text{Ad}_{R}\SO(3)$ is a linear operator that permits to map
+elements from the local tangent space to the Lie algebra. Those operations are illustrated by \figRef{fig:rotation_exp_log}.
 
 
 %
@@ -413,7 +600,7 @@ in solving the NLLS problem.
 Let's consider the toy example represented in \figRef{fig:toy_problem}. 
 We wish to estimate the trajectory of a differential robot, that is its states at chosen timestamps called \textit{\keyframes}, and \textit{landmarks} which are elements of the 
 environment that are easily detectable. We suppose that this robot is equipped with an odometer, which measurements integrated over time provide relative 
-transformations between \keyframes, and an exteroceptive sensor, which provides relative measurements between \keyframes landmarks.
+transformations between \keyframes, and an exteroceptive sensor, which provides relative measurements between \keyframes~and landmarks.
 
 \begin{figure}[h]
     \centering
@@ -433,7 +620,8 @@ transformations between \keyframes, and an exteroceptive sensor, which provides 
     (blue for robot \keyframe, green for landmarks) and factors by squares (orange for odometry, black for exteroceptive sensor, red for the prior).}
 \end{figure}
 
-In this case, the state variables are $\cX = \{ \bfx_1, \bfx_2, \bfx_3, l_1, l_2\}$ %and measurements $\cZ = \{ z_{o,1}, z_{o,2}, z_{e,1}, z_{e,2}\}$
+In this case, the state variables are $\cX = \{ \bfx_1, \bfx_2, \bfx_3, l_1, l_2\}$ 
+and measurements $\cZ = \{ z_{o,1}, z_{o,2}, z_{e,1}, z_{e,2}\}$
 We also apply a prior on the pose of the first \keyframe of the trajectory, which can be understood as fixing the frame origin of the reference 
 frame in which the estimation is done.
 
@@ -459,6 +647,30 @@ recognize the link between NLLS problems and factor graph.
 
 \subsection{Sparsity of the NLLS problem}
 
+The jacobian matrix of the residuals $\bfJ \in \Reals^{M \times N}$ is a big sparse matrix of dimensions 
+\begin{itemize}
+    \item N columns = $\sum_{i=1}^{n}dim(\cT_{\bfx_i}\cM_i)~\rightarrow$ the sum of variables tangent spaces dimensions 
+    \item M rows = $\sum_{i=1}^{m}dim(\bfe_i) \rightarrow~$ the sum of residual dimensions
+\end{itemize}   
+
+Each block column corresponds to one of the state variables and each row corresponds to a residual.
+\begin{equation}
+    \bfJ=
+    \begin{pmatrix}
+       J^{p}_{\bfx_1} &   &     &     &     \\
+       J^{o_1}_{\bfx_1} & J^{o_1}_{\bfx_2}  &     &     &     \\
+                       & J^{o_2}_{\bfx_2}  & J^{o_2}_{\bfx_3}   &     &     \\
+       J^{e_1}_{\bfx_1} &                  &     &  J^{o_2}_{\bfl_1}   &     \\
+                       & J^{e_1}_{\bfx_2}  &     &  J^{e_1}_{\bfl_1}   &     \\
+                       & J^{e_2}_{\bfx_2}  &     &     &  J^{e_2}_{\bfl_2}   \\
+                       &                  & J^{e_3}_{\bfx_3}    &     &  J^{e_3}_{\bfl_2}   \\
+    \end{pmatrix}
+    \label{eq:sparse_jac}
+\end{equation}
+
+The approximate hessian matrix $\bfH \in \Reals^{N \times N}$ displays a similarly remarkable sparsity which makes the resolution of the linear system
+at each step very efficient. Algorithms such as the Schur complement, Cholesky factorization and QR factorization were applied by different authors to the 
+problem of SLAM and estimation.
 
 
 
@@ -467,22 +679,4 @@ recognize the link between NLLS problems and factor graph.
 
 
 
-
-
-
-
-\section{Comparison with the EKF}
-
-An important remark to be made is that the traditional Kalman filter can also be derived from the same MAP approximate Bayesian inference (a derivation 
-of Kalman filter equations from MAP solution can be found in \cite{barfoot2017state}, section 3.3.2). What differs is the way the computation of the 
-MAP is undertaken. Instead of solving a NLLS problem, the Kalman filter separates the measurements in two kinds. 
-A process model describing the state dynamics and based on "inputs" (in practice often sensor measurements or random noise) is used to marginalize 
-against the previous state. Then, a set of measurement models update the state based on other sensor data.
-
-The posterior is then summed up by a mean estimate and its associated covariance matrix, that summarizes the correlations of state variables
-accumulated from past states (this covariance matrix is usually dense). For markovian, linear-markovian system, the Kalman filter is the optimal
-estimator. However, the EKF needs to linearize process and measurement models around the current state estimate. This means that if the is initialized
-far from the true state, linearization errors can accumulate over time, which can lead to inconsistent estimates \footnote{This problem is nowadays
-mitigated by an algorithm like the Invariant \KalmanF \cite{barrau2018invariant}}. In contrast, NLLS problems are
-solved using by repeatedly relinearizing around the new more values closer to the optimal.
-
+% CONCLU
