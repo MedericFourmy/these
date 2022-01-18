@@ -31,7 +31,7 @@ and assuming a perfect robot kinematic model, the state of any part of the poly-
 are again based on the robot kinematic model as well as the segments inertia, which we together call the $kinodynamic$ robot model. This model is often 
 found in URDF files (Unified Robot Description Format) which are generated via CAD models (Computer Aided Design).
 
-The \textit{centroidal state} refer to the center of mass, angular momentum, and their derivatives. The center 
+The \textit{centroidal state} refers to the center of mass, angular momentum, and their derivatives. The center 
 of mass (barycenter of the robot segment masses) is a virtual point that is the main control variable for locomotion. 
 %Centroidal estimators fuse the robot kinematic model, which is often assumed to be biased, with various dynamical models of the system. 
 
@@ -76,8 +76,8 @@ only its inner ear, kinesthesis and sense of touch. \cite{bloesch2013state,rotel
 that the absolute velocity, pitch, and roll angles as well as IMU biases are observable using only IMU and kinematic measurements when at 
 least one contact is kept with the ground.
 
-The roboticist has to make many design choices when building such a system. Those choices mainly include the way kinematic information is used in the system, 
-the nature of the filter used (tightly-coupled vs loosely-coupled), how to detect stable contacts and whether extra sensors or more complex modeling need 
+The roboticist has to make many design choices when building such a system. Those choices mainly include: the type of kinematic information used, 
+the nature of the observer (tightly-coupled vs loosely-coupled), stable contacts detection , and whether extra sensors or modeling need 
 to be used to mitigate model errors.
  
 
@@ -88,8 +88,8 @@ can be computed through forward kinematics. Integrated over time, the relative d
 often referred to as \textit{leg odometry} (by analogy with wheel odometry). This computation takes about 1 microsecond thanks to libraries such as \cite{carpentier2019pinocchio, hereid2017frost}. It uses
 readings from the joint encoders as well as the robot kinematic model. In systems with actuator reduction steps, encoders are usually placed before the reduction step 
 to increase accuracy (... for solo \cite{grimminger2020open}). Joint velocities are often less precise since they are generally computed from numerical differentiation \cite{rotella2016imu}. 
-The main sources of uncertainty usually come from inaccuracies in the parameters of the kinematic models such as approximate segment lengths, segments flexibilities \cite{vigne2018estimation}, 
-joint backlash \cite{fallon2014drift} and flexibilities \cite{koolen2016design}. 
+The main sources of uncertainty usually come from inaccuracies in the parameters of the kinematic models such as approximate segment lengths, flexibilities \cite{vigne2018estimation, villa2022addressing}, or 
+joint backlash \cite{fallon2014drift, koolen2016design}. 
 Bloesch \cite{bloesch2018technical} classifies kinematic measurement models in three categories that define the structure of this section. 
 Those measurement models are summarized in \figRef{fig:kin_models}.
 
