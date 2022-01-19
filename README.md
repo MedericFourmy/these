@@ -4,6 +4,12 @@
 Use `build.sh` and `clean.sh` scripts
 `build.sh -n`: build without bibliography
 
+### Build page de garde separately
+`pdflatex first_page.tex`
+
+### Merge page de garde and rest of the thesis
+`./merge_first_and_these.sh`
+
 ## TO DO
 - robot family portraits?
 - cite end to end ML estimation+control?
