@@ -1,18 +1,16 @@
 \chapter{Tutorial on factor graph state estimation}
 \minitoc
 
-Let us explicit the terms of this chapter's title. 
-
-The \textit{state} of the robot is a reduced set of variables of particular interest to the roboticist, be it for control, parameter identification, etc.
+Let us explicit the terms of this chapter's title. The \textit{state} of the robot is a reduced set of variables of particular interest to the roboticist, be it for control, parameter identification, etc.
 Those quantities may not directly be measurable, due to their physical nature (the center of mass is a virtual point) or because sensor data
 is too noisy, biased, or impractical to obtain (\eg GPS for localization is bad close to flat surfaces because of beam reflections). 
 Those latent variables can however be estimated by fusing multiple sensors data using a state estimator (aka. observer in automation). 
 The task of \textit{estimation} can then simply be stated as finding the most likely robot state given these measurements. 
 
 Probabilistic theory applied to signal processing and information theory has been the bedrock of the state estimation theory development.
-From the probabilistic estimator, states are random variables, which, in the robotics context, are mostly continuous. 
-The goal is then to find the probability density of those states using sensor measurements.
-Taking the Bayesian perspective, we want to find a distribution over a collection of random variables $\cX$ given a set 
+For probabilistic estimators, states are random variables, which, in the robotics context, are mostly continuous.
+The goal is to find the best estimate using sensor measurements.
+In the Bayesian perspective, this means to to find a distribution over a collection of random variables $\cX$ given a set 
 of measurements $\cZ$, $p(\cX | \cZ)$, which is known as the \textit{posterior} distribution. 
 The Bayes law represents this inference:
 %
@@ -27,17 +25,17 @@ The \textit{marginalized likelihood} $p(\cZ) = \int p(\cZ|\cX)p(\cX)d\cX $ can b
 the $\cZ$ random variable is observed, which is our case. In general, this term is computationally intractable to compute, since it requires marginalizing
 the likelihood distribution over all possible states. Exact inference is therefore rarely possible, the Bayesian practitioner instead relying on approximate inference.
 
-In the context of robotics, recursive Monte Carlo sampling (\cite{koller2009probabilistic}, chapter 11) has been 
+For example, in the context of robotics, recursive Monte Carlo sampling (\cite{koller2009probabilistic}, chapter 11) has been 
 leveraged in the popular recursive particle filter for tasks such as localization \cite{dellaert1999monte} and SLAM \cite{montemerlo2002fastslam}. A very interesting
 property of this approximation is the fact that multimodal distributions can be modeled, which can be useful
 for multi hypothesis problems such as the kidnapped robot problem \cite{dellaert1999monte} or target tracking \cite{gustafsson2002particle}. 
 
-Application of variational inference (\cite{koller2009probabilistic}, chapter 11) is scarcer. The idea here is to search for a candidate distribution 
-(usually a Gaussian) that minimizes the Kullback-Leibert divergence between the posterior and the candidate distribution. Very recent works start 
+Another type of approximate inference is variational inference (\cite{koller2009probabilistic}, chapter 11), which application in robotics is scarcer. The idea here is to search for a candidate distribution 
+(usually a Gaussian) that minimizes the Kullback-Leibler divergence between the posterior and the candidate distribution. Very recent works start 
 to find applications in robotics as an alternative to MAP-based graph optimization \cite{barfoot2020exactly, wong2020variational} 
 or to Bayes filtering \cite{lambert2022recursive}. 
 
-A more popular approach to the estimation problem is to find the mode of the posterior distribution, aka. the \textit{Maximum A Posteriori} (MAP).
+A more popular approach to the estimation problem is to find the mode of the posterior distribution, \aka the \textit{Maximum A Posteriori} (MAP).
 This problem is best visually represented by a probabilistic graphical model known as the \textit{factor graph}, which will be described in \secRef{sec:factor_graphs}
 
 
