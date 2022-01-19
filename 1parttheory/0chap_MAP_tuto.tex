@@ -264,7 +264,7 @@ to mitigate the shortcomings of the "pure" Gauss-Newton algorithm.
 
 
 \section{Covariance of the estimate}
-
+\label{sec:map_covariance}
 An important question to ask is how confident are we in our MAP estimate? Even if our priors and measurements models are Gaussian distribution, the posterior distribution
 is not in general Gaussian (unless all measurements models are linear). The region near the peak of the posterior is, however, often nearly Gaussian in shape.
 The curvature around the mode is described by the Hessian the negative log-likelihood of the posterior at the MAP estimated state. 
@@ -485,6 +485,7 @@ $\Cov_{\bfx} \in \Reals^{n_x \times n_x}$ through f writes:
 \begin{equation}
     f~: \bfx \in \Reals^{n_x} \rightarrow \bfy \in \Reals^{n_y}, \quad \quad \Cov_{\bfy} \approx 
                 \left.\frac{D f}{D \bfx} \right|_{\bfx}   \Cov_{\bfx}    \left.\frac{D \bfy}{D \bfx}\right|_{\bfx}^T
+    \label{eq:cov_propagation}
 \end{equation}
 
 The same equation applies for random variables $\bfx \in \cM_{\bfx}$ and $\bfy \in \cM_{\bfy}$ living on manifolds. The definition of jacobians has however
