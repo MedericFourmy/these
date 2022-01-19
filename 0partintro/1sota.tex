@@ -29,13 +29,16 @@ to filtering-based methods.
         \includegraphics[width=\textwidth]{figures/Robots-humanoides_HRP2_Talos_crop.jpg}
     \end{subfigure}%
     
-    \begin{subfigure}{0.5\textwidth}
+    \begin{subfigure}{0.4\textwidth}
         \includegraphics[width=\textwidth]{figures/SOLO_isolated-shadow-1024x662.png}
     \end{subfigure}%
+    \begin{subfigure}{0.35\textwidth}
+        \includegraphics[width=\textwidth]{figures/minicheetah-photo1-full.jpg}
+    \end{subfigure}%
     \caption{A few legged robots examples cited in the literature review.
-    Top (left to right): Boston Dynamics' Atlas (2013 version), Wandercraft exoskeleton Atalante \cite{harib2018feedback}
-    , Kawada Industries \HRP{2}, PAL Robotic's Talos \cite{stasse2017talos}. 
-    Bottom: solo from the Open Dynamic Robot Initiative \cite{grimminger2020open}.}
+    Top (left to right): Boston Dynamics' \textbf{Atlas} (2013 version), Wandercraft exoskeleton \textbf{Atalante} \cite{harib2018feedback}
+    , Kawada Industries' \mbox{\textbf{\HRP{2}}}, PAL Robotic's \textbf{Talos} \cite{stasse2017talos}. 
+    Bottom: \textbf{Solo} from the Open Dynamic Robot Initiative \cite{grimminger2020open}, MIT \textbf{Mini Cheetah}.}
     \label{fig:robots}
 \end{figure}
 
@@ -358,24 +361,25 @@ leads to important and unmeasured base accelerations. \HRP{2} being equipped wit
 force sensors at the end-effectors, \cite{flayols2017experimental} proposes to map these measurements to relative orientations that can 
 directly be included in the kinematic chain as an intermediate ball joint. Calibration of the stiffness matrix is done by comparing 
 kinematics to motion capture measurements. Similarly, Villa \cite{villa2022addressing} proposes to account for the flexibility of the hip joint of Talos robot 
-\cite{stasse2017talos} (\figRef{fig:robots}) by modelling it as a passive joint with a damped-spring model.
-\cite{benallegue2015estimation} derives a procedure to alleviate the need for force/torque sensors by 
-designing a centroidal filter using an inverted pendulum dynamical
-model. 
-For the Wandercraft exoskeleton \cite{harib2018feedback}, flexibilities
+\cite{stasse2017talos} (\figRef{fig:robots}) by modeling it as a passive joint with a damped-spring model.
+Benallegue \cite{benallegue2015estimation} derives a procedure to alleviate the need for force/torque sensors by 
+designing a centroidal filter using an inverted pendulum dynamical model. 
+In Wandercraft' exoskeleton Atalante \cite{harib2018feedback}, flexibilities
 are shown to be spread along the successive segments of the kinematic chain, and can be modeled as punctual, 
 3d rotations with a linear spring behavior \cite{vigne2018estimation}. This work implements an IMU network similar to the ideas of 
-\cite{xinjilefu2016distributed,rotella2016imu} but it uses independent complementary filters for each IMU to recover their tilt (pitch and roll). This complementary
-filter neglects linear accelerations of the IMU before gravity, filtering them as noise.
-These orientations are then used as virtual joints and fused with the robot whole-body dynamics and the linear spring models to recover segments 
+\cite{xinjilefu2016distributed,rotella2016imu} but it uses independent complementary filters for each IMU to recover their tilt (pitch and roll). 
+Each filter uses the "zero-on-average" assumption, considering linear accelerations of the IMU frame negligeable on average before gravity and 
+filtering them as noise on the accelerometer measurements. These orientations are then used as virtual joints and fused with the robot whole-body dynamics and the linear spring models to recover segments 
 relative orientation and angular velocities. In a follow up work \cite{vigne2022movie}, the same authors revisit the linear acceleration negligibility 
-assumption and drop the use of the robot dynamical model. They design an observer to capable to estimate linear acceleration of each IMU of 
-the network by fusing IMU measurements and the linear velocity measurements from the kinematics, which are propagated forward starting from the contacts. 
+assumption and drop the use of the robot dynamical model. They design an observer jointly estimating linear velocity and tilt 
+of each IMU by fusing IMU data and linear velocities from the kinematics, which are propagated forward starting from the contacts by applying the filter recursively. 
+% By limiting the input using the measurement model to relative velocities, problems such as backlash present in \cite{vigne2018estimation} are less likely to impact the estimate.
+It is shown that the new model converges more quickly than the zero-on-average estimators and has a reduced phase shift. 
 The approach is validated with a controller which exhibits a better behavior than the rigid one when human sized and weighted (80kg) dummies are used in the exoskeleton. 
 
 Other kinematic uncertainties are however often present and are harder to model or sense. For instance, the foot of the quadruped used in 
 \cite{bloesch2013state} is spherical but is only modeled as a point. Backlash prevented Fallon \cite{fallon2014drift} to use a direct kinematic 
-measurement model and was one of the limiting factors of Vigne \cite{vigne2018estimation} estimator. 
+measurement model and was one of the limiting factors of Vigne first flexibilities estimator \cite{vigne2018estimation}. 
 % Backlash can be understood as 
 % "the maximum distance or angle through which any part of a mechanical system may be moved in one direction without 
 % applying appreciable force or motion to the next part in mechanical sequence" \cite{bagad2007mechatronics}.
@@ -631,7 +635,7 @@ modified the kinematic factor formulation, taking into account uncertainty induc
 also used as a source of odometry by using a sparse 3D landmark map. In a following work \cite{wisth2020preintegrated}, the proprioceptive odometry factor was adapted
 to include a slowly variable bias on odometry measurements by adapting the preintegration theory from \cite{forster2017-TRO}. They again extended this work
 by including LIDAR measurements in \cite{wisth2021vilens}.
-\cite{kim2021legged} also implemented an inertial kinematic proprioceptive smoothing estimator on the MIT Cheetah, mitigating slipping of the feet by removing kinematic 
+\cite{kim2021legged} also implemented an inertial kinematic proprioceptive smoothing estimator on the MIT Mini Cheetah (see \ref{fig:robots}), mitigating slipping of the feet by removing kinematic 
 measurements whose residual errors exceed a certain threshold.    
 
 
