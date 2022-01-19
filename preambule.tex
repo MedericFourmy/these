@@ -1,11 +1,14 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
 %% Réglage des fontes et typo  
 \usepackage{ae,lmodern} % ou seulement l'un, ou l'autre, ou times etc.
 \usepackage[utf8]{inputenc}		% LaTeX, comprend les accents !
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
+
+\usepackage[Lenny]{fncychap} 
 
 
 \usepackage[dvipsnames]{xcolor}  % Coloured text etc.
@@ -48,17 +51,19 @@
 \usepackage{fancyhdr}	
 	\pagestyle{fancy}
   \fancyhf{} %clears the header and footer, otherwise the elements of the default "plain" page style will appear
-  % \rhead{Overleaf}
-  % \lhead{Guides and tutorials}
-  % \rfoot{Page \thepage}
-  \fancyhead[LE,RO]{Overleaf}
-  \fancyhead[RE,LO]{Guides and tutorials}
-  \fancyfoot[CE,CO]{\leftmark}
-  \fancyfoot[LE,RO]{\thepage}
+  \fancyfoot[C]{\thepage}
+  \fancyhead[LE]{Chapter \thechapter: \leftmark}
+  \fancyhead[RO]{\rightmark}
   
-  \renewcommand{\headrulewidth}{2pt}
-  \renewcommand{\footrulewidth}{1pt}
-  
+  \renewcommand{\headrulewidth}{1pt}
+  % \renewcommand{\footrulewidth}{1pt}
+
+\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
+\renewcommand{\chaptermark}[1]{%
+  \markboth{\if@mainmatter\@chapapp\ \thechapter. \fi\ #1}
+  {\if@mainmatter\@chapapp\ \thechapter. \fi\ #1}} 
+
+
 \usepackage{enumerate}
 \usepackage{enumitem}
 \usepackage[section]{placeins}	% Place un FloatBarrier à chaque nouvelle section
