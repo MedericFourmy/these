@@ -1,42 +1,119 @@
 \chapter{Kinematics}
 \minitoc
 
-The most legged-robot specific sensor measurements that we developed are those related to the robot kinematics. 
-The principle is to use the robot kinodynamic model to compute relative placement and velocity of different parts of the robot 
-with respect to the base frame. This computation is done using the vector of configuration of the robot $\qa$ and its derivative $\dqa$ which
-are typically obtained from joint encoders.
-For centroidal quantities, we can compute the CoM position, velocity and the angular momentum.
-For leg odometry, the relative placement of the feet with respect to the base is considered. A special care has to be taken in order to
-obtain non biased measurements. In particular, calibration of the robot kinematic model is of paramount importance. We left dynamic calibration 
-out of the scope of this work.
+The robot kinematic model along with encoder measurements make possible the computation of poses and spatial velocities \cite{featherstone2014rigid} (aka. twists) 
+of reference frames attached to the robot segments relative to the base or world frame. We will shortly describe the computation of these quantities and their 
+application to leg odometry.
 
-\section{Leg odometry}
-Assuming that we have access to an accurate contact detection, for each foot in contact between \keyframes~$i$ and $j$, we can write that 
-$\posi{W}{L}^i = \posi{W}{L}^j + \noise_{LO}$ where $\noise_{LO}$ denotes a Gaussian noise accounting for potential slip of the foot and kinematic inaccuracies 
-$\Gaussian{0}{\Cov_{LO}}$.
-This noise can be modeled as the integration of a white noise on the foot velocity $\noise_v$, which integrated gives a random walk.  
-Its variance after $\Dt$ is $\Cov_{LO} = \sqrt{\Dt} \Cov_v$
-This pseudo measurement can be used to derive a 3D factor for each foot $l$ in contact:
 
+\section{Forward kinematics}
+The number of freedom (DoF) $n$ of a poly-articulated system is the minimal number of variables that completely describe his state given the base frame
+pose and spatial velocity. For robots with rigid segments, the DoF of the robot is the sum of the DoFs of its joints (1 for linear and rotational joints, 3 for
+ball joints, etc.). The state of the joints (1 angle for rotational joints) can be stacked together in the vector of joint configurations 
+$\qa \in \Reals$. For most simple joins, the joint configuration velocities are simply the time derivative $\dqa \in \Reals^n$\footnote{An exception is the ball joint where the 
+state is defined as an element of $\SO(3)$, thus its velocity vector is defined as an angular velocity in $\Reals$.}. $\qa$ and $\dqa$ are typically obtained from
+the joint encoder measurements.
+
+The whole body state of the robot is defined by the robot configuration vector $\bfq$ and configuration velocity vector $\bfv_q$. Those are concatenations
+of the base state and joint configuration vectors:
+%
 \begin{equation}
-    \bfr^{LO}_l(\posi{}{}^i, \Rot{}{}^i, \posi{}{}^j, \Rot{}{}^j) = \posi{}{}^i + \Rot{}{}^i \posim{B}{L}^i - (\posi{}{}^j + \Rot{}{}^j \posim{B}{L}^j)
+    \bfq=
+    \begin{pmatrix}
+        \posi{w}{b} \\
+        \prescript{w}{}{\bfq}_b \\
+        \qa
+    \end{pmatrix} \in \Reals^{7+n},
+    \quad \quad
+    \bfv_q=
+    \begin{pmatrix}
+        \prescript{b}{}{\mathbf{\nu}}_b  \\
+        \dqa
+    \end{pmatrix}
+    \label{eq:configuration} \in \Reals^{6+n}
+\end{equation}
+%
+where $\posi{w}{b} \in \Reals^3$ is the position of the base relative to the world expressed in world frame, $\prescript{w}{}{\bfq}_b \in \Reals^4$ is the orientation 
+of the base frame with respect to the world as a unit quaternion, and $\prescript{b}{}{\mathbf{\nu}}_b$ is the twist of the base frame expressed in the base frame.
+The computation of any segment pose of index $k$ relative to the world is obtained using the forward kinematics (FK) algorithm:
+%
+\begin{equation}
+    \T{w}{k} = \text{FK}(\bfq, \text{segment k id})
 \end{equation}
 
-Where $\posim{B}{L}^i$ and $\posi{B}{L}^j$ are the contact positions in base frame at times $i$ and $j$ acquired from $\bfq_a$ via forward kinematics. 
+It is also possible to obtain the pose relative to the base $\T{b}{k}$ by simply setting the base pose vector to be the identity pose $[0,0,0,~0,0,0,1]$.
+FK is a nonlinear function of the robot state. To obtain the relative spatial velocity, we have to compute the jacobian $\bfJ_k$ of FK with respect to the configuration.
+The differential forward kinematics (DFK) is then simply:
 
-Assuming good contact detection, leg odometry fused with the IMU is enough to properly observe 6 DoF motion with as few as 2 contact feet at a time. 
-Note that contrary to previous works \cite{hartley2018legged, wisth2020preintegrated}, this leg odometry factor does not require gyroscope integration.
+\begin{equation}
+    \prescript{w}{}{\mathbf{\nu}}_k = \bfJ_k \bfv_q    
+\end{equation}
+Similarly, the spatial velocity relative to the base $\prescript{b}{}{\mathbf{\nu}}_k$ can be obtained by setting the base spatial twist part of $\bfv_q$ to zero.
+These algorithms are very fast to compute ($\approx 1\mu s)$ using modern dedicated libraries \cite{carpentier2019pinocchio}.
+
+We will now see how these base algorithms can be used to derive leg odometry for a quadruped robot.
+
+\section{Leg odometry}
+We will restrict ourselves to the case of point feet as the main platform on which we experimented is a quadruped robot.
+Quadrupeds are usually equipped with nonarticulated round feet whose contact with the ground, is in first approximation, punctual.
+Humanoid robots are equipped with articulated flat feet that provide richer information. In \ref{sec:kinematic_info} we gave an exhaustive review of the types of leg 
+odometry measurements that can be obtained on legged machines.
+
+The basic idea is that we assume to have access to accurate contact detection. If the contact is held between time $t_i$ and $t_j$ and that
+the contact point $L$ (to which a frame is attached) is fixed. This can be written $\posi{W}{L}^i = \posi{W}{L}^j$. 
+In practice, the round feet of our robot can slightly roll but we will neglect this phenomenon for now. 
+If we unroll the transformation chain to make the base poses appear in the equation, we obtain the identity:
+
+\begin{equation}
+    \posi{}{}^i + \Rot{}{}^i \posim{B}{L}^i = \posi{}{}^j + \Rot{}{}^j \posim{B}{L}^j
+\end{equation}
+
+To turn this equation into a measurement model, we need to model the influence of measurement inaccuracies.
+This equation depends on relative positions $\posim{B}{L}^i$ and $\posim{B}{L}^j$ that are computed using FK. The quality of the computation depends on several things:
+the robot kinematic model (calibration), hard to model deviation from the rigid body model (\eg segment/joint flexibilities, backlash), encoder noise.
+It is tempting to propagate encoder noise $\noise_{\qa}$ trough FK using the kinematic jacobian \cite{bloesch2013state, hartley2018legged}:
+
+\begin{equation}
+    \posim{B}{L} = FK(\qa + \noise_{\qa}) \approx FK(\qa) + \bfJ_L\noise_{\qa}, \quad \quad \Cov_{p} = \bfJ_L \Cov_{\qa} \bfJ_L
+\end{equation}
+
+However, the resolution of Solo encoder is actually very high: 0.002 degrees which would account for a mere 10 \textit{micrometers} difference.
+Therefore, most of the measurement errors come from the other mentioned effects. Unfortunately, those are much harder to model, and all act at the same time
+in an unpredictable fashion. Thus, we opt for a simple additive noise on the foot position in the world:
+
+\begin{equation}
+    \posi{W}{L}^i = \posi{W}{L}^j + \noise_{LO}
+\end{equation}
+
+where $\noise_{LO} \sim \Gaussian{0}{\Cov_{LO}}$ denotes a Gaussian noise accounting for a potential roll of the foot and kinematic inaccuracies.
+This noise can be modeled as the integration of white noise on the foot velocity $\noise_v$, which integrated gives a random walk.  
+Its variance after $\Dt$ is $\Cov_{LO} = \sqrt{\Dt} \Cov_v$.
+The residual $\bfe^{LO}$ is then expressed for each foot $l$ in contact between $t_i$ and $t_j$:
+
+\begin{equation}
+    \bfe^{LO}_l(\posi{}{}^i, \Rot{}{}^i, \posi{}{}^j, \Rot{}{}^j) = \posi{}{}^i + \Rot{}{}^i \posim{B}{L}^i - (\posi{}{}^j + \Rot{}{}^j \posim{B}{L}^j)
+\end{equation}
+
+Where $\posim{B}{L}^i$ and $\posi{B}{L}^j$ are the contact positions in base frame at times $t_i$ and $t_j$ acquired from $\qa$ via forward kinematics. 
+In the literature review and \figRef{fig:kin_models}, this method is referred to as \textit{single foot matching}. To obtain
+a relative transformation between $t_i$ and $t_j$, at least three feet are necessary. When it is the case, it is possible to directly compute the
+relative transformation by solving an orthogonal Procrustes problem \cite{roston1991dead} which would be integrated as a separate residual.
+We did not found useful to implement such a factor for several reasons. First of all, this computation is implicitly handled by the solver.
+Secondly, for trotting gates common for quadrupeds, the robot is most of the time standing on two legs. Thirdly, when fusing with other sensors (such as the IMU,
+see [REF application IK for an example]), 1 or 2 legs in contact already provide sufficient information to make the desired variables observable.
+
+% Assuming good contact detection, leg odometry fused with the IMU is enough to properly observe 6 DoF motion with as few as 2 contact feet at a time. 
+% Note that contrary to previous works \cite{hartley2018legged, wisth2020preintegrated}, this leg odometry factor does not require gyroscope integration.
 
 
 \section{Terrain height}
-
 If we have prior knowledge about the foot terrain height $h \in \Reals$, it is easy to define, for each foot $l$ in contact, the residual:
 
 \begin{equation}
-    \bfr^h_l = (\posi{}{} \posi{b}{l})_z - h
+    \bfe^h_l(\posi{}{}, \Rot{}{}) = (\posi{}{} + \Rot{}{} \posi{b}{l})_z - h
 \end{equation}
 
-This residual can be assigned with a variance $\Cov_h$ which is hand tuned.
+This residual can be assigned with a variance $\sigma_h^2$ which is hand-tuned.
 
-\section{Kinematic calibration}
-A crucial part of the usability of this measurement model is to be able to compute an unbiased $\posi{B}{L}$ estimation for each foot.
+% \section{Kinematic calibration}
+% A crucial part of the usability of this measurement model is to be able to compute an unbiased $\posi{B}{L}$ estimation for each foot.
