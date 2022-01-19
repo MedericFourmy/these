@@ -53,9 +53,11 @@ The \textit{base} refers to a reference frame rigidly attached to the main body 
 We are most often interested in the estimation of the position, velocity, and orientation of this frame with regard to an inertial \textit{world} frame, which is called the \textit{base state}. 
 An example of these frames is given for the Solo robot in \figRef{fig:solo_frames}.
 This estimation is the main focus in most of legged robot estimation literature. In fact, knowing the base and other quantities directly measurable (such as joint angles), 
-and assuming a perfect robot kinematic model, the state of any part of the poly-articulated system can be recovered using \textit{forward kinematics}. Rigid body algorithms
-\cite{featherstone2014rigid} provide methods to efficiently compute the center of mass, linear and angular momentum of the  poly-articulated systems. These computations
-are again based on the robot kinematic model as well as the segments inertia, which we together call the $kinodynamic$ robot model. This model is often 
+and assuming a perfect robot kinematic model, the state of any part of the poly-articulated system can be recovered using \textit{forward kinematics}. 
+This algorithm permits to compute \textit{poses} (position and orientation) and \textit{spatial veloctities} (linear and angular velocities) of reference
+frames attached to the robot segments relative to the base or the world frames.
+Rigid body algorithms \cite{featherstone2014rigid} provide methods to efficiently compute the center of mass, linear and angular momentum of the  poly-articulated systems. 
+These computations are again based on the robot kinematic model as well as the segments inertia, which we together call the $kinodynamic$ robot model. This model is often 
 found in URDF files (Unified Robot Description Format) which are generated via CAD models (Computer Aided Design).
 
 The \textit{centroidal state} refers to the center of mass, angular momentum, and their derivatives. The center 
@@ -520,7 +522,7 @@ Semantic information prior come from a Convolutional neural network fine-tuned t
 
 
 LIDAR can also be used as an odometry source by matching point clouds taken at successive timestamps with ICP. However, this procedure is time-consuming 
-and leads to time delays with respect to other measurement sources, which is generally a problem for Bayes filters. 
+and leads to time delays with other measurement sources, which is generally a problem for Bayes filters. 
 Nobili \cite{nobili2017heterogeneous} solves this issue by keeping a buffer of past belief state of the EKF, a method on which is 
 based the Pronto framework \cite{camurri2020pronto}.
 

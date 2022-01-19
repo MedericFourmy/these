@@ -54,7 +54,7 @@ result in the highest posterior probability. The estimation problem is, in this 
 \end{equation}
 %
 
-Notice that the $p(\cZ)$ term does not appear anymore on the right side since it is constant with respect to $\cX$.
+Notice that the $p(\cZ)$ term does not appear anymore on the right side since it is constant relative to $\cX$.
 States variables $\cX$ in our case are a collection of $n$ random variables $\{\cX_i\}_{i \in [1..n]}$ that each relate to a physical quantity of 
 interest (\eg the initial robot position, constant camera parameters, orientation of an object in the scene, IMU biases, etc.). Measurements $\cZ$ are 
 similarly a collection of $m$ individual sensor measurements $\{\bfz_i\}_{i \in [1..m]}$.
@@ -256,10 +256,12 @@ instead of the identity matrix. The damping affects each direction of the state 
 
 For both cases, the values of $\alpha$ and $\lambda$ are continuously adapted, which can be understood as an implementation of the 
 Trust Region paradigm \cite{boyd2004convex}. The Levenberg-Marquardt is only one example of a vast family of algorithmic strategies 
-to mitigate the shortcomings of the "pure" Gauss-Newton algorithm.
+to mitigate the shortcomings of the "pure" Gauss-Newton algorithm. Those algorithms are trade offs between accuracy, speed, and implementation complexity, that
+suits better in different applications. It seems that, for robotics, Levenberg-Marquadt has proven to be a good trade off between the real-time and
+accuracy requirements. 
 
-% For very large structure from motion problems, Conjugate Gradient Descent is also used as an alternative to Gauss-Newton derivates, though extra care has to 
-% be taken toward the conditioning of the problem Hessian.
+For very large structure from motion problems, Conjugate Gradient Descent is also used as an alternative to Gauss-Newton derivates, though extra care has to 
+be taken toward the conditioning of the problem Hessian \cite{jian2012generalized}.
 
 
 
