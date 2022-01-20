@@ -378,7 +378,8 @@ assumption and drop the use of the robot dynamical model. They design an observe
 of each IMU by fusing IMU data and linear velocities from the kinematics, which are propagated forward starting from the contacts by applying the filter recursively. 
 % By limiting the input using the measurement model to relative velocities, problems such as backlash present in \cite{vigne2018estimation} are less likely to impact the estimate.
 It is shown that the new model converges more quickly than the zero-on-average estimators and has a reduced phase shift. 
-The approach is validated with a controller which exhibits a better behavior than the rigid one when human sized and weighted (80kg) dummies are used in the exoskeleton. 
+The approach is validated with a controller which exhibits a better behavior than the rigid one (that trips and falls) when a dummy of human size and weight 
+(80kg) is put in the exoskeleton, exciting the flexibilities. 
 
 Other kinematic uncertainties are however often present and are harder to model or sense. For instance, the foot of the quadruped used in 
 \cite{bloesch2013state} is spherical but is only modeled as a point. Backlash prevented Fallon \cite{fallon2014drift} to use a direct kinematic 
@@ -395,6 +396,7 @@ coupled estimators, to which this thesis would like to contribute.
 %%%%%%%%%%
 \section{Dynamic centroidal estimation}
 %
+\label{sec:centroidal_est_lit}
 \subsection{Why is centroidal dynamic estimation important?}
 Legged robots are highly nonlinear systems that use contact forces between their end-effector and the environment to implement stable locomotion. 
 The effect of these forces is dictated by the Newton/Euler equations, also known as the underactuated dynamics, which state that the variation of the 
@@ -434,8 +436,10 @@ Xinjilefu \cite{xinjilefu2012state} ponders the use of a more complete planar sa
 without introducing model biases as was done in Stephens \cite{stephens2011state}. It instead relies on tuning filter covariances to alleviate their effects. 
 Simulation shows that the LIPM seems more able to cope with model errors but performances on the real robot show similar results. 
 One of the benefits of this model is that force measurements can be summarized by the Center of Pressure (CoP) (aka. Zero Moment Point (ZMP) \cite{sardain2004forces}).
-In the context of  robotic challenge, the CMU team later implemented a centroidal estimator \cite{xinjilefu2015center} similar to that of Stephen \cite{stephens2011state} that was able to prevent a fall during the challenge finals. 
-Similar EKF based estimators using respectively a LIPM \cite{piperakis2016non} or a fly-wheel process model \cite{piperakis2018nonlinear}, which models a non-zero angular momentum contrary to the LIPM,  is later implemented on a NAO robot. 
+In the context of  robotic challenge, the CMU team later implemented a centroidal estimator \cite{xinjilefu2015center} similar to that of Stephen \cite{stephens2011state} 
+that was able to prevent a fall during the challenge finals. 
+Similar EKF based estimators using respectively a LIPM \cite{piperakis2016non} or a fly-wheel process model \cite{piperakis2018nonlinear}, which models a 
+non-zero angular momentum contrary to the LIPM,  is later implemented on a NAO robot. 
 Because the robot used for the experiments is equipped with a single axis ground reaction sensor,
 the process model has to be used again in the measurement model equations.   
 A LIPM process can also be used with a fixed contact point assumption \cite{benallegue2015estimation}. By a tight fusion with IMU 

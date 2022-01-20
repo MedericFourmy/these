@@ -190,6 +190,8 @@ where $J_i$ is the jacobian of the residual at $\check{\cX}_{S_i}$:
     \label{eq:res_jacobian}
 \end{equation}
 
+Those jacobians are usually obtained by automatic differentiation, \eg using dual number \cite{ceres-solver}. 
+
 We can note $N = \sum_{i=1}^{n}dim(\bfx_i)$ and $M = \sum_{i=1}^{m}dim(\bfe_i)$.
 We stack up the $\Delta \bfx_i$ column vectors as $\Delta \bfx \in \Reals^N$ and the residual jacobians at the linearization point 
 $\bfJ \in \Reals^{M \times N}$. We call this new function $\cF(\Delta \bfx) \triangleq \cL(\check{\cX} + \Delta \bfx)$, so that the linearized cost function writes:  
