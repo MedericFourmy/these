@@ -36,7 +36,7 @@ to find applications in robotics as an alternative to MAP-based graph optimizati
 or to Bayes filtering \cite{lambert2022recursive}. 
 
 A more popular approach to the estimation problem is to find the mode of the posterior distribution, \aka the \textit{Maximum A Posteriori} (MAP).
-This problem is best visually represented by a probabilistic graphical model known as the \textit{factor graph}, which will be described in \secRef{sec:factor_graphs}
+
 
 
 
@@ -77,11 +77,11 @@ $\Cov_i \in \Reals^{M_i \times M_i}$ is the covariance of the observation noise,
 $\phi_i(\cX_{S_i})$ is the un-normalized measurement likelihoods called \textit{factors}, and 
 %
 \begin{equation*}
-    ||\bfe_i(\cX_{S_i})||_{\Cov_i} = \sqrt{\bfe_i(\cX_{S_i}) \Cov_i^{-1} \bfe_i(X_{S_i})}
+    ||\bfe_i(\cX_{S_i})||_{\Cov_i} \triangleq \sqrt{\bfe_i(\cX_{S_i}) \Cov_i^{-1} \bfe_i(X_{S_i})}
 \end{equation*}
 %
 is known as the squared Mahalanobis distance. 
-Residuals $\bfe_i$ can generally be formulated as a difference between a \textit{expectation function} $\bfh$ and the actual measurements
+Residuals $\bfe_i$ can generally be formulated as a difference between an \textit{expectation function} $\bfh$ and the actual measurements
 %
 \begin{equation}
     \bfe_i(\cX_{S_i}) = \bfh(\cX_{S_i}) - \bfz_i,
@@ -103,9 +103,11 @@ apply the assumptions successively to write:
 %
 \begin{align}
     \cX^{MAP} 
-    &= \argmin_{\cX} - \log p(\cX | \cZ) &\text{\small MAP problem definition}
+    &= \argmax_{\cX} p(\cX | \cZ) &\text{\small MAP problem definition}
     \\
-    &= \argmin_{\cX} - \log p(\cZ | \cX) p(\cX) &\text{\small Unaffected Partition constant}
+    &= \argmin_{\cX} - \log p(\cX | \cZ) &\text{\small Negative log likelihood}
+    \\
+    &= \argmin_{\cX} - \log p(\cZ | \cX) p(\cX) &\text{\small Unaffected by constant denominator}
     \\
     &= \argmin_{\cX} - \log p(\cX_0) \prod_{i=1}^{n} p(\bfz_i | \cX_{S_i})  &\text{\small Conditional independences}
     \\
@@ -115,12 +117,11 @@ apply the assumptions successively to write:
 \end{align}
 
 Thus, solving the MAP problem with the aforementioned hypotheses boils down to solving a nonlinear weighted least-squares (NLLS) problem.
-Notice that we included the prior in the sum of the residuals, as it is mathematically equivalent to a measurement model even if it conceptually
-comes from a different source of information. 
+Notice that we included the prior in the sum of the residuals, as it is mathematically equivalent to a measurement model. 
 The weights are the inverse of the measurement covariances: the more uncertain a measurement is, the higher its covariance and, therefore, the lower its influence
 on the weighted squared residuals sum. 
 
-A vast part of the literature on MAP estimation has been dedicated to the implementation of efficient ad hoc NLLS solvers. Most of them are 
+A vast part of the literature on MAP estimation has been dedicated to the implementation of efficient \adhoc NLLS solvers. Most of them are 
 gradient-based algorithm, typically some variation of the Gauss-Newton algorithm, such as the Levenberg-Marquardt algorithm \cite{boyd2004convex}.
 
 
@@ -135,9 +136,30 @@ gradient-based algorithm, typically some variation of the Gauss-Newton algorithm
 %
 %
 \section{Gauss-Newton algorithm}
-In this section, we will give a brief introduction to a commonly used way to solve the MAP problem expressed as an NNLS problem: the Gauss-Newton algorithm.
+In this section, we will give a brief introduction to a commonly used way in robotics to solve the MAP problem expressed as an NNLS problem efficiently: the Gauss-Newton algorithm.
 For now, we will assume that state variables and measurements all live in vector spaces to simplify the derivations. For many practical robotics applications,
-some state variables such as rotation matrices live in more complex manifolds. This section is based on tutorials such as \cite{dellaert2017factor,sola2017course}. 
+some state variables (such as rotation matrices) live in more complex manifolds.
+We will extend the method to manifold states in \secRef{sec:manifold_GN}. This section is based on tutorials such as \cite{dellaert2017factor,sola2017course}. 
+
+
+
+
+
+\subsection{The algorithm}
+The Gauss-Newton algorithm is an iterative algorithm to find the minimum of NLLS cost functions that can be decomposed in a series of steps.
+\begin{enumerate}
+    \item Initialize the state estimate at an initial value $\check{\cX} := \cX^0$
+    \item Approximate the cost function $\cL(\cX)$ around the current estimate as a quadratic function
+    \item Find the optimal step $\Delta \bfx^*$ by solving a linear set of equations \eqRef{eq:linear_syst_GN}
+    \item Update the current state estimate $\check{\cX} := \check{\cX} + \Delta \bfx^*$
+    \item Loop over steps 2-4 until convergence
+\end{enumerate}
+
+
+
+
+
+
 
 \subsection{Derivation of the Gauss-Newton step}
 First, we will simplify notations by dropping dependencies on state variables $X_{S_i}$ where evident. 
@@ -154,42 +176,42 @@ from the Cholesky factorization of $\Cov_i^{-1}$. Therefore, the NLLS MAP proble
     \cX^{MAP} = \argmin_{\cX} \cL(\cX) \triangleq||\bfr(\cX)||^2 = \sum_i^{i=N} ||\bfr_i({\cX_{S_i}})||^2 
 \end{equation}
 were $\bfr$ is a vector of vertically stacked residuals (column vectors) and the cost function $\cL(\cX)$ is simply the squared norm 
-of the residual vector. Let's assume we have a current estimate of the state variables $\check{\cX}$.
-Each residual can be linearized with respect to this estimate:
+of the residual vector. Let us assume we have a current estimate $\check{\cX}$ of the state variables $\cX$ .
+Each residual can be linearized with respect to the states it depends on $\cX_{S_i}$ at their current estimate $\check{\cX}_{S_i}$:
 
 \begin{equation}
-    \bfr_i(\cX_{S_i}) = \bfr_i(\check{\cX}_{S_i} + \Delta \bfx_i) \approx \check{\bfr}_i + \check{\bfJ}_i \Delta \bfx_i
+    \bfr_i(\cX_{S_i}) = \bfr_i(\check{\cX}_{S_i} + \Delta \bfx_i) \approx \check{\bfr}_i + \bfJ_i \Delta \bfx_i
 \end{equation}
-
-where $\check{J}_i$ is the jacobian of the residual at $\check{\cX}_{S_i}$: 
+%
+where $J_i$ is the jacobian of the residual at $\check{\cX}_{S_i}$: 
 
 \begin{equation}
-    \check{\bfJ}_i \triangleq \left.\frac{\partial \bfr_i}{\partial \cX_{S_i}}\right|_{\check{\cX}_{S_i}}
+    \bfJ_i \triangleq \left.\frac{\partial \bfr_i}{\partial \cX_{S_i}}\right|_{\check{\cX}_{S_i}}
     \label{eq:res_jacobian}
 \end{equation}
 
 We can note $N = \sum_{i=1}^{n}dim(\bfx_i)$ and $M = \sum_{i=1}^{m}dim(\bfe_i)$.
-We also stack up the $\Delta \bfx_i$ column vectors as $\Delta \bfx \in \Reals^N$ and the residual jacobians at the linearization point 
-$\check{\bfJ} \in \Reals^{M \times N}$ so that the linearized cost function writes:  
+We stack up the $\Delta \bfx_i$ column vectors as $\Delta \bfx \in \Reals^N$ and the residual jacobians at the linearization point 
+$\bfJ \in \Reals^{M \times N}$. We call this new function $\cF(\Delta \bfx) \triangleq \cL(\check{\cX} + \Delta \bfx)$, so that the linearized cost function writes:  
 %
 \begin{equation}
-    \cL(\check{\cX} + \Delta \bfx) 
-    \approx ||\check{\bfr} + \check{\bfJ} \Delta \bfx||^2 
-    = \check{\cL} +  \check{\bfr}^T \check{\bfJ} \Delta \bfx + \frac{1}{2}\Delta \bfx^T \check{\bfJ}^T \check{\bfJ} \Delta \bfx .
-    \triangleq \cF(\Delta \bfx)
+    \cF(\Delta \bfx) \triangleq \cL(\check{\cX} + \Delta \bfx) 
+    \approx ||\check{\bfr} + \bfJ \Delta \bfx||^2 
+    = \check{\cL} +  \check{\bfr}^T \bfJ \Delta \bfx + \frac{1}{2}\Delta \bfx^T \bfJ^T \bfJ \Delta \bfx
 \end{equation}.
 
-We now drop the $\check{\cdot}$ notation to lighten notations $\cF(\Delta \bfx)$ is therefore a local parabolic approximation of 
+We now drop the $\check{\cdot}$ notation to lighten notations. $\cF(\Delta \bfx)$ is therefore a local parabolic approximation of 
 $\cL$ around the current estimate and $\bfH \triangleq \bfJ^T \bfJ$ is the approximate Hessian of $\cL$ 
 \footnote{See \cite{sola2017course} Section 4.2.1 for more details on the nature of the approximation.}. Note that by construction, $\bfH$ is always 
 semi-definite positive.
 
-The optimal step (Gauss-Newton step) $\Delta \bfx^*$ is found by differentiating $\cF$ with respect to $\Delta \bfx$ and and equaling to 0,
+
+The optimal step (Gauss-Newton step) $\Delta \bfx^*$ is by definition the step that minimizes $\cF$. This minimum is found by differentiating $\cF$ with respect to $\Delta \bfx$ and equaling to 0,
 which gives the linear system of equation:
 \begin{equation}
     \bfH \Delta \bfx^* = - \bfJ^T \bfr.%, \quad \quad \bfA \triangleq \bfH, \quad \quad \bfb \triangleq 
     \label{eq:linear_syst_GN}
-\end{equation}
+\end{equation}.
 
 Substituting $\bfH$ by its expression, the Gauss-Newton step is found by solving the linear system, that is to say inverting $\bfH$:
 
@@ -210,20 +232,8 @@ Taking a Gauss-Newton step then refers to applying the optimal step to get a new
 \end{equation}
 
 
-\subsection{Gauss-Newton algorithm}
-The Gauss-Newton algorithm is an iterative algorithm to find the minimum of NLLS cost functions that can be decomposed in a series of steps.
-\begin{enumerate}
-    \item Initialize the state estimate at an initial value $\check{\cX} := \cX^0$
-    \item Approximate the cost function $\cL(\cX)$ around the current estimate as a quadratic function
-    \item Find the optimal step $\Delta \bfx^*$ by solving a linear set of equations \eqRef{eq:linear_syst_GN}
-    \item Update the current state estimate $\check{\cX} := \check{\cX} + \Delta \bfx^*$
-    \item Loop over steps 1-3 until convergence
-\end{enumerate}
 
-
-
-
-\subsection{Levenberg-Marquardt}
+\section{Levenberg-Marquardt}
 The Gauss-Newton algorithm is only as valid as the quadratic approximation of its cost function is. Close to the optimum, this approximation
 is quite good and leads to a quadratic convergence of the optimization procedure. If the current estimate is farther from the optimum and the
 local shape of the cost function is flat, that is if the hessian has small eigenvalues, the resulting step can be too large and lead to a 
@@ -239,55 +249,62 @@ Levenberg \cite{levenberg1944method} contribution was to propose to dampen the H
 %
 
 $\alpha$ and $\lambda$ are scalar coefficients that can be tuned depending on the evolution of the cost function. 
-In particular, $\lambda$ controls the amount of damping: for a given $\lambda$ computed step is wrong (the cost function goes up),
+In particular, $\lambda$ controls the amount of damping: if a given $\lambda$ computed step is wrong (the cost function goes up),
 $\lambda$ is increased so that the Hessian influence is diminished. For large values, the steps are close to a gradient descent step.
 $\alpha$ provides a way to tune the size of the gradient steps.
 
 \paragraph{Marquardt}
-Marquardt \cite{marquardt1963algorithm} improves on Levenberg proposition by proposing to dampen not by the Hessian diagonal $\text{diag}(\bfH)$
-instead of the identity matrix. The damping affects each direction of the state differently, depending on the local shape of the cost function:
+Marquardt \cite{marquardt1963algorithm} improves on Levenberg by proposing to dampen by the Hessian diagonal $\text{diag}(\bfH)$
+instead of the identity matrix:
 %
 \begin{equation}
     \Delta \bfx_{L}^* = - \alpha (\bfH^{-1} + \lambda \text{diag}(\bfH))^{-1} \bfJ^T \bfr
-\end{equation}
-%
+\end{equation}.
+
+The damping affects each direction of the state differently, depending on the local shape of the cost function.
 
 For both cases, the values of $\alpha$ and $\lambda$ are continuously adapted, which can be understood as an implementation of the 
-Trust Region paradigm \cite{boyd2004convex}. The Levenberg-Marquardt is only one example of a vast family of algorithmic strategies 
+Trust Region paradigm \cite{boyd2004convex}. 
+
+The Levenberg-Marquardt is only one example of a vast family of algorithmic strategies 
 to mitigate the shortcomings of the "pure" Gauss-Newton algorithm. Those algorithms are trade offs between accuracy, speed, and implementation complexity, that
 suits better in different applications. It seems that, for robotics, Levenberg-Marquadt has proven to be a good trade off between the real-time and
 accuracy requirements. 
 
-For very large structure from motion problems, Conjugate Gradient Descent is also used as an alternative to Gauss-Newton derivates, though extra care has to 
-be taken toward the conditioning of the problem Hessian \cite{jian2012generalized}.
+For very large structure-from-motion problems, Conjugate Gradient Descent is also used as an alternative to Gauss-Newton derivates, though extra care has to 
+be taken toward the conditioning of the Hessian \cite{jian2012generalized}.
 
 
 
 \section{Covariance of the estimate}
+\subsection{Laplace approximation}
 \label{sec:map_covariance}
-An important question to ask is how confident are we in our MAP estimate? Even if our priors and measurements models are Gaussian distribution, the posterior distribution
-is not in general Gaussian (unless all measurements models are linear). The region near the peak of the posterior is, however, often nearly Gaussian in shape.
-The curvature around the mode is described by the Hessian the negative log-likelihood of the posterior at the MAP estimated state. 
-In fact, the Hessian is the \textit{information matrix} of the problem. Thus, finding the covariance of the MAP estimate resolves to inverting a 
-sparse positive definite matrix \footnote{The proof of this statement is out of the scope of this document and can be found in Section 5.1 of 
-\cite{peng2018advanced}}. This Hessian is immediately related to Hessian of the residual vector norm by a factor 2 since:
+An important question to ask is how confident are we in our MAP estimate. Even if our priors and measurements models are Gaussian distributions, the posterior distribution
+is in general non-Gaussian (unless all measurements models are linear). The region near the peak of the posterior is, however, often nearly Gaussian in shape.
+The curvature around the mode is described by the Hessian of the posterior negative log-likelihood at the MAP estimated state. 
+It can be shown that he Hessian is the \textit{information matrix} of the problem \footnote{The proof of this statement is out of the scope of this document and can be found in Section 5.1 of
+\cite{peng2018advanced}}. Thus, finding the covariance of the MAP estimate resolves to inverting a 
+sparse positive definite matrix. This Hessian is immediately related to Hessian of the residual vector norm by a factor 2 since:
 
 \begin{equation*}
-    -\log p(\cX|\cZ) = cst + \frac{1}{2}\cL(\cX)
+    -\log p(\cX|\cZ) = \frac{1}{2}\cL(\cX) + \text{const}
 \end{equation*}
 
-This way, we can approximate our posterior by a multivariate Gaussian, which mean is the mode value and covariance 
-is the problem hessian inverse. 
+This way, we can approximate our posterior by a multivariate Gaussian, whose mean is the mode and whose covariance 
+is the inverse of the problem's Hessian. 
 
 \begin{equation}
-    p(\cX | \cZ) \approx \text{Gauss}(\cX^{MAP}; 2\bfH^{-1})
+    p(\cX | \cZ) \approx \Gaussian{\cX^{MAP}}{2\bfH^{-1}}
     \label{eq:map_laplace}
 \end{equation}
 
-This is referred to as the Quadratic or Laplace approximation (\cite{mcelreath2018statistical}, section 2.4.2). MAP inference is then a two-step process: 
+This is referred to as the quadratic or Laplace approximation (\cite{mcelreath2018statistical}, section 2.4.2). MAP inference is then a two-step process: 
 first, find the mode of the posterior (the MAP), then "fit a Gaussian" on this mode. 
+
 To contrast this approach with the aforementioned approximations, variational inference as applied in Barfoot et al. 
  \cite{barfoot2020exactly} for instance fit both the mean and the information matrix of a Gaussian model as a result of a single optimization problem.
+
+\subsection{Example: stereoscopic depth estimation}
 
  We can illustrate the Laplace approximation with a one-dimensional toy problem (borrowed from Barfoot \cite{barfoot2017state}, section 4.1.1).
 The problem is stated as estimating the depth $x \in \Reals$ of a landmark in the scene with a nonlinear camera model (see \figRef{fig:barfoot_stereo})
@@ -427,6 +444,7 @@ its inverse $\boxminus$ retraction to individual elements of the manifold and it
 
 
 \subsection{Back to the MAP optimization problem}
+\label{sec:manifold_GN}
 Elements of the tangent space can be interpreted as steps that we can make to go from one point of the manifold to another.
 This ties closely to the notion of Gaussian steps that we defined earlier. We will now consider that the estimated state $\cX$
 is an element of a composite manifold. In this case, the Gaussian steps of \eqRef{eq:gaussian_step}
@@ -457,7 +475,7 @@ simply reduce to the addition and subtraction of cartesian vectors.
 \subsection{Uncertainty in manifolds, jacobians}
 Our state variables are random variables approximated by multivariate Gaussian distribution, that can be summarized by their mean vector and covariance matrix.
 These concepts need to be slightly modified to account for the manifold nature of some of these. We will see how to define Gaussian distribution on manifolds.
-Let's $\bftau \in \Reals^n$ be a small perturbation around a point $\bar{\bfx} \in \cM$, so that we can write:
+Let us $\bftau \in \Reals^n$ be a small perturbation around a point $\bar{\bfx} \in \cM$, so that we can write:
 %
 \begin{equation}
     \bfx = \bar{\bfx} \oplus \bftau, \quad \bftau = \bfx \ominus \bar{\bfx}
@@ -519,7 +537,7 @@ Analogously, an element of a Lie group represents a path from one element to ano
 In particular, the identity element $\cE$ relates to a notion of a global reference from which each element of the manifold can be compared.
 The tangent space at this element is called the Lie algebra $\mathfrak{m} \triangleq \cT_{\cE}\cM$.
 
-Let's compute the retraction operations in the case of Lie groups. We will follow the example of 3D rotations as they are of great use in robotics and provide
+Let us compute the retraction operations in the case of Lie groups. We will follow the example of 3D rotations as they are of great use in robotics and provide
 good intuitions regarding the general behavior of Lie groups.
 The group of 3D rotations is defined as the Special Orthogonal group in 3D: 
 \begin{equation}
@@ -537,7 +555,7 @@ Firstly, properties that make $SO(3)$ a group are immediate from the properties 
     \item Inverse element $\Rot{}{}^{-1} = \Rot{}{}^T$ (from the group definition)
 \end{itemize}
 %
-Let's explicit the manifold structure of $\SO(3)$. First, the topology of its corresponding manifold is the $S^3$ sphere.
+Let us explicit the manifold structure of $\SO(3)$. First, the topology of its corresponding manifold is the $S^3$ sphere.
 It can be shown \cite{sola2018micro} that taking the time difference of a rotation matrices results in an element of its local tangent space:
 
 \begin{equation}
@@ -612,7 +630,7 @@ in solving the NLLS problem.
 
 
 \subsection{Factor Graph representation}
-Let's consider the toy example represented in \figRef{fig:toy_problem}. 
+Let us consider the toy example represented in \figRef{fig:toy_problem}. 
 We wish to estimate the trajectory of a differential robot, that is its states at chosen timestamps called \textit{\keyframes}, and remarkable elements 
 of the environment, called \textit{landmarks}. We suppose that this robot is equipped with an odometer, which measurements integrated over time provide relative 
 transformations between \keyframes, and an exteroceptive sensor, which provides relative measurements between \keyframes~and landmarks.
