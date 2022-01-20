@@ -21,7 +21,7 @@ the robot pose, the camera extrinsics, and the object pose:
 \begin{equation}
     \bfe_V (\T{W}{B}, \T{B}{C}, \T{W}{O}) = \Log(\T{W}{O} \T{W}{B}^{-1} \T{B}{C}^{-1} \T{C}{O}^{-1}) ~ \in \Reals^6
 \end{equation}
-%
+
 We also assume that we have access to the covariance of this measurement 
 \mbox{$\Cov_V \in \Reals^{6 \times 6}$}. We will now describe two applications of this factor, one using Apriltag fiducial markers and one using 
 a deep-learning object pose estimation algorithm.
@@ -77,7 +77,7 @@ PnP algorithm provides us with a function $\text{pnp}$ defined as:
                            \bfx &\rightarrow \T{C}{O} = \text{pnp}_w(\bfx)
     \end{split}
 \end{equation}
-
+%
 where w denotes the dependency on the width of the marker. This $\text{pnp}_w$ function implementation depends on the specificities of the PnP algorithm used and  
 is in general hard to analytically differentiate. Instead, if we consider the inverse function
 
@@ -85,9 +85,9 @@ is in general hard to analytically differentiate. Instead, if we consider the in
     \begin{split}
         \text{proj}_w: \SE(3) &\rightarrow \Reals^8 \\
                            \T{C}{O} &\rightarrow \bfx = \text{proj}_w(\T{C}{O})
-    \end{split}
+    \end{split},
 \end{equation}
-
+%
 that maps the relative pose to the projection of the tag in the image, a rather simple jacobian expression can be derived using the chain rule, as follows.
 
 Let's define the marker corner coordinates in the marker frame like shown in \figRef{fig:tag_coordinate_frame}. As a convention 
@@ -105,8 +105,8 @@ Let's define the marker corner coordinates in the marker frame like shown in \fi
     ~
     c_3 =  \begin{pmatrix} \frac{w}{2} \\ -\frac{w}{2} \\ 0 \end{pmatrix}
     ~
-    c_4 =  \begin{pmatrix} -\frac{w}{2} \\ -\frac{w}{2} \\ 0 \end{pmatrix}
-\end{equation}.
+    c_4 =  \begin{pmatrix} -\frac{w}{2} \\ -\frac{w}{2} \\ 0 \end{pmatrix}.
+\end{equation}
 
 %
 \begin{figure}
@@ -126,7 +126,7 @@ for each corner $c_i$, where $h_i$ are the homogeneous coordinates representing 
     \begin{split}
         \text{eucl}: \Reals^3 &\rightarrow \Reals^2 \\
         \bfh = \begin{pmatrix}x\\y\\z\end{pmatrix} &\rightarrow \bfx = \begin{pmatrix}x/z\\y/z\end{pmatrix}
-    \end{split}
+    \end{split}.
 \end{equation}
 
 We need to compute the jacobian of each corner projection with respect to the estimated relative pose $J^{x_i}_{\T{}{}} = J^{x_i}_{h_i} J^{h_i}_{\T{}{}}$. 
@@ -148,7 +148,7 @@ while the euclideanization jacobian is found to be
     \begin{pmatrix}
     1/z_i & 0 & -x_i/z_i^2 \\
     0 & 1/z_i & -y_i/z_i^2
-    \end{pmatrix}
+    \end{pmatrix}.
 \end{equation}
 
 
@@ -161,14 +161,13 @@ Finally, we can stack the 4 jacobians to get the full jacobian to be used for co
     ~ \in \Reals^{8 \times 6}
 \end{equation}.
 
-
 We therefore have the covariance propagation equation $\Cov_{\bfx} = J \Cov_{\T{}{}} J^T$. 
 This equation must be inverted in order to recover the needed covariance. $J$ being non square, 
 we have to use the pseudo inverse to write: $\Cov_{\T{}{}} = J^{+,T} \Cov_{\bfx} J^{+}$. 
 Given that the pixel noise covariance is isotropic as explained above, this equation simplifies to:
 
 \begin{equation}
-\Cov_{\T{}{}} = \sigma_{x}^2(J^T J)^{-1}    
+    \Cov_{\T{}{}} = \sigma_{x}^2(J^T J)^{-1}.
 \end{equation}
 
 Note that the derivations above are not limited to a square tag with four corners and could be used for any object defined as
@@ -286,7 +285,6 @@ by an index $\alpha$ and associated with an object candidate $O_{\alpha}$. Its 6
 is then computed as follows.
 
 \begin{figure}[]
-
     \begin{subfigure}{.5\textwidth} % this sets the figure to be max half the width of the page
         \centering
         % include first image
@@ -321,7 +319,7 @@ and another for the refinement of the pose. The coarse network gives the first t
 and the prediction of the pose of the object is obtained by composing the $N$ successive transformations:
 
 \begin{equation}
-\T{C}{O_{\alpha}} = \T{C}{O_{\alpha},0} \prod_{k=1}^N  \T{O_{\alpha},k-1}{O_{\alpha},k}
+\T{C}{O_{\alpha}} = \T{C}{O_{\alpha},0} \prod_{k=1}^N  \T{O_{\alpha},k-1}{O_{\alpha},k}.
 \end{equation}
 
 CosyPose reuses the neural network architecture of DeepIm with a new backbone for feature extraction, Efficient-Net \cite{tan2020efficientnet} ,
@@ -334,13 +332,13 @@ Each 3D model $l$ is associated with a set of symmetries $S(l)$, that is the set
 \begin{equation}
     \textit{S}(l) = \left \{ \bfS \in \SE(3) | \forall \bfT \in \SE(3), \cR(l,\bfT) = \cR(l,\bfT \bfS)\right \}
 \end{equation}
-
+%
 where $\cR(l,\bfT)$ is the rendered image of the object $l$ captured in pose $M$. Given a set of symmetries $S(l)$, 
 the symmetric distance $D_l$ measures the distance between two 6D poses represented by transformation $\bfT_1$ and $\bfT_2$. 
 Given an object $l$ associated to a set $\cX_l$ of 3D points $\mathbf{x} \in \cX_l$, we have:
 
 \begin{equation}
-    D_l(\bfT_1, \bfT_2) = \underset{\bfS \in \textit{S}(l)}{\text{min}} \frac{1}{|\cX_l|} \sum_{\mathbf{x} \in \cX_l} ||\bfT_1 \bfS \mathbf{x} - \bfT_2\mathbf{x} ||^2
+    D_l(\bfT_1, \bfT_2) = \underset{\bfS \in \textit{S}(l)}{\text{min}} \frac{1}{|\cX_l|} \sum_{\mathbf{x} \in \cX_l} ||\bfT_1 \bfS \mathbf{x} - \bfT_2\mathbf{x} ||^2.
     \label{eq:distSym}
 \end{equation}
 
@@ -401,7 +399,7 @@ We can then compute the error of CosyPose relative to the motion capture data:
 \begin{equation}
     \mathbf{e}  = [\mathbf{e}_{t}, \mathbf{e}_{a}]  \triangleq  \left[~\posihat{O}{C} - \posim{O}{C}, ~ \Log \left(\Rothat{O}{C}^{-1}\Rotm{O}{C}\right)~\right]
 \end{equation}
-
+%
 where $\widehat{\cdot}$ and $\widetilde{\cdot}$ denote quantities obtained from the motion capture system and CosyPose respectively. 
 $\Log$ denotes the logarithm application mapping elements of SO(3) to the $\Reals^3$ representation of its Lie algebra 
 $\so(3)$.

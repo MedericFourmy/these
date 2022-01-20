@@ -18,7 +18,7 @@ in the following developments. Among available sensors, the IMU measurements are
     \angvelm{}{} &= \angvel{B}{WB} + \bias_{\angvel{}{}} + \noise_{\angvel{}{}} 
     \\
     \accm{}{}    &= \Rot{B}{W} \grav + \acc{B}{WB} + \bias_{\acc{}{}} + \noise_{\acc{}{}} 
-    \end{split}
+    \end{split}.
     \label{eq:imu_meas_model}
 \end{equation}
     
@@ -27,7 +27,7 @@ Other sensors can help estimate IMU biases so we include the biases in the estim
 \begin{equation}
     \bfx = [\posi{W}{WB}, \vel{W}{WB}, \Rot{W}{B}, \bias_{\bfa}, \bias_{\angvel{}{}}]
     \triangleq 
-    [\bfp, \bfv, \Rot{}{}, \bias_{\bfa}, \bias_{\angvel{}{}}] 
+    [\bfp, \bfv, \Rot{}{}, \bias_{\bfa}, \bias_{\angvel{}{}}] .
 \end{equation}
 
 Once the IMU has been started, these biases slowly change over time, depending on the quality of the IMU used. This change is almost always modeled 
@@ -41,10 +41,10 @@ A dynamical model based on strapdown integration of IMU measurements can then be
     \dot{\Rot{}{}} = \Rot{}{} [\angvel{B}{WB}]_{\times} ~~~~~~~
     \dot{\bias}_{\bfa} = \noise_{\bfa}  ~~~~~~~
     \dot{\bias}_{\angvel{}{}} = \noise_{\angvel{}{}} ~~~~~~~
-    \end{split}
+    \end{split}.
     \label{eq:imu_dyn_conti}
 \end{equation}
-%
+
 Introducing the measurement equations \eqRef{eq:imu_meas_model} in continuous dynamics \eqRef{eq:imu_dyn_conti} and using a zero order hold
 explicit Euler integration scheme during $\dt$ results in the discrete dynamics:
 
@@ -56,7 +56,7 @@ explicit Euler integration scheme during $\dt$ results in the discrete dynamics:
     \\
     \posi{}{}^{k+1} &= \posi{}{}^{k} + \vel{}{}^{k}\dt + \frac{1}{2}\grav \dt^2 
     + \frac{1}{2}\Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)\dt^2
-    \end{split}
+    \end{split}.
     \label{eq:imu_dyn_disc}
 \end{equation}
     
@@ -71,10 +71,10 @@ $t_i$ and $t_m$ by unfurling \eqRef{eq:imu_dyn_disc}, we obtain:
     \vel{}{}^{m}  &= \vel{}{}^{i} + \sum_{k=i}^{m} \Big[\grav \dt + \Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)\dt \Big]  \\
     \posi{}{}^{m} &= \posi{}{}^{i} + \sum_{k=i}^{m} \Big[\vel{}{}^{k}\dt + \frac{1}{2}\grav \dt^2 
     + \frac{1}{2}\Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)\dt^2 \Big]
-    \end{split}
+    \end{split}.
     \label{eq:IMUIntij}
 \end{equation}
-%
+
 Assuming IMU biases stay constant during $\Dt^{im}$, 
 \begin{equation*}
     \bias^i \triangleq [\bias_{\acc{}{}}^i, \bias_{\angvel{}{}}^i] \approx [\bias_{\acc{}{}}^k, \bias_{\angvel{}{}}^k]  ~~~ \forall k \in [i..m]
@@ -108,10 +108,10 @@ and
     \sum_{k=i}^{m} \Big[\grav \dt + \Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^i - \noise_{\acc{}{}}^k)\dt \Big]  \\
     \sum_{k=i}^{m} \Big[\vel{}{}^{k}\dt + \frac{1}{2}\grav \dt^2 
     + \frac{1}{2}\Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^i)\dt^2 \Big]
-    \end{bmatrix}
+    \end{bmatrix}.
     \label{eq:IMUIntim}
 \end{align}
-%
+
 Both quantities are recomputed at each evaluation of the residual by the nonlinear solver. $\bfDelta_{\bfx}(\bfx_i, \bfx_m)$ is fairly quick to compute.
 However $\bfDelta_{\cZ_{im}}(\bias^i, \bfx_i)$ formulation requires to reintegrate the whole buffer of measurements which
 is highly inefficient. This is due to the dependency on velocity, orientation and biases at timestamp $i$. However the terms of equation \eqRef{eq:IMUIntij} can 
@@ -170,6 +170,9 @@ Dependence on other small-varying parameters $\bfb$ such as sensor bias is linea
 Then we can pre-integrate $\ol\bfDelta_{im}\te\bfDelta_{im}(\ol\bfb)$ once during data gathering, and use it to define residuals that are later evaluated many times by the optimizer.
 This was the main contribution of paper my paper \cite{fourmy2021contact}.
 
+
+
+
 \subsection{Delta pre-integration}
 
 \begin{figure}[tb]
@@ -186,30 +189,30 @@ First, $\ol\bfDelta_{ii}$ is initialized to the null motion.
 Its covariance $\Cov_\Delta^{ii}$ and the Jacobian $\mjac{\bm\delta_i}{\bfb_i}$ are set to zero. 
 At each reception of sensor data $\tilde\bfz_k$ at $t_k$, we integrate during $\dt$ to obtain the delta corresponding to a single data sample
 %
-\begin{align}
-\bm\delta_k = f(\tilde\bfz_k, \ol\bfb_i, \dt)~, 
-\label{eq:data2delta}
-\end{align}
-
+\begin{equation}
+    \bm\delta_k = f(\tilde\bfz_k, \ol\bfb_i, \dt)~, 
+    \label{eq:data2delta}
+\end{equation}
+%
 using the bias $\ol\bfb_i$ available in KF $i$. 
 This single delta is integrated onto the delta pre-integrated so far using the delta composition law
-
-\begin{align}
-\ol\bfDelta_{ik} = \ol\bfDelta_{ij} \circ \bm\delta_k~. 
-\label{eq:deltaPlusDelta}
-\end{align}
-
+%
+\begin{equation}
+    \ol\bfDelta_{ik} = \ol\bfDelta_{ij} \circ \bm\delta_k~. 
+    \label{eq:deltaPlusDelta}
+\end{equation}
+%
 which is represented in figure \figRef{fig:delta_time}.
 %with Jacobians $\mjac{\ol\bfDelta_{ik}}{\ol\bfDelta_{ij}}$ and $\mjac{\ol\bfDelta_{ik}}{\bm\delta_k}$. 
 The Jacobian of the pre-integrated delta with respect to biases, as well as the delta covariance, are also pre-integrated
-
+%
 \begin{align}
     \mjac{\bfDelta_{ik}}{\bfb_i} &= \mjac{\bfDelta_{ik}}{\bfDelta_{ij}}\mjac{\bfDelta_{ij}}{\bfb_i} 
 + \mjac{\bfDelta_{ik}}{\bm\delta_k}\mjac{\bm\delta_k}{\bfb_i} \\
     \Cov_\Delta^{ik} &= \mjac{\bfDelta_{ik}}{\bfDelta_{ij}}\Cov_\Delta^{ij}\mjac{\bfDelta_{ik}}{\bfDelta_{ij}}\tr 
-+ \mjac{\bfDelta_{ik}}{\bm\delta_k}\mjac{\bm\delta_k}{\bfz_k}\Cov_\bfz\mjac{\bm\delta_k}{\bfz_k}\tr\mjac{\bfDelta_{ik}}{\bm\delta_k}\tr
++ \mjac{\bfDelta_{ik}}{\bm\delta_k}\mjac{\bm\delta_k}{\bfz_k}\Cov_\bfz\mjac{\bm\delta_k}{\bfz_k}\tr\mjac{\bfDelta_{ik}}{\bm\delta_k}\tr,
 \end{align}
-
+%
 where $\mjac{\bm\delta_k}{\bfb_i}$, $\mjac{\bm\delta_k}{\bfz_k}$, $\mjac{\bfDelta_{ik}}{\bfDelta_{ij}}$ and $\mjac{\bfDelta_{ik}}{\bm\delta_k}$ 
 are the Jacobians $\mjac{y}{x}=\partial y/\partial x$ of (\eqRef{eq:data2delta},\eqRef{eq:deltaPlusDelta}), computed according to Lie theory \cite{sola2018micro}.
 
@@ -217,13 +220,13 @@ are the Jacobians $\mjac{y}{x}=\partial y/\partial x$ of (\eqRef{eq:data2delta},
 \subsection{Residual definition}
 \label{sec:preint_residual}
 
-The pre-integrated $\ol\bfDelta_{im}$ is used at the end of the pre-integration to define the residual
-
+The pre-integrated $\ol\bfDelta_{im}$ is used at the end of the pre-integration to define the residual:
+%
 \begin{align}
     \bfr_{im} = (\ol\bfDelta_{im} \oplus \mjac{\bfDelta_{im}}{\bfb_i}(\bfb_i-\ol\bfb_i) ) \ominus \hat\bfDelta_{im}
     \label{eq:preint_residual}
 \end{align}
-
+%
 where $\bfb_i$ is the current bias value,  $\hat\bfDelta_{im}=\bfx^m\boxminus\bfx^i$ is the expected delta between KFs, and $\{\op,\om\}$ are the composite
  plus and minus operators described in \cite{sola2018micro}. 
 That is, $\{\op,\om\}$ are $\{+,-\}$ for vectors, and for rotations we have $\bfR\op\bm\theta\te\bfR\Exp(\bm\theta)$ and $\bfR_2\om\bfR_1\te\Log(\bfR_1\tr\bfR_2)$. 
@@ -237,8 +240,9 @@ The states involved in this integration are the base states $\bfx_b = [\posi{}{}
 The IMU produces biased and noisy measurements $\tilde\bfz = [\tilde\bfa, \tilde{\bfomega}]$ of the base proper acceleration and angular velocity, 
 with bias $\bfb = [\bias_{a}, \bias_{\omega}]$ and noise $\noise = [\noise_{a}, \noise_{\omega}]$. 
 
-The pre-integration method in  \cite{forster2017-TRO} can be put in the formalism above by realizing that defining $\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta} as
-
+The pre-integration method in  \cite{forster2017-TRO} can be put in the formalism above by realizing that defining 
+$\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta} as:
+%
 \begin{align}
     \bm\delta^k = \begin{bmatrix}
     \delta\bfp\\\delta\bfv\\\delta\bfR
@@ -249,9 +253,9 @@ The pre-integration method in  \cite{forster2017-TRO} can be put in the formalis
     \Exp((\tilde{\bfomega}-\bfb_\omega-\noise_\omega)\dt)
     \end{bmatrix}^k
 \end{align}
-
+%
 and the composition law $\bfDelta^{ik}=\bfDelta^{ij}\circ\bm\delta^k$ in \eqRef{eq:deltaPlusDelta} as
-
+%
 \begin{align} \label{eq:composition_delta}
     \begin{split}
     \Dp^{ik} 
@@ -263,7 +267,7 @@ and the composition law $\bfDelta^{ik}=\bfDelta^{ij}\circ\bm\delta^k$ in \eqRef{
     \end{split}
 \end{align}
 
-then $\bfx_k=\bfx_i\boxplus\bfDelta_{ik}$ is \cite[eq.~32]{forster2017-TRO} and $\bfDelta_{ik}=\bfx_k\boxminus\bfx_i$ is \cite[eq.~33]{forster2017-TRO}. 
+Then, $\bfx_k=\bfx_i\boxplus\bfDelta_{ik}$ is \cite[eq.~32]{forster2017-TRO} and $\bfDelta_{ik}=\bfx_k\boxminus\bfx_i$ is \cite[eq.~33]{forster2017-TRO}. 
 Full details can be found in \cite[Section 3.4]{atchuthan-18-thesis}.
 
 
@@ -274,12 +278,9 @@ Full details can be found in \cite[Section 3.4]{atchuthan-18-thesis}.
 %
 \section{IMU pre-integration on Lie groups}
 In \cite{fourmy2019absolute}, we showed that an alternative formulation of IMU preintegration on Lie groups was possible.
-We introduce a new matrix Lie group representation of
-the IMU deltas. The complete IMU pre-integration theory,
-including the computation of the residual, is based on this
-new Lie structure. The theoretical material for the Lie
+We introduce a new matrix Lie group representation of the IMU deltas. The complete IMU pre-integration theory,
+including the computation of the residual, is based on this new Lie structure. The theoretical material for the Lie
 development in this section can be found in the report \cite{sola2018micro}.
-
 
 \subsection{Lie Group formulation}
 
@@ -399,21 +400,22 @@ Use the pre-integrated Jacobian $\mjac{\D_{im}}{\bfb}$ to correct the pre-integr
     ~.
 \end{align}
 
-Use [Forster delta def] \eqRef{equ:delta} as $\boxminus$ to compute the expected delta from  $\bfx_i$ to $\bfx_m$,
+Use \eqRef{equ:delta} as $\boxminus$ to compute the expected delta from  $\bfx_i$ to $\bfx_m$,
 
 \begin{align}
     \widehat\D_{im}(\bfx_i,\bfx_m) &= \bfx_m \boxminus \bfx_i 
     ~.
 \end{align}
+
 Compute the residual in the  tangent of $\cD$ at $\D_{im}$,
 
 \begin{align}
     \bfr^\Delta_{im}(\bfx_i,\bfx_m,\bfb_i) &= \Log(\D_{im}(\bfb_i)\inv \cdot \widehat\D_{im}(\bfx_i,\bfx_m)) \in \bbR^9
 ~,
 \end{align}
-
+%
 and drop the $\Dt$ part from the residual after the $\Log()$ ---see comment in \secRef{sec:uncertainty}.
-In this last equation, the composite minus operator $\oplus$ is simply the traditional Lie group "minus" operator defined in [cite sola eq ...] applied
+In this last equation, the composite minus operator $\oplus$ is simply the traditional Lie group "minus" operator defined in \cite{sola2018micro} applied
 between the corrected preintegration delta and the expected delta.
 
 
@@ -445,8 +447,8 @@ In effect, with this approximation, if we now compact all the steps \eqsRef{equ:
     \end{bmatrix}\dt\right)
 ~,
 \end{align}
-%
-it is possible (although tedious) to show that both Forster's and our method are exactly equivalent when $\bw\dt\to0$.
+
+It is possible (although tedious) to show that both Forster's and our method are exactly equivalent when $\bw\dt\to0$.
 % , which is usually a valid hypothesis.
 % These differences should not constitute an argument against Forster, since in practice we typically have extremely small steps $\bw\dt$ and the approximation holds very well.
 

@@ -53,9 +53,11 @@ of our paper \cite{fourmy2021contact}.
 \subsection{Centroidal dynamics}
 \label{sec:centroidal_dynamics}
 The robot dynamics is described by the well-known:
+%
 \begin{equation}\label{eq:wbdyn}
   \bfM(\q) \vq + h(\q,\vq) = \bm\tau_q + \sum_l \bfJ_l\tr \bff_l
 \end{equation}
+%
 where $\q,\vq,\dvq,\bm\tau_q$ are the position, velocity, acceleration and torques of the robot in configuration space,
 $\bff_l$ are the contact forces (written as 3D forces in this paper),
 $\bfM$ is the generalized inertia matrix, $h$ the sum of gravity, Coriolis and centrifugal forces, and $\bfJ_l$ the jacobians of the contact points.
@@ -99,41 +101,41 @@ Assuming constant forces during each interval $\dt$
 the integration of \eqRef{eq:NewtonEuler} yields the discrete dynamic model for the centroidal states:
 %
 \begin{equation}
-\begin{split}
-\COM^{k} &= \COM^{k-1} + \COMd^{k-1} \dt+\frac{1}{2} \bfg \dt^2 + \frac{1}{2m} \Rot{}{}^{k-1} \sum_L \Rotm{}{L}^k (\forcem{}{L}^k - \noise_{f}) \dt^2
-\\
-\COMd^{k}&= \COMd^{k-1} + \bfg \dt + \frac{1}{m} \Rot{}{}^k \sum_L\Rotm{}{L}^k (\forcem{}{L}^k - \noise_{f}) \dt 
-\\
-\AM^{k} &= \AM^{k-1} +\Rot{}{}^k \sum_L (\posim{}{L}^k  - \posim{}{C}^k +  \bias_{c}^k + \noise_{c}) \times \Rotm{}{L}^k(\forcem{}{L}^k - \noise_{f}) \dt
-\end{split}
-\label{eq:COMDiscrete}
+    \begin{split}
+        \COM^{k} &= \COM^{k-1} + \COMd^{k-1} \dt+\frac{1}{2} \bfg \dt^2 + \frac{1}{2m} \Rot{}{}^{k-1} \sum_L \Rotm{}{L}^k (\forcem{}{L}^k - \noise_{f}) \dt^2
+        \\
+        \COMd^{k}&= \COMd^{k-1} + \bfg \dt + \frac{1}{m} \Rot{}{}^k \sum_L\Rotm{}{L}^k (\forcem{}{L}^k - \noise_{f}) \dt 
+        \\
+        \AM^{k} &= \AM^{k-1} +\Rot{}{}^k \sum_L (\posim{}{L}^k  - \posim{}{C}^k +  \bias_{c}^k + \noise_{c}) \times \Rotm{}{L}^k(\forcem{}{L}^k - \noise_{f}) \dt
+    \end{split}
+    \label{eq:COMDiscrete}
 \end{equation}
-%
+
 Analogously to the IMU case, it is possible to pre-integrate force measurements to derive a factor on the states 
 $\bfx_c=[\COM, \COMd, \AM, \Rot{}{}]$ using deltas $\D_c=[\D\COM, \D\COMd, \D\AM, \DR]$. 
 The rotation measured by the gyroscope has to be included too for the pre-integration to work. 
 In this case, the bias vector is $\bias = [\bias_c, \bias_{\omega}]$. We define measurements  $\bfz^k$ to be:
 %
 \begin{equation}
-\bfz^k = \left[ \posim{}{C}^k, \angvelm{}{}^k, \left[\forcem{}{L}^k, \posim{}{L}^k, \Rotm{}{L}^k \right]_{L=1..4}\right]
+    \bfz^k = \left[ \posim{}{C}^k, \angvelm{}{}^k, \left[\forcem{}{L}^k, \posim{}{L}^k, \Rotm{}{L}^k \right]_{L=1..4}\right]
 \end{equation}
 
 The following operators are enough to particularize the  method in \secRef{sec:general-preint} to the contact forces case.
 Integrating $\bfz_k$ during $\dt$ yields $\bm\delta_k$ in \eqRef{eq:data2delta} as
 %
 \begin{equation}
-\small
-    \bm\delta^{k}(\bfz^k, \bfb^i, \dt) =
-    \begin{bmatrix}
-    \frac{1}{2m} \sum_l \Rotm{}{L}^k \forcem{}{L}^k \dt^2
-    \\
-    \frac{1}{m} \sum_l \Rotm{}{L}^k \forcem{}{L}^k \dt 
-    \\
-    (\sum_l \posim{}{L}^k - (\posim{}{C}^k - \bias_c^i) \times (\Rotm{}{L}^k \forcem{}{L}^k ))\dt
-    \\
-    \Exp((\angvelm{}{}^k - \bias_{\omega}^i)\dt)
-    \end{bmatrix}
-\normalsize
+    \small
+        \bm\delta^{k}(\bfz^k, \bfb^i, \dt) =
+        \begin{bmatrix}
+        \frac{1}{2m} \sum_l \Rotm{}{L}^k \forcem{}{L}^k \dt^2
+        \\
+        \frac{1}{m} \sum_l \Rotm{}{L}^k \forcem{}{L}^k \dt 
+        \\
+        (\sum_l \posim{}{L}^k - (\posim{}{C}^k - \bias_c^i) \times (\Rotm{}{L}^k \forcem{}{L}^k ))\dt
+        \\
+        \Exp((\angvelm{}{}^k - \bias_{\omega}^i)\dt)
+        \end{bmatrix}
+    \normalsize
 \end{equation}
 %
 and the delta composition law in \eqRef{eq:deltaPlusDelta} as
@@ -156,23 +158,22 @@ and the delta composition law in \eqRef{eq:deltaPlusDelta} as
 The expected delta $\D^{ik}=\bfx^k\boxminus\bfx^i$ between KFs $i$ and $k$ reads
 %
 \begin{equation}
-\D^{ik} =
-\begin{bmatrix}
-   \D\COM^{ik} \\ \D\COMd^{ik} \\ \D\AM^{ik} \\ \DR^{ik}
-\end{bmatrix}
-=
-\begin{bmatrix}
-	{\Rot{}{}^i}\tr (\COM^k - \COM^i - \COMd^i \Dt^{ik})
-	\\
-	{\Rot{}{}^i}\tr (\COMd^{k} - \COMd^{i} - \bfg \Dt^{ik})
-	\\
-	{\Rot{}{}^i}\tr (\AM^{k} - \AM^{i})
-	\\
-    {\Rot{}{}^i}\tr \Rot{}{}^k
-\end{bmatrix}
-~.
+    \D^{ik} =
+    \begin{bmatrix}
+    \D\COM^{ik} \\ \D\COMd^{ik} \\ \D\AM^{ik} \\ \DR^{ik}
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        {\Rot{}{}^i}\tr (\COM^k - \COM^i - \COMd^i \Dt^{ik})
+        \\
+        {\Rot{}{}^i}\tr (\COMd^{k} - \COMd^{i} - \bfg \Dt^{ik})
+        \\
+        {\Rot{}{}^i}\tr (\AM^{k} - \AM^{i})
+        \\
+        {\Rot{}{}^i}\tr \Rot{}{}^k
+    \end{bmatrix}~.
 \end{equation}
-%
+
 Finally, the propagation of the state $\bfx_i$ to $\bfx_k$ using $\D_{ik}$, which can be used to retrieve a state at any time $k$ between KFs in the trajectory, is
 %
 \begin{equation}
@@ -187,8 +188,5 @@ Finally, the propagation of the state $\bfx_i$ to $\bfx_k$ using $\D_{ik}$, whic
 	\Rot{}{}^i \DR^{ik}
 	\end{bmatrix}
 \end{equation}
-%
-%
-%
-%
+
 
