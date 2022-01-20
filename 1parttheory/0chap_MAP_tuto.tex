@@ -133,7 +133,7 @@ gradient-based algorithm, typically some variation of the Gauss-Newton algorithm
 %
 %
 %
-\section{Gauss-Newton algorithm}
+\section{The Gauss-Newton algorithm and some variants}
 In this section, we will give a brief introduction to a commonly used way in robotics to solve the MAP problem expressed as an NNLS problem efficiently: the Gauss-Newton algorithm.
 For now, we will assume that state variables and measurements all live in vector spaces to simplify the derivations. For many practical robotics applications,
 some state variables (such as rotation matrices) live in more complex manifolds.
@@ -236,7 +236,7 @@ Taking a Gauss-Newton step then refers to applying the optimal step to get a new
 
 
 
-\section{Levenberg-Marquardt}
+\subsection{The Levenberg-Marquardt variants}
 The Gauss-Newton algorithm is only as valid as the quadratic approximation of its cost function is. Close to the optimum, this approximation
 is quite good and leads to a quadratic convergence of the optimization procedure. If the current estimate is farther from the optimum and the
 local shape of the cost function is flat, that is if the hessian has small eigenvalues, the resulting step can be too large and lead to a 
@@ -270,6 +270,8 @@ Thus, the damping affects each direction of the state differently, depending on 
 
 The values of $\alpha$ and $\lambda$ are continuously adapted to accommodate for the local shape of the cost function, which can be understood as an implementation of the 
 Trust Region paradigm \cite{boyd2004convex}. 
+
+\subsection{Other algorithms}
 
 The Levenberg-Marquardt is only one example of a vast family of algorithmic strategies 
 to mitigate the shortcomings of the "pure" Gauss-Newton algorithm. Those algorithms are trade offs between accuracy, speed, memory budget, and implementation complexity, 
