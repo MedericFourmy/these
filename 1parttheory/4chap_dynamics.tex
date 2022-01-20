@@ -67,7 +67,6 @@ base frame $\vel{B}{C}(\qa, \dqa) \in \Reals^3$, the inertial matrix $\Inertia(\
 of the robot limbs $\AM_a(\qa, \dqa) \in \Reals^{3}$. The geometrical relation between base states and centroidal states is:
 %
 \begin{equation}
-    \small
     \begin{split}
     \COM &= \Rot{}{} \posi{B}{C} + \posi{}{}
     \\
@@ -87,7 +86,6 @@ The angular velocity from the IMU is used and its bias has to be incorporated in
 In the end, the equations used to derive the factor are:
 %
 \begin{equation}
-    \small
     \begin{split}
     \COM &= \Rot{}{} (\posim{B}{C} -  \bias_{c} - \noise_{c}) + \posi{}{}
     \\
@@ -101,7 +99,6 @@ In the end, the equations used to derive the factor are:
 Then, the residual $\bfe^{CK} \in \Reals^9$ is simply expressed as:
 %
 \begin{equation}
-    \small
     \bfe^{CK}=
     \begin{bmatrix}
         (\Rot{}{}^T(\COM - \posi{}{}) + \bias_{c}) - \posim{B}{C}
@@ -160,7 +157,6 @@ The following operators are enough to particularize the method in \secRef{sec:ge
 Integrating $\bfz_k$ during $\dt$ yields $\bm\delta_k$ in \eqRef{eq:data2delta} as
 %
 \begin{equation}
-    \small
         \bm\delta^{k}(\bfz^k, \bfb^i, \dt) =
         \begin{bmatrix}
         \frac{1}{2m} \sum_l \Rotm{}{L}^k \forcem{}{L}^k \dt^2

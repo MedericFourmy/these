@@ -17,11 +17,14 @@ $\T{W}{O} = \T{W}{B}\T{B}{C}\T{C}{O}$ where W and B correspond to the world and 
 of the camera that has to be calibrated.
 Given measurement $\Tm{C}{O}$, this relation can therefore be turned into a residual relating 
 the robot pose, the camera extrinsics, and the object pose:
-%
-\begin{equation}
-    \bfe_V (\T{W}{B}, \T{B}{C}, \T{W}{O}) = \Log(\T{W}{O} \T{W}{B}^{-1} \T{B}{C}^{-1} \T{C}{O}^{-1}) ~ \in \Reals^6
-\end{equation}
 
+\begin{align}
+    \bfe_V (\T{W}{B}, \T{B}{C}, \T{W}{O}) 
+    &= \left[ (\T{W}{B}\T{B}{C})^{-1}\T{W}{O} \right] \ominus \Tm{C}{O} ~ \in \Reals^6 \\
+    &= \Log_{\SE(3)} ( (\T{W}{B} \T{B}{C} \Tm{C}{O})^{-1} \T{W}{O}) ~ \in \Reals^6
+\end{align}
+%
+where here $\Log_{\SE(3)}$ denotes the log map on $\SE(3)$.
 We also assume that we have access to the covariance of this measurement 
 \mbox{$\Cov_V \in \Reals^{6 \times 6}$}. We will now describe two applications of this factor, one using Apriltag fiducial markers and one using 
 a deep-learning object pose estimation algorithm.
