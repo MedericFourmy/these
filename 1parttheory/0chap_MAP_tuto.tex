@@ -199,7 +199,7 @@ $\bfJ \in \Reals^{M \times N}$. We call this new function $\cF(\Delta \bfx) \tri
 \begin{equation}
     \cF(\Delta \bfx) \triangleq \cL(\check{\cX} + \Delta \bfx) 
     \approx ||\check{\bfr} + \bfJ \Delta \bfx||^2 
-    = \check{\cL} +  \check{\bfr}^T \bfJ \Delta \bfx + \frac{1}{2}\Delta \bfx^T \bfJ^T \bfJ \Delta \bfx
+    = \check{\cL} +  2\check{\bfr}^T \bfJ \Delta \bfx + \Delta \bfx^T \bfJ^T \bfJ \Delta \bfx
 \end{equation}.
 
 $\cF(\Delta \bfx)$ is therefore a local parabolic approximation of 
@@ -289,17 +289,10 @@ is in general non-Gaussian (unless all measurements models are linear). The regi
 The curvature around the mode is described by the Hessian of the posterior negative log-likelihood at the MAP estimated state. 
 It can be shown that he Hessian is the \textit{information matrix} of the problem \footnote{The proof of this statement is out of the scope of this document and can be found in Section 5.1 of
 \cite{peng2018advanced}}. Thus, finding the covariance of the MAP estimate resolves to inverting a 
-sparse positive definite matrix. This Hessian is immediately related to Hessian of the residual vector norm by a factor 2 since:
-
-\begin{equation*}
-    -\log p(\cX|\cZ) = \frac{1}{2}\cL(\cX) + \text{const}
-\end{equation*}
-
-This way, we can approximate our posterior by a multivariate Gaussian, whose mean is the mode and whose covariance 
-is the inverse of the problem's Hessian. 
+sparse positive definite matrix.
 
 \begin{equation}
-    p(\cX | \cZ) \approx \Gaussian{\cX^{MAP}}{2\bfH^{-1}}
+    p(\cX | \cZ) \approx \Gaussian{\cX^{MAP}}{\bfH^{-1}}
     \label{eq:map_laplace}
 \end{equation}
 
