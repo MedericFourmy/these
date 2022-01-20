@@ -695,7 +695,8 @@ The jacobian matrix of the residuals $\bfJ \in \Reals^{M \times N}$ is a big spa
     \item N columns = $\sum_{i=1}^{n}dim(\cT_{\bfx_i}\cM_i)~\rightarrow$ the sum of variables tangent spaces dimensions 
 \end{itemize}   
 
-Each block column corresponds to one of the state variables and each row corresponds to a residual.
+Each block column corresponds to one of the state variables and each row corresponds to a residual. For each row, only the blocks corresponding to the
+state variables that the residual depends on are non-zero. For instance, the matrix corresponding to the toy problem described in \ref{fig:toy_problem} is:
 \begin{equation}
     \bfJ=
     \begin{pmatrix}
@@ -709,6 +710,8 @@ Each block column corresponds to one of the state variables and each row corresp
     \end{pmatrix}
     \label{eq:sparse_jac}
 \end{equation}
+
+% Comparing the matrix structure with the factor graph in \ref{fig:toy_factor}, the connexi 
 
 The approximate Hessian matrix $\bfH \in \Reals^{N \times N}$ displays a similarly remarkable sparsity which makes the resolution of the linear system
 at each step very efficient. Algorithms such as the Schur complement, Cholesky factorization, and QR factorization were applied by different authors to the 
