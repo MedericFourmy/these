@@ -199,8 +199,8 @@ $\bfJ \in \Reals^{M \times N}$. We call this new function $\cF(\Delta \bfx) \tri
 \begin{equation}
     \cF(\Delta \bfx) \triangleq \cL(\check{\cX} + \Delta \bfx) 
     \approx ||\check{\bfr} + \bfJ \Delta \bfx||^2 
-    = \check{\cL} +  2\check{\bfr}^T \bfJ \Delta \bfx + \Delta \bfx^T \bfJ^T \bfJ \Delta \bfx
-\end{equation}.
+    = \check{\cL} +  2\check{\bfr}^T \bfJ \Delta \bfx + \Delta \bfx^T \bfJ^T \bfJ \Delta \bfx.
+\end{equation}
 
 $\cF(\Delta \bfx)$ is therefore a local parabolic approximation of 
 $\cL$ around the current estimate and $\bfH \triangleq \bfJ^T \bfJ$ is the approximate Hessian of $\cL$ 
@@ -289,7 +289,7 @@ be taken toward the conditioning of the Hessian \cite{jian2012generalized}.
 An important question to ask is how confident are we in our MAP estimate. Even if our priors and measurements models are Gaussian distributions, the posterior distribution
 is in general non-Gaussian (unless all measurements models are linear). The region near the peak of the posterior is, however, often nearly Gaussian in shape.
 The curvature around the mode is described by the Hessian of the posterior negative log-likelihood at the MAP estimated state. 
-It can be shown that he Hessian is the \textit{information matrix} of the problem \footnote{The proof of this statement is out of the scope of this document and can be found in Section 5.1 of
+It can be shown that he Hessian is the \textit{information matrix} of the problem\footnote{The proof of this statement is out of the scope of this document and can be found in Section 5.1 of
 \cite{peng2018advanced}}. Thus, finding the covariance of the MAP estimate resolves to inverting a 
 sparse positive definite matrix.
 
@@ -417,9 +417,9 @@ $\oplus$ and $\ominus$:
 \end{figure}
 
 When dealing with a collection of elements $\bfx^i$ living in their respective manifold $\cM^i$, it is often convenient to define a composite manifold
-as the concatenation $\cM_c \triangleq \left<\cM^1, \dots, \cM^M \right>$. The element of this composite manifold is denoted by $\cX$
-The composite equivalent of the retraction operation $\boxplus$ and 
-its inverse $\boxminus$ retraction to individual elements of the manifold and its tangent space separately:
+as the concatenation $\cM_c \triangleq \left<\cM^1, \dots, \cM^M \right>$. The element of this composite manifold is denoted by $\cX$.
+We will also write composite equivalent of the retraction operation $\oplus$ and 
+its inverse $\ominus$. It consists in applying operatrions to individual elements of the manifold and its tangent space:
 
 \begin{equation}
     \cX=
@@ -429,14 +429,16 @@ its inverse $\boxminus$ retraction to individual elements of the manifold and it
         \bfx^M
     \end{bmatrix},
     \quad
-    \cX \boxplus \bftau
+    \cX \oplus \bftau
+    =
     \begin{bmatrix}
         \bfx^1 \oplus \bftau^1 \\
         \vdots \\
         \bfx^M \oplus \bftau^M
     \end{bmatrix}
     \quad
-    \cX_2 \boxminus \cX_1
+    \cX_2 \ominus \cX_1
+    =
     \begin{bmatrix}
         \bfx^1_2 \ominus \bfx^1_1 \\
         \vdots \\
@@ -454,7 +456,7 @@ is an element of a composite manifold. In this case, the Gaussian steps of \eqRe
 are in the composite manifold tangent space and the step updates write:
 
 \begin{equation}
-    \check{\cX} := \check{\cX} \boxplus \Delta \bfx^*
+    \check{\cX} := \check{\cX} \oplus \Delta \bfx^*
 \end{equation}
 %
 obtained by solving
@@ -601,20 +603,18 @@ logarithm on the relative rotation as described here:
 
 \begin{figure}[h]
     \centering
-    \begin{subfigure}{0.85\textwidth}
-        \includegraphics[width=\textwidth]{figures/lie_group.pdf}
-        \caption{Representations of a Lie group including the identity element $\cE$, operations of composition
-        between increments and relations between a tangent space increment at the identity $\prescript{\cE}{}{\bftau}$ 
-        and at the local element $\prescript{\bfx}{}{\bftau}$ through the adjoint matrix $\text{Ad}_{\bfx}$. Figure adapted from \cite{sola2018micro}.}
-        \label{fig:lie_group} 
-    \end{subfigure}
+    \includegraphics[width=0.7\textwidth]{figures/lie_group.pdf}
+    \caption{Representations of a Lie group including the identity element $\cE$, operations of composition
+    between increments and relations between a tangent space increment at the identity $\prescript{\cE}{}{\bftau}$ 
+    and at the local element $\prescript{\bfx}{}{\bftau}$ through the adjoint matrix $\text{Ad}_{\bfx}$. Figure adapted from \cite{sola2018micro}.}
+    \label{fig:lie_group} 
+\end{figure}
 
-    \begin{subfigure}{0.85\textwidth}
-        \includegraphics[width=\textwidth]{figures/rotation_exp_log.pdf}
-        \caption{Representation of $\SO(3)$ Lie groups operations. Note that we represented frames with different origins
-        for better readability while the group elements only represent pure rotations (no translation).}
-        \label{fig:rotation_exp_log} 
-    \end{subfigure}
+\begin{figure}[h]
+    \centering    \includegraphics[width=0.7\textwidth]{figures/rotation_exp_log.pdf}
+    \caption{Representation of $\SO(3)$ Lie groups operations. Note that we represented frames with different origins
+    for better readability while the group elements only represent pure rotations (no translation).}
+    \label{fig:rotation_exp_log} 
 \end{figure}
 
 In robotics terms, $\prescript{1}{}{\bftheta}$ is the axis angle representation of the relative rotation $\prescript{1}{}{\delta \bfR}_{12} = \Rot{}{1}^T\Rot{}{2}$ and
