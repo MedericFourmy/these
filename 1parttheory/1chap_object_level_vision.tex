@@ -191,26 +191,26 @@ covariance matrix $\Cov \in \Reals^{3 \times 3}$, the statistics:
 follows a chi-square distribution with 3 degrees of freedom. We can then plot confidence volumes as ellipsoids by replacing the right end side of  
 \eqRef{eq:chi2} by the critical value of the chi-square distribution for the desired confidence interval (we chose $\alpha=99\%$). We simulate a 
 realistic scenario using calibration data from a laboratory Realsense camera, 15cm tags a $\sigma_x = 2~[pixels]$. An example of a simulated scene is given
-in \figRef{fig:\apriltag_cov}. 
+in \figRef{fig:apriltag_cov}. 
 
 \begin{figure}[h]
     \centering
     \begin{subfigure}{.49\linewidth}
         \centering
-        \includegraphics[width=\textwidth]{figures/\apriltag_cov_posi.png}
-        \caption{Relative position covariances \label{fig:\apriltag_cov_posi}}
+        \includegraphics[width=\textwidth]{figures/apriltag_cov_posi.png}
+        \caption{Relative position covariances \label{fig:apriltag_cov_posi}}
     \end{subfigure}%
     \hfill
     \begin{subfigure}{.49\linewidth}
         \centering
-        \includegraphics[width=\textwidth]{figures/\apriltag_cov_orientation.png}
-        \caption{Relative orientations covariances \label{fig:\apriltag_cov_orientation}}
+        \includegraphics[width=\textwidth]{figures/apriltag_cov_orientation.png}
+        \caption{Relative orientations covariances \label{fig:apriltag_cov_orientation}}
     \end{subfigure}%
     \caption{Representation of the analytic covariance model. The single frame at the bottom represents the pose of the virtual camera, others are identical 
     \apriltags placed in front of the camera at different distances but identical orientations, covariances are represented in orange, centered at the corresponding taf position.
-    (\subref{fig:\apriltag_cov_posi}) shows that the main positional uncertainty is along the camera-tag axis, which corresponds to the depth information. 
-    (\subref{fig:\apriltag_cov_orientation}) shows that in contrary the rotation along the camera-tag axis is by far the most precise.}
-    \label{fig:\apriltag_cov}
+    (\subref{fig:apriltag_cov_posi}) shows that the main positional uncertainty is along the camera-tag axis, which corresponds to the depth information. 
+    (\subref{fig:apriltag_cov_orientation}) shows that in contrary the rotation along the camera-tag axis is by far the most precise.}
+    \label{fig:apriltag_cov}
 \end{figure}
 
 We can see that the error distribution is clearly anisotropic. The uncertainty of the pose measurements
