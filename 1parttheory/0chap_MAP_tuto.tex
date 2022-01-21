@@ -347,7 +347,7 @@ compute a posterior approximation involves minimizing the negative log-likelihoo
     \frac{1}{2 \sigma_p^2}(x - x_p)^2 + \frac{1}{2\sigma_y^2} \sum_{i=1}^m (\frac{fb}{x} - y_i)
 \end{equation}
 
-Finding the MAP and approximating the covariance deviation of $x$, we can plot the MAP posterior along with its numerical computation in \ref{fig:MAP_stereo1D}. 
+Finding the MAP and approximating the covariance deviation of $x$, we can plot the MAP posterior along with its numerical computation in \figRef{fig:MAP_stereo1D}. 
 Both computations result in largely overlapping functions: the main mass of the real posterior density function is captured by the Laplacian approximation.
 However, notice that the real posterior distribution is not symmetrical contrary to the prior it derives from. This means that, contrary to its Gaussian approximation, the mean of the
 of the real posterior is not equal to its mode. 
@@ -519,7 +519,7 @@ to be redefined as:
     \frac{D f}{D \bfx} \triangleq \lim_{\bftau \to 0} \frac{f(\bfx \oplus \bftau) \ominus f(\bfx)}{\bftau}
 \end{equation}
 
-These jacobians also play a central role in the derivation of the residual jacobians \ref{eq:res_jacobian}.
+These jacobians also play a central role in the derivation of the residual jacobians \eqRef{eq:res_jacobian}.
 Examples of manifold jacobian derivations in the context of Lie groups can be found in \cite{sola2018micro}.  
 
 
@@ -674,7 +674,7 @@ The factorization of the likelihood of \eqRef{eq:likelihood_factorization} in th
     ~&{\color{Black} \phi_3({\color{Blue} \bfx_1}, {\color{Green} l_1}) \phi_4({\color{Blue} \bfx_2}, {\color{Green} l_1}, {\color{Green} l_2}) \phi_5({\color{Blue} \bfx_3}, {\color{Green} l_2})} \\ 
 \end{align}
 
-This factorization can be represented as a \textit{factor graph} as seen in \ref{fig:toy_factor}. 
+This factorization can be represented as a \textit{factor graph} as seen in \figRef{fig:toy_factor}. 
 factor graphs are popular graphical models \cite{koller2009probabilistic} that can describe a vast family of statistical models \cite{loeliger2004introduction}.
 A factor graph in the most general sense is a bipartite graph that represents the factorization of a function of several variables. 
 We adopt the visual notation commonly found in robotics: round nodes for variables, square nodes for factors, edges represent the dependency 
@@ -682,7 +682,7 @@ of each factor on a subset of variables. Over the last two decades, they have gr
 estimation problems \cite{dellaert2017factor} and planning problems \cite{dong2016motion}. Dellaert and Kaess \cite{dellaert2006square} were the first to
 recognize the link between NLLS problems and factor graphs.
 
-Many specialized solvers \cite{grisetti2011g2o, dellaert2012factor, ila2017slam++} have been implemented that exploit the sparse structure of these 
+Many specialized solvers \cite{grisetti2011g2o, kaess2012isam2, ila2017slam++} have been implemented that exploit the sparse structure of these 
 problems. A discussion of the particularities of factor graph-based NNLS solvers can be found in \cite{dellaert2017factor, sola2017course}.
 
 
@@ -698,7 +698,7 @@ The jacobian matrix of the residuals $\bfJ \in \Reals^{M \times N}$ is a big spa
 \end{itemize}   
 
 Each block column corresponds to one of the state variables and each row corresponds to a residual. For each row, only the blocks corresponding to the
-state variables that the residual depends on are non-zero. For instance, the matrix corresponding to the toy problem described in \ref{fig:toy_problem} is:
+state variables that the residual depends on are non-zero. For instance, the matrix corresponding to the toy problem described in \figRef{fig:toy_problem} is:
 \begin{equation}
     \bfJ=
     \begin{pmatrix}
@@ -712,8 +712,6 @@ state variables that the residual depends on are non-zero. For instance, the mat
     \end{pmatrix}
     \label{eq:sparse_jac}
 \end{equation}
-
-% Comparing the matrix structure with the factor graph in \ref{fig:toy_factor}, the connexi 
 
 The approximate Hessian matrix $\bfH \in \Reals^{N \times N}$ displays a similarly remarkable sparsity which makes the resolution of the linear system
 at each step very efficient. Algorithms such as the Schur complement, Cholesky factorization, and QR factorization were applied by different authors to the 

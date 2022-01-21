@@ -243,7 +243,7 @@ following steps and \textit{tightly-coupled} (TC) approaches, which try to captu
 In the context of proprioceptive estimation, a common loosely-coupled filter is to pre-compute the base orientation independently by a first filter and using it as a 
 fixed value in subsequent filters. The 2015 Darpa robotic challenge, which mimicked a disaster intervention scenario, was an interested testing field for humanoid robotics
 team implementing control and estimation strategies. For instance, the CMU \cite{feng2015optimization} and IHMC 
-\cite{johnson2015team} teams, that both were using the Atlas humanoid robot \ref{fig:robots}, explain that they implemented tightly-coupled nonlinear estimators for the 
+\cite{johnson2015team} teams, that both were using the Atlas humanoid robot (picture in \figRef{fig:robots}), explain that they implemented tightly-coupled nonlinear estimators for the 
 early trials, based on ad hoc implementations of proprioceptive filter, but ended up using the orientation estimation provided by the Atlas IMU without modification 
 later in the competition preparation. This was helped by the fact that Atlas IMU was a tactical-grade fiber-optic model. 
 An experimental comparison of two decoupled proprioceptive filters for \HRP{2} was proposed \cite{flayols2017experimental}. For both, a complementary filter estimates 
@@ -587,7 +587,7 @@ Factor Graph optimization keeps a trajectory of arbitrarily spaced past states t
 Maximum A Posteriori over the trajectory joint distribution. The terms smoothing and mapping or sliding window estimator are also used when a limited window of past states are kept 
 in the estimator, the old ones being marginalized. The earliest example \cite{lu1997globally} proposed to obtain globally consistent 2D LIDAR range 
 scan alignments by minimizing a cost function over a trajectory of 2D poses constrained by LIDAR scans and wheel odometry.
- Many ad hoc efficient solvers such as \cite{grisetti2011g2o, dellaert2012factor, ila2017slam++, ceres-solver} have been developed 
+ Many ad hoc efficient solvers such as \cite{grisetti2011g2o, kaess2012isam2, ila2017slam++, ceres-solver} have been developed 
 over the years to leverage the specific sparsity of the SLAM problem.
 
 While the first successful online monocular visual SLAM algorithm was implemented using an EKF \cite{davison2007monoslam}, a breakthrough happened with the 
@@ -642,7 +642,7 @@ modified the kinematic factor formulation, taking into account uncertainty induc
 also used as a source of odometry by using a sparse 3D landmark map. In a following work \cite{wisth2020preintegrated}, the proprioceptive odometry factor was adapted
 to include a slowly variable bias on odometry measurements by adapting the preintegration theory from \cite{forster2017-TRO}. They again extended this work
 by including LIDAR measurements in \cite{wisth2021vilens}.
-\cite{kim2021legged} also implemented an inertial kinematic proprioceptive smoothing estimator on the MIT Mini Cheetah (see \ref{fig:robots}), mitigating slipping of the feet by removing kinematic 
+\cite{kim2021legged} also implemented an inertial kinematic proprioceptive smoothing estimator on the MIT Mini Cheetah (see \figRef{fig:robots}), mitigating slipping of the feet by removing kinematic 
 measurements whose residual errors exceed a certain threshold.    
 
 
