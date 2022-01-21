@@ -116,3 +116,18 @@
 \newcommand{\vvee}{^\vee}
 
 \renewcommand{\mjac}[1]{\jac{#1}}
+
+\input pstricks
+\def\dimondplus{\psset{unit=0.15ex,linewidth=0.4pt}%
+ \mathrel{\pspicture(10,10)
+ \psline(5,0)(5,10)
+ \psline(0,5)(10,5)
+ \pspolygon(0,5)(5,10)(10,5)(5,0)
+\endpspicture}}
+
+\def\dimondminus{\psset{unit=0.15ex,linewidth=0.4pt}%
+ \mathrel{\pspicture(10,10)
+% \psline(5,0)(5,10)
+ \psline(0,5)(10,5)
+ \pspolygon(0,5)(5,10)(10,5)(5,0)
+\endpspicture}}
