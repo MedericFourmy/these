@@ -549,10 +549,15 @@ The map is constantly updated using two sources of information: range measuremen
 using heuristics based on the traveled distance. \cite{fankhauser2014robot, fankhauser2018probabilistic} adapted these ideas to legged robots. The map grid probabilistic representation
 was also improved by including horizontal uncertainty due to the robot's relative motion. A costly map fusion process that computes lower and upper bound on the elevations
 is decoupled from the sensor updates and can be computed intermittently at the discretion of the user. This system was recently integrated in a reactive planning system
-\cite{huang2021efficient} able to navigate outdoor uneven terrain with a biped using LIDAR data.  
+\cite{huang2021efficient} able to navigate outdoor uneven terrain with a biped using LIDAR data. Taking another route, Kim \cite{kim2020vision} proposed a much 
+simpler algorithm, relying on integrated Realsense sensors, in order to alleviate on-board computations. A T265 integrated SLAM algorithm provides localization and 
+a D435 provides noisy depth information. A 2.5D world-centered height map is produced from scratch at each point-cloud acquisition using opening morphological 
+transformation filtering. Classification of the terrain, based on local gradient thresholds, is used implement dynamical manoeuvers in a cluttered environment
+with an MIT Mini-Cheetah.
 
 An extension of the elevation grid map is to represent occupied 3D space as an 3D occupancy voxel map, which can be efficiently stored using an Octomap.
-While \cite{hornung2014monte, fallon2014drift} only used this representation as prior for online localization, it was used for online foot planning in \cite{winkler2015planning, mastalli2015line}. 
+While \cite{hornung2014monte, fallon2014drift} only used this representation as prior for online localization, it was used for online foot planning in 
+\cite{winkler2015planning, mastalli2015line}. 
 
 \cite{kolter2009stereo} adopts a mesh representation built from point-clouds aligned twice a second off-board using an ICP procedure initialized by proprioceptive odometry and filled with
 a texture synthesis step. This representation directly provides richer information such as the slope of the terrain which is used in \cite{mastalli2020motion} to 
