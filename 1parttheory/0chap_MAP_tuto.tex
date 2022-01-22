@@ -160,7 +160,7 @@ The Gauss-Newton algorithm is an iterative algorithm to find the minimum of NLLS
 \subsection{Derivation of the Gauss-Newton step}
 We will now detail the critical parts of the algorithm, namely the linearization of the residuals and the computation of an optimal step.
 First, we will simplify notations by dropping dependencies on state variables $X_{S_i}$ where evident. 
-Secondly, we will make a simple change of variables. The weighted squared residuals can be expressed as:
+Secondly, we will make a change of variables. The weighted squared residuals can be expressed as:
 %
 \begin{equation}
     ||\bfe_i||^2_{\Cov_i} = \bfe_i \Cov_i^{-1} \bfe_i 
@@ -613,7 +613,11 @@ logarithm on the relative rotation as described here:
 \begin{figure}[h]
     \centering    \includegraphics[width=0.7\textwidth]{figures/rotation_exp_log.pdf}
     \caption{Representation of $\SO(3)$ Lie groups operations. Note that we represented frames with different origins
-    for better readability while the group elements only represent pure rotations (no translation).}
+    for better readability while the group elements only represent pure rotations (no translation). $world$ is the "global" reference 
+    frame of the problem to which we assign the identity element of $\SO(3)$: $\bfI_3$. $1$ and $2$ are two frames of reference
+    defined by their orientations \wrt $world$, $\Rot{}{1}$ and $\Rot{}{2}$. $\delta \Rot{}{12}$ is the relative rotation
+    between elements $\Rot{}{1}$ and $\Rot{}{2}$ and can be computed using the exponential map on the angle axis $\bftheta$ expressed
+    in $world$ or local frame, depending on whether we use the right or left $\oplus$ operator.}
     \label{fig:rotation_exp_log} 
 \end{figure}
 
@@ -621,8 +625,14 @@ In robotics terms, $\prescript{1}{}{\bftheta}$ is the axis angle representation 
 \textit{local} rotations represent the orientation of reference frames in a \textit{global} world reference frame. The identity element, therefore, corresponds 
 to the world frame. For Lie groups, an additional $\oplus$ operator exists that retracts and composes vectors at the Lie algebra instead of
 the local tangent space, the left-$\oplus$. The local operator, that corresponds to the manifold retraction, is called the right-$\oplus$. 
-The Adjoint $\text{Ad}_{R}\SO(3)$ is a linear operator that permits to map elements from the local tangent space to the Lie algebra. 
-For rotation matrices, the adjoint is simply $\text{Ad}_{\bfR}\SO(3)=\bfR$. Those operations are illustrated in \figRef{fig:rotation_exp_log}.
+The Adjoint $\text{Ad}_{\bfx}\cM$ is an operatormaps elements from the local tangent space to the Lie algebra. 
+
+\begin{equation}
+    \prescript{\cE}{}{\bftau} = \text{Ad}_{\bfx}\cM \prescript{\bfx}{}{\bftau} 
+\end{equation}
+
+For rotation matrices, the adjoint matrix is $\text{Ad}_{\bfR}\SO(3)=\bfR$: to change the reference frame of the angle axis from local to global reference, it needs
+to be rotated from one frame to another. Those operations are illustrated in \figRef{fig:rotation_exp_log}.
 
 
 %
@@ -678,13 +688,18 @@ This factorization can be represented as a \textit{factor graph} as seen in \fig
 factor graphs are popular graphical models \cite{koller2009probabilistic} that can describe a vast family of statistical models \cite{loeliger2004introduction}.
 A factor graph in the most general sense is a bipartite graph that represents the factorization of a function of several variables. 
 We adopt the visual notation commonly found in robotics: round nodes for variables, square nodes for factors, edges represent the dependency 
-of each factor on a subset of variables. Over the last two decades, they have grown in popularity among roboticists as a visual language to describe 
-estimation problems \cite{dellaert2017factor} and planning problems \cite{dong2016motion}. Dellaert and Kaess \cite{dellaert2006square} were the first to
-recognize the link between NLLS problems and factor graphs.
+of each factor on a subset of variables. Dellaert and Kaess \cite{dellaert2006square} were the first to
+recognize the link between NLLS problems and factor graphs \cite{dong2019minisam}. Over the last two decades, they have grown in popularity among roboticists as a visual language to describe 
+estimation problems \cite{dellaert2017factor} and planning problems \cite{dong2016motion}. As Frank Dellaert puts it \footnote{Citation from a recent talk,
+see \href{https://www.youtube.com/watch?v=-yCC7mpgL4w}{this video}, around 15:30.}, factor graphs are "an amazing thing to write on blackboards".% and white boards". 
+Aside from providing insights over the computational structure of the problems, they can be used as a common language between engineering teams
+to convey insights about the nature of the problems to solve.
+
+% The SLAM problem hereby represented as a factor graph in only one example of the vast family of estimation problem that can be modeled as a factor graph
+% (other including \eg target tracking, structure-from-motion, control and planning \cite{}). 
 
 Many specialized solvers \cite{grisetti2011g2o, kaess2012isam2, ila2017slam++} have been implemented that exploit the sparse structure of these 
 problems. A discussion of the particularities of factor graph-based NNLS solvers can be found in \cite{dellaert2017factor, sola2017course}.
-
 
 
 
@@ -712,6 +727,8 @@ state variables that the residual depends on are non-zero. For instance, the mat
     \end{pmatrix}
     \label{eq:sparse_jac}
 \end{equation}
+
+
 
 The approximate Hessian matrix $\bfH \in \Reals^{N \times N}$ displays a similarly remarkable sparsity which makes the resolution of the linear system
 at each step very efficient. Algorithms such as the Schur complement, Cholesky factorization, and QR factorization were applied by different authors to the 
