@@ -1,4 +1,5 @@
 \chapter{Visual-inertial SLAM with fiducial markers}
+\label{chp:absolute_vi}
 \minitoc
 
 
@@ -52,7 +53,7 @@ The pros and cons of these two approaches come from the choice of the factors, b
 Both use a plain Forster pre-integration~\cite{forster2017-TRO}. 
 Using either visual odometry or feature tracking, both systems cannot natively benefit from the information brought by loop closure and would fail 
 to exploit known map information.
-In both cases, the kinematic factor is straightforward to write as a 6D constraint.
+In both cases, the kinematic factor is straightforward to write as a 6D probabilistic constraint.
 Finally, both works can account for the very different sensor frequencies, while providing a good estimate at the higher frequency if needed.
 
 In this work, we are looking for a solution to localize a humanoid robot indoors, with sufficient accuracy to navigate on some stairs, grasp a handrail or 
@@ -85,7 +86,7 @@ Both inertial and visual factors are processed in a factor graph resulting in a 
 \end{figure}
 
 In graph-based optimization, the problem is well represented as a bipartite graph, where one type of node refers to the variables, 
-and the other type called \emph{factors} represents constraints between variables, produced by the measurements.
+and the other type called \emph{factors} represents probabilistic constraints between variables, produced by the measurements.
 %
 The state $\bfx$ is modeled as a multi-variate Gaussian distribution.
 In the case of landmark-based visual-inertial SLAM (see \figRef{fig:graph}), $\bfx$ includes robot poses and velocities 
@@ -210,8 +211,8 @@ cross-correlation between MoCap and estimated state sequences.
 
 
 \subsection{Localization precision}
-%
-We consider four datasets which are summarized in table \tabRef{tab:datasets}. They cover different tasks on which a consistent 
+
+We consider four datasets that are summarized in table \tabRef{tab:datasets}. They cover different tasks on which a consistent 
 estimation of the robot movement is necessary. The first one is a relatively long sequence consisting of two loops with the VIS handheld. 
 This is used to test the long-term localization of the robot, which is interesting for navigation. Secondly, we made the LAAS Gepetto team 
 \HRP{2} walk and turn around on a short distance to evaluate the resilience of the filter to the vibrations of the robot. Finally, two more 

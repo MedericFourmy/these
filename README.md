@@ -11,13 +11,14 @@ Use `build.sh` and `clean.sh` scripts
 `./merge_first_and_these.sh`
 
 ## TO DO
-- robot family portraits?
+- preintegration related works Joan's comments
+- Curve with solo estimated forces for dynamic trajectories to show why we were limited
 - cite end to end ML estimation+control?
 - automatize term definition/lexicon
 - Camurri Thesis Table 2.1 extended for all legged robot estimation cited papers
     -> split between base est and centroidal est?  
 - CosyPose cov model, explain calibration procedure?
-- explore CosyPose covariance models 
+- explore CosyPose covariance models?
 
 ## TO DEFINE
 - pose

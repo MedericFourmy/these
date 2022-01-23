@@ -259,6 +259,7 @@ In this section, we propose to integrate a deep-learning-based object pose estim
 
 
 \subsection{Object pose estimation algorithms}
+\label{sec:object_pose_est}
 The problem of object pose estimation can simply be stated: given a calibrated camera and a set of known object models, detect those objects in the current image 
 frame and extract camera-objects poses. Traditionally, competing methods were developed using either local features matching or learning-based methods.
 As shown by the most recent BOP challenge results \cite{hodan2020bop}, deep-learning methods now clearly dominate the field in terms of accuracy. 
@@ -352,6 +353,7 @@ $S(l)$ is discretized using 64 angles.
 
 
 \subsection{Empirical covariance estimation}
+\label{sec:cosypose_covariance}
 
 When considering merging a tracker such as CosyPose with other sensor modalities, an important aspect is to predict covariance representing the level 
 of confidence in the tracker estimate. Such data uncertainty is crucial to the robustness of SLAM systems involving neural networks 
@@ -467,6 +469,7 @@ A more quantitative evaluation can be deduced from table \tabRef{table:empirical
 
 
 \subsection{Retraining with stairs}
+\label{sec:retraining_with_stairs}
 In order to produce a realistic SLAM scenario in the context of legged robots, we retrained CosyPose with staircases present in our lab.
 We made a textured mesh of a stair step used in our experimental platform. This textured mesh was used both for training and using the trained model. 
 The generation of photorealistic synthetic data was handled by BlenderProc \cite{denninger2019blenderproc}. The render-and-compare loop uses PyBullet \cite{coumans2021}.

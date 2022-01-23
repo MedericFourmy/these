@@ -96,12 +96,12 @@ In the end, the equations used to derive the factor are:
     \end{split}
 \end{equation}
 
-Then, the residual $\bfe^{CK} \in \Reals^9$ is simply expressed as:
+Then, the residual $\bfe^{CK} \in \Reals^9$ is then expressed as:
 %
 \begin{equation}
     \bfe^{CK}=
     \begin{bmatrix}
-        (\Rot{}{}^T(\COM - \posi{}{}) + \bias_{c}) - \posim{B}{C}
+        \Rot{}{}^T(\COM - \posi{}{}) + \bias_{c} - \posim{B}{C}
         \\
         \Rot{}{}^T(\COMd - \vel{}{}) - \left[(\angvelm{}{} - \bias_{\omega}) \times (\posim{B}{C} -  \bias_{p}) + \velm{B}{C} \right]
         \\

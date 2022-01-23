@@ -1,7 +1,12 @@
 \chapter{Centroidal estimation}
 \minitoc
 
+In this chapter, we present work published in our paper \cite{fourmy2021contact}.
 
+- Prelaminary work on Inertial Kinematics estimation
+- Centroidal estimation results
+
+\section{Introduction}
 
 
 In this section we present results of the application of the estimator on a dataset taken at LAAS-CNRS on the open source robot Solo-12 \cite{grimminger2020open} that we recently built:
@@ -10,9 +15,16 @@ In this section we present results of the application of the estimator on a data
 We use the state estimation framework WOLF, developed at IRI-Barcelona, which relies on Google Ceres \cite{ceres-solver} as the graph solver. The robot kinematics and dynamics computations are handled by the Pinocchio library \cite{carpentier2015pinocchio}. For all runs, KFs were created  at 4Hz for fair comparison.
 
 
-\subsection{Experimental setup}
+\section{Experimental setup}
 %  
-As is often the case with quadruped robots, Solo-12 is not equipped with three axis force sensors at its feet. Yet, in order to validate the present method, it is possible to reconstruct the contact forces based on the robot dynamics equation \eqref{eq:wbdyn}. Knowing the robot configuration and derivatives $\q,\vq,\dvq$ and joint torques $\bm\tau$ (from motor currents), recovering forces from this equation results in solving an over-determined linear system. Some of these quantities are hard to obtain directly since they depend on the state being estimated (e.g. base orientation) or on numerical differentiation ($\ddqa$). For these reasons, we pre-calculated these forces by benefiting from an internal filter of the 3DM-CX5-25 IMU for the base orientation, centered window differentiation of encoder speed measurements for the articulation acceleration $\ddqa$ and neglecting the influence of linear velocity. Fig. \ref{fig:force_est} shows an example of the force reconstruction of one leg using the robot proprioceptive sensors.
+As is often the case with quadruped robots, Solo-12 is not equipped with three axis force sensors at its feet. 
+Yet, in order to validate the present method, it is possible to reconstruct the contact forces based on the robot dynamics 
+equation \eqref{eq:wbdyn}. Knowing the robot configuration and derivatives $\q,\vq,\dvq$ and joint torques $\bm\tau$ (from motor currents), 
+recovering forces from this equation results in solving an over-determined linear system. Some of these quantities are hard to obtain directly 
+since they depend on the state being estimated (e.g. base orientation) or on numerical differentiation ($\ddqa$). For these reasons, we pre-calculated 
+these forces by benefiting from an internal filter of the 3DM-CX5-25 IMU for the base orientation, centered window differentiation of encoder speed 
+measurements for the articulation acceleration $\ddqa$ and neglecting the influence of linear velocity. Fig. \ref{fig:force_est} shows an example of 
+the force reconstruction of one leg using the robot proprioceptive sensors.
 %
 \begin{figure}
     \centering
@@ -51,9 +63,17 @@ Artificially removing contact factors (considering only 1, 2 or 3 feet in contac
 
 \subsection{Centroidal estimation}
 
-Now, on the same trajectory, we deploy the full estimator with all factors described in Section \ref{sec:factor-graph} to jointly estimate the base and centroidal quantities. A ground truth on the centroidal quantities is difficult to obtain since no direct sensor can provide us with this information contrary to the base state. 
-We can however validate our method by comparing it to a two step procedure: first, estimate the base state with a state Kalman filter as implemented in \cite{bledt2018cheetah}, then compute the centroidal quantities directly from the robot kinematic model. 
-The full estimator should be able to infer a bias on the $\posim{B}{C}$ measure so we artificially add a constant disturbance in the robot dynamic model on the lever of the base link of [0.03, 0.06, 0.04]\,cm, which then corresponds to a CoM bias of [-0.0197, -0.0394,  0.0263] cm. Fig.~\ref{fig:bias_est} shows that the bias estimated with our method closely matches the introduced bias. Fig.~\ref{fig:comparison_KF_wolf} shows a comparison between the base and CoM reconstruction with our method and with the two-step base Kalman filter with geometric CoM. Note that the base-CoM difference on the z axis reflects the fact that limbs of the robot naturally lowers  its CoM. The estimated CoM velocity closely follows the velocity of the base as shown in Fig.~\ref{fig:com_base_vel}.
+Now, on the same trajectory, we deploy the full estimator with all factors described in Section \ref{sec:factor-graph} to jointly 
+estimate the base and centroidal quantities. A ground truth on the centroidal quantities is difficult to obtain since no direct 
+sensor can provide us with this information contrary to the base state. 
+We can however validate our method by comparing it to a two step procedure: first, estimate the base state with a state Kalman filter as 
+implemented in \cite{bledt2018cheetah}, then compute the centroidal quantities directly from the robot kinematic model. 
+The full estimator should be able to infer a bias on the $\posim{B}{C}$ measure so we artificially add a constant disturbance 
+in the robot dynamic model on the lever of the base link of [0.03, 0.06, 0.04]\,cm, which then corresponds to a CoM bias of 
+[-0.0197, -0.0394,  0.0263] cm. Fig.~\ref{fig:bias_est} shows that the bias estimated with our method closely matches the introduced bias. 
+Fig.~\ref{fig:comparison_KF_wolf} shows a comparison between the base and CoM reconstruction with our method and with the two-step base Kalman filter 
+with geometric CoM. Note that the base-CoM difference on the z axis reflects the fact that limbs of the robot naturally lowers  its CoM. 
+The estimated CoM velocity closely follows the velocity of the base as shown in Fig.~\ref{fig:com_base_vel}.
 
 
 
