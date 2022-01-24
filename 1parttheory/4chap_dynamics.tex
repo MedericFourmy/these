@@ -101,11 +101,11 @@ Then, the residual $\bfe^{CK} \in \Reals^9$ is then expressed as:
 \begin{equation}
     \bfe^{CK}=
     \begin{bmatrix}
-        \Rot{}{}^T(\COM - \posi{}{}) + \bias_{c} - \posim{B}{C}
+        \Rot{}{}^{\top}(\COM - \posi{}{}) + \bias_{c} - \posim{B}{C}
         \\
-        \Rot{}{}^T(\COMd - \vel{}{}) - \left[(\angvelm{}{} - \bias_{\omega}) \times (\posim{B}{C} -  \bias_{p}) + \velm{B}{C} \right]
+        \Rot{}{}^{\top}(\COMd - \vel{}{}) - \left[(\angvelm{}{} - \bias_{\omega}) \times (\posim{B}{C} -  \bias_{p}) + \velm{B}{C} \right]
         \\
-        \Rot{}{}^T\AM - \left[\Inertia (\angvelm{}{} - \bias_{\omega}) + \AM_a \right]
+        \Rot{}{}^{\top}\AM - \left[\Inertia (\angvelm{}{} - \bias_{\omega}) + \AM_a \right]
     \end{bmatrix}
     \label{eq:CKFactor}
 \end{equation}

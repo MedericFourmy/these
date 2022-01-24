@@ -25,7 +25,7 @@ As is often the case with quadruped robots, Solo-12 is not equipped with three a
 Yet, in order to validate the present method, it is possible to reconstruct the contact forces based on the robot dynamics 
 equation \eqref{eq:wbdyn}. Knowing the robot configuration and derivatives $\q,\vq,\dvq$ and joint torques $\bm\tau$ (from motor currents), 
 recovering forces from this equation results in solving an over-determined linear system. Some of these quantities are hard to obtain directly 
-since they depend on the state being estimated (e.g. base orientation) or on numerical differentiation ($\ddqa$). For these reasons, we pre-calculated 
+since they depend on the state being estimated (\eg base orientation) or on numerical differentiation ($\ddqa$). For these reasons, we pre-calculated 
 these forces by benefiting from an internal filter of the 3DM-CX5-25 IMU for the base orientation, centered window differentiation of encoder speed 
 measurements for the articulation acceleration $\ddqa$ and neglecting the influence of linear velocity. Fig. \ref{fig:force_est} shows an example of 
 the force reconstruction of one leg using the robot proprioceptive sensors.

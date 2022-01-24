@@ -244,10 +244,10 @@ In the context of proprioceptive estimation, a common loosely-coupled filter is 
 fixed value in subsequent filters. The 2015 Darpa robotic challenge, which mimicked a disaster intervention scenario, was an interested testing field for humanoid robotics
 team implementing control and estimation strategies. For instance, the CMU \cite{feng2015optimization} and IHMC 
 \cite{johnson2015team} teams, that both were using the Atlas humanoid robot (picture in \figRef{fig:robots}), explain that they implemented tightly-coupled nonlinear estimators for the 
-early trials, based on ad hoc implementations of proprioceptive filter, but ended up using the orientation estimation provided by the Atlas IMU without modification 
+early trials, based on \adhoc implementations of proprioceptive filter, but ended up using the orientation estimation provided by the Atlas IMU without modification 
 later in the competition preparation. This was helped by the fact that Atlas IMU was a tactical-grade fiber-optic model. 
 An experimental comparison of two decoupled proprioceptive filters for \HRP{2} was proposed \cite{flayols2017experimental}. For both, a complementary filter estimates 
-the orientation of the base from IMU measurements only. The second step is either a straightforward \KalmanF on the position and velocity or an ad hoc two-stage 
+the orientation of the base from IMU measurements only. The second step is either a straightforward \KalmanF on the position and velocity or an \adhoc two-stage 
 weighting algorithm: first orientation weighting between the IMU and both feet, then position and velocity measurements 
 weighting between both feet. Similar decoupled approaches have been implemented on quadruped robots such as a \KalmanF for \cite{bledt2018cheetah} and a two-stage complementary filter for \cite{leziart2021implementation}.
 
@@ -592,7 +592,7 @@ Factor Graph optimization keeps a trajectory of arbitrarily spaced past states t
 Maximum A Posteriori over the trajectory joint distribution. The terms smoothing and mapping or sliding window estimator are also used when a limited window of past states are kept 
 in the estimator, the old ones being marginalized. The earliest example \cite{lu1997globally} proposed to obtain globally consistent 2D LIDAR range 
 scan alignments by minimizing a cost function over a trajectory of 2D poses constrained by LIDAR scans and wheel odometry.
- Many ad hoc efficient solvers such as \cite{grisetti2011g2o, kaess2012isam2, ila2017slam++, ceres-solver} have been developed 
+ Many \adhoc efficient solvers such as \cite{grisetti2011g2o, kaess2012isam2, ila2017slam++, ceres-solver} have been developed 
 over the years to leverage the specific sparsity of the SLAM problem.
 
 While the first successful online monocular visual SLAM algorithm was implemented using an EKF \cite{davison2007monoslam}, a breakthrough happened with the 

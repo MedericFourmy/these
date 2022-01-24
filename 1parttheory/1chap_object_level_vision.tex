@@ -71,7 +71,7 @@ as shown in Eq. \eqRef{eq:cov_propagation}.
 Instead of directly obtaining Jacobians from the PnP algorithms, we found that a natural way to proceed is to take the opposite 
 direction. It should somehow be possible, knowing the marker size and the relative pose measurement, and assuming pixel noise, to
 recover $\Cov_{\T{}{}}$. A simple model of pixel noise is to assume isotropic Gaussian noise on the pixels. If we stack four pixel (the four tag corners) 
-$\bfx_i = [u_i, v_i] \in \Reals^2$ and we stack then in the column vector $\bfx = [\bfx_1~\bfx_2~\bfx_3~\bfx_4]^T$, we have therefore that
+$\bfx_i = [u_i, v_i] \in \Reals^2$ and we stack then in the column vector $\bfx = [\bfx_1~\bfx_2~\bfx_3~\bfx_4]^{\top}$, we have therefore that
 $\bfx$ is corrupted by a Gaussian noise $\Cov_{\bfx} = \sigma_{x}^2 \bfI_8$, where $\sigma_{x}$ usually takes values of 1 or 2 pixels.
 PnP algorithm provides us with a function $\text{pnp}$ defined as:
 
@@ -165,13 +165,13 @@ Finally, we can stack the 4 jacobians to get the full jacobian to be used for co
     ~ \in \Reals^{8 \times 6}
 \end{equation}.
 
-We therefore have the covariance propagation equation $\Cov_{\bfx} = J \Cov_{\T{}{}} J^T$. 
+We therefore have the covariance propagation equation $\Cov_{\bfx} = J \Cov_{\T{}{}} J^{\top}$. 
 This equation must be inverted in order to recover the needed covariance. $J$ being non square, 
 we have to use the pseudo inverse to write: $\Cov_{\T{}{}} = J^{+,T} \Cov_{\bfx} J^{+}$. 
 Given that the pixel noise covariance is isotropic as explained above, this equation simplifies to:
 
 \begin{equation}
-    \Cov_{\T{}{}} = \sigma_{x}^2(J^T J)^{-1}.
+    \Cov_{\T{}{}} = \sigma_{x}^2(J^{\top} J)^{-1}.
 \end{equation}
 
 Note that the derivations above are not limited to a square tag with four corners and could be used for any object defined as
@@ -184,7 +184,7 @@ In fact, for a random variable $x$ with a size $k$ multivariate normal distribut
 covariance matrix $\Cov \in \Reals^{3 \times 3}$, the statistics:
 %
 \begin{equation}
-    (x - \mu)^T \Cov^{-1}(x - \mu) = \chi^2
+    (x - \mu)^{\top} \Cov^{-1}(x - \mu) = \chi^2
     \label{eq:chi2}
 \end{equation}
 %
