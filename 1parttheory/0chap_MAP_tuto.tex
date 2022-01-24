@@ -640,7 +640,7 @@ in solving the NLLS problem.
 \subsection{Factor Graph representation}
 Let us consider the toy example represented in \figRef{fig:toy_problem}. 
 We wish to estimate the trajectory of a differential robot, that is its states at chosen timestamps called \textit{\keyframes}, and remarkable elements 
-of the environment, called \textit{landmarks}. We suppose that this robot is equipped with an odometer, which measurements integrated over time provide relative 
+of the environment, called \textit{landmarks}. We suppose that this robot is equipped with an odometer, whose measurements integrated over time provide relative 
 transformations between \keyframes, and an exteroceptive sensor, which provides relative measurements between \keyframes~and landmarks.
 
 \begin{figure}[h]
@@ -657,7 +657,7 @@ transformations between \keyframes, and an exteroceptive sensor, which provides 
         \caption{\label{fig:toy_factor}}
     \end{subfigure}%
     \caption{(\subref{fig:toy_problem}): toy estimation problem, a differential drive robot equipped with an odometer moves in 
-    an scene with landmarks represented by stars. ()\subref{fig:toy_factor}): factor graph representation the problem, the estimated variables are represented by circles 
+    an scene with landmarks represented by stars. (\subref{fig:toy_factor}): factor graph representation the problem, the estimated variables are represented by circles 
     (blue for robot \keyframes, green for landmarks) and factors by squares (orange for odometry, black for exteroceptive sensor, red for the prior).}
 \end{figure}
 
