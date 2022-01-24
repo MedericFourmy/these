@@ -328,7 +328,7 @@ and the prediction of the pose of the object is obtained by composing the $N$ su
 \end{equation}
 
 CosyPose reuses the neural network architecture of DeepIm with a new backbone for feature extraction, Efficient-Net \cite{tan2020efficientnet} ,
-with a spatial average pooling layer added after it. Then, it disables the optical flow subnetwork during the training. 
+with a spatial average pooling layer added after it. Then, it disables the optical flow sub-network during the training. 
 A new rotation parametrization, introduced in \cite{zhou2020continuity}, is used for the loss function, which has been shown 
 to bring more stability during training. Then, the focal length of the cropped images is recomputed during training to fit the virtual camera 
 of these images. Finally, the object symmetries are taken into account during training thanks to the \textit{symmetric distance}. 
@@ -362,7 +362,7 @@ as the inverse of the Iterative Closest Point output. The methods targeted for d
 is to use an off-the-shelf pose estimation neural network, as is the case for this paper. For instance, Bayesian Neural Networks \cite{jospin2020hands} 
 need to be trained explicitly for uncertainty prediction while Monte Carlo (MC) Dropout \cite{gal2016dropout} requires multiple forward passes at run-time.
 
-In our work CosySLAM \cite{debeunne2021cosyslam}, we present a practical implementation of a SLAM system based on the design of an off-the-shelf deep learning object 
+In our work CosySLAM \cite{debeunne2021cosyslam} (submitted at ICRA22), we present a practical implementation of a SLAM system based on the design of an off-the-shelf deep learning object 
 pose estimation algorithm \cite{labbe2020cosypose}, which empirical results are presented in \chpRef{chp:cosyslam}. 
 To integrate these measurements with other sensors, we propose a noise model based on empirical data.
 
