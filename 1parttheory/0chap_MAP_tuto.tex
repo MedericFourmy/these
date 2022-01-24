@@ -110,9 +110,9 @@ apply the assumptions successively to write:
     \\
     &= \argmin_{\cX} - \log p(\cX_0) \prod_{i=1}^{n} p(\bfz_i | \cX_{S_i})  &\text{\small Conditional independences}
     \\
-    &= \argmin_{\cX} - \log \phi_0(\cX_{S_0}) \prod_{i=1}^{n} \phi_i(X_{S_i}) &\text{\small Factorized likelihood}
+    &= \argmin_{\cX} - \log \phi_0(\cX_{S_0}) \prod_{i=1}^{n} \phi_i(X_{S_i}) &\text{\small Factorized likelihood}  \label{eq:factorized_likelihood}
     \\
-    &= \argmin_{\cX}  \sum_{i=0}^{n} ||\bfe_i(\cX_{S_i})||_{\Cov_i}^2  &\text{\small Gaussian measurement models}
+    &= \argmin_{\cX}  \sum_{i=0}^{n} ||\bfe_i(\cX_{S_i})||_{\Cov_i}^2  &\text{\small Gaussian measurement models} \label{eq:nlls_map_pbe}
 \end{align}
 
 Thus, solving the MAP problem with the aforementioned hypotheses boils down to solving a nonlinear weighted least-squares (NLLS) problem.
@@ -696,7 +696,7 @@ The factorization of the likelihood of \eqRef{eq:likelihood_factorization} in th
 
 This factorization can be represented as a \textit{factor graph} as seen in \figRef{fig:toy_factor}. 
 factor graphs are popular graphical models \cite{koller2009probabilistic} that can describe a vast family of statistical models \cite{loeliger2004introduction}.
-A factor graph in the most general sense is a bipartite graph that represents the factorization of a function of several variables. 
+In the general sense, a factor graph is  a bipartite graph that represents the factorization of a function of several variables. In estimation , we use it to represent the factorized likelihood \eqRef{eq:factorized_likelihood}, or equivalently the NLLS problem \eqRef{eq:nlls_map_pbe}.
 We adopt the visual notation commonly found in robotics: round nodes for variables, square nodes for factors, edges represent the dependency 
 of each factor on a subset of variables. Dellaert and Kaess \cite{dellaert2006square} were the first to
 recognize the link between NLLS problems and factor graphs \cite{dong2019minisam}. Over the last two decades, they have grown in popularity among roboticists as a visual language to describe 
@@ -708,13 +708,15 @@ to convey insights about the nature of the problems to solve.
 % The SLAM problem hereby represented as a factor graph in only one example of the vast family of estimation problem that can be modeled as a factor graph
 % (other including \eg target tracking, structure-from-motion, control and planning \cite{}). 
 
-Many specialized solvers \cite{grisetti2011g2o, kaess2012isam2, ila2017slam++} have been implemented that exploit the sparse structure of these 
-problems. A discussion of the particularities of factor graph-based NNLS solvers can be found in \cite{dellaert2017factor, sola2017course}.
+The problems typically represented by factor graphs and found in estimation are very sparse.
+Many specialized solvers \cite{grisetti2011g2o, kaess2012isam2, ila2017slam++} have been implemented to exploit this sparsity. A discussion of the particularities of factor graph-based NNLS solvers can be found in \cite{dellaert2017factor, sola2017course}.
 
 
 
 
 \subsection{Sparsity of the NLLS problem}
+
+Each residual of the NLLS problem is a function of a small subset of the state variables. Therefore, each factor node in the Factor Graph representation of the problem is connected to but a few of the variable nodes. This makes for a graph with low connectivity. We will show that this low connectivity is linked to an important sparsity of the jacobian matrix of the residuals.
 
 The Jacobian matrix of the residuals $\bfJ \in \Reals^{M \times N}$ is a big sparse matrix of dimensions 
 \begin{itemize}
@@ -727,7 +729,7 @@ state variables that the residual depends on are non-zero. For instance, the mat
 \begin{equation}
     \bfJ=
     \begin{pmatrix}
-        J^{p}_{\bfx_1} &   &     &     &     \\
+        J^{0}_{\bfx_1} &   &     &     &     \\
        J^{o_1}_{\bfx_1} & J^{o_1}_{\bfx_2}  &     &     &     \\
                        & J^{o_2}_{\bfx_2}  & J^{o_2}_{\bfx_3}   &     &     \\
        J^{e_1}_{\bfx_1} &                  &     &  J^{o_2}_{\bfl_1}   &     \\
