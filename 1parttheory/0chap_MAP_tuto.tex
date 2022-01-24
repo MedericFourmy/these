@@ -236,6 +236,7 @@ matrices.
 
 
 \subsection{The Levenberg-Marquardt variants}
+\label{sec:LM}
 The Gauss-Newton algorithm is only as valid as the quadratic approximation of its cost function is. Close to the optimum, this approximation
 is quite good and leads to a quadratic convergence of the optimization procedure. If the current estimate is farther from the optimum and the
 local shape of the cost function is flat, that is if the hessian has small eigenvalues, the resulting step can be too large and lead to a 
@@ -278,7 +279,7 @@ to mitigate the shortcomings of the "pure" Gauss-Newton algorithm. Other example
 be taken toward the conditioning of the Hessian \cite{jian2012generalized}.
 
 Those algorithms are trade offs between accuracy, speed, memory budget, and implementation complexity, 
-that suits better in different applications. It seems that, for robotics, Levenberg-Marquadt has proven to be a good trade off between the real-time and
+that suits better in different applications. It seems that, for robotics, Levenberg-Marquardt has proven to be a good trade off between the real-time and
 accuracy requirements. 
 
 
@@ -295,11 +296,17 @@ Some of the equations involved in the Gauss-Newton algorithm cannot be directly 
 Many examples of Riemannian geometry arise in data science and robotics \cite{miolane2020geomstats}. 
 In our case, taking care of the manifold structure is necessary and enough to derive optimization algorithms.
 
-Besides, many of these robotics state variables also exhibit a group structure which, together with the smooth manifold
-property, define the so-called Lie group. Structural elements especially useful are the existence of an identity element (that can be thought of as the origin of the manifold), the existence of inverse for each element, the adjoint linear map, and the possibility to interpolate between elements.
+Besides, many of these robotics state variables also exhibit a group structure.
+Especially useful are the existence of an identity element (that can be thought of as the origin of the group), 
+the existence of inverse for each element, the adjoint linear map, and the possibility to interpolate between elements.
 
-In this section, we will provide the minimal concepts regarding smooth manifolds and Lie groups that are useful to the roboticist. The section is organized as follows: first we will introduce smooth
-manifolds and their properties, such as tangent spaces and retraction. Then we will show how those concept apply to Gauss-Newton optimization. Covariances and Jacobians on smooth manifold variables are then introduced. Finally, Lie groups in the robotics context will be shortly introduced.  
+If a variable has these two properties, they can be described as belonging to a so-called Lie group, whose properties we will review.
+We will introduce operations such as the exponential map that are necessary to describe the measurement models proposed in the following chapters.
+
+This section is organized by first describing the geometrical properties of manifold elements and how these properties
+can be exploited to derive optimization algorithms on manifolds. Of particular interest is the special definition that are given to 
+covariances and Jacobians on manifold elements. Finally, we will see how these properties can be brought together by the Lie theory, of which
+we give a very brief introduction, illustrating properties with the important example of rotation matrices.
 
 
 
@@ -368,6 +375,7 @@ lift $\ominus$ operations. It consists in applying operations to individual elem
         \vdots \\
         \bfx^M_2 \ominus \bfx^M_1
     \end{bmatrix}
+    \label{eq:composite_retract}
 \end{equation}
 
 
@@ -401,7 +409,8 @@ simply reduce to the addition and subtraction of cartesian vectors.
 
 
 
-\subsection{Uncertainty in manifolds, Jacobians}
+\subsection{Uncertainty on manifolds, Jacobians}
+\label{sec:uncertainty_on_manifolds}
 Our state variables are random variables approximated by multivariate Gaussian distribution, that can be summarized by their mean vector and covariance matrix.
 These concepts need to be slightly modified to account for the manifold nature of some of these. We will see how to define Gaussian distribution on manifolds.
 Let us $\bftau \in \Reals^n$ be a small perturbation around a point $\bar{\bfx} \in \cM$, so that we can write:
@@ -551,7 +560,7 @@ In robotics terms, $\prescript{1}{}{\bftheta}$ is the axis angle representation 
 \textit{local} rotations represent the orientation of reference frames $\{1,2\}$ in a \textit{global} world reference frame. The identity element, therefore, corresponds 
 to the world frame. 
 
-Due to the general non-commutativity of the grup operation, an additional $\oplus$ operator exists that retracts and composes vectors at the Lie algebra instead of
+Due to the general non-commutativity of the group operation, an additional $\oplus$ operator exists that retracts and composes vectors at the Lie algebra instead of
 the local tangent space, the left-$\oplus$. The local operator, that corresponds to the manifold retraction, is called the right-$\oplus$. 
 The Adjoint $\text{Ad}_{\bfx}\cM$ is an operator that maps elements from the local tangent space to the Lie algebra. 
 
@@ -666,96 +675,36 @@ problem of SLAM and estimation. Descriptions of these factorizations can be foun
 
 
 \subsection{The algorithm (revisited)}
-Recap of the everything
+To tie things together, we now recapitulate the Gauss-Newton algorithm in the context of variables living on manifolds. 
+We highlight the parts that differ from the regular Gauss-Newton algorithm with vector spaces.
+
+\begin{enumerate}
+    \item Initialize the state estimate at an initial value $\check{\cX} := \cX^0$ \\
+    $\cX$ lives on a composite manifold. Its covariance is defined on the local tangent space of this manifold (see \secRef{sec:uncertainty_on_manifolds}).
+    \item Approximate the NLLS cost function around the current estimate as a quadratic function \\
+    The linear approximation is done using the notation of Jacobian on manifolds described in \secRef{sec:uncertainty_on_manifolds}.
+    $\Delta \bfx$ is defined as the cartesian representation of a composite tangent space element.  
+    \item Find the optimal step $\Delta \bfx^*$ by solving a linear set of equations \eqRef{eq:linear_syst_GN} \\
+    This part does not change. As mentioned in \secRef{sec:LM}, alternatives to vanilla Gauss-Newton such as the Levenberg-Marquardt algorithm
+    may alter the linear system to solved for increased performance.
+    \item Update the current state estimate $\check{\cX} := \check{\cX} \oplus \Delta \bfx^*$ \\
+    The update of the current state is done using the retraction operator $\oplus$ of the composite manifold \eqRef{eq:composite_retract}.
+    \item Loop over steps 2-4 until convergence
+\end{enumerate}
+
+When the estimation algorithm has converged we can also obtain the covariance on the estimates (details and illustration are available in the 
+appendix \chpRef{chp:MAP_covariance}). This is however a costly computation that is usually reserved for offline investigation of the estimation quality. 
+
+We have described a general algorithm to solve NLLS problems with variables belonging to manifolds and weighted by covariance matrices. This problem
+comes from framing the state estimation as a MAP problem and using multiple assumptions on the nature of the measurement models. These measurement models
+are described as residuals weighted by their respective covariance matrices, representing the confidence we have on the sensor measurements. 
+
+Even though finding new solvers extending these ideas to new sets of problems, such as multi robot or multi hypothesis problems, is still an active research, 
+formulating new, efficient, and generalizable measurement models is equally important. The next chapters each concentrate on a different sensor modality:
+object pose retrieval from vision algorithms, a generalized preintegration theory for high rate sensors, legged robot kinematics, and the application 
+of preintegration to legged robots force measurements.
 
 
 
 
-
-
-\section{Covariance of the estimate}
-An important question to ask is how confident are we in our MAP estimate.
-More blabla -> why important
-
-\subsection{Laplace approximation}
-\label{sec:map_covariance}
-Even if our priors and measurements models are Gaussian distributions, the posterior distribution
-is in general non-Gaussian (unless all measurements models are linear). The region near the peak of the posterior is, however, often nearly Gaussian in shape.
-The curvature around the mode is described by the Hessian of the posterior negative log-likelihood at the MAP estimated state. 
-It can be shown that he Hessian is the \textit{information matrix} of the problem\footnote{The proof of this statement is out of the scope of this document and can be found in Section 5.1 of
-\cite{peng2018advanced}}. Thus, finding the covariance of the MAP estimate resolves to inverting a 
-sparse positive definite matrix.
-
-\begin{equation}
-    p(\cX | \cZ) \approx \Gaussian{\cX^{MAP}}{\bfH^{-1}}
-    \label{eq:map_laplace}
-\end{equation}
-
-This is referred to as the quadratic or Laplace approximation (\cite{mcelreath2018statistical}, section 2.4.2). Obtaining an approximation of the full posterior is then a two-step process: 
-first, find the mode of the posterior (the MAP), then "fit a Gaussian" on this mode. 
-
-The full covariance is however rarely computed for a few reasons. First, few algorithms rely on this information (a notable exception being active feature matching \cite{davison2007monoslam}, which is not longer used in state of the art vision systems). Second, computing the Hessian's inverse is too costly to be realized "in the loop". Sometimes, only parts of the covariance are computed using the Schur-complement method \cite{konolige2005slam}, which is costly but much less than the full inverse.
-The covariance computation is then often left for offline evaluations of the estimation.
-
-To contrast this approach with the aforementioned approximations, variational inference as applied in Barfoot et al. 
-\cite{barfoot2020exactly} for instance fit both the mean and the information matrix of a Gaussian model as a result of a single optimization problem.
-
-
-
-\subsection{Example: stereoscopic depth estimation}
-
-We can illustrate the Laplace approximation with a one-dimensional toy problem (borrowed from Barfoot \cite{barfoot2017state}, section 4.1.1).
-The problem is stated as estimating the depth $x \in \Reals$ of a landmark in the scene with a nonlinear camera model (see \figRef{fig:barfoot_stereo})
-%
-\begin{equation}
-    y = \frac{fb}{x} + n_y
-\end{equation}
-%
-%
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.6\textwidth]{figures/barfoot_stereo.png}
-    \caption{Stereo depth estimation toy model \cite{barfoot2017state}}
-    \label{fig:barfoot_stereo}
- \end{figure}
-%
-where $y=u - v$ is a disparity measurement ($u$ and $v$ are pixels corresponding to the projection of the landmark in each camera), $f$ is the focal
-length of the cameras (in pixels), $b$ is the horizontal distance between cameras (the baseline, in meters), and $n_y \approx \Gaussian{0}{\sigma_y^2}$ 
-is the measurements noise (in pixels), assumed to be Gaussian. We also assume that we have prior knowledge about the 
-estimated value $x_p$, with a standard deviation of $\sigma_p$.
-
-To ground the problem, we will assign sensible values to the problem (same as \cite{barfoot2017state}):
-%
-\begin{gather*}
-    x_{true} = 22~[m], \quad x_p = 20~[m], \quad \sigma_p = 3~[m] \\
-    f = 400~[pixels], \quad b = 0.1~[m], \quad \sigma_y = 0.3~[pixels]   
-\end{gather*}
-%
-where $x_{true}$ is the true depth that we seek to estimate.
-
-Notice that the prior standard deviation is quite big, assuming a great uncertainty about the prior value. We simulate noisy measurements by drawing samples 
-$\{y_{i \in [1..m]}\}$ of the measurement model using $x_{true}$ (we drew $m=10$ measurements). For a low dimensional problem such as this one, 
-it is possible to compute the full posterior distribution $p(x|\bfy)$ by numerical integration, which is referred to as the "grid approximation" by 
-\cite{mcelreath2018statistical}. We can make this computation almost arbitrarily precise since the computations are quite cheap. The prior and density distribution are represented in \figRef{fig:MAP_stereo1D}. Applying the Laplacian approximation to
-compute a posterior approximation involves minimizing the negative log-likelihood:
-
-\begin{equation}
-    \frac{1}{2 \sigma_p^2}(x - x_p)^2 + \frac{1}{2\sigma_y^2} \sum_{i=1}^m (\frac{fb}{x} - y_i)
-\end{equation}
-
-Finding the MAP and approximating the covariance deviation of $x$, we can plot the MAP posterior along with its numerical computation in \figRef{fig:MAP_stereo1D}. 
-Both computations result in largely overlapping functions: the main mass of the real posterior density function is captured by the Laplacian approximation.
-However, notice that the real posterior distribution is not symmetrical contrary to the prior it derives from. This means that, contrary to its Gaussian approximation, the mean of the
-of the real posterior is not equal to its mode. 
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.8\textwidth]{figures/MAP_stereo1D.pdf}
-    \caption{Representation of the posterior distribution inference for the 1D depth estimation problem. Dotted black: prior on $x$, 
-    continuous black: numerical "grid" integration of the posterior, continuous red: Laplacian approximation of the posterior. 
-    Vertical lines: red=MAP, green=mean of the posterior. The true value (22 m) is reasonably close to the MAP given the variance 
-    of the posterior distribution.
-    }
-    \label{fig:MAP_stereo1D}
- \end{figure}
 
