@@ -191,8 +191,6 @@ where $J_i$ is the jacobian of the residual at $\check{\cX}_{S_i}$:
     \label{eq:res_jacobian}
 \end{equation}
 
-Those jacobians are usually obtained by automatic differentiation, \eg using dual number \cite{ceres-solver}. 
-
 We can note $N = \sum_{i=1}^{n}dim(\bfx_i)$ and $M = \sum_{i=1}^{m}dim(\bfe_i)$.
 We stack up the $\Delta \bfx_i$ column vectors as $\Delta \bfx \in \Reals^N$ and the residual jacobians at the linearization point 
 $\bfJ \in \Reals^{M \times N}$. We call this new function $\cF(\Delta \bfx) \triangleq \cL(\check{\cX} + \Delta \bfx)$, so that the linearized cost function writes:  
@@ -224,10 +222,6 @@ Substituting $\bfH$ by its expression, the Gauss-Newton step is found by solving
 %
 where $\bfJ^{+}$ is the (right) pseudo inverse of the residual gradient. 
 
-In practice, this matrix $\bfJ^{+}$ is not computed explicitly. Efficient linear system solvers based on the Cholesky
-factorization of $\bfH$ and on the QR factorization of $\bfJ$ are commonly used in SLAM since they can exploit the sparsity of these
-matrices.
-
 Taking a Gauss-Newton step then refers to applying the optimal step to get a new estimate:
 
 \begin{equation}
@@ -235,6 +229,9 @@ Taking a Gauss-Newton step then refers to applying the optimal step to get a new
     \label{eq:gaussian_step}
 \end{equation}
 
+In practice, the individual jacobians \ref{eq:res_jacobian} are usually obtained by automatic differentiation, \eg using dual number \cite{ceres-solver} and $\bfJ^{+}$ is not constructed explicitly. Efficient linear system solvers based on the Cholesky
+factorization of $\bfH$ and on the QR factorization of $\bfJ$ are commonly used in SLAM since they can exploit the sparsity of these
+matrices.
 
 
 \subsection{The Levenberg-Marquardt variants}
@@ -274,7 +271,7 @@ Trust Region paradigm \cite{boyd2004convex}.
 
 \subsection{Other algorithms}
 
-The Levenberg-Marquardt is only one example of a vast family of algorithmic strategies 
+The Levenberg-Marquardt algorithm is only one example of a vast family of algorithmic strategies 
 to mitigate the shortcomings of the "pure" Gauss-Newton algorithm. Those algorithms are trade offs between accuracy, speed, memory budget, and implementation complexity, 
 that suits better in different applications. It seems that, for robotics, Levenberg-Marquadt has proven to be a good trade off between the real-time and
 accuracy requirements. 
@@ -325,7 +322,7 @@ The problem is stated as estimating the depth $x \in \Reals$ of a landmark in th
  \end{figure}
 %
 where $y=u - v$ is a disparity measurement ($u$ and $v$ are pixels corresponding to the projection of the landmark in each camera), $f$ is the focal
-length of the cameras (in pixels), $b$ is the horizontal distance between cameras (the baseline, in meters), a $n_y \approx \Gaussian{0}{\sigma_y^2}$ 
+length of the cameras (in pixels), $b$ is the horizontal distance between cameras (the baseline, in meters), and $n_y \approx \Gaussian{0}{\sigma_y^2}$ 
 is the measurements noise (in pixels), assumed to be Gaussian. We also assume that we have prior knowledge about the 
 estimated value $x_p$, with a standard deviation of $\sigma_p$.
 
