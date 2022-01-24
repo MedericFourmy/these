@@ -8,7 +8,7 @@ Those latent variables can however be estimated by fusing multiple sensors data 
 The task of \textit{estimation} can then simply be stated as finding the most likely robot state given these measurements. 
 
 Probabilistic theory applied to signal processing and information theory has been the bedrock of the state estimation theory development.
-For probabilistic estimators, states are random variables, which, in the robotics context, are mostly continuous.
+For probabilistic estimators, states are random variables, that, in the robotics context, are mostly continuous.
 The goal is to find the best estimate using sensor measurements.
 In the Bayesian perspective, this means to to find a distribution over a collection of random variables $\cX$ given a set 
 of measurements $\cZ$, $p(\cX | \cZ)$, which is known as the \textit{posterior} distribution. 
@@ -30,12 +30,13 @@ leveraged in the popular recursive particle filter for tasks such as localizatio
 property of this approximation is the fact that multimodal distributions can be modeled, which can be useful
 for multi hypothesis problems such as the kidnapped robot problem \cite{dellaert1999monte} or target tracking \cite{gustafsson2002particle}. 
 
-Another type of approximate inference is variational inference (\cite{koller2009probabilistic}, chapter 11), which application in robotics is scarcer. The idea here is to search for a candidate distribution 
-(usually a Gaussian) that minimizes the Kullback-Leibler divergence between the posterior and the candidate distribution. Very recent works start 
+Another type of approximate inference, with scarcer applications in robotics until now, is variational inference (\cite{koller2009probabilistic}, chapter 11). 
+The idea here is fit the parameters of a candidate distribution (often a Gaussian) so that the Kullback-Leibler 
+divergence between the posterior and the candidate distribution is minimized. Very recent works start 
 to find applications in robotics as an alternative to MAP-based graph optimization \cite{barfoot2020exactly, wong2020variational} 
 or to Bayes filtering \cite{lambert2022recursive}. 
 
-A more popular approach to the estimation problem is to find the mode of the posterior distribution, \aka the \textit{Maximum A Posteriori} (MAP).
+A more popular approach to the estimation problem is to concentrate on finding the mode of the posterior distribution, \aka the \textit{Maximum A Posteriori} (MAP).
 
 
 
@@ -64,7 +65,7 @@ First, the measurements are supposed to be conditionally independent of each oth
 \end{equation}
 
 Each factor represents the measurement model associated to the  observation $\bfz_i$ and depends only on a subset $S_i$ of the state variables $\cX_{S_i}$. 
-$S_0$ denotes the subset of random variables on which we have nonuniform prior.
+$S_0$ denotes the subset of random variables with nonuniform priors.
 Secondly, the measurements are assumed to be corrupted by multivariate Gaussian noise:
 %
 \begin{equation}
@@ -208,8 +209,8 @@ $\cL$ around the current estimate and $\bfH \triangleq \bfJ^T \bfJ$ is the appro
 semi-definite positive.
 
 
-The optimal step (Gauss-Newton step) $\Delta \bfx^*$ is by definition the step that minimizes $\cF$. This minimum is found by differentiating $\cF$ with respect to $\Delta \bfx$ and equaling to 0,
-which gives the linear system of equation:
+The optimal step (Gauss-Newton step) $\Delta \bfx^*$ is by definition the step that minimizes $\cF$. This minimum is found by differentiating $\cF$ 
+with respect to $\Delta \bfx$ and equaling to 0, giving the linear system of equation:
 \begin{equation}
     \bfH \Delta \bfx^* = - \bfJ^T \bfr.%, \quad \quad \bfA \triangleq \bfH, \quad \quad \bfb \triangleq 
     \label{eq:linear_syst_GN}
@@ -525,7 +526,7 @@ Examples of manifold jacobian derivations in the context of Lie groups can be fo
 
 
 \subsection{Lie groups for robotic state estimation}
-A \textit{group} ($\cG$, $\circ$) is a set $\cG$ with a composition law $\circ$ which satisfies the group axioms:
+A \textit{group} ($\cG$, $\circ$) is a couple comprised of a set $\cG$ and a composition law $\circ$ that satisfy the group axioms:
 
 \begin{align}
     \text{Closure under}~\circ~:&~\bfx \circ \bfy \\ 
@@ -651,7 +652,7 @@ in solving the NLLS problem.
 Let us consider the toy example represented in \figRef{fig:toy_problem}. 
 We wish to estimate the trajectory of a differential robot, that is its states at chosen timestamps called \textit{\keyframes}, and remarkable elements 
 of the environment, called \textit{landmarks}. We suppose that this robot is equipped with an odometer, whose measurements integrated over time provide relative 
-transformations between \keyframes, and an exteroceptive sensor, which provides relative measurements between \keyframes~and landmarks.
+transformations between \keyframes, and an exteroceptive sensor that provides relative measurements between \keyframes~and landmarks.
 
 \begin{figure}[h]
     \centering
@@ -730,7 +731,7 @@ state variables that the residual depends on are non-zero. For instance, the mat
 
 
 
-The approximate Hessian matrix $\bfH \in \Reals^{N \times N}$ displays a similarly remarkable sparsity which makes the resolution of the linear system
+The approximate Hessian matrix $\bfH \in \Reals^{N \times N}$ displays a similarly remarkable sparsity that makes the resolution of the linear system
 at each step very efficient. Algorithms such as the Schur complement, Cholesky factorization, and QR factorization were applied by different authors to the 
 problem of SLAM and estimation. Descriptions of these factorizations can be found in \cite{sola2017course, dellaert2017factor}.
 

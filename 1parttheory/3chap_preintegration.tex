@@ -10,8 +10,8 @@ In this section we will introduce the IMU measurement model and explain why inte
 lead to a viable factor. We will then explain the observations that lead to the development of the IMU pre-integration algorithm by Lupton \cite{lupton-09}.
 
 Let's consider the estimation of a robot base pose and velocity in the world frame. We will neglect effects due the rotation of the earth by assuming 
-that our world frame (which is fixed \wrt the ground) is an inertial frame, which
-is a common simplification in robotics scenarios \cite{forster2017-TRO}. Without loss of generality, we assume that the IMU frame is identical to the base frame 
+that our world frame (which is fixed \wrt the ground) is an inertial frame. This is a common simplification in robotics scenarios \cite{forster2017-TRO}. 
+Without loss of generality, we assume that the IMU frame is identical to the base frame 
 in the following developments. Among available sensors, the IMU measurements are known to be noisy, biased, and affected by the gravity.
 
 \begin{equation}
@@ -32,7 +32,7 @@ Other sensors can help estimate IMU biases so we include the biases in the estim
 \end{equation}
 
 Once the IMU has been started, these biases slowly change over time, depending on the quality of the IMU used. This change is almost always modeled 
-as a random walk which is close to the observed behavior for rather short periods of time \cite{hussen2015low}.
+as a random walk, which is close to the observed behavior for reasonably short periods of time \cite{hussen2015low}.
 A dynamical model based on strapdown integration of IMU measurements can then be derived.
 %
 \begin{equation}
@@ -114,8 +114,8 @@ and
 \end{align}
 
 Both quantities are recomputed at each evaluation of the residual by the nonlinear solver. $\bfDelta_{\bfx}(\bfx_i, \bfx_m)$ is fairly quick to compute.
-However $\bfDelta_{\cZ_{im}}(\bias^i, \bfx_i)$ formulation requires to reintegrate the whole buffer of measurements which
-is highly inefficient. This is due to the dependency on velocity, orientation and biases at timestamp $i$. However the terms of equation \eqRef{eq:IMUIntij} can 
+However $\bfDelta_{\cZ_{im}}(\bias^i, \bfx_i)$ formulation requires to reintegrate the whole buffer of measurements. This operation is 
+is highly inefficient and is due to the dependency on velocity, orientation and biases at timestamp $i$. However the terms of equation \eqRef{eq:IMUIntij} can 
 be rearranged (proof in the annex \secRef{sec:forster_proof}) to give:
 %
 % WITH NOISE
@@ -143,8 +143,8 @@ be rearranged (proof in the annex \secRef{sec:forster_proof}) to give:
 \end{equation}
 %
 where we define $\DR^{ik} \triangleq \Rot{}{i,T} \Rot{}{}^k$.
-We then overwrites our delta notations as $\bfDelta_{\bfx,im}(\bfx_i, \bfx_m) = \bfDelta_{\cZ_{im}}(\bias^i)$
-which lifts the dependency of the right hand term on the initial state $\bfx_i$. However the bias terms in \eqRef{eq:IMUPreintij} still enforce the repeated 
+We then overwrites our delta notations as $\bfDelta_{\bfx,im}(\bfx_i, \bfx_m) = \bfDelta_{\cZ_{im}}(\bias^i)$,
+emphasizing the fact that the right hand side term does not depend on $\bfx_i$ anymore. However the bias terms in \eqRef{eq:IMUPreintij} still enforce the repeated 
 reintegration of the measurements buffer. Instead, the right hand side can be integrated once using biases estimates at the time where we begin to integrate them that
 we note $\biasbar_i$. Then, we can approximate changes due to the newly estimated bias $\bias_i$ using a first order approximation.
 % $\bfDelta_{\cZ_{im}}(\bias^i) = \bar{\bfDelta}_{\cZ_{im}} \oplus (\bfJ^{\bfDelta_{\cZ_{im}}}_{\bias_i} (\bias^i - \biasbar^i))$.
@@ -463,7 +463,7 @@ by the fact that previous systems required a precise initialization of position,
 With this new formulation, Lupton noted that pre-integration of IMU measurements permitted to use measurements immediately and delay initial orientation about the gravity
 vector in particular. 
 This seminal work was quickly adopted by other authors using smoothing filters \cite{carlone2014eliminating}. As pioneering as this work was, it was however 
-limited by the use of Euler angles which problematic geometric properties are notorious. Indelman \cite{Indelman-2013-7768} first proposed to use the exponential of the 
+limited by the use of Euler angles whose problematic geometric properties are notorious. Indelman \cite{Indelman-2013-7768} first proposed to use the exponential of the 
 matrix rotation group instead of Euler integration and to relax the assumptions of a non-rotating and flat earth of Lupton \cite{lupton-09}. Forster \cite{forster2015imu, forster2017-TRO}
 proposed the same formulation using instead quaternions. Various experiments brought to light three main problem with the Euler angle formulation, that are completely absent 
 from the quaternion "on-manifold" formulation. Firstly, first order integration of angular velocities using Euler angles is approximate, which leads to accumulated errors 

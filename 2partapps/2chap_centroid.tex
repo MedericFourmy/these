@@ -9,10 +9,14 @@ In this chapter, we present work published in our paper \cite{fourmy2021contact}
 \section{Introduction}
 
 
-In this section we present results of the application of the estimator on a dataset taken at LAAS-CNRS on the open source robot Solo-12 \cite{grimminger2020open} that we recently built:
-\textit{sinXYZ} corresponds to a trajectory where the robot moves by following a sine wave reference with the feet fixed in place. This movement and another one are displayed in the companion video \url{https://peertube.laas.fr/videos/watch/16822d27-3557-4e35-9a0d-ce5b0aea4c27}.
+In this section we present results of the application of the estimator on a dataset taken at LAAS-CNRS on the open source robot Solo-12 
+\cite{grimminger2020open} that we recently built:
+\textit{sinXYZ} corresponds to a trajectory where the robot moves by following a sine wave reference with the feet fixed in place. 
+% This movement and another one are displayed in the companion video \url{https://peertube.laas.fr/videos/watch/16822d27-3557-4e35-9a0d-ce5b0aea4c27}.
 %
-We use the state estimation framework WOLF, developed at IRI-Barcelona, which relies on Google Ceres \cite{ceres-solver} as the graph solver. The robot kinematics and dynamics computations are handled by the Pinocchio library \cite{carpentier2015pinocchio}. For all runs, KFs were created  at 4Hz for fair comparison.
+We use the state estimation framework WOLF, developed at IRI-Barcelona, which relies on Google Ceres \cite{ceres-solver} as the graph solver. 
+The robot kinematics and dynamics computations are handled by the Pinocchio library \cite{carpentier2015pinocchio}. For all runs, KFs were created 
+at 4Hz for fair comparison.
 
 
 \section{Experimental setup}
@@ -34,7 +38,9 @@ the force reconstruction of one leg using the robot proprioceptive sensors.
 \end{figure}
 
 \subsection{Base estimation through inertial kinematic fusion}
-First, to validate the use of our kinematic factor, we include uniquely the IMU and LO factors to obtain an Inertial Kinematics  estimator which conceptually includes the same information as estimators such as \cite{bloesch2013state}. In Fig.~\ref{fig:PosiIK4}, we compare our state estimation at 1kHz with motion capture (Mo-Cap) up-sampled from 200Hz to 1kHz.
+First, to validate the use of our kinematic factor, we include uniquely the IMU and LO factors to obtain an Inertial Kinematics  estimator which 
+conceptually includes the same information as estimators such as \cite{bloesch2013state}. In Fig.~\ref{fig:PosiIK4}, we compare our state estimation 
+at 1kHz with motion capture (Mo-Cap) up-sampled from 200Hz to 1kHz.
 Velocity in base frame is also shown in Fig.~\ref{fig:VelIK4}.
 %
 \begin{figure}[t]
@@ -51,12 +57,16 @@ Velocity in base frame is also shown in Fig.~\ref{fig:VelIK4}.
     \label{fig:VelIK4}
 \end{figure}
 
-Artificially removing contact factors (considering only 1, 2 or 3 feet in contact) can help us gain confidence in the use of this kinematic factor in situations where we rarely have all feet in contact, like for example with trotting gaits. In Fig.~\ref{fig:ErrIKn}, we can see that only considering 1 foot in contact during the whole trajectory results in a drifting position, but as soon as 2 or more feet are in contact, the system is constrained enough for the drift to remain below around 5mm on all axes. 
+Artificially removing contact factors (considering only 1, 2 or 3 feet in contact) can help us gain confidence in the use of this kinematic factor 
+in situations where we rarely have all feet in contact, like for example with trotting gaits. In Fig.~\ref{fig:ErrIKn}, we can see that only considering 
+1 foot in contact during the whole trajectory results in a drifting position, but as soon as 2 or more feet are in contact, the system is constrained enough 
+for the drift to remain below around 5mm on all axes. 
 %
 \begin{figure}[t]
     \centering
     \includegraphics[height=0.6\columnwidth]{figures/centroidal/base_position_err_IKn.pdf}
-    \caption{\textit{sinXYZ} trajectory base position error with different numbers of feet used for the leg odometry factors: 1 (blue), 2 (orange), 3 (green), 4 (red) from the IMU+kinematics estimator}
+    \caption{\textit{sinXYZ} trajectory base position error with different numbers of feet used for the leg odometry factors: 
+    1 (blue), 2 (orange), 3 (green), 4 (red) from the IMU+kinematics estimator}
     \label{fig:ErrIKn}
 \end{figure}
 %
@@ -102,7 +112,8 @@ The estimated CoM velocity closely follows the velocity of the base as shown in 
 \begin{figure}[t]
     \centering
     \includegraphics[height=0.6\columnwidth]{figures/centroidal/base_com_position_wolf_vs_KF.pdf}
-    \caption{Comparison of the estimates between decoupled the Kalman filter base estimator and geometric CoM reconstruction (blue) and the tightly coupled estimator presented in this paper (red) on the \textit{sinXYZ} trajectory with artificial base link CoM bias.}
+    \caption{Comparison of the estimates between decoupled the Kalman filter base estimator and geometric CoM reconstruction (blue) and 
+    the tightly coupled estimator presented in this paper (red) on the \textit{sinXYZ} trajectory with artificial base link CoM bias.}
     \label{fig:comparison_KF_wolf}
 \end{figure}
 
