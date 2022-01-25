@@ -319,7 +319,7 @@ We will denote by $p$ the dimension of the space in which the manifold is embedd
 Note that by definition $n \leq p$.  
 
 An element of tangent space at $\bfx$, noted $\bftau\hhat \in \cT_{\bfx}\cM$ can naturally be decomposed as a linear combination 
-of the tangent space basis vectors $E_i$. We can therefore define an element by its coefficient, which is the vector $\bftau \in \Reals^n$, called the cartesian tangent vector.
+of the tangent space basis vectors $E_i$. We can therefore define an element by its coefficient, which is the vector $\bftau \in \Reals^n$, called the Cartesian tangent vector.
 The \textit{hat} and \textit{vee} are mutually inverse linear maps permit to pass back and forth from $\cT_{\bfx}\cM$ to $\Reals^m$, which are therefore isomorphic:
 %
 \begin{align}
@@ -398,14 +398,14 @@ obtained by solving
 \end{equation}
 
 
-Concerning residual formulation in \eqRef{eq:error_expectation}, if the measurement $\bfz_i$ is itself an element of a manifold, then the cartesian minus needs to be replaced:
+Concerning residual formulation in \eqRef{eq:error_expectation}, if the measurement $\bfz_i$ is itself an element of a manifold, then the Cartesian minus needs to be replaced:
 
 \begin{equation}
     \bfe_i(\cX_{S_i}) = \bfh(\cX_{S_i}) \ominus \bfz_i,
 \end{equation}
 
 Note that many state variables actually belong to vector spaces (such as the robot position), which are trivial manifolds. For those, the $\oplus$ and $\ominus$ operators
-simply reduce to the addition and subtraction of cartesian vectors.  
+simply reduce to the addition and subtraction of Cartesian vectors.  
 
 
 
@@ -413,14 +413,14 @@ simply reduce to the addition and subtraction of cartesian vectors.
 \label{sec:uncertainty_on_manifolds}
 Our state variables are random variables approximated by multivariate Gaussian distribution, that can be summarized by their mean vector and covariance matrix.
 These concepts need to be slightly modified to account for the manifold nature of some of these. We will see how to define Gaussian distribution on manifolds.
-Let us $\bftau \in \Reals^n$ be a small perturbation around a point $\bar{\bfx} \in \cM$, so that we can write:
+Let  $\bftau \in \Reals^n$ be a small perturbation around a point $\bar{\bfx} \in \cM$, so that we can write:
 %
 \begin{equation}
     \bfx = \bar{\bfx} \oplus \bftau, \quad \bftau = \bfx \ominus \bar{\bfx}
 \end{equation}
 %
 where $\bar{\bfx}$ designates the mean value of the distribution on $\bfx$. 
-We define a zero mean "cartesian" Gaussian distribution on the tangent space, the covariance being defined as:
+We define a zero mean "Cartesian" Gaussian distribution on the tangent space, the covariance being defined as:
 
 \begin{equation}
     \Cov_{\bfx} \triangleq \mathbb{E}[\bftau\bftau^{\top}] = \mathbb{E}[(\bfx \ominus \bar{\bfx})(\bfx \ominus \bar{\bfx})^{\top}] \in \Reals^{n \times n}
@@ -436,7 +436,7 @@ If we naively define the covariance matrix of a quaternion as \mbox{$\mathbb{E}[
 this covariance matrix is ill-defined. The covariance must be more properly defined as a $3 \times 3$ real matrix on the angle axis space.
 
 In general, covariances can be propagated through nonlinear function of random variables using the chain rule. For instance, if $\bfx \in \Reals^{n_x}$ and 
-$\bfy \in \Reals^{n_y}$ are cartesian multivariate Gaussian distribution related by the nonlinear function $f$, propagating the $\bfx$ covariance 
+$\bfy \in \Reals^{n_y}$ are Cartesian multivariate Gaussian distribution related by the nonlinear function $f$, propagating the $\bfx$ covariance 
 $\Cov_{\bfx} \in \Reals^{n_x \times n_x}$ through f writes:
 
 \begin{equation}
@@ -485,7 +485,7 @@ good intuitions regarding the general behavior of Lie groups.
 The group of 3D rotations is defined as the Special Orthogonal group in 3D: 
 %
 \begin{equation}
-    \SO(3) = \left\{\Rot{}{} \in \text{GL}(n,\Reals) | \Rot{}{}\Rot{}{}^{\top}=\Rot{}{}^{\top}\Rot{}{}=I,~det(\Rot{}{})=1\right\}
+    \SO(3) = \left\{\Rot{}{} \in \text{GL}(n,\Reals) | \Rot{}{}\Rot{}{}^{\top}=\Rot{}{}^{\top}\Rot{}{}=\bfI,~det(\Rot{}{})=1\right\}
 \end{equation}
 %
 under matrix multiplication.
@@ -535,7 +535,7 @@ logarithm on the relative rotation as described here:
 
 \begin{align}
     \Rot{}{2} &= \Rot{}{1}\oplus \prescript{1}{}{\bftheta} = \Rot{}{1} \Exp(\prescript{1}{}{\bftheta})  \\ 
-    \prescript{1}{}{\bftheta} &= \Rot{}{2}\ominus \Rot{}{2} = \Log(\Rot{}{1}^{\top}\Rot{}{2}) 
+    \prescript{1}{}{\bftheta} &= \Rot{}{2}\ominus \Rot{}{1} = \Log(\Rot{}{1}^{\top}\Rot{}{2}) 
 \end{align}
 
 \begin{figure}[h]
@@ -577,7 +577,7 @@ to be rotated from one frame to another. Those operations are illustrated in \fi
 %
 %
 %
-\section{Factor graphs: a visual language for robotics estimation}
+\section{Factor Graphs: a visual language for robotics estimation}
 \label{sec:factor_graphs}
 
 A crucial aspect of solving the MAP problem is the factorizibility of the likelihood function. This represents the fact that the problem
@@ -606,7 +606,7 @@ transformations between \keyframes, and an exteroceptive sensor that provides re
         \caption{\label{fig:toy_factor}}
     \end{subfigure}%
     \caption{(\subref{fig:toy_problem}): toy estimation problem, a differential drive robot equipped with an odometer moves in 
-    an scene with landmarks represented by stars. (\subref{fig:toy_factor}): factor graph representation the problem, the estimated variables are represented by circles 
+    an scene with landmarks represented by stars. (\subref{fig:toy_factor}): Factor Graph representation the problem, the estimated variables are represented by circles 
     (blue for robot \keyframes, green for landmarks) and factors by squares (orange for odometry, black for exteroceptive sensor, red for the prior).}
 \end{figure}
 
@@ -673,7 +673,7 @@ state variables that the residual depends on are non-zero. For instance, the mat
 
 The approximate Hessian matrix $\bfH \in \Reals^{N \times N}$ displays a similarly remarkable sparsity that makes the resolution of the linear system
 at each step very efficient. Algorithms such as the Schur complement, Cholesky factorization, and QR factorization were applied by different authors to the 
-problem of SLAM and estimation. Descriptions of these factorizations can be found in \cite{sola2017course, dellaert2017factor}.
+problem of SLAM and estimation. Descriptions of these linear solvers can be found in \cite{sola2017course, dellaert2017factor}.
 
 
 \subsection{The algorithm (revisited)}
@@ -685,7 +685,7 @@ We highlight the parts that differ from the regular Gauss-Newton algorithm with 
     $\cX$ lives on a composite manifold. Its covariance is defined on the local tangent space of this manifold (see \secRef{sec:uncertainty_on_manifolds}).
     \item Approximate the NLLS cost function around the current estimate as a quadratic function \\
     The linear approximation is done using the notation of Jacobian on manifolds described in \secRef{sec:uncertainty_on_manifolds}.
-    $\Delta \bfx$ is defined as the cartesian representation of a composite tangent space element.  
+    $\Delta \bfx$ is defined as the Cartesian representation of a composite tangent space element.  
     \item Find the optimal step $\Delta \bfx^*$ by solving a linear set of equations \eqRef{eq:linear_syst_GN} \\
     This part does not change. As mentioned in \secRef{sec:LM}, alternatives to vanilla Gauss-Newton such as the Levenberg-Marquardt algorithm
     may alter the linear system to solved for increased performance.
@@ -697,12 +697,19 @@ We highlight the parts that differ from the regular Gauss-Newton algorithm with 
 When the estimation algorithm has converged we can also obtain the covariance on the estimates (details and illustration are available in the 
 appendix \chpRef{chp:MAP_covariance}). This is however a costly computation that is usually reserved for offline investigation of the estimation quality. 
 
+\bigskip
+\bigskip
+\bigskip
+\bigskip
+\bigskip
+
+
 We have described a general algorithm to solve NLLS problems with variables belonging to manifolds and weighted by covariance matrices. This problem
 comes from framing the state estimation as a MAP problem and using multiple assumptions on the nature of the measurement models. These measurement models
-are described as residuals weighted by their respective covariance matrices, representing the confidence we have on the sensor measurements. 
+are described as residuals weighted by their respective covariance matrices, representing the confidence we have on the sensor measurements. Factor Graphs can represent visually those problems and their connectivity is closely related to the sparsity of the linear problems appearing in the optimization algorithm.
 
 Even though finding new solvers extending these ideas to new sets of problems, such as multi robot or multi hypothesis problems, is still an active research, 
-formulating new, efficient, and generalizable measurement models is equally important. The next chapters each concentrate on a different sensor modality:
+formulating new, efficient, and generalizable measurement models is equally important. The next chapters each concentrate on a range of sensor modalities useful for legged robots:
 object pose retrieval from vision algorithms, a generalized preintegration theory for high rate sensors, legged robot kinematics, and the application 
 of preintegration to legged robots force measurements.
 

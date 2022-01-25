@@ -1,16 +1,16 @@
-\chapter{Object level vision}
+\chapter{Object-level vision}
 \label{chp:object_level}
 \minitoc
 
-We will develop two measurements models that have in common to relate a camera pose to a known object in the environment through a rigid transformation. The first one 
+In this chapter, we develop two measurements models that have in common to relate a camera pose to a known object in the environment through a rigid transformation. The first one 
 is derived from \apriltag\ fiducial markers \cite{wang2016iros} that are widely used in the robotics community. The second uses a deep learning-based method
 to obtain relative poses from objects whose CAD models are known \cite{labbe2020cosypose}. We develop covariance models for both
-models to be able to use them in the context of multi-sensor fusion.
+measurement types to be able to use them in the context of multi-sensor fusion.
 
 We assume that the camera has been calibrated and that the images are corrected against distortions. The camera reference frame $C$ has its origin at 
 the camera optical center and follows the convention X-Y-Z = Righ-Down-Front, Front being the optical axis direction, looking through the lens.
 
-\section{General factor}
+\section{Relative 6D pose factor}
 Let's assume that an algorithm provides us $\Tm{C}{O} \in \SE(3)$, a measurement of the pose of an element 
 of the scene with an attached frame $O$ with respect to the camera frame $C$.
 The kinematic chain of the problem described in \figRef{fig:camera_object_chain} unrolls as 
@@ -27,7 +27,7 @@ the robot pose, the camera extrinsics, and the object pose:
 %
 where here $\Log_{\SE(3)}$ denotes the log map on $\SE(3)$.
 We also assume that we have access to the covariance of this measurement 
-\mbox{$\Cov_V \in \Reals^{6 \times 6}$}. We will now describe two applications of this factor, one using \apriltag fiducial markers and one using 
+\mbox{$\Cov_V \in \Reals^{6 \times 6}$}. We will now describe two applications of this factor, one using \apriltag\ fiducial markers and one using 
 a deep-learning object pose estimation algorithm.
 
 \begin{figure}
@@ -43,7 +43,7 @@ a deep-learning object pose estimation algorithm.
 \section{Fiducial marker}
 \subsection{Markers Pose estimation algorithms}
 
-Fiducial markers are widely used in robotics and Augmented Reality (AR) applications as they provide an easy way to obtain a relative 6D pose 
+Fiducial markers (such as ARToolkit \cite{kato1999marker}, ARTag \cite{fiala2005artag}, ArUco \cite{garrido2014automatic}) are widely used in robotics and Augmented Reality (AR) applications as they provide an easy way to obtain a relative 6D pose 
 between a calibrated camera and the marker. These markers are designed so that they are uniquely and robustly identifiable in any scene 
 \cite{wang2016iros,romero2018speeded}. For square markers, the outputs of the algorithm are sub-pixel projections of the square corners, whose 
 corresponding position in the local reference frame of the tag is known (using the tag dimensions). Recovering their pose is then an instance 
@@ -52,7 +52,7 @@ A vast literature has been written on the topic, many methods relying on efficie
 \cite{gao2003complete, lepetit2009epnp, collins2014infinitesimal, terzakis2020consistently}, sometimes refined by a nonlinear maximum likelihood step. 
 
 A known problem of fiducial markers is the orientation ambiguity for noisy images. Close to fronto-parallel pose (identical orientation as 
-the camera frame, null x and y position), the estimated orientation can jump between two solutions of orientations several tenths of degrees apart 
+the camera frame), the estimated orientation can jump between two solutions of orientations several tenths of degrees apart 
 \cite{collins2014infinitesimal}. 
 This problem has been addressed by an analytical algorithm called Infinitesimal Plane-based Pose Estimation \cite{collins2014infinitesimal} that can 
 provide both ambiguous solutions so that the end-user may make an informed choice based on other data.
@@ -69,11 +69,11 @@ therefore, we think that a simpler yet equivalent formulation is possible. This 
 Usually, when a nonlinear mapping of noise variables from one space to another is available, we can propagate the covariance through the nonlinearity
 as shown in Eq. \eqRef{eq:cov_propagation}.  
 Instead of directly obtaining Jacobians from the PnP algorithms, we found that a natural way to proceed is to take the opposite 
-direction. It should somehow be possible, knowing the marker size and the relative pose measurement, and assuming pixel noise, to
+direction as follows. It should somehow be possible, knowing the marker size and the relative pose measurement, and assuming pixel noise, to
 recover $\Cov_{\T{}{}}$. A simple model of pixel noise is to assume isotropic Gaussian noise on the pixels. If we stack four pixel (the four tag corners) 
 $\bfx_i = [u_i, v_i] \in \Reals^2$ and we stack then in the column vector $\bfx = [\bfx_1~\bfx_2~\bfx_3~\bfx_4]^{\top}$, we have therefore that
 $\bfx$ is corrupted by a Gaussian noise $\Cov_{\bfx} = \sigma_{x}^2 \bfI_8$, where $\sigma_{x}$ usually takes values of 1 or 2 pixels.
-PnP algorithm provides us with a function $\text{pnp}$ defined as:
+The PnP algorithm provides us with a function $\text{pnp}$ defined as:
 
 \begin{equation}
     \begin{split}
@@ -188,9 +188,9 @@ covariance matrix $\Cov \in \Reals^{3 \times 3}$, the statistics:
     \label{eq:chi2}
 \end{equation}
 %
-follows a chi-square distribution with 3 degrees of freedom. We can then plot confidence volumes as ellipsoids by replacing the right end side of  
+follows a chi-square distribution with 3 degrees of freedom. Since \eqRef{eq:chi2} is the equation of an ellipse centered at $\mu$, we can then plot confidence volumes as ellipsoids by replacing the right-hand side of  
 \eqRef{eq:chi2} by the critical value of the chi-square distribution for the desired confidence interval (we chose $\alpha=99\%$). We simulate a 
-realistic scenario using calibration data from a laboratory Realsense camera, 15cm tags a $\sigma_x = 2~[pixels]$. An example of a simulated scene is given
+realistic scenario using calibration data from a laboratory Realsense camera, 15cm tags and $\sigma_x = 2~[pixels]$. An example of a simulated scene is given
 in \figRef{fig:apriltag_cov}. 
 
 \begin{figure}[h]
@@ -208,7 +208,7 @@ in \figRef{fig:apriltag_cov}.
     \end{subfigure}%
     \caption{Representation of the analytic covariance model. The single frame at the bottom represents the pose of the virtual camera, others are identical 
     \apriltags placed in front of the camera at different distances but identical orientations, covariances are represented in orange, centered at the corresponding taf position.
-    (\subref{fig:apriltag_cov_posi}) shows that the main positional uncertainty is along the camera-tag axis, which corresponds to the depth information. 
+    (\subref{fig:apriltag_cov_posi}) shows that the main positional uncertainty is along the camera-tag axis, which corresponds to the distance information. 
     (\subref{fig:apriltag_cov_orientation}) shows that in contrary the rotation along the camera-tag axis is by far the most precise.}
     \label{fig:apriltag_cov}
 \end{figure}
@@ -241,6 +241,7 @@ However, if the reprojection errors $e_1$ and $e_2$ are too close (we test for $
 we increase the rotational part of the covariance matrix by a great factor to prevent a potential wrong tag orientation to influence the estimation.
 
 
+Necker's cube
 
 
 

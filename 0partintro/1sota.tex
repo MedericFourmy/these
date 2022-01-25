@@ -46,13 +46,13 @@ to filtering-based methods.
 \label{sec:def}
 Let's first introduce terms and key concepts that are commonly used in the legged robot estimation literature.
 
-\textit{Legged robot} are poly-articulated systems that use a set of end-effectors (commonly referred to as feet whatever their nature) to move their main body
+\textit{Legged robots} are poly-articulated systems that use a set of end-effectors (commonly referred to as feet whatever their nature) to move their main body
 by pushing on its environment. The kinematic chain of the robot is modeled as a graph composed of fixed shape segments (aka. links) 
 linked together by articulations (aka. joints). Joints come in various forms (revolute, prismatic, ball...) and can be actuated or not.
 The \textit{base} refers to a reference frame rigidly attached to the main body of the robot (often the trunk for quadrupeds and the pelvis for humanoids). 
 We are most often interested in the estimation of the position, velocity, and orientation of this frame with regard to an inertial \textit{world} frame, which is called the \textit{base state}. 
 An example of these frames is given for the Solo robot in \figRef{fig:solo_frames}.
-This estimation is the main focus in most of legged robot estimation literature. In fact, knowing the base and other quantities directly measurable (such as joint angles), 
+The base state is the main focus in most of legged robot estimation literature. In fact, knowing the base and other quantities directly measurable (such as joint angles), 
 and assuming a perfect robot kinematic model, the state of any part of the poly-articulated system can be recovered using \textit{forward kinematics}. 
 This algorithm permits to compute \textit{poses} (position and orientation) and \textit{spatial veloctities} (linear and angular velocities) of reference
 frames attached to the robot segments relative to the base or the world frames.
@@ -231,7 +231,7 @@ in particular IMUs, to derive proprioceptive filters.
 \label{sec:proprio_filters}
 
 Many types of observer designs have been put to test on legged robots proprioceptive estimation. The problem being Markovian in nature,
-most are continuous Bayes filters such as variants of the \KalmanF \cite{kalman1960new} and complementary filters \cite{higgins1975comparison}. While a complete history of 
+most are Bayes filters such as variants of the \KalmanF \cite{kalman1960new} and complementary filters \cite{higgins1975comparison}. While a complete history of 
 the evolution of proprioceptive filters is instructive 
 \cite{gassmann2005localization, lin2005leg, lin2006sensor, cobano2008location, aoustin2008experimental, lebastard2011estimation, chilian2011multisensor, reinstein2011dead, 
 gur2012model, ma2012robust, gorner2013leg}, 
@@ -241,13 +241,13 @@ roughly divided between \textit{loosely-coupled} (LC) approaches, which divide t
 following steps and \textit{tightly-coupled} (TC) approaches, which try to capture all statistical cross-correlations between the estimated states.
 
 In the context of proprioceptive estimation, a common loosely-coupled filter is to pre-compute the base orientation independently by a first filter and using it as a 
-fixed value in subsequent filters. The 2015 Darpa robotic challenge, which mimicked a disaster intervention scenario, was an interested testing field for humanoid robotics
+fixed value in subsequent filters. The 2015 Darpa robotic challenge, which mimicked a disaster intervention scenario, was an interesting testing field for humanoid robotics
 team implementing control and estimation strategies. For instance, the CMU \cite{feng2015optimization} and IHMC 
 \cite{johnson2015team} teams, that both were using the Atlas humanoid robot (picture in \figRef{fig:robots}), explain that they implemented tightly-coupled nonlinear estimators for the 
-early trials, based on \adhoc implementations of proprioceptive filter, but ended up using the orientation estimation provided by the Atlas IMU without modification 
+early trials, based on \adhoc\ implementations of proprioceptive filter, but ended up using the orientation estimation provided by the Atlas IMU without modification 
 later in the competition preparation. This was helped by the fact that Atlas IMU was a tactical-grade fiber-optic model. 
 An experimental comparison of two decoupled proprioceptive filters for \HRP{2} was proposed \cite{flayols2017experimental}. For both, a complementary filter estimates 
-the orientation of the base from IMU measurements only. The second step is either a straightforward \KalmanF on the position and velocity or an \adhoc two-stage 
+the orientation of the base from IMU measurements only. The second step is either a straightforward \KalmanF on the position and velocity or an \adhoc\ two-stage 
 weighting algorithm: first orientation weighting between the IMU and both feet, then position and velocity measurements 
 weighting between both feet. Similar decoupled approaches have been implemented on quadruped robots such as a \KalmanF for \cite{bledt2018cheetah} and a two-stage complementary filter for \cite{leziart2021implementation}.
 
@@ -297,7 +297,7 @@ as well as the contact normal, is generally hard to infer. The authors propose a
 far from the median. A similar choice is made by \cite{bloesch2013stateSlippery} in which Unscented \KalmanF velocity updates are rejected as outliers if their innovation exceeds a threshold.  
 More recent papers try to fuse these different sources of information in Bayes filters. \cite{hwangbo2016probabilistic} and subsequently \cite{jenelten2019dynamic} fuse 
 the kinodynamic models of the robot, IMU measurements, joint encoders values (and their first and second-order differentiation) as well as
-joint torques in a discrete Hidden Markov Model (HMM) where contact states are binary values. A HMM is used instead of a continuous Bayes filter because the feet state are modeled as taking a finite set of values: either in contact or not.
+joint torques in a discrete state Hidden Markov Model (HMM) where contact states are binary values. A HMM is used instead of a continuous Bayes filter because the feet state are modeled as taking a finite set of values: either in contact or not.
 They build separate filters for contact and slip detections and demonstrate walking on ice with an 
 \mbox{ANYmal-C} using a special controller. A similar approach formulated as a \KalmanF directly estimates contact probabilities \cite{bledt2018contact}. 
 It questions previous works that assume the availability  \cite{hwangbo2016probabilistic} or negligibility \cite{camurri2017probabilistic} of joint angular 
@@ -483,7 +483,6 @@ following a previously traversed path without a metric map \cite{furgale2010visu
 \cite{aulinas2008slam, cadena2016past}, object detection and pose retrieval \cite{du2021vision}, autonomous exploration \cite{rouvcek2019darpa, kulkarni2021autonomous}... 
 An intermediate case is the one of visual/LIDAR odometry in which a local representation of the environment is built to provide a 
 precise odometry source \cite{scaramuzza2011visual} and is later discarded. 
-e{gan2020bayesian}
 
 
 The particularity of legged platforms is that they interact through intermittent contacts to move, usually using predefined cyclic gaits. While some controllers are 
@@ -502,7 +501,7 @@ mainly requires instantaneous base velocity and orientation with regard to the g
 navigation, it becomes critical to have some kind of precise odometry or localization strategy, or, even better, being able to run onboard Simultaneous Localization And Mapping. 
 \cite{davison2007monoslam} is the first example of a monocular vision-based SLAM system implemented for the navigation of a humanoid robot \HRP{2}. The gyro of the robot
 is also incorporated in the filter at the camera rate to minimize the growth of uncertainty before loop closing. \cite{stasse2006real} expends on this concept by also fusing
-kinematic velocity and altitude (known from the planning). Other systems based on sparse features were later developd \cite{ahn2012board, oriolo2012vision, oriolo2016humanoid, kwak20093d}. 
+kinematic velocity and altitude (known from the planning). Other systems based on sparse features were later developed \cite{ahn2012board, oriolo2012vision, oriolo2016humanoid, kwak20093d}. 
 Visual Teach and Repeat \cite{furgale2010visual} has also been recently brought to quadruped 
 robots \cite{mattamala2021learning, mattamala2022efficient}, which opens up practical long-term operations in industrial environments. Some works also propose to use mature visual odometry libraries
 as black-boxes sources of odometry by integrating them as relative pose measurements \cite{hartley2018legged,hartley2018hybrid}. While it may lead to sub-optimal estimators, 
@@ -520,10 +519,10 @@ LIDAR localization very noisy.
 The algorithm is validated on a NAO humanoid robot and used a learned leg odometry motion model, pitch and roll information from the IMU as well as an edge-based vision measurement model.
 The MIT team \cite{fallon2014drift} uses the same method but replaced the motion model with an inertial kinematics proprioceptive filter. Other occupancy mapping algorithms 
 such as Bayesian generalized kernel OctoMap (BGKOctoMap) \cite{doherty2017bayesian} try to infer unobserved parts of the of map by considering correlations between grid cells. This inference model
-as the interesting property to smoothly transition to sanely defined prior (like a uniform probability distribution) while keeping similar computation time as the Octomap.
+has the interesting property to smoothly transition to sanely defined prior (like a uniform probability distribution) while keeping similar computation time as the Octomap.
 BGKOctoMap is generalized to jointly infer the probabilistic occupancy grid and semantic information using stereo camera and LIDAR information \cite{gan2020bayesian}. 
 Potential for legged robot navigation was demonstrated with a dataset taken outdoor on a Cassie robot.  
-Semantic information prior come from a Convolutional neural network fine-tuned to manually labeled pictures taken in the same kind of environment.
+Semantic information prior come from a Convolutional neural network fine-tuned to manually labeled pictures ($\approx$ 1000) of similar scenes.
 
 
 LIDAR can also be used as an odometry source by matching point clouds taken at successive timestamps with ICP. However, this procedure is time-consuming 
@@ -552,7 +551,7 @@ is decoupled from the sensor updates and can be computed intermittently at the d
 \cite{huang2021efficient} able to navigate outdoor uneven terrain with a biped using LIDAR data. Taking another route, Kim \cite{kim2020vision} proposed a much 
 simpler algorithm, relying on integrated Realsense sensors, in order to alleviate on-board computations. A T265 integrated SLAM algorithm provides localization and 
 a D435 provides noisy depth information. A 2.5D world-centered height map is produced from scratch at each point-cloud acquisition using opening morphological 
-transformation filtering. Classification of the terrain, based on local gradient thresholds, is used implement dynamical manoeuvers in a cluttered environment
+transformation filtering. Classification of the terrain, based on local gradient thresholds, is used to implement dynamical manoeuvers in a cluttered environment
 with an MIT Mini-Cheetah.
 
 An extension of the elevation grid map is to represent occupied 3D space as an 3D occupancy voxel map, which can be efficiently stored using an Octomap.
@@ -565,7 +564,8 @@ tightly couple motion/step planning and terrain reconstruction.
 
 \cite{fallon2015continuous} used the Kintinuous framework \cite{whelan2012kintinuous} to obtain a local Truncated Signed Distance Function based dense representation. This map was
 shown to be of equivalent quality to that of a LIDAR and used as an input to a feasible contact surface segmentation algorithm selecting planar convex regions of uneven cinder blocks. 
-In order to handle local loopy trajectories better than Kintinuous, Elastic Fusion \cite{whelan2016elasticfusion}, which is a surfel-based dense depth vision system, 
+In order to handle local loopy trajectories better than Kintinuous, Elastic Fusion \cite{whelan2016elasticfusion}, which is a dense depth_based vision system using surfels\footnote{"
+A surfel is a zero-dimensional n-tuple with shape and shade attributes that locally approximate an object surfac" \cite{pfister2000surfels}}, 
 was shown to be usable on humanoid platforms \cite{scona2017direct}. The system augmented the Elastic Fusion algorithm by adding 
 proprioceptive odometry term to the solved nonlinear least-squares (NLLS) problem, using a heuristic to increase the weight of proprioception in visually degenerate situations. The 
 dense reconstruction is accurate up to 2cm, which is enough for motion planning. However, in this case, the map was only used for localization.
@@ -589,10 +589,10 @@ such as drone navigation: \textit{factor graph optimization} (FGO), also known a
 
 While the Bayes filter summarizes  the accumulated information about the current estimated state and its cross-correlations as a single probabilistic distribution, 
 Factor Graph optimization keeps a trajectory of arbitrarily spaced past states that are regularly re-optimized in the least-squares sense, by finding the so-called 
-Maximum A Posteriori over the trajectory joint distribution. The terms smoothing and mapping or sliding window estimator are also used when a limited window of past states are kept 
+Maximum A Posteriori over the trajectory joint distribution. The terms smoothing and mapping or sliding window estimator are also used when a limited window of past states is kept 
 in the estimator, the old ones being marginalized. The earliest example \cite{lu1997globally} proposed to obtain globally consistent 2D LIDAR range 
 scan alignments by minimizing a cost function over a trajectory of 2D poses constrained by LIDAR scans and wheel odometry.
- Many \adhoc efficient solvers such as \cite{grisetti2011g2o, kaess2012isam2, ila2017slam++, ceres-solver} have been developed 
+ Many \adhoc\ efficient solvers such as \cite{grisetti2011g2o, kaess2012isam2, ila2017slam++, ceres-solver} have been developed 
 over the years to leverage the specific sparsity of the SLAM problem.
 
 While the first successful online monocular visual SLAM algorithm was implemented using an EKF \cite{davison2007monoslam}, a breakthrough happened with the 
@@ -627,7 +627,7 @@ A very popular modality is to inject IMU measurements into the SLAM system.
 \subsection{Visual-Inertial odometry}
 To robustify visual SLAM/odometry systems in cases of adverse situations, IMUs provide complementary high rate odometry information that can 
 be debiased by tightly coupling mapping and odometry. Another important feature of visual-inertial estimation is that the orientation absolute 
-pitch an rolls can be observed thanks to the gravity (absolute yaw is unobservable, unless a compass is used). Estimation of the pose and velocity
+pitch and roll can be observed thanks to the gravity (absolute yaw is unobservable, unless a compass is used). Estimation of the pose and velocity
 of the system can be estimated at the IMU frequency (which is usually an order of magnitude higher than the camera's).
 
 A careful preintegration \cite{lupton-09,forster2017-TRO} of these high 
@@ -645,7 +645,7 @@ and tests were conducted on a Cassie bipedal robot. In \cite{hartley2018hybrid},
 modified the kinematic factor formulation, taking into account uncertainty induced by contact switches. Dynamic Robot Systems Group at Oxford proposed in 
 \cite{wisth2019robust} to replace a modeled kinematic factor by integrating odometry from the onboard proprioceptive filter of the ANYmal robot. Stereo vision was 
 also used as a source of odometry by using a sparse 3D landmark map. In a following work \cite{wisth2020preintegrated}, the proprioceptive odometry factor was adapted
-to include a slowly variable bias on odometry measurements by adapting the preintegration theory from \cite{forster2017-TRO}. They again extended this work
+to include a slowly variable bias on odometry measurements by adapting the preintegration theory from \cite{forster2017-TRO}. The same authors extended this work
 by including LIDAR measurements in \cite{wisth2021vilens}.
 \cite{kim2021legged} also implemented an inertial kinematic proprioceptive smoothing estimator on the MIT Mini Cheetah (see \figRef{fig:robots}), mitigating slipping of the feet by removing kinematic 
 measurements whose residual errors exceed a certain threshold.    
