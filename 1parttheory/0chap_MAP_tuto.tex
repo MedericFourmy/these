@@ -458,9 +458,10 @@ Examples of manifold Jacobian derivations in the context of Lie groups can be fo
 
 
 \subsection{Lie groups for robotic state estimation}
-Riemmanian geometry is enough to deal with optimization problems with variables living on smooth manifold. However, many of these state variables, in the context of robotics, also exhibit a group structure, which give them extra interesting properties.
+Riemmanian geometry is enough to deal with optimization problems with variables living on smooth manifold. However, many of these state variables, 
+in the context of robotics, also exhibit a group structure, which give them extra interesting properties.
 
-A \textit{group} ($\cG$, $\circ$) is a couple comprised of a set $\cG$ and a composition law $\circ$ that satisfy the group axioms:
+A \textit{group} is an ordered pair ($\cG$, $\circ$) comprised of a set $\cG$ and a composition law $\circ$ that together satisfy the group axioms:
 
 \begin{align}
     \text{Closure under}~\circ~:&~\bfx \circ \bfy \\ 
@@ -469,6 +470,7 @@ A \textit{group} ($\cG$, $\circ$) is a couple comprised of a set $\cG$ and a com
     \text{Inverse existence}~\bfx^{-1}~:&~\bfx^{-1} \circ \bfx = \bfx \circ \bfx^{-1} = \cE
 \end{align}
 $\forall~\bfx,\bfy,\bfz \in \cG$.
+
 Simply stated, a \text{Lie group} is a group whose elements live in a smooth manifold $\cM$.
 
 A vector can represent a displacement from one point to another along a straight line in the euclidean space, or directly a point (displacement from the origin).
