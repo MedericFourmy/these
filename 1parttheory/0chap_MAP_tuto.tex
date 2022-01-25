@@ -319,7 +319,7 @@ We will denote by $p$ the dimension of the space in which the manifold is embedd
 Note that by definition $n \leq p$.  
 
 An element of tangent space at $\bfx$, noted $\bftau\hhat \in \cT_{\bfx}\cM$ can naturally be decomposed as a linear combination 
-of the tangent space basis vectors $E_i$. We can therefore define an element by its coefficient, which is the vector $\bftau \in \Reals^n$, called the cartesian tangent vector.
+of the tangent space basis vectors $E_i$. We can therefore define an element by its coefficient, which is the vector $\bftau \in \Reals^n$, called the Cartesian tangent vector.
 The \textit{hat} and \textit{vee} are mutually inverse linear maps permit to pass back and forth from $\cT_{\bfx}\cM$ to $\Reals^m$, which are therefore isomorphic:
 %
 \begin{align}
@@ -398,14 +398,14 @@ obtained by solving
 \end{equation}
 
 
-Concerning residual formulation in \eqRef{eq:error_expectation}, if the measurement $\bfz_i$ is itself an element of a manifold, then the cartesian minus needs to be replaced:
+Concerning residual formulation in \eqRef{eq:error_expectation}, if the measurement $\bfz_i$ is itself an element of a manifold, then the Cartesian minus needs to be replaced:
 
 \begin{equation}
     \bfe_i(\cX_{S_i}) = \bfh(\cX_{S_i}) \ominus \bfz_i,
 \end{equation}
 
 Note that many state variables actually belong to vector spaces (such as the robot position), which are trivial manifolds. For those, the $\oplus$ and $\ominus$ operators
-simply reduce to the addition and subtraction of cartesian vectors.  
+simply reduce to the addition and subtraction of Cartesian vectors.  
 
 
 
@@ -413,14 +413,14 @@ simply reduce to the addition and subtraction of cartesian vectors.
 \label{sec:uncertainty_on_manifolds}
 Our state variables are random variables approximated by multivariate Gaussian distribution, that can be summarized by their mean vector and covariance matrix.
 These concepts need to be slightly modified to account for the manifold nature of some of these. We will see how to define Gaussian distribution on manifolds.
-Let us $\bftau \in \Reals^n$ be a small perturbation around a point $\bar{\bfx} \in \cM$, so that we can write:
+Let  $\bftau \in \Reals^n$ be a small perturbation around a point $\bar{\bfx} \in \cM$, so that we can write:
 %
 \begin{equation}
     \bfx = \bar{\bfx} \oplus \bftau, \quad \bftau = \bfx \ominus \bar{\bfx}
 \end{equation}
 %
 where $\bar{\bfx}$ designates the mean value of the distribution on $\bfx$. 
-We define a zero mean "cartesian" Gaussian distribution on the tangent space, the covariance being defined as:
+We define a zero mean "Cartesian" Gaussian distribution on the tangent space, the covariance being defined as:
 
 \begin{equation}
     \Cov_{\bfx} \triangleq \mathbb{E}[\bftau\bftau^{\top}] = \mathbb{E}[(\bfx \ominus \bar{\bfx})(\bfx \ominus \bar{\bfx})^{\top}] \in \Reals^{n \times n}
@@ -436,7 +436,7 @@ If we naively define the covariance matrix of a quaternion as \mbox{$\mathbb{E}[
 this covariance matrix is ill-defined. The covariance must be more properly defined as a $3 \times 3$ real matrix on the angle axis space.
 
 In general, covariances can be propagated through nonlinear function of random variables using the chain rule. For instance, if $\bfx \in \Reals^{n_x}$ and 
-$\bfy \in \Reals^{n_y}$ are cartesian multivariate Gaussian distribution related by the nonlinear function $f$, propagating the $\bfx$ covariance 
+$\bfy \in \Reals^{n_y}$ are Cartesian multivariate Gaussian distribution related by the nonlinear function $f$, propagating the $\bfx$ covariance 
 $\Cov_{\bfx} \in \Reals^{n_x \times n_x}$ through f writes:
 
 \begin{equation}
@@ -483,7 +483,7 @@ good intuitions regarding the general behavior of Lie groups.
 The group of 3D rotations is defined as the Special Orthogonal group in 3D: 
 %
 \begin{equation}
-    \SO(3) = \left\{\Rot{}{} \in \text{GL}(n,\Reals) | \Rot{}{}\Rot{}{}^{\top}=\Rot{}{}^{\top}\Rot{}{}=I,~det(\Rot{}{})=1\right\}
+    \SO(3) = \left\{\Rot{}{} \in \text{GL}(n,\Reals) | \Rot{}{}\Rot{}{}^{\top}=\Rot{}{}^{\top}\Rot{}{}=\bfI,~det(\Rot{}{})=1\right\}
 \end{equation}
 %
 under matrix multiplication.
@@ -533,7 +533,7 @@ logarithm on the relative rotation as described here:
 
 \begin{align}
     \Rot{}{2} &= \Rot{}{1}\oplus \prescript{1}{}{\bftheta} = \Rot{}{1} \Exp(\prescript{1}{}{\bftheta})  \\ 
-    \prescript{1}{}{\bftheta} &= \Rot{}{2}\ominus \Rot{}{2} = \Log(\Rot{}{1}^{\top}\Rot{}{2}) 
+    \prescript{1}{}{\bftheta} &= \Rot{}{2}\ominus \Rot{}{1} = \Log(\Rot{}{1}^{\top}\Rot{}{2}) 
 \end{align}
 
 \begin{figure}[h]
@@ -671,7 +671,7 @@ state variables that the residual depends on are non-zero. For instance, the mat
 
 The approximate Hessian matrix $\bfH \in \Reals^{N \times N}$ displays a similarly remarkable sparsity that makes the resolution of the linear system
 at each step very efficient. Algorithms such as the Schur complement, Cholesky factorization, and QR factorization were applied by different authors to the 
-problem of SLAM and estimation. Descriptions of these factorizations can be found in \cite{sola2017course, dellaert2017factor}.
+problem of SLAM and estimation. Descriptions of these linear solvers can be found in \cite{sola2017course, dellaert2017factor}.
 
 
 \subsection{The algorithm (revisited)}
@@ -683,7 +683,7 @@ We highlight the parts that differ from the regular Gauss-Newton algorithm with 
     $\cX$ lives on a composite manifold. Its covariance is defined on the local tangent space of this manifold (see \secRef{sec:uncertainty_on_manifolds}).
     \item Approximate the NLLS cost function around the current estimate as a quadratic function \\
     The linear approximation is done using the notation of Jacobian on manifolds described in \secRef{sec:uncertainty_on_manifolds}.
-    $\Delta \bfx$ is defined as the cartesian representation of a composite tangent space element.  
+    $\Delta \bfx$ is defined as the Cartesian representation of a composite tangent space element.  
     \item Find the optimal step $\Delta \bfx^*$ by solving a linear set of equations \eqRef{eq:linear_syst_GN} \\
     This part does not change. As mentioned in \secRef{sec:LM}, alternatives to vanilla Gauss-Newton such as the Levenberg-Marquardt algorithm
     may alter the linear system to solved for increased performance.
