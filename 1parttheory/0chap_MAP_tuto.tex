@@ -575,7 +575,7 @@ to be rotated from one frame to another. Those operations are illustrated in \fi
 %
 %
 %
-\section{Factor graphs: a visual language for robotics estimation}
+\section{Factor Graphs: a visual language for robotics estimation}
 \label{sec:factor_graphs}
 
 A crucial aspect of solving the MAP problem is the factorizibility of the likelihood function. This represents the fact that the problem
@@ -604,7 +604,7 @@ transformations between \keyframes, and an exteroceptive sensor that provides re
         \caption{\label{fig:toy_factor}}
     \end{subfigure}%
     \caption{(\subref{fig:toy_problem}): toy estimation problem, a differential drive robot equipped with an odometer moves in 
-    an scene with landmarks represented by stars. (\subref{fig:toy_factor}): factor graph representation the problem, the estimated variables are represented by circles 
+    an scene with landmarks represented by stars. (\subref{fig:toy_factor}): Factor Graph representation the problem, the estimated variables are represented by circles 
     (blue for robot \keyframes, green for landmarks) and factors by squares (orange for odometry, black for exteroceptive sensor, red for the prior).}
 \end{figure}
 
@@ -695,12 +695,19 @@ We highlight the parts that differ from the regular Gauss-Newton algorithm with 
 When the estimation algorithm has converged we can also obtain the covariance on the estimates (details and illustration are available in the 
 appendix \chpRef{chp:MAP_covariance}). This is however a costly computation that is usually reserved for offline investigation of the estimation quality. 
 
+\bigskip
+\bigskip
+\bigskip
+\bigskip
+\bigskip
+
+
 We have described a general algorithm to solve NLLS problems with variables belonging to manifolds and weighted by covariance matrices. This problem
 comes from framing the state estimation as a MAP problem and using multiple assumptions on the nature of the measurement models. These measurement models
-are described as residuals weighted by their respective covariance matrices, representing the confidence we have on the sensor measurements. 
+are described as residuals weighted by their respective covariance matrices, representing the confidence we have on the sensor measurements. Factor Graphs can represent visually those problems and their connectivity is closely related to the sparsity of the linear problems appearing in the optimization algorithm.
 
 Even though finding new solvers extending these ideas to new sets of problems, such as multi robot or multi hypothesis problems, is still an active research, 
-formulating new, efficient, and generalizable measurement models is equally important. The next chapters each concentrate on a different sensor modality:
+formulating new, efficient, and generalizable measurement models is equally important. The next chapters each concentrate on a range of sensor modalities useful for legged robots:
 object pose retrieval from vision algorithms, a generalized preintegration theory for high rate sensors, legged robot kinematics, and the application 
 of preintegration to legged robots force measurements.
 
