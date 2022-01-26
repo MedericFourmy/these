@@ -81,7 +81,7 @@ It is tempting to propagate encoder noise $\noise_{\qa}$ trough FK using the kin
     \posim{B}{L} = FK(\qa + \noise_{\qa}) \approx FK(\qa) + \bfJ_L\noise_{\qa}, \quad \quad \Cov_{p} = \bfJ_L \Cov_{\qa} \bfJ_L
 \end{equation}
 
-However, the resolution of Solo encoder is actually very high: 0.002 degrees which would account for a mere 10 \textit{micrometers} difference.
+However, the resolution of Solo encoder is actually very high: 0.002 degrees, which would account for a mere 10 \textit{micrometers} difference.
 Therefore, most of the measurement errors come from the other mentioned effects. Unfortunately, those are much harder to model, and all act at the same time
 in an unpredictable fashion. Thus, we opt for a simple additive noise on the foot position in the world:
 
