@@ -1,10 +1,12 @@
-\chapter{Preintegrated sensors}
+\chapter{High-rate sensors data pre-integration Preintegrated}
 \label{chp:preintegration}
 \minitoc
+\bigskip
+
 
 Sensor modalities available on robotic platforms display a great variety in the rate at which measurements are acquired. For instance, 
 a camera may record images at 33Hz while an IMU may be updated at 1kHz. In the context of Factor Graph estimation, this creates a challenge since residuals
-are defined between \keyframes\ selected at a relatively low frequency. Ones needs to integrate measurements from these high-rate sensors between \keyframes\,
+are defined between \keyframes\ selected at a relatively low frequency. One needs to integrate measurements from these high-rate sensors between \keyframes\,
 which is not trivial in general.
 
 In this chapter, we first describe the example of the integration of IMU measurements which motivates the development of the pre-integration theory \cite{lupton-09,forster2017-TRO}.
@@ -19,20 +21,20 @@ proposed in \cite{fourmy2019absolute}. We conclude the chapter with a discussion
 In this section we will introduce the IMU measurement model and explain why a naive integration of these measurements in the world frame does not immediately
 lead to a viable factor. We will then introduce the observations that lead to the development of the so-called IMU pre-integration algorithm by Lupton \cite{lupton-09}.
 
-Let's consider the estimation of a robot base state comprised of its pose and velocity in the world frame. 
-
+Let us consider the estimation of a robot base state comprised of its pose and velocity in the world frame,
+%
 \begin{equation}
     \bfx = [\posi{W}{WB}, \vel{W}{WB}, \Rot{W}{B}]
     \triangleq 
     [\bfp, \bfv, \Rot{}{}].
 \end{equation}
 
-We make several hypothesis. We neglect effects due the rotation of the earth by assuming 
+We make several hypothesis. We neglect effects due the rotation of the Earth by assuming 
 that our world frame (which is fixed \wrt the ground) is an inertial frame. This is a common simplification in robotics scenarios \cite{forster2017-TRO}. 
 Without loss of generality, we assume that the IMU frame is identical to the base frame in the following developments.
 
-Among available sensors, the IMU measurements are known to be noisy, biased, and affected by the gravity.
-
+Among available sensors, the IMU measurements are known to be noisy, biased, and affected by the gravity,
+%
 \begin{equation}
     \begin{split}
     \angvelm{}{} &= \angvel{B}{WB} + \bias_{\angvel{}{}} + \noise_{\angvel{}{}} 
@@ -42,23 +44,21 @@ Among available sensors, the IMU measurements are known to be noisy, biased, and
     \label{eq:imu_meas_model}
 \end{equation}
     
-Other sensors can help estimate IMU biases $\bias \triangleq [\bias_{\acc{}{}}, \bias_{\angvel{}{}}]$ so we include them in the estimator state.
+Other sensors can help estimate IMU biases $\bias \triangleq [\bias_{\acc{}{}}, \bias_{\angvel{}{}}]$ that are thus included in the estimator state.
 
 
 Once the IMU has been started, these biases may change over time, more or less slowly depending on the quality of the IMU. This change is can be modeled 
 as a random walk, which is close to the observed behavior for reasonably short periods of time \cite{hussen2015low}.
 A dynamical model based on strapdown integration of IMU measurements can then be derived.
 
-\begin{equation}
-    \begin{split}
-    \dot{\posi{}{}} = \vel{}{}  ~~~~~~~
-    \dot{\vel{}{}} = \acc{W}{WB} ~~~~~~~
-    \dot{\Rot{}{}} = \Rot{}{} [\angvel{B}{WB}]_{\times} ~~~~~~~
-    \dot{\bias}_{\bfa} = \noise_{\bfa}  ~~~~~~~
-    \dot{\bias}_{\angvel{}{}} = \noise_{\angvel{}{}} ~~~~~~~
-    \end{split}
+\begin{align}
+    &\dot{\posi{}{}} = \vel{}{} \\
+    &\dot{\vel{}{}} = \acc{W}{WB} \\
+    &\dot{\Rot{}{}} = \Rot{}{} [\angvel{B}{WB}]_{\times} \\
+    &\dot{\bias}_{\bfa} = \noise_{\bfa} \\
+    &\dot{\bias}_{\angvel{}{}} = \noise_{\angvel{}{}} \\
     \label{eq:imu_dyn_conti}
-\end{equation}
+\end{align}
 
 Introducing the measurement equations \eqRef{eq:imu_meas_model} in continuous dynamics \eqRef{eq:imu_dyn_conti} and using a zero order hold
 explicit Euler integration scheme during $\dt$ results in the discrete dynamics:
@@ -75,7 +75,7 @@ explicit Euler integration scheme during $\dt$ results in the discrete dynamics:
     \label{eq:imu_dyn_disc}
 \end{equation}
     
-Now, these equations relate variables variables between two state variables sampled at IMU frequency. To include these measurements in our smoothing estimator,
+Now, these equations relate variables  between two state variables sampled at IMU frequency. To include these measurements in our smoothing estimator,
 one solution would be to introduce new variables at the rate of the IMU. However, the size of the problem would grow very quickly. A better option
 is to integrate IMU measurements during extended periods of time. If we simply integrate the sequence of IMU measurements $\cZ_{im}$ between timestamps 
 $t_i$ and $t_m$ by recursively applying \eqRef{eq:imu_dyn_disc}, we obtain:
@@ -92,7 +92,7 @@ $t_i$ and $t_m$ by recursively applying \eqRef{eq:imu_dyn_disc}, we obtain:
 
 Assuming IMU biases stay constant during $\Dt^{im}$
 \begin{equation*}
-    \bias^k \approx \bias@^i  ~~~ \forall k \in [i..m],
+    \bias^k \approx \bias^i  ~~~ \forall k \in [i..m],
 \end{equation*}
 % \begin{equation*}
 %     \bias_i \triangleq [\bias_{\acc{}{}i}, \bias_{\angvel{}{}i}] \approx [\bias_{\acc{}{}k}, \bias_{\angvel{}{}k}]  ~~~ \forall k \in [i..j]
@@ -131,7 +131,7 @@ Both quantities are recomputed at each evaluation of the residual by the nonline
 However, $\bfDelta_{im}(\bias^i, \bfx^i)$ requires to reintegrate the whole buffer of measurements, due to the dependency on velocity, 
 orientation and biases at timestamp $i$. This is highly inefficient. 
 
-Nevertheless, the terms of equation \eqRef{eq:IMUIntij} can be rearranged (proof in the annex \secRef{sec:forster_proof}) to give:
+Fortunately, the terms of equation \eqRef{eq:IMUIntij} can be rearranged (proof in the annex \secRef{sec:forster_proof}) to give:
 %
 % WITH NOISE
 % \begin{equation}
@@ -158,9 +158,11 @@ Nevertheless, the terms of equation \eqRef{eq:IMUIntij} can be rearranged (proof
 \end{equation}
 %
 % where we define $\DR^{ik} \triangleq \Rot{}{i,T} \Rot{}{}^k$.  % NOT really needed to precise and would require \Dv^{ik} which is longer to write 
-We then overwrites our delta notations as $\hat\bfDelta_{im}(\bfx^i, \bfx^m) = \bfDelta_{im}(\bias^i)$,
-emphasizing the fact that the right hand side term does not depend on $\bfx_i$ anymore. However the bias terms in \eqRef{eq:IMUPreintij} still enforce the repeated 
-reintegration of the measurements buffer. Instead, the right hand side can be integrated once, giving $\ol\bfDelta_{im}$ using biases estimates at the time where we 
+We then overwrite our delta notations as $\hat\bfDelta_{im}(\bfx^i, \bfx^m) = \bfDelta_{im}(\bias^i)$,
+emphasizing the fact that the right hand side term does not depend on $\bfx_i$ anymore. 
+
+However, the bias terms in \eqRef{eq:IMUPreintij} still enforce the repeated 
+reintegration of the measurements buffer. Instead, the right hand side can be integrated once, giving $\ol\bfDelta_{im}$, using biases estimates at the time where we 
 begin to integrate them, which we note $\biasbar^i$. Then, we can approximate changes due to the newly estimated bias $\bias_i$ using a first order approximation:
 % $\bfDelta_{im}(\bias^i) = \bar{\bfDelta}_{\cZ_{im}} \oplus (\bfJ^{\bfDelta_{im}}_{\bias_i} (\bias^i - \biasbar^i))$.
 
