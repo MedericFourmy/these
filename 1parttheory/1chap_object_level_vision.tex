@@ -2,13 +2,25 @@
 \label{chp:object_level}
 \minitoc
 
-In this chapter, we develop two measurements models that have in common to relate a camera pose to a known object in the environment through a rigid transformation. The first one 
-is derived from \apriltag\ fiducial markers \cite{wang2016iros} that are widely used in the robotics community. The second uses a deep learning-based method
-to obtain relative poses from objects whose CAD models are known \cite{labbe2020cosypose}. We develop covariance models for both
-measurement types to be able to use them in the context of multi-sensor fusion.
+The field of computer vision comprises a wide range of methods to extract information about the real world from images taken by digital cameras. This information can be used to infer the structure of the environment (mapping or object tracking), about the movement of the system to which is attached the camera (localization), or both at the same time (Simultaneous Localization And Mapping, \aka\ SLAM). In the context of robotics, the images are obtained one after an other at a constant rate. This leads to a somewhat continuous evolution of the image appearance, which can be leveraged by in various ways algorithms (feature tracking, motion models etc.). We are here interested in solving SLAM, which is the most general application of this methods and is used when a robot needs to localize itself in an a priori unknown environment. A vast literature of dedicated algorithms have been developed in this regard, with approaches ranging from geometrical constraints using sparse feature detection (CITE ORBSLAM and 2 others) or photometric consistencies [DTAM, LSD, DSO], certain methods combining ideas from both approaches [SVO2].
 
-We assume that the camera has been calibrated and that the images are corrected against distortions. The camera reference frame $C$ has its origin at 
-the camera optical center and follows the convention X-Y-Z = Righ-Down-Front, Front being the optical axis direction, looking through the lens.
+These algorithms aim at being generalizable to any kind of environments and have their respective strengths and weaknesses [CITE Review]. Although open-source code is available for most, these pieces of software may be difficult to integrate in other frameworks. Besides, though providing quite accurate localization, maps obtained from these methods are rarely immediately useful, lacking semantic information about the scene usable by a legged robot. 
+
+In this thesis, rather than investing time and energies in new vision processing algorithms, we chose to focus our attention on legged-robot state estimation. In particular, we are interested in localizing the robot with respect to objects of interest such as stairs, which geometrical model are known.
+%
+%On the other hands, 
+Approaches based on object level measurement can provide an affordable alternative, and are readily available. These systems assume the presence of known objects in the scene which can be detected in the images. Dedicated algorithms can then infer the object pose relative to the camera, which can be used to build \textit{object-level SLAM} systems. 
+
+In this chapter, we present two measurements models based on available software, that permit to implement this paradigm. The first one 
+uses unique \apriltag\ fiducial markers \cite{wang2016iros} that are disposed sparsely in the scene. The second uses a deep learning-based method \cite{labbe2020cosypose}
+to obtain relative poses from object of interest, such as stairs. Instead of artificially augmenting the environment with fiducial markers, we assume that objects of interest exist in the scene, whose CAD models are known. 
+Both systems lack ways to estimate the uncertainty of their output and we therefore propose methods for the computation of the measurements covariances.
+
+In both models, we assume the we have a calibrated camera, and that the images have been corrected for distortions. The camera reference frame $C$ has its origin at 
+the camera optical center and follows the convention X-Y-Z = Righ-Down-Front, Front being the optical axis direction, looking through the lens. This chapter starts by introducing the measurement model based on a general 6D factor used by both systems. Methods to recover the covariance of both algorithms are then given. For applications fusing these models with IMU data, please refer to \ref{chp:absolute_vi}
+and \ref{chp:cosyslam}.
+
+
 
 \section{Relative 6D pose factor}
 Let's assume that an algorithm provides us $\Tm{C}{O} \in \SE(3)$, a measurement of the pose of an element 
@@ -26,9 +38,15 @@ the robot pose, the camera extrinsics, and the object pose:
 \end{align}
 %
 where here $\Log_{\SE(3)}$ denotes the log map on $\SE(3)$.
+
 We also assume that we have access to the covariance of this measurement 
-\mbox{$\Cov_V \in \Reals^{6 \times 6}$}. We will now describe two applications of this factor, one using \apriltag\ fiducial markers and one using 
-a deep-learning object pose estimation algorithm.
+\mbox{$\Cov_V \in \Reals^{6 \times 6}$}. 
+
+This factor is general enough to be used in two applications that we successively describe, based on \apriltag\ fiducial markers and CosyPose. For both, we explain the
+algorithm behind the pose measurements and propose covariances models
+
+% We will now describe two applications of this factor, one using \apriltag\ fiducial markers and one using 
+% a deep-learning object pose estimation algorithm.
 
 \begin{figure}
     \centering
@@ -71,7 +89,7 @@ as shown in Eq. \eqRef{eq:cov_propagation}.
 Instead of directly obtaining Jacobians from the PnP algorithms, we found that a natural way to proceed is to take the opposite 
 direction as follows. It should somehow be possible, knowing the marker size and the relative pose measurement, and assuming pixel noise, to
 recover $\Cov_{\T{}{}}$. A simple model of pixel noise is to assume isotropic Gaussian noise on the pixels. If we stack four pixel (the four tag corners) 
-$\bfx_i = [u_i, v_i] \in \Reals^2$ and we stack then in the column vector $\bfx = [\bfx_1~\bfx_2~\bfx_3~\bfx_4]^{\top}$, we have therefore that
+$\bfx_i = [u_i, v_i] \in \Reals^2$ in the column vector $\bfx = [\bfx_1~\bfx_2~\bfx_3~\bfx_4]^{\top}$, we have therefore that
 $\bfx$ is corrupted by a Gaussian noise $\Cov_{\bfx} = \sigma_{x}^2 \bfI_8$, where $\sigma_{x}$ usually takes values of 1 or 2 pixels.
 The PnP algorithm provides us with a function $\text{pnp}$ defined as:
 
@@ -188,9 +206,9 @@ covariance matrix $\Cov \in \Reals^{3 \times 3}$, the statistics:
     \label{eq:chi2}
 \end{equation}
 %
-follows a chi-square distribution with 3 degrees of freedom. Since \eqRef{eq:chi2} is the equation of an ellipse centered at $\mu$, we can then plot confidence volumes as ellipsoids by replacing the right-hand side of  
+follows a chi-square distribution with 3 degrees of freedom. Since \eqRef{eq:chi2} is the equation of an ellipse centered at $\mu$ and shape governed by $\Cov$, we can then plot confidence volumes as ellipsoids by replacing the right-hand side of  
 \eqRef{eq:chi2} by the critical value of the chi-square distribution for the desired confidence interval (we chose $\alpha=99\%$). We simulate a 
-realistic scenario using calibration data from a laboratory Realsense camera, 15cm tags and $\sigma_x = 2~[pixels]$. An example of a simulated scene is given
+realistic scenario using calibration data from a laboratory Realsense camera, 15cm tags and $\sigma_x = 2~pixels$. An example of a simulated scene is given
 in \figRef{fig:apriltag_cov}. 
 
 \begin{figure}[h]
@@ -207,7 +225,7 @@ in \figRef{fig:apriltag_cov}.
         \caption{Relative orientations covariances \label{fig:apriltag_cov_orientation}}
     \end{subfigure}%
     \caption{Representation of the analytic covariance model. The single frame at the bottom represents the pose of the virtual camera, others are identical 
-    \apriltags placed in front of the camera at different distances but identical orientations, covariances are represented in orange, centered at the corresponding taf position.
+    \apriltags placed in front of the camera at different distances but identical orientations, covariances are represented in orange, centered at the corresponding tag position.
     (\subref{fig:apriltag_cov_posi}) shows that the main positional uncertainty is along the camera-tag axis, which corresponds to the distance information. 
     (\subref{fig:apriltag_cov_orientation}) shows that in contrary the rotation along the camera-tag axis is by far the most precise.}
     \label{fig:apriltag_cov}
@@ -275,7 +293,7 @@ This approach mixes a new state-of-the-art single-view pose estimation algorithm
 It achieved first in most of the 2020 BOP challenge categories \cite{hodan2020bop}. This system obtains precision in the order of centimeters 
 on real objects whose 3D model is known. Its performances make it a good candidate as a direct 6D pose sensor to perform a multi-sensor fusion. 
 In the context of legged robots, this is very useful to localize the robot relative to objects it needs to interact with, such as objects 
-to manipulate or stairs to climb. While CosyPose is not yet able to generalize unseen to classes of objects, rapid progress is expected in 
+to manipulate or stairs to climb. While CosyPose is not yet able to generalize to unseen classes of objects, rapid progress is expected in 
 this direction.
 
 \subsection{CosyPose}
