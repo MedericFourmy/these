@@ -333,12 +333,12 @@ where $\bfe_i$ are basis vectors of $\Reals^n$.
 Vector spaces operations such as the addition of a vector to a point or subtraction of two vectors do not apply in Riemannian geometry. For instance, if we
 take a point on a sphere (the 2-sphere embedded in the 3-dimensional Euclidean space for instance) and add to it an arbitrary vector, we do not get in general
 another point on the sphere. These operations have equivalent in the \textit{retraction} and the \textit{lift}, its inverse.
-Retraction pulls an element from the local tangent space back to the manifold as represented in \figRef{fig:manifold}. We denote retraction and its inverse as 
+Retraction pulls an element from the local tangent space back to the manifold as represented in \figRef{fig:manifold}. We denote the retraction and lift operators 
 $\oplus$ and $\ominus$:
 %
 \begin{align}
-            \text{Retraction}~:&\quad\quad \bfx_2 = \bfx_1 \oplus \bftau   \\
-    \text{Lift}~:&\quad\quad \bftau = \bfx_2 \ominus \bfx_1
+    \text{Retraction}~&: \quad\quad \cM \times \Reals^n \rightarrow \cM; \quad\quad (\bfx_1,\bftau) \rightarrow \bfx_2 = \bfx_1 \oplus \bftau   \\
+    \text{Lift}~      &: \quad\quad \cM \times \cM \rightarrow \Reals^n; \quad\quad (\bfx_1,\bfx_2) \rightarrow \bftau = \bfx_2 \ominus \bfx_1
 \end{align}
 
 
