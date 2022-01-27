@@ -1,4 +1,4 @@
-\chapter{High-rate sensors data pre-integration Preintegrated}
+\chapter{High-rate motion data pre-integration}
 \label{chp:preintegration}
 \minitoc
 \bigskip
@@ -75,8 +75,8 @@ explicit Euler integration scheme during $\dt$ results in the discrete dynamics:
     \label{eq:imu_dyn_disc}
 \end{equation}
     
-Now, these equations relate variables  between two state variables sampled at IMU frequency. To include these measurements in our smoothing estimator,
-one solution would be to introduce new variables at the rate of the IMU. However, the size of the problem would grow very quickly. A better option
+Now, these equations relate consecutive states with data sampled at IMU frequency. To include these measurements in our smoothing estimator,
+one solution would be to introduce new states at the rate of the IMU. However, the size of the problem would grow very quickly. A better option
 is to integrate IMU measurements during extended periods of time. If we simply integrate the sequence of IMU measurements $\cZ_{im}$ between timestamps 
 $t_i$ and $t_m$ by recursively applying \eqRef{eq:imu_dyn_disc}, we obtain:
 %
@@ -158,21 +158,23 @@ Fortunately, the terms of equation \eqRef{eq:IMUIntij} can be rearranged (proof 
 \end{equation}
 %
 % where we define $\DR^{ik} \triangleq \Rot{}{i,T} \Rot{}{}^k$.  % NOT really needed to precise and would require \Dv^{ik} which is longer to write 
-We then overwrite our delta notations as $\hat\bfDelta_{im}(\bfx^i, \bfx^m) = \bfDelta_{im}(\bias^i)$,
+where then override our delta notations as $\hat\bfDelta_{im}(\bfx^i, \bfx^m) = \bfDelta_{im}(\bias^i)$,
 emphasizing the fact that the right hand side term does not depend on $\bfx_i$ anymore. 
 
-However, the bias terms in \eqRef{eq:IMUPreintij} still enforce the repeated 
-reintegration of the measurements buffer. Instead, the right hand side can be integrated once, giving $\ol\bfDelta_{im}$, using biases estimates at the time where we 
-begin to integrate them, which we note $\biasbar^i$. Then, we can approximate changes due to the newly estimated bias $\bias_i$ using a first order approximation:
+However, the bias terms in \eqRef{eq:IMUPreintij} still enforce the repeated reintegration of the measurements buffer. 
+A better approach is to define $\ol\bfDelta_{im}$ as the integration right-hand side integration using biases estimates at the time where we 
+begin to integrate, which we note $\biasbar^i$. Then, we can approximate changes due to the newly estimated bias $\bias_i$ using a first order approximation:
 % $\bfDelta_{im}(\bias^i) = \bar{\bfDelta}_{\cZ_{im}} \oplus (\bfJ^{\bfDelta_{im}}_{\bias_i} (\bias^i - \biasbar^i))$.
 
 \begin{align}
-    \bfDelta_{im} = \ol\bfDelta_{im} \oplus \mjac{\bfDelta_{im}}{\bfb_i}(\bfb_i-\ol\bfb_i).
+    \bfDelta_{im}(\bf^i) = \ol\bfDelta_{im} \oplus \mjac{\bfDelta_{im}}{\bfb_i}(\bfb_i-\ol\bfb_i).
     % \label{eq:preint_residual}
 \end{align}
 
 These two observations were first made by Lupton \cite{lupton-09}, whose formulation relied on Euler angles, and were later formalized on \SO(3) using Lie theory
-by Forster \cite{forster2017-TRO}. The above equations are not directly useful for the implementation of pre-integration. We need first to derive a recursive formulation 
+by Forster \cite{forster2017-TRO}. 
+
+The above equations are not directly useful for the implementation of pre-integration. We need first to derive a recursive formulation 
 of the problem. IMU noise propagation also needs to be described in order to obtain covariances associated to the factor error. In the next section, we will take 
 a step back and derive a pre-integration generalized to other proprioceptive sensors.
 
@@ -187,6 +189,8 @@ Pre-integration refers to the integration of high rate proprioceptive sensory da
 As we have seen, if a standard integration is conducted naively to derive a factor measurement between two KFs, 
 then the IMU data needs to be reintegrated at each solver iteration because the integral depends on the states we are to estimate. 
 The IMU pre-integration theory solves this issue and can be generalized to any proprioceptive sensor as shown in \cite{atchuthan-18-thesis,deray-19-selfcalib,fourmy2021contact}. 
+
+
 
 Delta quantities $\bfDelta_{im}$  are defined between KFs $i$ and $m$ so that $\bfx_m=\bfx_i\boxplus\bfDelta_{im}$. A suitable composition $\boxplus$ is chosen so that $\bfDelta_{im}$ 
 does not depend on the initial states $\bfx_i$. 
@@ -236,7 +240,7 @@ The Jacobian of the pre-integrated delta with respect to biases, as well as the 
 \end{align}
 %
 where $\mjac{\bm\delta_k}{\bfb_i}$, $\mjac{\bm\delta_k}{\bfz_k}$, $\mjac{\bfDelta_{ik}}{\bfDelta_{ij}}$ and $\mjac{\bfDelta_{ik}}{\bm\delta_k}$ 
-are the Jacobians $\mjac{y}{x}=\partial y/\partial x$ of (\eqRef{eq:data2delta},\eqRef{eq:deltaPlusDelta}), computed according to Lie theory \cite{sola2018micro}.
+are the Jacobians $\mjac{y}{x}=\partial y/\partial x$ of (\eqRef{eq:data2delta},\eqRef{eq:deltaPlusDelta}), computed according to Lie theory \cite{sola2018micro}, to which we give a brief introduction in \secRef{sec:lie_groups}.
 
 
 \subsection{Residual definition}
@@ -505,3 +509,5 @@ As we saw the preintegration theory began in the context of visual-inertial odom
 possibly including self-calibration \cite{deray-19-selfcalib}. In his thesis, Atchuthan (\cite{atchuthan-18-thesis}, Section 4.3) derived the general form of the preintegration 
 equations as a sensor agnostic form that is integrated in state estimation WOLF \cite{sola2021wolf}. As previously mentioned, other team applied preintegration theory in the 
 context of factor graph legged robot state estimation to derive new leg odometry factors \cite{hartley2018legged, wisth2019robust, wisth2020preintegrated}.
+
+
