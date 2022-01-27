@@ -167,7 +167,7 @@ begin to integrate, which we note $\biasbar^i$. Then, we can approximate changes
 % $\bfDelta_{im}(\bias^i) = \bar{\bfDelta}_{\cZ_{im}} \oplus (\bfJ^{\bfDelta_{im}}_{\bias_i} (\bias^i - \biasbar^i))$.
 
 \begin{align}
-    \bfDelta_{im}(\bf^i) = \ol\bfDelta_{im} \oplus \mjac{\bfDelta_{im}}{\bfb_i}(\bfb_i-\ol\bfb_i).
+    \bfDelta_{im}(\bias^i) = \ol\bfDelta_{im} \oplus \mjac{\bfDelta_{im}}{\bfb_i}(\bfb_i-\ol\bfb_i).
     % \label{eq:preint_residual}
 \end{align}
 
@@ -204,7 +204,7 @@ Then we can pre-integrate $\ol\bfDelta_{im}\te\bfDelta_{im}(\ol\bfb)$ once durin
 \begin{figure}[tb]
     \centering
     \includegraphics[width=0.6\textwidth]{figures/delta_time}
-    \caption{
+    \caption{https://www.overleaf.com/project/61a4d5031b45aa571f0fa82e
     The pre-integrated delta $\bfDelta_{ij}$ contains all motion from the last KF at time $i$, up to time $j$. 
     The current delta $\bfdelta_k$ contains the motion from times $j$ to $k$, computed from the last IMU measurement at time $k$.}
     \label{fig:delta_time}
