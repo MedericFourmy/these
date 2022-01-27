@@ -10,19 +10,19 @@ and the computational processing cost. Likewise, robotics applications vary grea
 platforms and the nature of the robot environment, and, thus, the information needed from their perception system is also variable.
 
 For legged robots, on the one hand, the robot state is needed to maintain its sense of balance and locomote safely, and,
-on the other hand, a representation of the environment for navigation is required. Most systems in the literature propose to solve
+on the other hand, a precise representation of the environment is required for navigation and interaction. Most systems in the literature propose to solve
 these problems independently, using cascades of estimators, that may neglect some of the correlation present in the data. 
 In this thesis, we defend the idea of building a single tightly-coupled estimator capable of estimating all quantities needed by the robot. 
 We show that the framework of Factor Graph estimation, which is nowadays highly popular in the SLAM literature, is appropriate. 
 Yet, it is still under-represented in legged robots systems.
 
-We develop tailored sensor measurement models with attention to the correct mathematical formulation involving Lie theory.
-We propose visual-inertial systems based on object-level detection libraries, which provide relative transformation between the camera and the objects.
+In this thesis, we investigate a few avenues that we believe crucial to achieve these goals. First, we develop tailored sensor measurement models with attention to the correct mathematical formulation involving Lie theory.
+Second, we propose visual-inertial systems based on object-level detection libraries, which provide relative transformation between the camera and the objects.
 We provide covariance models for two kinds of objects: the first one is an analytical model for fiducial markers; the second
 is an empirical model for deep-learning-based object pose estimation.
-High-rate sensors are handled by developing a generalization of the IMU pre-integration theory. We propose a new formulation of the IMU
+Third, we handle high-rate sensors by developing a generalization of the IMU pre-integration theory. We propose a new formulation of the IMU
 pre-integration based on compact Lie groups. 
-We show that pre-integration can also be applied to use force-torque sensors found on legged robots. 
+Fourth, we show that pre-integration can also be applied to use force-torque sensors found on legged robots. 
 Fusion with a leg-kinematics based odometry and IMU, we show that this new formulation makes possible the tightly-coupled estimation
 of centroidal quantities within the context of Factor Graph estimation.
 

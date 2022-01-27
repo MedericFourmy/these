@@ -13,7 +13,7 @@ This representation is built by an estimator that fuses several sources of infor
 The challenge is then to choose the set of appropriate sensors for each application and to design an efficient estimation algorithm to fuse them.
 
 In this thesis, we are interested in extending the perceptual capabilities of legged robots (humanoids and quadrupeds). This kind of robot requires both a high-rate (1kHz),
-low latency estimates its physical quantities to balance itself, and an environment representation for safe navigation.
+low latency estimates of its physical quantities to balance itself, like a precise direction of the gravity, and an accurate environment representation for safe navigation and interaction.
 These tasks are oftentimes handled separately in the literature. We believe that it is possible to improve existing systems by a tight integration of the
 many sensor modalities available on such a platform.
 
@@ -63,7 +63,7 @@ This makes for challenging perceptual problems that require taking into account 
 \section{Biological equivalent, an example}
 
 A digression through a biological example can give some intuitions to grasp the complexity of the problem. 
-Let's investigate the example of a human lifting package. Our vision might inform us about the general form of the object, 
+Let's investigate the example of a human lifting a box. Our vision might inform us about the general form of the object, 
 its location in space with respect to us, some of its physical properties through our prior knowledge of the world. Our proprioception (kinesthetic sense) 
 instinctively guide our arms toward the right path. Our sense of touch might infer the surface texture of the object,  its softness, making us 
 adapt our grip. During this whole process, our vestibular system provides us with a sense of balance to counter gravity, while our ears 
