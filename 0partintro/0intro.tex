@@ -1,25 +1,84 @@
 \chapter{Introduction}
-% De tout temps les hommes ont voulus estimer des trucs...
 
-% ...et voila le pbe qu'on va résoudre.
 
-%%%%%%%%%%%%%%%%%
-% MEH
-%%%%%%%%%%%%%%%%%
-% For robots, perception of oneself and of its environment is a major challenge on the road toward many real world applications. 
-% Tasks that are instinctive to us, like for instance manipulating an object, actually involve a complex 
-% interactions between our many senses, our nervous and our muscular system.
-% Though our sensory motor skills have been developed by millions of year of evolution, and are refined throughout our childhood,
-% the task of representing them in abstracted algorithm to be implemented on a cybernetic system is a serious challenge. 
-% Let's investigate the example a human lifting package. Our vision might inform us about the general form of the object, 
-% its location in space with respect to us, some of its physical properties through our prior knowledge of the world. Our proprioception 
-% instinctively guide our arms toward the right path. Our sense of touch might infer the surface texture of the object, 
-% its softness, making us adapt our grip. During this whole process, our vestibular system
-% provides us with a sense of balance to counter gravity, while our hears make us aware of events external to our current enterprise.
 
-% All these complex phenomena happen mostly at the subconscious level while our conscious mind focuses on high level decisions.
+Since the advent of cybernetics, the concept of sensory feedback has been at the core of the study of autonomous agents. To realize
+actions, an agent needs a representation of the current state of the world, which is inferred from its past sensors measurements. Its actions may 
+then affect this state, which is reflected in a change of its sensors output. This creates a feedback loop, that, if designed well, leads to a stable, 
+auto-regulated system.
+
+For robotics applications \footnote{Exception of direct sensory feedback such as Visual Servoing.}, actions are decided by a control algorithm and 
+the representation may be limited to a set of physically meaningful variables (robot position, orientation, position of a set of stairs). 
+This representation is built by an estimator that fuses several sources of information. 
+The challenge is then to choose the set of appropriate sensors for each application and to design an efficient estimation algorithm to fuse them.
+
+In this thesis, we are interested in extending the perceptual capabilities of legged robots (humanoids and quadrupeds). This kind of robot requires both a high-rate (1kHz),
+low latency estimates its physical quantities to balance itself, and an environment representation for safe navigation.
+These tasks are oftentimes handled separately in the literature. We believe that it is possible to improve existing systems by a tight integration of the
+many sensor modalities available on such a platform.
+
+We will first compare the nature of perception needs for a few robotics applications, then give a biological example, and finish by motivating the use of 
+modular tightly coupled estimators in the context of legged-robotics.
+
+
+
+\section{Evolution of perception for autonomous systems}
+
+Within the field of robotics, the implementation of the feedback loop has seen dramatic changes over the years, propelled by the changing nature 
+of the mechatronic systems, in particular in the actuation and sensor array, the applications at play, and the mathematical formulations
+used to model the systems. The progression of the perception side of the loop, extracting meaningful information from sensor data, can be divided into a few
+steps that accompany the evolution of robotics, from fixed manipulators to agile legged robots. 
+
+The first major robotic use was in the industrial space: 
+starting in the early 60's \footnote{The Unimate manipulator was adopted by General Motors to displace hot die casting pieces to cooling tanks, first tests starting in 1961.}, 
+arm manipulators have been progressively integrated into many assembly lines, especially in the automotive industry. 
+This application requires the performance of highly precise, repetitive tasks, which are predefined by specialized human operators.
+These highly rigid robots are position-controlled and fixed to the ground, which usually limits the perception needs to the relative angles between their different parts.
+
+On the other end of the spectrum, researchers started to equip wheeled mobile platforms in controlled laboratory environments with exteroceptive sensors 
+\cite{Nilsson1984ShakeyTR, chatila1985position} to apply planning algorithms, using mainly range sensors to control the presence of obstacles, along with wheel odometry
+to detect relative displacement. 
+Research on mobile robotics moved to outdoors applications, using motorized vehicles as research platforms. The 2005 DARPA grand challenge
+offered one of the first large scale proof of concept of autonomous cars, where a few teams managed to safely drive 150 miles paths in desert-environments 
+\cite{thrun2006stanley}, while the 2007 DARPA Urban challenge concentrated on urban road environments \cite{urmson2008autonomous}. In both cases, cars were 
+equipped with GPS, IMU's, cameras, and a metric map of the path. Most teams relied heavily on global positioning, exteroceptive sensors being used for 
+minor checks and corrections \cite{hillel2014recent}. Nowadays, the most successful autonomous car systems (such as Tesla [CITE Karpathy?] and comma.ai \cite{comma2020openpilot}) 
+seem to tend toward exclusive use of vision for local navigation (lane following, lane changing, overtaking, etc.).
+\footnote{As A. Karpathy puts it, “Lidar is really a shortcut”}. 
+
+% Mature systems now exhibit almost human-level performance, though some hard corner cases,
+% especially involving other humans behavior predictions, are still on the table.
+% Though relying mostly on global positioning (fusing GPS and IMU \cite{hillel2014recent}), exteroceptive sensing 
+
+In this landscape of autonomous systems, legged robots (such as humanoid or quadrupeds) are singular in many regards. 
+First and foremost, they are inherently unstable dynamical systems that require continuous active control by applying forces at chosen locations of the environment. 
+Therefore, they require an acute sense of balance, in which Inertial Measurement Units and contact detection play important roles. 
+%which was primarily handled by Inertial Measurement Units in early applications ([CITE RAIBERT+HONDA]) 
+Secondly, they are mobile platforms, whose primary function is to be able to navigate environments to perform tasks such as inspection or manipulation.
+A perception of the environment is therefore required for any meaningful tasks to be undertaken, contrary to fixed manipulators.
+Thirdly, they can in theory navigate cluttered, unstructured environments, which extends their operational capacities, compared to wheeled platforms.
+This makes for challenging perceptual problems that require taking into account the many sensor modalities available.
+
+
+\section{Biological equivalent, an example}
+
+A digression through a biological example can give some intuitions to grasp the complexity of the problem. 
+Let's investigate the example of a human lifting package. Our vision might inform us about the general form of the object, 
+its location in space with respect to us, some of its physical properties through our prior knowledge of the world. Our proprioception (kinesthetic sense) 
+instinctively guide our arms toward the right path. Our sense of touch might infer the surface texture of the object,  its softness, making us 
+adapt our grip. During this whole process, our vestibular system provides us with a sense of balance to counter gravity, while our ears 
+make us aware of events external to our current enterprise.
+
+All of this happens mostly at the subconscious level while our conscious mind focuses on high-level decisions.
+The difficulty of mimicking these feats is therefore hard to grasp at first since we are most of the time oblivious to them.
+However, if even one of these senses becomes deficient we are severely hindered in our daily enterprises. For instance, for people deprived
+of proprioception, something as simple as grasping a glass is a tedious process, even if their sense of touch and vision works perfectly.
+
+
 % Imitating these skills in robot system requires then to build models of available sensor modalities and to integrate them through sensor
-% fusion. This can be achieved at several levels depending on the task to solve. In the legged robot community, one of the core task is locomotion.
+% fusion. 
+
+% This can be achieved at several levels depending on the task to solve. In the legged robot community, one of the core task is locomotion.
 % For this application, robust algorithms exist in the literature using a limited set of sensors, most often inertial and contact detection.
 % On the other end of the blind robot approach, a broad field of research has been concentrated on building representations of the environment 
 % using exteroceptive sensors such as cameras and LIDARs. This in turn enables planning algorithms to navigate the robot in its environment. 
@@ -28,74 +87,31 @@
 % Even though recent approaches have taken step in this direction, such a system is still not widely used in legged robotics. 
 % This thesis is a contribution to this goal. 
 
-%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%
-
-% Rotella 
-% - Legged robots benefits and challenges
-% - Need to estimate quantities that are not directly measurable -> data fusion
-% - questions about which sensors should be used for which platforms 
-%     -> poundering needs vs constraints (costs, weight, processing cost for embedded platforms)
-
-% Dinesh
-% - Need for redundant sensing -> example of living beings (inner ear, vision, kinestesis
-
-% Sola:
-% - State a clear objective and describe the different terms
-% - "hardware vs intelligence driven approaches" 
-%     -> more expensive hardware enable easier preprocessing (expensive IMUs = good attitude)
-% - very short reading guide: sketch the organisation of the thesis
-
-% Vallve:
-% - adapting the robot to the env rather than the other way around (motivation for autonomous systems AND legged robots)
-% - applications without offline maps available (because difficult to access, too expensive...) 
-%     -> example of the search and rescue DARPA subterran challenge
-% - Idea: compare DARPA 14 to DARPA 20 -> focus on real time exploration and SLAM, large scale problems
-
-% Bloesch:
-% - motivation for legged robots: extend range of robotic applications
-% - recent sucesses -> cite a bunch of recent legged robots (a lot now...)
-% - Central role of state est -> prerequisite for other tasks like stabilization (high bandwidth est of attitude, vel, com)
-% , predictive control, planning contacts etc.
-% - High reliability spec -> need for redundancy (Bloesch says "simple estimators" with "low complexity", quite the opposit actually)
-% - Short talk about inertial sensors: can provide attitude alone but fast drifting deadreckoning for position and velocity that has to be mitigated by sensor fusion.
-% - cameras: nice because low weight and complexity wrt LIDARS (even though now low cost depth sensor)
-% - vision based state est: impressive and various results. Benefits from increased robustness using IMU (only for short periods of time)
-%     -> shortly describe why both are very complimentary. Kinematics adds more information and increases robustness of approaches.
-% Remark: under represented works about semantic informations about the scene (nod to CosySLAM)
 
 
-% CNBC doc
-% Interviewies: Fankhauser
-% At the core, quadruped robots are mobility platforms that can be equipped with different payloads depending on the type of information that company want to gather
-% ANYbotics CEO (Peter Fankhauser): can carry up to 15 kg of payload: visual cameras, thermal cameras, microphone, LED lights and gaz detection sensors -> example of leakage detection
-% for fire prevention
-% can be equipped with an arm to manipulate the env around them
-% Price: 
-%    - ANYbotics -> 150k$ including lidar and docking station
-%    - Ghost robotics vision 60 -> 150k$
-%    - Boston dynamics entry level Explorer Spot -> 75k$, for US national grid robot, just LIDAR+thermal cam +57k$
-% National grid: improve the safety of operating conditions for workers. Very repeatable -> images from same angles/vantage
-%   LIDAR for navigation + visual and thermal cameras for inspection of the substation -> detect assets hotspot for areas of concern, premature failure
-%   Team up with IBM for cloud coomputing and AI for online detection
-% Spot Other users:
-% - Germany pharmacetical group Merck 
-% - BP to read gauges, monitor corrosion and measure methane on oil rigs in the gulf of mexico 
-% - Ford plant (Michigan) -> create a digital model of the plant 
-% Anymal other users ()
-% - Petronas (Maleysian oil company) -> inspect offshore platforms. manned and manual operations : 35% of annual operational epanditures.
-% Personal training and equipment certification add to the cost. Oil rigs high risk areas 
-% - Vale (Brazilian mining corporation) -> in the process of purchasing 1 to gather condition of equipment in one of its mines. Dangerous spaces with noise, dust and rotating parts
-% - BASF (German chemical company) -> currently testing anymal to gather visual thermal and accoustic data  
-% Developping an explosion proof version to avoid sparks from igniting explosive materials (no metal on metal contact, electronics flooded in nitrogen)
-% Also (Both): construction sites and train yards (Anymal)
 
-% Defense application: already autonomous used but people triggered by quadrupeds in particular (Black Mirror)
-% 2021: NYC state police stop using spot because of public backlash
-% Campaign to stop killer robots
-% Boston Dynamics ethical principles -> will not allow use of its robot for weaponized autonomous systems
-% Ghost Robotics (Philadelphia) -> 20+ customers, 90% US and allies. Airforce for security patrols in bases
-%      October 2021: Ghost robotics quadruped equiped with a rifle manufactured by Sword International
-% Farmers Insurance: use spot to assess damaged caused by natural disasters -> 1.7 billion $ in 2025 $
+% For robots, perception of oneself and of its environment is a major challenge on the road toward many real world applications. 
+% Tasks that are instinctive to us, like for instance manipulating an object, actually involve a complex 
+% interactions between our many senses, our nervous and our muscular system.
+% Though our sensory motor skills have been developed by millions of year of evolution, and are refined throughout our childhood,
+% the task of representing them in abstracted algorithm to be implemented on a cybernetic system is a serious challenge. 
 
-% Use still far from widespread: Spot sold a few hundred, ANYbotics < 100
+
+\section{Need for a modular and tightly-coupled estimator for legged-robots}
+
+Legged robots are designed to evolve in human-designed environments and to replace us in some of our tedious tasks. As such, they should be able to
+display a sufficient level of dynamical intelligence and perception capabilities. In our opinion, this implies that a tight fusion of as many sources of
+information as possible is necessary. To achieve that goal, the development of \textit{tightly coupled} estimators, that exploit as many correlations as possible
+between the sensor measurements, should be undertaken.
+
+It is not yet exactly clear what is the optimal set of sensors that needs to be integrated on legged platforms (though Inertial Measurement Units, kinesthesis, and 
+cameras or LIDARS are becoming more and more standard for industrial applications). This set may depend heavily on the type of application,
+the size of the platform (LIDARS are too bulky for smaller quadrupeds), the acceptable price range of the robot. It is important to allow
+for a great \textit{modularity} in the design of estimators. We think that this can be attained by different means. First, by a flexible software architecture
+that allows a general formulation of estimation problems (which is the endeavor of WOLF \cite{sola2021wolf}). Second, by a generalization of mathematical
+models describing sensor measurements. Third, by the use of an estimation algorithm called Factor Graph optimization, which lends itself well to the modular design.
+
+To summarize, in this thesis, we will defend the use of tightly-coupled, modular estimators for legged robots.
+
+- More on the structure of the thesis...
+
