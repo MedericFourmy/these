@@ -117,7 +117,7 @@ stairs and beams. The robot environment was augmented with objects of the datase
 We recorded two types of datasets: one for the uncertainty models and one for SLAM experiments. For the uncertainty models, reflective MoCap markers 
 were attached to the object to obtain the ground truth of their pose. For the SLAM, only the camera was tracked. We used the monocular RGB camera and the Bosh BMI085 
 IMU of an Intel Realsense L515 Camera for handheld trajectories. The Intel Realsense d435i was used with the same modalities 
-for the experiments on the quadruped robot Solo \cite{grimminger2020open} as shown in Fig. \ref{fig:solo_and_stairs}. 
+for the experiments on the quadruped robot Solo \cite{grimminger2020open} as shown in Fig. \figRef{figfig:solo_and_stairs}. 
 The extrinsic calibration between the IMU and the camera was provided by Intel and the delays observed between IMU and Camera measurements were negligible. 
 Our datasets are publicly available at \url{https://homepages.laas.fr/mfourmy/icra22_cosyslam}.
 
@@ -170,7 +170,7 @@ This is therefore a challenging dataset to test the robustness of our algorithm.
 \end{table}
 
 It is interesting to analyze the gains brought by the IMU fusion. The most evident observation is that the output trajectory is smoother, which gives more consistency 
-to the result (Fig. \ref{fig:traj_circular}). But we can notice that the MTE is also reduced (Table \ref{table:tless}). Indeed, the motion model is more precise thanks 
+to the result (Fig. \figRef{figfig:traj_circular}). But we can notice that the MTE is also reduced (Table \figRef{figtable:tless}). Indeed, the motion model is more precise thanks 
 to IMU data. This makes the outlier rejection more efficient than the visual-only CosySLAM which makes a zero velocity assumption between \keyframes.
 
 
@@ -182,7 +182,7 @@ With our retrained model (\secRef{sec:retraining_with_stairs}) we were able to p
 We recorded video sequences including stairs with a camera fixed on a Solo robot (\figRef{fig:map_stairs}). A stair has three discrete symmetries 
 that are hard to handle for an object pose estimator and the images provided by Solo were noisy because of the walk. 
 These scenarios are challenging for our SLAM system, but it maps successfully the stairs and the error on the position of the base of Solo remains reasonable 
-(Table \ref{table:solo}).
+(Table \figRef{figtable:solo}).
 
 \begin{table}[h]
    \begin{center}

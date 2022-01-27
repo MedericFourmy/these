@@ -30,7 +30,7 @@ equation \eqref{eq:wbdyn}. Knowing the robot configuration and derivatives $\q,\
 recovering forces from this equation results in solving an over-determined linear system. Some of these quantities are hard to obtain directly 
 since they depend on the state being estimated (\eg base orientation) or on numerical differentiation ($\ddqa$). For these reasons, we pre-calculated 
 these forces by benefiting from an internal filter of the 3DM-CX5-25 IMU for the base orientation, centered window differentiation of encoder speed 
-measurements for the articulation acceleration $\ddqa$ and neglecting the influence of linear velocity. Fig. \ref{fig:force_est} shows an example of 
+measurements for the articulation acceleration $\ddqa$ and neglecting the influence of linear velocity. Fig. \figRef{figfig:force_est} shows an example of 
 the force reconstruction of one leg using the robot proprioceptive sensors.
 %
 \begin{figure}
@@ -42,9 +42,9 @@ the force reconstruction of one leg using the robot proprioceptive sensors.
 
 \subsection{Base estimation through inertial kinematic fusion}
 First, to validate the use of our kinematic factor, we include uniquely the IMU and LO factors to obtain an Inertial Kinematics  estimator which 
-conceptually includes the same information as estimators such as \cite{bloesch2013state}. In Fig.~\ref{fig:PosiIK4}, we compare our state estimation 
+conceptually includes the same information as estimators such as \cite{bloesch2013state}. In Fig.~\figRef{figfig:PosiIK4}, we compare our state estimation 
 at 1kHz with motion capture (Mo-Cap) up-sampled from 200Hz to 1kHz.
-Velocity in base frame is also shown in Fig.~\ref{fig:VelIK4}.
+Velocity in base frame is also shown in Fig.~\figRef{figfig:VelIK4}.
 %
 \begin{figure}[t]
     \centering
@@ -61,7 +61,7 @@ Velocity in base frame is also shown in Fig.~\ref{fig:VelIK4}.
 \end{figure}
 
 Artificially removing contact factors (considering only 1, 2 or 3 feet in contact) can help us gain confidence in the use of this kinematic factor 
-in situations where we rarely have all feet in contact, like for example with trotting gaits. In Fig.~\ref{fig:ErrIKn}, we can see that only considering 
+in situations where we rarely have all feet in contact, like for example with trotting gaits. In Fig.~\figRef{figfig:ErrIKn}, we can see that only considering 
 1 foot in contact during the whole trajectory results in a drifting position, but as soon as 2 or more feet are in contact, the system is constrained enough 
 for the drift to remain below around 5mm on all axes. 
 %
@@ -76,17 +76,17 @@ for the drift to remain below around 5mm on all axes.
 
 \subsection{Centroidal estimation}
 
-Now, on the same trajectory, we deploy the full estimator with all factors described in Section \ref{sec:factor-graph} to jointly 
+Now, on the same trajectory, we deploy the full estimator with all factors described in Section \figRef{figsec:factor-graph} to jointly 
 estimate the base and centroidal quantities. A ground truth on the centroidal quantities is difficult to obtain since no direct 
 sensor can provide us with this information contrary to the base state. 
 We can however validate our method by comparing it to a two step procedure: first, estimate the base state with a state Kalman filter as 
 implemented in \cite{bledt2018cheetah}, then compute the centroidal quantities directly from the robot kinematic model. 
 The full estimator should be able to infer a bias on the $\posim{B}{C}$ measure so we artificially add a constant disturbance 
 in the robot dynamic model on the lever of the base link of [0.03, 0.06, 0.04]\,cm, which then corresponds to a CoM bias of 
-[-0.0197, -0.0394,  0.0263] cm. Fig.~\ref{fig:bias_est} shows that the bias estimated with our method closely matches the introduced bias. 
-Fig.~\ref{fig:comparison_KF_wolf} shows a comparison between the base and CoM reconstruction with our method and with the two-step base Kalman filter 
+[-0.0197, -0.0394,  0.0263] cm. Fig.~\figRef{figfig:bias_est} shows that the bias estimated with our method closely matches the introduced bias. 
+Fig.~\figRef{figfig:comparison_KF_wolf} shows a comparison between the base and CoM reconstruction with our method and with the two-step base Kalman filter 
 with geometric CoM. Note that the base-CoM difference on the z axis reflects the fact that limbs of the robot naturally lowers  its CoM. 
-The estimated CoM velocity closely follows the velocity of the base as shown in Fig.~\ref{fig:com_base_vel}.
+The estimated CoM velocity closely follows the velocity of the base as shown in Fig.~\figRef{figfig:com_base_vel}.
 
 
 

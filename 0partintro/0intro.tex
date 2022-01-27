@@ -100,8 +100,9 @@ of proprioception, something as simple as grasping a glass is a tedious process,
 
 Legged robots are designed to evolve in human-designed environments and to replace us in some of our tedious tasks. As such, they should be able to
 display a sufficient level of dynamical intelligence and perception capabilities. In our opinion, this implies that a fusion of as many sources of
-information as possible is necessary. To achieve that goal, the development of \textit{tightly coupled} estimators, that exploit as many correlations as possible
-between the sensor measurements, should be undertaken.
+information as possible is necessary. In order to maximize the precision of the estimator, all correlations between variables should in principle be taken into account. 
+We also need to perform online calibration for certain sensor biases and fixed parameters. To achieve that goal, the development of \textit{tightly coupled} estimators, 
+that exploit as many data correlations as possible between the sensor measurements, should be undertaken.
 
 It is not yet exactly clear what is the optimal set of sensors that needs to be integrated on legged platforms (though Inertial Measurement Units, kinesthesis, and 
 cameras or LIDARS are becoming more and more standard for industrial applications). This set may depend heavily on the type of application,
@@ -113,12 +114,45 @@ models describing sensor measurements. Third, by the use of an estimation algori
 To summarize, in this thesis, we will defend the use of tightly-coupled, modular estimators for legged robots.
 
 
-\section{Contributions of this thesis}
-
-For excteroceptive -> object level SLAM
-for balance: inertial-kinematics and centroidal
-
-Experimental validation on humanoid and quadruped
+\section{Thesis organization and contributions}
 
 
-These contributions -> 
+\paragraph{Overview}~
+
+In this thesis, we propose to approach the different legged robot estimation problems in a unified manner, based on a tightly-coupled estimator implemented as
+a Factor Graph estimator.
+We propose to build an object-level environmental model through object-level visual-inertial SLAM algorithms. We propose two implementations of this paradigm. 
+The first is based on \apriltag\ fiducial markers, the second is based on a deep-learning-based object pose estimation library.   
+For the sense of balance, we implemented a whole-body estimation algorithm based on IMU, kinematic and force-torque measurements.
+Experimental validation on humanoid \HRP{2} and quadruped robot Solo (see \figRef{fig:robots} for both) were conducted for all of these applications.
+
+
+
+\paragraph{Organization}~
+
+\textbf{Chapter 2} presents a literature overview for legged robots. 
+
+In \textbf{Chapter 3} A general introduction to Factor Graph optimization using the Maximum A Posteriori is given. We put the emphasis
+on the special treatment variables belonging to manifolds and give a brief introduction to Lie theory, which is used extensively in chapter 6.
+
+\textbf{Chapter 4} describes measurement models used in the object-level visual-inertial systems that we built. 
+
+\textbf{Chapter 5} presents the use of robot kinematics to obtain leg-odometry measurements. 
+
+\textbf{Chapter 6} introduces a generalization of the IMU pre-integration theory. Examples of the classic on-manifold pre-integration are recalled and 
+then extended to a compact Lie group formulation. 
+
+\textbf{Chapter 7} presents the first application which is a visual-inertial object-level SLAM system based on fiducial markers. This chapter describes
+results presented in Humanoids 2019 conference paper \cite{fourmy2019absolute}.
+
+In \textbf{Chapter 8}, we propose a whole-body (base and centroidal states) estimator based on the fusion of IMU, kinematics, and force-torque sensors. This
+work was presented at ICRA 2021 conference \cite{fourmy2021contact}.
+
+In \textbf{Chapter 9}, a visual-inertial SLAM system using deep-learning-based object pose estimation is presented. This work was submitted to ICRA 2022 conference 
+\cite{debeunne2021cosyslam}.
+
+Throughout this work, we contributed to different parts of the WOLF state estimation framework \cite{sola2021wolf} which was submitted to RAL journal this year.
+
+
+
+
