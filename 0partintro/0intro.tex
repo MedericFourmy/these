@@ -43,8 +43,7 @@ offered one of the first large scale proof of concept of autonomous cars, where 
 \cite{thrun2006stanley}, while the 2007 DARPA Urban challenge concentrated on urban road environments \cite{urmson2008autonomous}. In both cases, cars were 
 equipped with GPS, IMU's, cameras, and a metric map of the path. Most teams relied heavily on global positioning, exteroceptive sensors being used for 
 minor checks and corrections \cite{hillel2014recent}. Nowadays, the most successful autonomous car systems (such as Tesla [CITE Karpathy?] and comma.ai \cite{comma2020openpilot}) 
-seem to tend toward exclusive use of vision for local navigation (lane following, lane changing, overtaking, etc.).
-\footnote{As A. Karpathy puts it, “Lidar is really a shortcut”}. 
+seem to tend toward exclusive use of vision for local navigation (lane following, lane changing, overtaking, etc.) \footnote{As A. Karpathy puts it, “Lidar is really a shortcut”}. 
 
 % Mature systems now exhibit almost human-level performance, though some hard corner cases,
 % especially involving other humans behavior predictions, are still on the table.
@@ -97,10 +96,10 @@ of proprioception, something as simple as grasping a glass is a tedious process,
 % the task of representing them in abstracted algorithm to be implemented on a cybernetic system is a serious challenge. 
 
 
-\section{Need for a modular and tightly-coupled estimator for legged-robots}
+\section{Need for a tightly-coupled and modular estimator for legged-robots}
 
 Legged robots are designed to evolve in human-designed environments and to replace us in some of our tedious tasks. As such, they should be able to
-display a sufficient level of dynamical intelligence and perception capabilities. In our opinion, this implies that a tight fusion of as many sources of
+display a sufficient level of dynamical intelligence and perception capabilities. In our opinion, this implies that a fusion of as many sources of
 information as possible is necessary. To achieve that goal, the development of \textit{tightly coupled} estimators, that exploit as many correlations as possible
 between the sensor measurements, should be undertaken.
 
@@ -113,5 +112,13 @@ models describing sensor measurements. Third, by the use of an estimation algori
 
 To summarize, in this thesis, we will defend the use of tightly-coupled, modular estimators for legged robots.
 
-- More on the structure of the thesis...
 
+\section{Contributions of this thesis}
+
+For excteroceptive -> object level SLAM
+for balance: inertial-kinematics and centroidal
+
+Experimental validation on humanoid and quadruped
+
+
+These contributions -> 

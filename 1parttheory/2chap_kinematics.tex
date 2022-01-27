@@ -1,13 +1,22 @@
 \chapter{Kinematics}
 \minitoc
+\bigskip
 
 The robot kinematic model along with encoder measurements make possible the computation of poses and spatial velocities \cite{featherstone2014rigid} (aka. twists) 
-of reference frames attached to the robot segments relative to the base or world frame. We will shortly describe the computation of these quantities and their 
-application to leg odometry.
+of reference frames attached to the robot segments relative to the base or world frame. This kinesthesis capability is of paramount importance to control
+multi-body systems for locomotion or other interactions with its environment. If we have information about stable contacts that the robot keeps with
+its environment, it is possible to infer a relative motion measurement, which is commonly called leg-odometry.
+
+We will shortly describe the formulation of the forward kinematics algorithm, that enables to compute relative poses and spatial velocities between parts of the robot
+and then show how this information can be used to define a leg-odometry factor. The last section shows how forward kinematics can also be used to leverage prior 
+information about the height of the environment. 
+
 
 
 \section{Forward kinematics}
 \label{sec:forward_kinematics}
+We first describe the forward kinematics and differential kinematics algorithms by introducing notations commonly found in the legged robots literature.
+
 The degrees of freedom (DoF) $n$ of a poly-articulated system is the minimal number of variables that completely describe his state given the base frame. 
 For robots with rigid segments, the DoF of the robot is the sum of the DoFs of its joints (1 for linear and rotational joints, 3 for
 ball joints, etc.).
@@ -59,7 +68,7 @@ We will now see how FK can be used to derive leg odometry for a quadruped robot.
 
 \section{Leg odometry}
 We will restrict ourselves to the case of point feet as the main platform on which we experimented is a quadruped robot.
-Quadrupeds are usually equipped with nonarticulated round feet whose contact with the ground is, in first approximation, punctual.
+Quadrupeds are usually equipped with non-articulated round feet whose contact with the ground is, in first approximation, punctual.
 Humanoid robots are equipped with articulated flat feet that provide richer information. In \secRef{sec:kinematic_info} we gave an exhaustive review of the types of leg 
 odometry measurements that can be obtained on legged machines.
 
@@ -105,7 +114,7 @@ a relative transformation between $t_i$ and $t_j$, at least three feet are neces
 relative transformation, which would be integrated as a separate residual, by solving an orthogonal Procrustes problem \cite{roston1991dead}.
 We did not found useful to implement such a factor for several reasons. First of all, this computation is implicitly handled by the solver.
 Secondly, for trotting gates common for quadrupeds, the robot is most of the time standing on two legs. Thirdly, when fusing with other sensors (such as the IMU,
-see [REF application IK for an example]), 1 or 2 legs in contact already provide sufficient information to make the desired variables observable.
+see \chpRef{chp:centroidal_estimation}), 1 or 2 legs in contact already provide sufficient information to make the desired variables observable.
 
 % Assuming good contact detection, leg odometry fused with the IMU is enough to properly observe 6 DoF motion with as few as 2 contact feet at a time. 
 % Note that contrary to previous works \cite{hartley2018legged, wisth2020preintegrated}, this leg odometry factor does not require gyroscope integration.
@@ -115,10 +124,8 @@ see [REF application IK for an example]), 1 or 2 legs in contact already provide
 If we have prior knowledge about the foot terrain height $h \in \Reals$, it is easy to define, for each foot $l$ in contact, the residual:
 
 \begin{equation}
-    \bfe^h_l(\posi{}{}, \Rot{}{}) = (\posi{}{} + \Rot{}{} \posi{b}{l})_z - h
+    \bfe^h_l(\posi{}{}, \Rot{}{}) = (\posi{}{} + \Rot{}{} \posi{b}{l})_z - h \quad, \quad e^{h}_l \in \Reals
 \end{equation}
 
-This residual can be assigned with a variance $\sigma_h^2$ which is hand-tuned. It can permit to remove vertical drift of the odometry estimation.
-
-% \section{Kinematic calibration}
-% A crucial part of the usability of this measurement model is to be able to compute an unbiased $\posi{B}{L}$ estimation for each foot.
+This residual can be assigned with a variance $\sigma_h^2$ which is hand-tuned. 
+It can permit to remove vertical drift of the odometry estimation.

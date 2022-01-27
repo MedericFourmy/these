@@ -19,14 +19,12 @@ Use `build.sh` and `clean.sh` scripts
     -> split between base est and centroidal est?  
 - CosyPose cov model, explain calibration procedure?
 - explore CosyPose covariance models?
+- Idea from Strasdat: 1 sentence summary of each chapter
 
 ## TO DEFINE
-- pose
 
 ## COMMONLY used abreviations -> to define?
-- wrt.
 
 ## Sketch TODO
-- Exp/Log map
 - preintegration algo (as an algo)
 - kinematic chain for the robot calibration
