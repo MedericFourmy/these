@@ -99,7 +99,7 @@ in an unpredictable fashion. Thus, we opt for a simple additive noise on the foo
 \end{equation}
 %
 where $\noise_{LO} \sim \Gaussian{0}{\Cov_{LO}}$ denotes a Gaussian noise accounting for potential roll/slip of the foot and kinematic inaccuracies.
-This noise can be modeled as white noise on the foot velocity $\noise_v$, which integrated gives a random walk.  
+This noise can be modeled as white noise on the foot velocity $\noise_v$, which when integrated gives a random walk.  
 Its variance after $\Dt$ is $\Cov_{LO} = \Dt \Cov_v$.
 The residual $\bfe^{LO}$ is then expressed for each foot $l$ in contact between $t_i$ and $t_j$:
 
@@ -110,9 +110,9 @@ The residual $\bfe^{LO}$ is then expressed for each foot $l$ in contact between 
 where $\posim{B}{L}^i$ and $\posi{B}{L}^j$ are the contact positions in base frame at times $t_i$ and $t_j$ acquired from $\qa$ via forward kinematics. 
 
 In the literature review and \figRef{fig:kin_models}, this method is referred to as \textit{single foot matching}. To obtain
-a relative transformation between $t_i$ and $t_j$, at least three feet are necessary. When it is the case, it is possible to directly compute the
+a relative transformation of the robot's base frame between $t_i$ and $t_j$, at least three stable feet contacts are necessary. When it is the case, it is possible to directly compute the
 relative transformation, which would be integrated as a separate residual, by solving an orthogonal Procrustes problem \cite{roston1991dead}.
-We did not found useful to implement such a factor for several reasons. First of all, this computation is implicitly handled by the solver.
+We did not find useful to implement such a factor for several reasons. First of all, this computation is implicitly handled by the solver.
 Secondly, for trotting gates common for quadrupeds, the robot is most of the time standing on two legs. Thirdly, when fusing with other sensors (such as the IMU,
 see \chpRef{chp:centroidal_estimation}), 1 or 2 legs in contact already provide sufficient information to make the desired variables observable.
 
@@ -129,3 +129,5 @@ If we have prior knowledge about the foot terrain height $h \in \Reals$, it is e
 
 This residual can be assigned with a variance $\sigma_h^2$ which is hand-tuned. 
 It can permit to remove vertical drift of the odometry estimation.
+
+
