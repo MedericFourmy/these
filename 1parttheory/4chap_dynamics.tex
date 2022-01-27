@@ -17,7 +17,7 @@ one of the major theoretical contributions of this thesis.
 
 \section{Centroidal dynamics}
 \label{sec:centroidal_dynamics}
-The robot dynamics is described by the well-known:
+The robot dynamics is described by the Lagragian dynamics:
 %
 \begin{equation}\label{eq:wbdyn}
   \bfM(\q) \dvq + h(\q,\vq) = \bm\tau_q + \sum_l \bfJ_l\tr \wrench{}{l}
@@ -116,7 +116,7 @@ Then, the residual $\bfe^{CK} \in \Reals^9$ is then expressed as:
 
 \section{External force pre-integration}
 In this section, we apply the generalized pre-integration algorithm to the problem of using measured external
-forces applied on a legged robot in a smoothing estimator. We propose to integrate the underactuated dynamics \eqRef{NewtonEuler} using force torques measurements.
+forces applied on a legged robot in a smoothing estimator. We propose to integrate the underactuated dynamics \eqRef{NewtonEuler} using wrench measurements.
 To this end, we derive the specificities of the pre-integration of external forces of a poly-articulated system. This is the main theoretical contribution
 of our paper \cite{fourmy2021contact}.
 
