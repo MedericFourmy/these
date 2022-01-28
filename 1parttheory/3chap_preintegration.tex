@@ -323,16 +323,16 @@ The group composition law $\bfDelta^{ik}=\bfDelta^{ij}\circ\bm\delta^k$ in \eqRe
 with a group identity element composed of the identity element of its Lie groups:
 %
 \begin{equation}
-    \bfDelta_{\cE} = [\bfO_3, \bfO_3, \bfI_3],
+    \bfDelta_{\cE} = [\bf0_3, \bf0_3, \bfI_3],
 \end{equation}
 %
-its the resulting inverse
+its the resulting inverse being
 %
 \begin{equation}
     \bfDelta^{-1} =     \begin{bmatrix}
-    - \tr\DR(\Dp + \Dv \dt) \\
-    -\tr\DR \Dv \\
-    \tr\DR
+    - \DR\tr(\Dp + \Dv \dt) \\
+    - \DR\tr \Dv \\
+      \DR\tr
     \end{bmatrix}
 \end{equation}
 %
@@ -350,6 +350,7 @@ $\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta} as:
     (\tilde\bfa-\bfb_a-\noise_a)\dt \\
     \Exp((\tilde{\bfomega}-\bfb_\omega-\noise_\omega)\dt)
     \end{bmatrix}^k
+    \label{eq:delta_function}
 \end{align}
 
 Then, $\bfx_k=\bfx_i\boxplus\bfDelta_{ik}$ is \cite[eq.~32]{forster2017-TRO} and $\bfDelta_{ik}=\bfx_k\boxminus\bfx_i$ is \cite[eq.~33]{forster2017-TRO}. 
@@ -364,41 +365,41 @@ This formulation was proposed in our published paper \cite{fourmy2019absolute}.
 We propose a matrix form of the Lie group of IMU deltas as,
 %
 \begin{align}\label{equ:delta_Lie}
-\D &= 
-\begin{bmatrix}
-\DR & \Dv & \Dp \\
-\bf0 & 1 & \Dt \\
-\bf0 & 0 & 1
-\end{bmatrix} \in \cD \subset \bbR^{5\times 5}
-~.
+    \D &= 
+    \begin{bmatrix}
+    \DR & \Dv & \Dp \\
+    \bf0 & 1 & \Dt \\
+    \bf0 & 0 & 1
+    \end{bmatrix} \in \cD \subset \bbR^{5\times 5}
+    ~.
 \end{align}
 
-Group identity, inverse and composition stem from regular matrix identity, inverse (with $\DR\inv=\DR\tr$) and product,
+Group composition, identity and inverse stem from regular matrix product, identity, and inverse (with $\DR\inv=\DR\tr$).
 
 \begin{align}
-\D_\cE&=\begin{bmatrix}
-\bfI & \bf0 & \bf0 \\
-\bf0 & 1 & 0 \\
-\bf0 & 0 & 1 
-\end{bmatrix} = \bfI_{5\times5}
-\label{equ:identity}
-\\
-\D\inv &= \begin{bmatrix}
-\DR\tr & -\DR\tr\Dv & -\DR\tr(\Dp-\Dv\Dt) \\
-\bf0 & 1 & -\Dt \\
-\bf0 & 0 & 1
-\end{bmatrix} 
-\label{equ:inverse}
-\\
-\D\cdot\bm\delta 
-&= 
-\begin{bmatrix}
-\DR\dR & \Dv + \DR\dv & \Dp+\Dv\dt + \DR\dpp \\
-\bf0 & 1 & \Dt+\dt \\
-\bf0 & 0 & 1
-\end{bmatrix}
-~.
-\label{equ:composition}
+    \D\cdot\bm\delta 
+    &= 
+    \begin{bmatrix}
+    \DR\dR & \Dv + \DR\dv & \Dp+\Dv\dt + \DR\dpp \\
+    \bf0 & 1 & \Dt+\dt \\
+    \bf0 & 0 & 1
+    \end{bmatrix}
+    ~.
+    \label{eq:compact_composition}
+    \\
+    \D_\cE&=\begin{bmatrix}
+    \bfI_3 & \bf0 & \bf0 \\
+    \bf0 & 1 & 0 \\
+    \bf0 & 0 & 1 
+    \end{bmatrix} = \bfI_{5\times5}
+    \label{equ:identity}
+    \\
+    \D\inv &= \begin{bmatrix}
+    \DR\tr & -\DR\tr\Dv & -\DR\tr(\Dp-\Dv\Dt) \\
+    \bf0 & 1 & -\Dt \\
+    \bf0 & 0 & 1
+    \end{bmatrix} 
+    \label{equ:inverse}
 \end{align}
 %
 % Comparing against \eqsRef{equ:composite_identity}{equ:composite_composition} we observe that this matrix Lie group is exactly equivalent to the classical IMU deltas above.
@@ -409,7 +410,8 @@ Group identity, inverse and composition stem from regular matrix identity, inver
 
 The Lie algebra elements $\bftau\hhat$ and their isomorphic Cartesian $\bftau$ have the forms
 %
-\begin{align}\label{equ:lie_algebra}
+\begin{align}
+    \label{equ:lie_algebra}
     \bftau\hhat &= \begin{bmatrix}
     \hatx{\bth} & \bfrho & \bfupsilon \\
     \bf0 & 0 & \Dt \\
@@ -437,7 +439,7 @@ The exponential map transfers tangent elements to the group; the logarithmic map
     \bf0 & 1 & \Dt \\
     \bf0 & 0 & 1
     \end{bmatrix} %\in\cD 
-    \label{equ:exp}
+    \label{eq:compact_exp}
     \\
     \bftau &= \Log(\D) \te \log(\D)\vvee = \begin{bmatrix}
     \bfQ\inv(\Dp-\bfP\bfQ\inv\Dv\Dt) \\
@@ -445,17 +447,21 @@ The exponential map transfers tangent elements to the group; the logarithmic map
     \Log(\DR) \\
     \Dt 
     \end{bmatrix} %\in \bbR^{10}
-    \label{equ:log}
+    \label{eq:compact_log}
 \end{align}
 %
-where $\Log()$ is obtained by identifying terms in \eqRef{equ:delta_Lie} and \eqRef{equ:exp}.
+where $\Log()$ is obtained by identifying terms in \eqRef{equ:delta_Lie} and \eqRef{eq:compact_exp}.
 Matrices $\bfP$ and $\bfQ$ are provided in the appendix's \secRef{sec:IMULieGroup}.
+
+Note that the function $f$ \eqRef{eq:delta_function}, integrating one step of motion data, is here decomposed in two operations: 
+first the debiasing presented in \eqRef{preint_debiasing}, then the integration using the delta group exponential map \eqRef{eq:compact_exp}.
 
 
 \subsubsection{Jacobians, uncertainty}
 \label{sec:uncertainty}
 
-For general functions $f:\cM\to\cN;y=f(x)$, we propagate uncertainty normally via the Jacobians $\mjac{y}{x}\te\dpar{y}{x}$, \ie, $\Cov_y=\mjac{y}{x}\,\Cov_x\,\mjac{y}{x}\tr$. 
+For general functions $f:\cM\to\cN;y=f(x)$, we propagate uncertainty normally via the Jacobians 
+$\mjac{y}{x}\te\dpar{y}{x}$, \ie, $\Cov_y=\mjac{y}{x}\,\Cov_x\,\mjac{y}{x}\tr$. 
 These Jacobians map the tangent spaces of the mannifolds $\cM,\cN$ at $x$ and $y$, and in case of vector spaces they resort to the classical Jacobian.
 They also satisfy the chain rule, which we use extensively in our developments.
 We provide ample reference and justification of this approach in the technical report \cite{sola2018micro}.
@@ -465,6 +471,79 @@ It relates to the uncertainty of the last component of the tangent space \eqRef{
 Having it in the covariances would imply singularity and result in the risk of a number of well-known numerical issues. 
 We therefore systematically marginalize this time component out of the covariances, simply by removing the last row and column. 
 
+
+%
+%
+%
+\subsubsection{IMU-preintegration pipeline on compact Lie groups}
+
+Here we recall the general pre-integration pipeline in the case of compact Lie group, pointing at the minor differences with composite Lie group case.
+The following pipeline of operations is performed to recursively pre-integrate IMU data into a unique measurement.
+
+At the reception of each IMU measurement $\bfz_k=(\bfa,\bw)_k$, start by correcting it with available  bias estimates $\ol\bfb_i=(\bfa_b,\bw_b)_i$, 
+to produce the tangent vector $\bftau=\bm\nu\dt$. For this, set the velocity part of $\bm\nu$ to zero as the IMU is by definition at zero speed \wrt 
+the moving frame (see comment \ref{sec:IMU_case} in the appendix). Obtain at the same time the respective Jacobians,
+%
+\begin{align}
+    \bftau_k &= 
+    \begin{bsmallmatrix}
+    \bf0 \\ \bfa-\bfa_b \\ \bw-\bw_b \\ 1
+    \end{bsmallmatrix}\dt, 
+    &
+    \mjac{\bftau}{\bfz} &= 
+    \begin{bsmallmatrix}
+    \bf0 & \bf0 \\
+    \bfI & \bf0 \\
+    \bf0 & \bfI \\
+    0 & 0
+    \end{bsmallmatrix}\dt,
+    &
+    \mjac{\bftau}{\bfb} &= 
+    -\begin{bsmallmatrix}
+    \bf0 & \bf0 \\
+    \bfI & \bf0 \\
+    \bf0 & \bfI \\
+    0 & 0
+    \end{bsmallmatrix}\dt 
+    \label{eq:preint_debiasing}
+\end{align}
+%
+Second, use the exponential map to obtain the current delta step $\bm\delta_{jk}$ in the group manifold, and obtain Jacobian
+%
+\begin{align}
+    \bm\delta_{jk} &= \Exp(\bftau_{k})~,
+    &
+    \mjac{\bm\delta}{\bftau} &= \mjac{}{r}(\bftau_k)
+    ~.
+    %
+    \intertext{Third, use group composition \eqRef{eq:compact_composition} to update the pre-integrated delta; obtain Jacobians}
+    %
+    \ol\D_{ik} &= \ol\D_{ij}\cdot\bm\delta_{jk} ~,
+    &
+    \mjac{\D_{ik}}{\D_{ij}} &= \Ad{\bm\delta_{jk}}\inv
+    ~,&
+    \mjac{\D_{ik}}{\bm\delta_{jk}} = \bfI
+    \label{equ:pre_composition}
+    ~,
+\end{align}
+%
+where $\Ad{\bm\delta}$ is the adjoint and $\mjac{}{r}$ is the right Jacobian ---see the appendix and \cite{sola2018micro} for reference. Fourth, propagate the delta covariance
+%
+\begin{align}
+    \bfSigma^\Delta_{ik} &= \mjac{\D_{ik}}{\D_{ij}}\bfSigma^\Delta_{ij}\mjac{\D_{ik}}{\D_{ij}}\tr 
+    + \mjac{\D_{ik}}{\bfz}\bfSigma_\bfz\mjac{\D_{ik}}{\bfz}\tr
+    ~,
+    %
+    \intertext{with $\bfSigma_\bfz$ the covariance of the IMU measurements $\bfz$, and $\mjac{\D_{ik}}{\bfz}=\mjac{\D_{ik}}{\bm\delta}\mjac{\bm\delta}{\bftau}\mjac{\bftau}{\bfz}$ computed using the chain rule. Finally, integrate the Jacobian of the delta \wrt the biases}
+    %
+    \mjac{\D_{ik}}{\bfb} &= \mjac{\D_{ik}}{\D_{ij}}\mjac{\D_{ij}}{\bfb} 
+    + \mjac{\D_{ik}}{\bm\delta_{jk}}\mjac{\bm\delta}{\bftau}\mjac{\bftau}{\bfb}
+    ~.
+\end{align}
+%
+
+Pre-integration starts after each keyframe with $\ol\D_{ii} = \bfI$, $\bfSigma^\Delta_{ii} = \bf0$ and $\mjac{\D_{ii}}{\bfb} = \bf0$, using $\ol\bfb_i = \bfb_i$ the current best estimate of the bias at time $i$.
+Pre-integration is complete (\figRef{fig:delta_time}) when $k=m$, which yields $\ol\D_{im}$, $\bfSigma^\Delta_{im}$ and $\mjac{\D_{im}}{\bfb}$.
 
 
 \subsubsection{Delta Lie group IMU factor residual}
@@ -501,7 +580,7 @@ between the corrected preintegration delta and the expected delta.
 
 Mathematically, and disregarding methodology, the main difference between our method and Forster's \cite{forster2017-TRO} is to be found in the exponential map. 
 To see it, let us consider small rotation increments $\bth=\bw\dt$ captured at each single IMU sample. 
-In such cases, the matrices $\bfP,\bfQ$ appearing in the exponential map \eqRef{equ:exp} and detailed in \eqRef{equ:RQP} can be approximated by $\bfP\approx\tfrac12\bfI$ and $\bfQ\approx\bfI$.
+In such cases, the matrices $\bfP,\bfQ$ appearing in the exponential map \eqRef{eq:compact_exp} and detailed in \eqRef{equ:RQP} can be approximated by $\bfP\approx\tfrac12\bfI$ and $\bfQ\approx\bfI$.
 The exponential becomes,
 %
 \begin{align}
@@ -516,7 +595,7 @@ The exponential becomes,
 \end{align}
 %
 where we find the terms $\bfa\dt$ and $\tfrac12\bfa\dt^2$, which should sound familiar from Forster's method. 
-In effect, with this approximation, if we now compact all the steps \eqsRef{equ:pre_calibration}{equ:pre_composition} of our integration into a cumulative expression,
+In effect, with this approximation, if we now compact all the steps \eqsRef{eq:preint_debiasing}{equ:pre_composition} of our integration into a cumulative expression,
 %
 \begin{align}
     \D_{ik} = \prod_{j=i+1}^k \Exp\left(\begin{bmatrix}
@@ -529,10 +608,36 @@ It is possible (although tedious) to show that both Forster's and our method are
 % , which is usually a valid hypothesis.
 % These differences should not constitute an argument against Forster, since in practice we typically have extremely small steps $\bw\dt$ and the approximation holds very well.
 
+\subsubsection{Discussion Group design}
+Regarding "compact group" designs, there is still another proposal, the $\SE_2(3)$ group proposed by \cite{barrau2020mathematical, brossard2021associating}, 
+which can be used for IMU pre-integration. This proposal differs from ours in the following aspects:
 
+\begin{itemize}
+    \item The group does not contain the time and therefore the composition law does not account for the whole integration. Some extra algebra needs to be added.
+    \item The group is easier to manipulate since the closed forms for the exponential map, the adjoint and the right-jacobian are easier to obtain.
+    \item Our group better separates between the delta states and the velocity of these states which depend only on the IMU data.
+\end{itemize}
 
+Therefore, it is apparent that depending on the structure of the defined Lie group, we can have different designs:
+\begin{itemize}
+    \item Forster \cite{forster2015imu}: Composite Lie group
+    \item Barrau \cite{barrau2020mathematical}: $\SE_2(3)$ compact Lie group without time
+    \item Fourmy \cite{fourmy2019absolute}: Compact IMU group with time
+\end{itemize}
+
+In the context of filtering, using a compact group formulation of the robot state has been proven to improve greatly the basin of convergence of the so-called
+Invariant Kalman Filter \cite{barrau2018invariant, hartley2020contact} by avoiding the need to compute jacobians around the current estimates (which is done
+with the standard EKF), which may lead to an inconsistent estimate if the filter is initialized far from the optimal. 
+However, this issue is not so present with factor graph optimization since we repeatedly linearize around the new estimate.
+Nevertheless, it seems that compact Lie groups may provide slightly better performances than composite Lie groups \cite{brossard2021associating}, thanks 
+to a more precise linearization \wrt\ the IMU biases and a covariance propagation that better represents the geometry of the problem.
+
+However one may ask whether these more elegant mathematical formulations and slight improvements are worth the effort. This design may be seen as going against
+our modularity philosophy since for each new motion sensor, we need to find a new appropriate Lie group instead of being able to reuse the machinery developed
+for composite groups, which is somewhat simpler.
 
 \section{Related works}
+
 
 Pre-integration principles were first proposed by Lupton \cite{lupton-09} to be applied to a smoothing based visual inertial estimator. His work was motivated partly 
 by the fact that previous systems required a precise initialization of position, orientation and velocity (using a specialized routine) to begin to integrate IMU measurements. 

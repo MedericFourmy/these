@@ -168,7 +168,7 @@ Secondly, we will make a change of variables. The weighted squared residuals can
 %
 \begin{equation}
     ||\bfe_i||^2_{\Cov_i} = \bfe_i \Cov_i^{-1} \bfe_i 
-    = (\Cov_i^{-\frac{1}{2}}\bfe_i)^{\top}\Cov_i^{-\frac{1}{2}}\bfe_i
+    = (\Cov_i^{-\frac{1}{2}}\bfe_i)\tr\Cov_i^{-\frac{1}{2}}\bfe_i
     = ||\Cov_i^{-\frac{1}{2}}\bfe_i||^2 = ||\bfr_i||^2
 \end{equation}
 %
@@ -201,11 +201,11 @@ $\bfJ \in \Reals^{M \times N}$. We call this new function $\cF(\Delta \bfx) \tri
 \begin{equation}
     \cF(\Delta \bfx) \triangleq \cL(\check{\cX} + \Delta \bfx) 
     \approx ||\check{\bfr} + \bfJ \Delta \bfx||^2 
-    = \check{\cL} +  2\check{\bfr}^{\top} \bfJ \Delta \bfx + \Delta \bfx^{\top} \bfJ^{\top} \bfJ \Delta \bfx.
+    = \check{\cL} +  2\check{\bfr}\tr \bfJ \Delta \bfx + \Delta \bfx\tr \bfJ\tr \bfJ \Delta \bfx.
 \end{equation}
 
 $\cF(\Delta \bfx)$ is therefore a local parabolic approximation of 
-$\cL$ around the current estimate and $\bfH \triangleq \bfJ^{\top} \bfJ$ is the approximate Hessian of $\cL$ 
+$\cL$ around the current estimate and $\bfH \triangleq \bfJ\tr \bfJ$ is the approximate Hessian of $\cL$ 
 \footnote{See \cite{sola2017course} Section 4.2.1 for more details on the nature of the approximation.}. Note that by construction, $\bfH$ is always 
 semi-definite positive.
 
@@ -213,14 +213,14 @@ semi-definite positive.
 The optimal step (Gauss-Newton step) $\Delta \bfx^*$ is by definition the step that minimizes $\cF$. This minimum is found by differentiating $\cF$ 
 with respect to $\Delta \bfx$ and equaling to 0, giving the linear system of equation:
 \begin{equation}
-    \bfH \Delta \bfx^* = - \bfJ^{\top} \bfr.%, \quad \quad \bfA \triangleq \bfH, \quad \quad \bfb \triangleq 
+    \bfH \Delta \bfx^* = - \bfJ\tr \bfr.%, \quad \quad \bfA \triangleq \bfH, \quad \quad \bfb \triangleq 
     \label{eq:linear_syst_GN}
 \end{equation}
 
 Substituting $\bfH$ by its expression, the Gauss-Newton step is found by solving the linear system, that is to say inverting $\bfH$:
 %
 \begin{equation*}
-    \Delta \bfx_{GN}^* = - \bfH^{-1} \bfJ^{\top} \bfr = - (\bfJ^{\top} \bfJ)^{-1} \bfJ^{\top} \bfr = -  \bfJ^{+} \bfr
+    \Delta \bfx_{GN}^* = - \bfH^{-1} \bfJ\tr \bfr = - (\bfJ\tr \bfJ)^{-1} \bfJ\tr \bfr = -  \bfJ^{+} \bfr
 \end{equation*}
 %
 where $\bfJ^{+}$ is the (right) pseudo inverse of the residual gradient. 
@@ -251,7 +251,7 @@ to alleviate this phenomenon.
 Levenberg \cite{levenberg1944method} contribution was to propose to dampen the Hessian by the identity matrix:
 %
 \begin{equation}
-    \Delta \bfx_{L}^* = - \alpha (\bfH^{-1} + \lambda \bfI)^{-1} \bfJ^{\top} \bfr
+    \Delta \bfx_{L}^* = - \alpha (\bfH^{-1} + \lambda \bfI)^{-1} \bfJ\tr \bfr
 \end{equation}
 %
 where $\alpha$ and $\lambda$ are scalar coefficients that can be tuned depending on the evolution of the cost function. 
@@ -266,7 +266,7 @@ Marquardt \cite{marquardt1963algorithm} improves on Levenberg by proposing to da
 instead of the identity matrix:
 %
 \begin{equation}
-    \Delta \bfx_{L}^* = - \alpha (\bfH^{-1} + \lambda \text{diag}(\bfH))^{-1} \bfJ^{\top} \bfr.
+    \Delta \bfx_{L}^* = - \alpha (\bfH^{-1} + \lambda \text{diag}(\bfH))^{-1} \bfJ\tr \bfr.
 \end{equation}
 
 Thus, the damping affects each direction of the state differently, depending on the local shape of the cost function.
@@ -426,7 +426,7 @@ where $\bar{\bfx}$ designates the mean value of the distribution on $\bfx$.
 We define a zero mean "Cartesian" Gaussian distribution on the tangent space, the covariance being defined as:
 
 \begin{equation}
-    \Cov_{\bfx} \triangleq \mathbb{E}[\bftau\bftau^{\top}] = \mathbb{E}[(\bfx \ominus \bar{\bfx})(\bfx \ominus \bar{\bfx})^{\top}] \in \Reals^{n \times n}
+    \Cov_{\bfx} \triangleq \mathbb{E}[\bftau\bftau\tr] = \mathbb{E}[(\bfx \ominus \bar{\bfx})(\bfx \ominus \bar{\bfx})\tr] \in \Reals^{n \times n}
 \end{equation}
 %
 where $\mathbb{E}[\cdot]$ denotes the expectation operator.
@@ -435,7 +435,7 @@ By a slight abuse of notation, we note that the manifold distribution is $\bfx \
 As an illustration, the group of unit quaternions $\mathbb{H} = \left\{ \bfq \in \Reals^4~|~\bfq \odot \bfq^*=1 \right\}$ under quaternion multiplication 
 $\odot$ is a manifold (the $S^3$ sphere, p=4 and n=3) \cite{sola2012quaternion}. 
 The tangent space is the set of antisymmetric matrices, which is isomorphic to the angle axis rotation vectors $\bftheta \in \Reals^3$.
-If we naively define the covariance matrix of a quaternion as \mbox{$\mathbb{E}[(\bfq - \bar{\bfq})(\bfq - \bar{\bfq})^{\top}] \in \Reals^{4 \times 4}$}, 
+If we naively define the covariance matrix of a quaternion as \mbox{$\mathbb{E}[(\bfq - \bar{\bfq})(\bfq - \bar{\bfq})\tr] \in \Reals^{4 \times 4}$}, 
 this covariance matrix is ill-defined. The covariance must be more properly defined as a $3 \times 3$ real matrix on the angle axis space.
 
 In general, covariances can be propagated through nonlinear function of random variables using the chain rule. For instance, if $\bfx \in \Reals^{n_x}$ and 
@@ -444,7 +444,7 @@ $\Cov_{\bfx} \in \Reals^{n_x \times n_x}$ through f writes:
 
 \begin{equation}
     f~: \bfx \in \Reals^{n_x} \rightarrow \bfy \in \Reals^{n_y}, \quad \quad \Cov_{\bfy} \approx 
-                \left.\frac{D f}{D \bfx} \right|_{\bfx}   \Cov_{\bfx}    \left.\frac{D \bfy}{D \bfx}\right|_{\bfx}^{\top}
+                \left.\frac{D f}{D \bfx} \right|_{\bfx}   \Cov_{\bfx}    \left.\frac{D \bfy}{D \bfx}\right|_{\bfx}\tr
     \label{eq:cov_propagation}
 \end{equation}
 
@@ -489,7 +489,7 @@ good intuitions regarding the general behavior of Lie groups.
 The group of 3D rotations is defined as the Special Orthogonal group in 3D: 
 %
 \begin{equation}
-    \SO(3) = \left\{\Rot{}{} \in \text{GL}(n,\Reals) | \Rot{}{}\Rot{}{}^{\top}=\Rot{}{}^{\top}\Rot{}{}=\bfI,~det(\Rot{}{})=1\right\}
+    \SO(3) = \left\{\Rot{}{} \in \text{GL}(n,\Reals) | \Rot{}{}\Rot{}{}\tr=\Rot{}{}\tr\Rot{}{}=\bfI,~det(\Rot{}{})=1\right\}
 \end{equation}
 %
 under matrix multiplication.
@@ -501,7 +501,7 @@ Firstly, properties that make $SO(3)$ a group are immediate from the properties 
     \item Closure under the matrix product
     \item Associativity through the matrix product
     \item Identity element $\bfI_3$
-    \item Inverse element $\Rot{}{}^{-1} = \Rot{}{}^{\top}$ (from the group definition)
+    \item Inverse element $\Rot{}{}^{-1} = \Rot{}{}\tr$ (from the group definition)
 \end{itemize}
 
 Let us explicit the manifold structure of $\SO(3)$.
@@ -539,7 +539,7 @@ logarithm on the relative rotation as described here:
 
 \begin{align}
     \Rot{}{2} &= \Rot{}{1}\oplus \prescript{1}{}{\bftheta} = \Rot{}{1} \Exp(\prescript{1}{}{\bftheta})  \\ 
-    \prescript{1}{}{\bftheta} &= \Rot{}{2}\ominus \Rot{}{1} = \Log(\Rot{}{1}^{\top}\Rot{}{2}) 
+    \prescript{1}{}{\bftheta} &= \Rot{}{2}\ominus \Rot{}{1} = \Log(\Rot{}{1}\tr\Rot{}{2}) 
 \end{align}
 
 \begin{figure}[h]
@@ -562,7 +562,7 @@ logarithm on the relative rotation as described here:
     \label{fig:rotation_exp_log} 
 \end{figure}
 
-In robotics terms, $\prescript{1}{}{\bftheta}$ is the axis angle representation of the relative rotation $\prescript{1}{}{\delta \bfR}_{12} = \Rot{}{1}^{\top}\Rot{}{2}$ and
+In robotics terms, $\prescript{1}{}{\bftheta}$ is the axis angle representation of the relative rotation $\prescript{1}{}{\delta \bfR}_{12} = \Rot{}{1}\tr\Rot{}{2}$ and
 \textit{local} rotations represent the orientation of reference frames $\{1,2\}$ in a \textit{global} world reference frame. The identity element, therefore, corresponds 
 to the world frame. 
 
