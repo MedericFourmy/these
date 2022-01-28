@@ -130,28 +130,39 @@ Experimental validation on humanoid \HRP{2} and quadruped robot Solo (see \figRe
 
 \paragraph{Organization}~
 
+\bigskip
 \textbf{Chapter 2} presents a literature overview for legged robots. 
 
+\bigskip
 In \textbf{Chapter 3} A general introduction to Factor Graph optimization using the Maximum A Posteriori is given. We put the emphasis
-on the special treatment variables belonging to manifolds and give a brief introduction to Lie theory, which is used extensively in chapter 6.
+on the special treatment of variables belonging to manifolds and give a brief introduction to Lie theory, which is used extensively in chapter 6.
 
-\textbf{Chapter 4} describes measurement models used in the object-level visual-inertial systems that we built. 
+\bigskip
+\textbf{Chapter 4} describes two different measurement models used in the object-level visual-inertial systems that we built. 
 
+\bigskip
 \textbf{Chapter 5} presents the use of robot kinematics to obtain leg-odometry measurements. 
 
+\bigskip
 \textbf{Chapter 6} introduces a generalization of the IMU pre-integration theory. Examples of the classic on-manifold pre-integration are recalled and 
 then extended to a compact Lie group formulation. 
 
-\textbf{Chapter 7} presents the first application which is a visual-inertial object-level SLAM system based on fiducial markers. This chapter describes
+\bigskip
+The following chapters present three different applications where we fuse several of the sensing modalities described so far.
+Regarding their practical implementation, we contributed to different parts of the WOLF state estimation framework \cite{sola2021wolf} which was submitted to RAL journal this year.
+
+\bigskip
+\textbf{Chapter 7} presents the first application, which is a visual-inertial object-level SLAM system based on fiducial markers. This chapter describes
 results presented in Humanoids 2019 conference paper \cite{fourmy2019absolute}.
 
-In \textbf{Chapter 8}, we propose a whole-body (base and centroidal states) estimator based on the fusion of IMU, kinematics, and force-torque sensors. This
+\bigskip
+In \textbf{Chapter 8} we propose a whole-body (base and centroidal states) estimator based on the fusion of IMU, kinematics, and force-torque sensors. This
 work was presented at ICRA 2021 conference \cite{fourmy2021contact}.
 
+\bigskip
 In \textbf{Chapter 9}, a visual-inertial SLAM system using deep-learning-based object pose estimation is presented. This work was submitted to ICRA 2022 conference 
 \cite{debeunne2021cosyslam}.
 
-Throughout this work, we contributed to different parts of the WOLF state estimation framework \cite{sola2021wolf} which was submitted to RAL journal this year.
 
 
 

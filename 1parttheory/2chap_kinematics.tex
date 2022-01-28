@@ -8,7 +8,7 @@ multi-body systems for locomotion or other interactions with its environment. If
 its environment, it is possible to infer a relative motion measurement, which is commonly called leg-odometry.
 
 We will shortly describe the formulation of the forward kinematics algorithm, that enables to compute relative poses and spatial velocities between parts of the robot
-and then show how this information can be used to define a leg-odometry factor. The last section shows how forward kinematics can also be used to leverage prior 
+and then show how this information can be used to define a leg-odometry factor to be added in the factor graph. The last section shows how forward kinematics can also be used to leverage prior 
 information about the height of the environment. 
 
 
@@ -75,7 +75,7 @@ odometry measurements that can be obtained on legged machines.
 The basic idea is that we assume to have access to accurate contact detection. If the contact is held between time $t_i$ and $t_j$ and that
 the contact point $L$ (to which a frame is attached) is fixed. This can be written $\posi{W}{L}^i = \posi{W}{L}^j$. 
 In practice, the round feet of our robot can slightly roll but we will neglect this phenomenon for now. 
-If we unroll the transformation chain to make the base poses appear in the equation, we obtain the identity:
+If we unfurl the transformation chain to make the base poses appear in the equation, we obtain the identity:
 
 \begin{equation}
     \posi{}{}^i + \Rot{}{}^i \posim{B}{L}^i = \posi{}{}^j + \Rot{}{}^j \posim{B}{L}^j
