@@ -98,29 +98,30 @@ of proprioception, something as simple as grasping a glass is a tedious process,
 
 \section{Need for a tightly-coupled and modular estimator for legged-robots}
 
-Legged robots are designed to evolve in human-designed environments and to replace us in some of our tedious tasks. As such, they should be able to
-display a sufficient level of dynamical intelligence and perception capabilities. In our opinion, this implies that a fusion of as many sources of
-information as possible is necessary. In order to maximize the precision of the estimator, all correlations between variables should in principle be taken into account. 
-We also need to perform online calibration for certain sensor biases and fixed parameters. To achieve that goal, the development of \textit{tightly coupled} estimators, 
+Legged robots are designed to evolve in human-designed environments to be able replace us in some of our tedious or dangerous tasks. As such, they should be able to
+display a sufficient level of dynamical intelligence and perception capabilities. 
+In particular, the perception should be adapted to real-time control at the high frequencies usually found in legged-robot controllers (in the kilohertz range).
+The estimated state should accurately reflect both the dynamics of the robot as well as its environment structure. Balance controllers in particular require a precise estimation of the gravity vector direction, as well centroidal quantities (center of mass, angular momentum etc.).
+In our opinion, this implies that a fusion of as many sources of
+information as possible is necessary. In addition, in order to maximize the precision of the estimator, all correlations between variables should in principle be taken into account. 
+We also need to perform online calibration for certain sensor biases and fixed parameters. To achieve these goal, the development of \textit{tightly coupled} estimators, 
 that exploit as many data correlations as possible between the sensor measurements, should be undertaken.
 
 It is not yet exactly clear what is the optimal set of sensors that needs to be integrated on legged platforms (though Inertial Measurement Units, kinesthesis, and 
 cameras or LIDARS are becoming more and more standard for industrial applications). This set may depend heavily on the type of application,
-the size of the platform (LIDARS are too bulky for smaller quadrupeds), the acceptable price range of the robot. It is important to allow
+the size of the platform (LIDARS are too bulky for smaller quadrupeds), or the acceptable price range of the robot. Thus, it is important to allow
 for a great \textit{modularity} in the design of estimators. We think that this can be attained by different means. First, by a flexible software architecture
 that allows a general formulation of estimation problems (which is the endeavor of WOLF \cite{sola2021wolf}). Second, by a generalization of mathematical
-models describing sensor measurements. Third, by the use of an estimation algorithm called Factor Graph optimization, which lends itself well to the modular design.
+models describing sensor measurements. Third, by the use of an estimation algorithm called Factor Graph optimization, which lends itself well to a modular design.
 
-To summarize, in this thesis, we will defend the use of tightly-coupled, modular estimators for legged robots.
+% To summarize, in this thesis, we will defend the use of tightly-coupled, modular estimators for legged robots.
 
 
 \section{Thesis organization and contributions}
 
 
-\paragraph{Overview}~
 
-In this thesis, we propose to approach the different legged robot estimation problems in a unified manner, based on a tightly-coupled estimator implemented as
-a Factor Graph estimator.
+In this thesis, we propose to approach the different legged robot estimation problems in a unified manner, based on a tightly-coupled estimator implemented in the framework of Factor Graph optimization.
 We propose to build an object-level environmental model through object-level visual-inertial SLAM algorithms. We propose two implementations of this paradigm. 
 The first is based on \apriltag\ fiducial markers, the second is based on a deep-learning-based object pose estimation library.   
 For the sense of balance, we implemented a whole-body estimation algorithm based on IMU, kinematic and force-torque measurements.
@@ -128,13 +129,13 @@ Experimental validation on humanoid \HRP{2} and quadruped robot Solo (see \figRe
 
 
 
-\paragraph{Organization}~
+I have organized this thesis as follows:
 
 \bigskip
-\textbf{Chapter 2} presents a literature overview for legged robots. 
+\textbf{Chapter 2} presents a literature overview for of state estimation legged robots. 
 
 \bigskip
-In \textbf{Chapter 3} A general introduction to Factor Graph optimization using the Maximum A Posteriori is given. We put the emphasis
+\textbf{Chapter 3} serves as general introduction to Factor Graph optimization using the Maximum A Posteriori. We put the emphasis
 on the special treatment of variables belonging to manifolds and give a brief introduction to Lie theory, which is used extensively in chapter 6.
 
 \bigskip

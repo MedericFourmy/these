@@ -11,7 +11,7 @@ These sources of information differ significantly on their acquisition frequenci
 While state estimation by sensor fusion is a common topic to most robotic platforms, it offers a particular challenge in legged robotics by their peculiar dynamics.
 For legged robots, on the one hand, the robot state is needed to maintain its sense of balance and locomote safely, and, on the other hand, a precise representation of the environment is required for navigation and interaction. 
 
-The current approach for many legged systems, in the literature, formulate the problem to solve
+The current approach for many legged systems, in the literature, solve
 these problems independently, using cascades of estimators that may neglect some of the correlation present in the data.
 This artificial decoupling acts as strong priors that enable simple estimators to handle the estimation of each part of the cascade and stabilize the behavior of the overall estimation scheme. On the other hand, designing a cascade involves a lot of specialized work that hardly generalizes to new scenarios or new sensor modalities.
 In this thesis, we rather defend the idea of building a single tightly-coupled estimator capable of estimating all quantities needed by the robot. 
