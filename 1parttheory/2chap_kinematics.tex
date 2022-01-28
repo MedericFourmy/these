@@ -35,27 +35,20 @@ The whole body state of the robot is defined by the robot configuration vector $
         \bf0_3\tr & 1
     \end{pmatrix}
 \end{equation}
-
-is the configuration of the base and $\qa \in \Reals^n$ is the configuration of the joints. $\bfq$ therefore belongs to a composite manifold $\cM_{\bfq} = \left<\SE(3), \Reals^n \right>$ and the configuration velocity vector belongs to its tangent space $\se(3)\times \Reals^n$ which is isomorphic to $\Reals^{6+n}$: $\bfv_q \in \Reals^{6+n}$. Those are concatenations
+%
+is the configuration of the base,
+with $\posi{w}{b} \in \Reals^3$ and $\Rot{W}{B} \in \SO(3)$ are the position and orientation of the base with respect to the world.
+$\qa \in \Reals^n$ is the configuration of the joints. $\bfq$ therefore belongs to a composite manifold $\cM_{\bfq} = \left<\SE(3), \Reals^n \right>$ and the configuration velocity vector belongs to its tangent space $\se(3)\times \Reals^n$ which is isomorphic to $\Reals^{6+n}$: $\bfv_q \in \Reals^{6+n}$. Those are concatenations
 of the base state and joint configuration vectors:
 %
 \begin{equation}
-    \bfq=
-    \begin{pmatrix}
-        \bfq_b \\
-        \qa
-    \end{pmatrix} \in \cM_{\bfq},
-    \quad \quad
-    \bfv_q=
-    \begin{pmatrix}
-        \prescript{b}{}{\mathbf{\nu}}_b  \\
-        \dqa
-    \end{pmatrix}
-    \label{eq:configuration} \in \Reals^{6+n}
+    \bfq= [\bfq_b, \qa]\in \cM_{\bfq}\quad\quad,
+    \quad\quad
+    \bfv_q= [\prescript{b}{}{\mathbf{\nu}}_b,\dqa]  \in \Reals^{6+n}
+    \label{eq:configuration}
 \end{equation}
 %
-where $\posi{w}{b} \in \Reals^3$ is the position of the base relative to the world expressed in world frame, $\prescript{w}{}{\bfq}_b \in \Reals^4$ is the orientation 
-of the base frame with respect to the world as a unit quaternion, and $\prescript{b}{}{\mathbf{\nu}}_b$ is the twist of the base frame expressed in the base frame.
+where $\prescript{b}{}{\mathbf{\nu}}_b$ is the twist of the base frame expressed in the base frame.
 The computation of any segment pose of index $k$ relative to the world is obtained using the forward kinematics (FK) algorithm:
 %
 \begin{equation}
@@ -151,13 +144,16 @@ see \chpRef{chp:centroidal_estimation}), 1 or 2 legs in contact already provide 
 
 
 \section{Terrain height}
-If we have prior knowledge about the foot terrain height $h \in \Reals$, it is easy to define, for each foot $l$ in contact, the residual:
+If we only use leg odometry along with other sources of odometry such as an IMU (see \ref{chp:centroidal_estimation}, the position of the robot drifts after some time. However, if we have prior knowledge about the foot terrain height $h \in \Reals$, it is easy to define, for each foot $l$ in contact, the residual:
 
 \begin{equation}
     \bfe^h_l(\posi{}{}, \Rot{}{}) = (\posi{}{} + \Rot{}{} \posi{b}{l})_z - h \quad, \quad e^{h}_l \in \Reals
 \end{equation}
 
 This residual can be assigned with a variance $\sigma_h^2$ which is hand-tuned. 
-It can permit to remove vertical drift of the odometry estimation.
+The error and its covariance form a unary factor (only depends on one \keyframe\ ) 
+that can be added to the factor we want to build.
+Giving information about the height of the feet of the robot grounds the robot base height estimates.
+
 
 

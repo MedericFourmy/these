@@ -69,12 +69,12 @@ explicit Euler integration scheme during $\dt$ results in the discrete dynamics:
 %
 \begin{equation}
     \begin{split}
-    \Rot{}{}^{k+1}  &= \Rot{}{}^{k}\Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^k - \noise_{\angvel{}{}}^k)\dt)
-    \\
-    \vel{}{}^{k+1}  &= \vel{}{}^{k} + \grav \dt + \Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)\dt
-    \\
     \posi{}{}^{k+1} &= \posi{}{}^{k} + \vel{}{}^{k}\dt + \frac{1}{2}\grav \dt^2 
     + \frac{1}{2}\Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)\dt^2 \\
+    \vel{}{}^{k+1}  &= \vel{}{}^{k} + \grav \dt + \Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)\dt
+    \\
+    \Rot{}{}^{k+1}  &= \Rot{}{}^{k}\Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^k - \noise_{\angvel{}{}}^k)\dt)
+    \\
     \bfb_\bfa^{k+1} &= \bfb_\bfa^k + \bfw_\bfa\\
     \bfb_{\angvel{}{}}^{k+1} &= \bfb_{\angvel{}{}}^k + \bfw_{\angvel{}{}}
     \end{split}
@@ -91,31 +91,39 @@ $t_i$ and $t_m$ by recursively applying \eqRef{eq:imu_dyn_disc}, we obtain:
 %
 \begin{equation}
     \begin{split}
-    \Rot{}{}^{m}  &= \Rot{}{}^{i} \prod_{k=i}^{m} \Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^k - \noise_{\angvel{}{}}^k)\dt) \\
-    \vel{}{}^{m}  &= \vel{}{}^{i} + \sum_{k=i}^{m} \Big[\grav \dt + \Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)\dt \Big]  \\
     \posi{}{}^{m} &= \posi{}{}^{i} + \sum_{k=i}^{m} \Big[\vel{}{}^{k}\dt + \frac{1}{2}\grav \dt^2 
-    + \frac{1}{2}\Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)\dt^2 \Big]
-    \end{split}.
+    + \frac{1}{2}\Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)\dt^2 \Big] \\
+    \vel{}{}^{m}  &= \vel{}{}^{i} + \sum_{k=i}^{m} \Big[\grav \dt + \Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)\dt \Big]  \\
+    \Rot{}{}^{m}  &= \Rot{}{}^{i} \prod_{k=i}^{m} \Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^k - \noise_{\angvel{}{}}^k)\dt) 
+    \end{split}
     \label{eq:IMUIntij}
 \end{equation}
-
-We thereafter that IMU biases stay constant during $\Dt^{im}$
+%
+where we assume that IMU biases stay constant during $\Dt^{im}$
 \begin{equation*}
     \bias^k \approx \bias^i  ~~~ \forall k \in [i..m],
 \end{equation*}
+%
+which makes their integration trivial and thus allows us to concentrate in the upper three lines of the model.
 
 We are here in the position of illustrating why a naive definition of the data integration leads to very bad performance. 
-First, by observing \eqRef{eq:IMUIntij} we can define a motion error, as follows. We define the motion increments or "deltas":
-
-\begin{equation}
-    \bfDelta_{im} = \left[\Dp_{im}, \Dv_{im}, \DR_{im} \right] \quad , \quad (\Dp_{im},\Dv_{im},\DR_{im}) \in \cM_{\bfDelta}=\left< \Reals^3,\Reals^3, \SO(3) \right>
-    \label{eq:delta_imu_def}
-\end{equation}
-
-in two ways. Note that delta quantities here belong to the composite Lie group $\left< \Reals^3,\Reals^3\in \SO(3) \right>$. From the motion data, we get
-
+By observing \eqRef{eq:IMUIntij} we can define a motion error, as follows. 
+First, we naively define the motion increments or "deltas"
+%
+% \begin{equation}
+%     \bfDelta_{im} = \left[\Dp_{im}, \Dv_{im}, \DR_{im} \right] \quad , \quad (\Dp_{im},\Dv_{im},\DR_{im}) \in \cM_{\bfDelta}=\left< \Reals^3,\Reals^3, \SO(3) \right>
+%     \label{eq:delta_imu_def}
+% \end{equation}
+%
+in two ways. 
+%Note that delta quantities here belong to the composite Lie group $\left< \Reals^3,\Reals^3\in \SO(3) \right>$. 
+From the motion data, %we get
+%
 \begin{align}
     \bfDelta_{im}(\bias^i, \bfx^i) = 
+    \begin{bmatrix}
+    \Dp_{im}\\ \Dv_{im}\\ \DR_{im}
+    \end{bmatrix} \triangleq
     \begin{bmatrix}
     \prod_{k=i}^{m} \Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^i)\dt)  \\
     \sum_{k=i}^{m} \Big[\grav \dt + \Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^i - \noise_{\acc{}{}}^k)\dt \Big]  \\
@@ -126,20 +134,28 @@ in two ways. Note that delta quantities here belong to the composite Lie group $
 \end{align}
 %
 and from the initial and final states:
-
+%
 \begin{align}
     \hat\bfDelta_{im}(\bfx^i, \bfx^m) = 
+    \begin{bmatrix}
+    \hat\Dp_{im}\\ \hat\Dv_{im}\\ \hat\DR_{im}
+    \end{bmatrix} \triangleq
     \begin{bmatrix}
     \Rot{}{}^{i,T} \Rot{}{}^{m}  \\
     \vel{}{}^{m}  - \vel{}{}^{i}  \\
     \posi{}{}^{m} - \posi{}{}^{i}
     \end{bmatrix}
 \end{align}
-
-Third, we build a residual error as
-
+%
+Then, we build a residual error as
+%
 \begin{equation}
-    \bfe(\bfx_i, \bfx_m, \bias_i) = \hat\Delta_{im} \ominus \Delta_{im}
+    \bfe(\bfx_i, \bfx_m, \bias_i) = \hat\Delta_{im} \ominus \Delta_{im} =
+    \begin{bmatrix}
+    \hat\Dp_{im} - \Dp_{im} \\ 
+    \hat\Dv_{im} - \Dv_{im} \\ 
+    \Log(\DR_{im}\inv \hat\DR_{im}) 
+    \end{bmatrix}
     \label{eq:error_naive_preintegration}
 \end{equation}
 %
@@ -150,46 +166,47 @@ $\Delta_{im}$ is the motion computed from the integration of IMU measurements du
 in the world frame, this terms depends on the initial state $\bfx_i$ and on IMU biases $\bias_i$. This implies for each update of the estimate $\bfx_i$, the IMU measurements needs to be re-integrated from the new $\bfx_i$. This is highly inefficient and, therefore, not well adapted to the repeated evaluations required by nonlinear solvers.
 
 To solve this problem, we need to re-define the deltas so that $\Delta_{im}$ is independent of the estimated states, that is, only dependent on the measured data. This new definition reads \cite{lupton-09, forster2015imu} (proof in the annex \secRef{sec:forster_proof}):
-
+%
 \begin{align}
     \bfDelta_{im}(\bias^i) \triangleq 
     \begin{bmatrix}
-    \prod_{k=i}^{m} \Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^i)\dt)  \\
+    \sum_{k=i}^{m} \Big[\Dv^{ik}\dt +  \frac{1}{2} \DR^{ik} (\accm{}{}^k - \bias_{\acc{}{}}^i)\dt^2 \Big] \\
     \prod_{k=i}^{m} \DR^{ik} \Exp((\accm{}{}^k - \bias_{\acc{}{}}^i)\dt)  \\
-    \sum_{k=i}^{m} \Big[\Dv^{ik}\dt +  \frac{1}{2} \DR^{ik} (\accm{}{}^k - \bias_{\acc{}{}}^i)\dt^2 \Big]
-    \end{bmatrix}.
+    \prod_{k=i}^{m} \Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^i)\dt)  
+    \end{bmatrix}
     \label{eq:imu_delta}
 \end{align}
 %
 and:
-
+%
 \begin{align}
     \hat\bfDelta_{im}(\bfx^i, \bfx^m) \triangleq 
     \begin{bmatrix}
-    \Rot{}{}^{i,T} \Rot{}{}^{m}  \\
+    \Rot{}{}^{i,T}(\posi{}{}^m - \posi{}{}^i - \vel{}{}^i \Dt^{im} - \frac{1}{2} \grav {\Dt^{im}}^2) \\
     \Rot{}{}^{i,T} (\vel{}{m} - \vel{}{i} - \grav \Dt^{im})  \\
-    \Rot{}{}^{i,T}(\posi{}{}^m - \posi{}{}^i - \vel{}{}^i \Dt^{im} - \frac{1}{2} \grav \Dt^{im,2})
+    \Rot{}{}^{i,T} \Rot{}{}^{m}  
     \end{bmatrix}.
 \end{align}
-
 %
-Let us emphasize the fact that $\bfDelta_{im}$ as defined in \eqRef{eq:imu_delta} does not depend on $\bfx_i$, contrary to \eqRef{eq:imu_delta_naive}. 
+Let us now emphasize the fact that $\bfDelta_{im}$ as defined in \eqRef{eq:imu_delta} does not depend on $\bfx_i$, contrary to \eqRef{eq:imu_delta_naive}. 
 
-The dependency on the bias variable in \eqRef{eq:imu_delta} still enforces the repeated reintegration of the measurements buffer to get $\bfDelta_{im}$. 
+Still, the dependency on the bias variable in \eqRef{eq:imu_delta} still enforces the repeated reintegration of the measurements buffer to get $\bfDelta_{im}$. 
 However, because the variations in $\bias_i$ are small, a linearized approximation can be used. The IMU measurements are pre-integrated using the current bias estimation at time $t_i$, that we note $\ol\bfb_i$, to give the pre-integrated delta $\ol\bfDelta_{im}$.
 Then, each time a new $\bias_i$ value is computed, we can correct the delta linearly:
-
+%
 \begin{align}
     \bfDelta_{im}(\bias^i) = \ol\bfDelta_{im} \oplus \mjac{\bfDelta_{im}}{\bfb_i}(\bfb_i-\ol\bfb_i).
 \end{align}
+%
+that is, without the need of re-integration. This is why this method takes the name of delta pre-integration.
 
 With all these considerations, our residual error can be written as
-
+%
 \begin{align}
     \bfe_{im}(\bfx^i, \bfx^m, \bias^i) = (\ol\bfDelta_{im} \oplus \mjac{\bfDelta_{im}}{\bfb_i}(\bfb_i-\ol\bfb_i) ) \ominus \hat\bfDelta_{im}
     \label{eq:preint_residual}
 \end{align}
-
+%
 In this expression, $\ol\bfDelta_{im}$ only depends on data and has been integrated only once. The rest of the operations are small and can be made as many times as necessary in the solver side.
 
 These two observations were first made by Lupton \cite{lupton-09}, whose formulation relied on Euler angles, and were later formalized on \SO(3) using Lie theory

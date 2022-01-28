@@ -628,13 +628,22 @@ The factorization of the likelihood of \eqRef{eq:likelihood_factorization} in th
 \end{align}
 
 This factorization can be represented as a \textit{factor graph} as seen in \figRef{fig:toy_factor}. 
-factor graphs are popular graphical models \cite{koller2009probabilistic} that can describe a vast family of statistical models \cite{loeliger2004introduction}.
-In the general sense, a factor graph is  a bipartite graph that represents the factorization of a function of several variables. In estimation , we use it to represent the factorized likelihood \eqRef{eq:factorized_likelihood}, or equivalently the NLLS problem \eqRef{eq:nlls_map_pbe}.
+Factor graphs are popular probabilistic graphical models \cite{koller2009probabilistic} that can describe a vast family of statistical models \cite{loeliger2004introduction}.
+In the general sense, a factor graph is a bipartite graph that represents the factorization of a function of several variables. In estimation , we use it to represent the factorized likelihood \eqRef{eq:factorized_likelihood}, or equivalently the NLLS problem \eqRef{eq:nlls_map_pbe}.
+
 We adopt the visual notation commonly found in robotics: round nodes for variables, square nodes for factors, edges represent the dependency 
-of each factor on a subset of variables. Dellaert and Kaess \cite{dellaert2006square} were the first to
+of each factor on a subset of variables. In the following parts, we will use the following terminology to designate factors depending on which variables they depend on:
+
+\begin{itemize}
+    \item \textbf{Unary factor} $\color{Red} \phi$: depends on a single \keyframes, obtained from a an absolute measurement (\eg a prior, GPS etc.)
+    \item \textbf{Motion factor} $\color{Orange} \phi$: depends on successive \keyframes, obtained from a motion sensor (\eg wheel odometry, IMU etc.)
+    \item \textbf{Relative} or \textbf{exteroceptive factor} $\phi$: depends on a \keyframe\ and a part of the map, a few landmarks in this case, obtained from exteroceptive sensors
+\end{itemize}
+
+Dellaert and Kaess \cite{dellaert2006square} were the first to
 recognize the link between NLLS problems and factor graphs \cite{dong2019minisam}. Over the last two decades, they have grown in popularity among roboticists as a visual language to describe 
 estimation problems \cite{dellaert2017factor} and planning problems \cite{dong2016motion}. As Frank Dellaert puts it \footnote{Citation from a recent talk,
-see \href{https://www.youtube.com/watch?v=-yCC7mpgL4w}{this video}, around 15:30.}, factor graphs are "an amazing thing to write on blackboards".% and white boards". 
+see \href{https://www.youtube.com/watch?v=-yCC7mpgL4w}{this video}, around 15:30.}, factor graphs are "an amazing thing to write on blackboards".   
 Aside from providing insights over the computational structure of the problems, they can be used as a common language between engineering teams
 to convey insights about the nature of the problems to solve.
 
