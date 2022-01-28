@@ -114,12 +114,8 @@ for a great \textit{modularity} in the design of estimators. We think that this 
 that allows a general formulation of estimation problems (which is the endeavor of WOLF \cite{sola2021wolf}). Second, by a generalization of mathematical
 models describing sensor measurements. Third, by the use of an estimation algorithm called Factor Graph optimization, which lends itself well to a modular design.
 
-% To summarize, in this thesis, we will defend the use of tightly-coupled, modular estimators for legged robots.
-
 
 \section{Thesis organization and contributions}
-
-
 
 In this thesis, we propose to approach the different legged robot estimation problems in a unified manner, based on a tightly-coupled estimator implemented in the framework of Factor Graph optimization.
 We propose to build an object-level environmental model through object-level visual-inertial SLAM algorithms. We propose two implementations of this paradigm. 
@@ -127,7 +123,7 @@ The first is based on \apriltag\ fiducial markers, the second is based on a deep
 For the sense of balance, we implemented a whole-body estimation algorithm based on IMU, kinematic and force-torque measurements.
 Experimental validation on humanoid \HRP{2} and quadruped robot Solo (see \figRef{fig:robots} for both) were conducted for all of these applications.
 
-
+To summarize, in this thesis, we will defend the use of tightly-coupled, modular estimators for legged robots. This estimator should provide a kHz state throughput of the robot dynamics, in particular of its localization, orientation with respect to gravity, dynamics, and a representation of the environment.
 
 I have organized this thesis as follows:
 
@@ -150,7 +146,7 @@ then extended to a compact Lie group formulation.
 
 \bigskip
 The following chapters present three different applications where we fuse several of the sensing modalities described so far.
-Regarding their practical implementation, we contributed to different parts of the WOLF state estimation framework \cite{sola2021wolf} which was submitted to RAL journal this year.
+Regarding their practical implementation, we contributed to different parts of the WOLF state estimation framework \cite{sola2021wolf} which was submitted to RAL journal this year. We present these applications in the chronological order of their development.
 
 \bigskip
 \textbf{Chapter 7} presents the first application, which is a visual-inertial object-level SLAM system based on fiducial markers. This chapter describes

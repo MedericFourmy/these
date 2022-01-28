@@ -150,7 +150,7 @@ the integration of \eqRef{eq:NewtonEuler} yields the discrete dynamic model for 
 Analogously to the IMU case, it is possible to pre-integrate force measurements to derive a factor on the states 
 $\bfx_c=[\COM, \COMd, \AM, \Rot{}{}]$ using deltas $\D_c=[\D\COM, \D\COMd, \D\AM, \DR]$. 
 The rotation measured by the gyroscope has to be included too for the pre-integration to work. 
-In this case, the bias vector is $\bias = [\bias_c, \bias_{\omega}]$. We define measurements  $\bfz^k$ to be:
+In this case, the bias vector is $\bias = [\bias_c, \bias_{\omega}]$, that is, CoM and gyro biases. We define the measurements  $\bfz^k$ to be:
 %
 \begin{equation}
     \bfz^k = \left[ \posim{}{C}^k, \angvelm{}{}^k, \left[\forcem{}{L}^k, \torquem{L}{L}, \posim{}{L}^k, \Rotm{}{L}^k \right]_{L=1..4}\right]
