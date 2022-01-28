@@ -11,9 +11,9 @@ are obtained one after an other at a constant rate. This leads to a somewhat con
 various ways  (feature tracking, motion models etc.). We are here interested in solving SLAM, which is the most general application of this methods and 
 is used when a robot needs to localize itself in an a priori unknown environment. A vast literature of dedicated algorithms have been developed in this 
 regard, with approaches ranging from geometrical constraints using sparse feature detection \cite{mur2015orb, ferrera2021ov} or photometric consistencies 
-\cite{newcombe2011dtam, engel2014lsd, engel2017lsd}, certain methods combining ideas from both approaches \cite{forster2014svo, forster2016svo}.
+\cite{newcombe2011dtam, engel2014lsd, engel2017direct}, certain methods combining ideas from both approaches \cite{forster2014svo, forster2016svo}.
 
-These algorithms aim at being generalizable to any kind of environments and have their respective strengths and weaknesses [CITE Review]. 
+These algorithms aim at being generalizable to any kind of environments and have their respective strengths and weaknesses \cite{fuentes2015visual}. 
 Although open-source code is available for most, these pieces of software may be difficult to integrate in other frameworks. Besides, 
 though providing quite accurate localization, maps obtained from these methods are rarely immediately useful, lacking semantic information about 
 the scene usable by a legged robot. 
