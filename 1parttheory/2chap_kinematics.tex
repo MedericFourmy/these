@@ -63,7 +63,16 @@ The forward kinematics algorithm consists in a forward pass from the root of the
     \T{2'}{2}(q_2) \dots  \Tbar{k-1}{k'} \T{k'}{k}(q_k)
 \end{equation}
 %
-where $\Tbar{i-1}{i'}$ designates the transformation between joint frames $i-1$ and $i$ when the joint configuration $q_i$ is at the identity value and is a constant. The $\T{i'}{i}(q_i)$ designate transformations caused by a non-zero joint value $q_i$.
+where $\Tbar{i-1}{i'}$ designates the transformation between joint frames $i-1$ and $i$ when the joint configuration $q_i$ is at the identity value and is a constant. 
+The $\T{i'}{i}(q_i)$ designate transformations caused by a non-zero joint value $q_i$, as reprsented in \figRef{fig:forward_kinematics}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/kinematic_tree_FK.pdf}
+    \caption{Illustration of the Forward kinematics algorithm to get the transformation of the foot $4$ with respect to the world $0$.}
+    \label{fig:forward_kinematics}
+\end{figure}
+
 
 It is also possible to obtain the pose relative to the base $\T{b}{k}$ by simply setting the base pose vector to be the identity pose $[0,0,0,~0,0,0,1]$.
 
