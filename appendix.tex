@@ -267,35 +267,8 @@ with (we skip proofs for space reasons)
 where  $\bth=\bw\Dt$, $\theta=\norm{\bth}$ and $\bfu=\bth/\theta$ form the angle-axis representation of the rotation step $\bw\Dt$. 
 
 
-\subsubsection{The IMU case of \texorpdfstring{$\bfv=0$}{bfv=0}}
-\label{sec:IMU_case}
-
-We defined the IMU deltas as the motion relative to the free-falling frame, which has initial velocity $\bfv_i$. 
-Thus the tangent velocity $\bfv=\dot\Dp$  is zero at the start of the integration step. 
-%
-Since the exponential $\Exp(\bm\nu\Dt)$ assumes a constant tangent vector $\bm\nu=(\bfv,\bfa,\bw,1)$ during the interval $\Dt$, we have that $\bfv=0$ during the full step. 
-%
-This gives immediately
-%
-\begin{align}
-% \D &= 
-\exp\left(\begin{bsmallmatrix}
-\hatx{\bw} & \bfa & \bf0 \\
-\bf0 & 0 & 1 \\
-\bf0 & 0 & 0 
-\end{bsmallmatrix}\Dt\right) 
-= \begin{bsmallmatrix}
-\exp(\hatx{\bw}\Dt) & ~\bfQ\bfa\Dt~ & \bfP\bfa\Dt^2 \\
-\bf0 & 1 & \Dt \\
-\bf0 & 0 & 1
-\end{bsmallmatrix}
-~.
-\end{align}
-
-
-
-
 \subsection{The adjoint and small adjoint matrices}
+\label{sec:imu_compact_adjoint}
 
 %
 Following the general methodology explained in \cite{sola2018micro}, the adjoint matrix is obtained by identifying the linear terms in $\Ad{\D}\bftau=(\D\bftau\hhat\D\inv)\vvee$. We get after long but relatively easy calculations,
@@ -336,6 +309,7 @@ which  for $\bftau=(\bfrho,\bfupsilon,\bth,\Dt)\in\mathfrak{d}$ yields,
 
 
 \subsection{The right Jacobian}
+\label{sec:imu_compact_right_jacobian}
 
 The right Jacobian $\mjac{}{r}$ is the Jacobian of $\Exp()$ as described in \cite{sola2018micro}.
 Lacking at the moment a closed form for it, we take the general methodology for the left Jacobian described in \cite{EADE-18-DERIVATIVE}, and transform it to the right using $\mjac{}{r}(\bftau)=\mjac{}{l}(-\bftau)$ \cite{sola2018micro},

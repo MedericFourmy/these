@@ -80,7 +80,7 @@ Fiducial markers (such as ARToolkit \cite{kato1999marker}, ARTag \cite{fiala2005
 between a calibrated camera and the marker. These markers are designed so that they are uniquely and robustly identifiable in any scene 
 \cite{wang2016iros,romero2018speeded}. For square markers, the outputs of the algorithm are sub-pixel projections of the square corners, whose 
 corresponding position in the local reference frame of the tag is known (using the tag dimensions). Recovering their pose is then an instance 
-of the Perspective n Point (PnP) algorithm, which requires at least three 2D-3D correspondences to compute the 3D pose. 
+of the Perspective n Point (PnP) algorithm \cite{gao2003complete}, which requires at least three 2D-3D correspondences to compute the 3D pose. 
 A vast literature has been written on the topic, many methods relying on efficient analytical models
 \cite{gao2003complete, lepetit2009epnp, collins2014infinitesimal, terzakis2020consistently}, sometimes refined by a nonlinear maximum likelihood step. 
 
@@ -92,12 +92,10 @@ provide both ambiguous solutions so that the end-user may make an informed choic
 
 \subsection{Covariance model}
 Obtaining a covariance of the estimated transformation is an important step toward the integration of these measurements in a sensor fusion algorithm.
-For methods relying on a maximum likelihood nonlinear optimization refinement step, one might invert the Hessian matrix at the optimum to obtain a covariance 
-(as explained in \secRef{sec:map_covariance}).
-Eq. (23) in \cite{urban2016mlpnp} shows an analytical formula to compute pose uncertainty from pixel noise.
-The presented method in this paper uses a careful parameterization of the homogeneous coordinates associated with 2D features to develop
-a maximum likelihood PnP algorithm.  However, the formulation is particular to the choice of parameterization described in the paper and, 
-therefore, we think that a simpler yet equivalent formulation is possible. This model is proposed in our work \cite{fourmy2019absolute}. 
+
+Urban \cite{urban2016mlpnp} (Eq. (23)) uses a careful parameterization of the homogeneous coordinates associated with 2D features to develop
+a maximum likelihood PnP algorithm and also proposises a covariance model based on the problem Hessian (Eq. (23)).  However, the particular choice of variable parameterization makes the formulation of the covariance computation overcomplicated.
+We think that a simpler yet equivalent formulation is possible. 
 
 Usually, when a nonlinear mapping of noise variables from one space to another is available, we can propagate the covariance through the nonlinearity
 as shown in Eq. \eqRef{eq:cov_propagation}.  
@@ -158,7 +156,7 @@ Then, assuming that images are corrected (no distortion), the pinpoint camera mo
 \begin{equation}
     \bfx_i = \text{eucl}(h_i) = \text{eucl}(K\T{C}{O} c_i)
 \end{equation}
-for each corner $c_i$, where $h_i$ are the homogeneous coordinates representing the projected corners and $eucl$ is the euclideanization function defined as
+for each corner $c_i$, where $h_i$ are the homogeneous coordinates representing the projected corners and $eucl$ is the function that maps homogeneous coordinates to euclidean pixel coordinates, defined as
 \begin{equation}
     \begin{split}
         \text{eucl}: \Reals^3 &\rightarrow \Reals^2 \\
@@ -199,17 +197,33 @@ Finally, we can stack the 4 jacobians to get the full jacobian to be used for co
 \end{equation}.
 
 We therefore have the covariance propagation equation $\Cov_{\bfx} = J \Cov_{\T{}{}} J\tr$. 
-This equation must be inverted in order to recover the needed covariance. $J$ being non square, 
-we have to use the pseudo inverse to write: $\Cov_{\T{}{}} = J^{+,T} \Cov_{\bfx} J^{+}$. 
-Given that the pixel noise covariance is isotropic as explained above, this equation simplifies to:
+This equation must be inverted in order to recover the needed covariance $\Cov_{\T{}{}}$. $J$ being non square and full column rank for four corners ($J \in \Reals^{8 \times 6}$, 
+we can use the right pseudo inverse $J^{+} = (J\tr J)^{-1}J\tr$. Left and right multiplying by respectively $J^{+}$ and $J^{+,\top}$, we obtain: $\Cov_{\T{}{}} = J^{+} \Cov_{\bfx} J^{+,\top}$. 
+Given that the pixel noise covariance is isotropic as explained above:
+$\Cov_{\bfx} = \sigma_x^2 \bfI$. This equation finally simplifies to:
 
-\begin{equation}
-    \Cov_{\T{}{}} = \sigma_{x}^2(J\tr J)^{-1}.
-\end{equation}
+\begin{align}
+    \Cov_{\T{}{}} 
+    &=  (J\tr J)^{-1}J \tr \sigma_x^2 \bfI ((J\tr J)^{-1}J\tr)\tr \\
+    &=  \sigma_x^2 (J\tr J)^{-1} J\tr J (J\tr J)^{-1} \\
+    &= \sigma_{x}^2(J\tr J)^{-1}.
+\end{align}
 
 Note that the derivations above are not limited to a square tag with four corners and could be used for any object defined as
 a set of points in its local coordinate system provided their configuration is not degenerate and makes the PnP computation possible \cite{gao2003complete}.  
 We have therefore a compact model informed by the geometry of the measurement model with a single tuning parameter in the pixel noise $\sigma_x$.
+
+Another interpretation of these derivations is the Laplace approximation presented in \ref{chp:MAP_covariance}. 
+In fact, the PnP problem is best described as the minimization of the reprojection errors:
+
+\begin{equation}
+    \T{C}{O}* \argmin \frac{1}{\sigma_x^2} ||\tilde{\bfx} - \text{proj}_{w}(T{C}{O})||^2
+\end{equation}
+
+We find the Maximum-A-Posterior solution \footnote{In this case, no prior is used, so we could talk instead of the Maximum likelihood.} of the problem using a dedicated algorithm \cite{collins2014infinitesimal}.
+Then, the computation of the covariance resorts to computing the Jacobians of the likelihood and inverting the Hessian matrix $J\tr J$. 
+
+\subsection{Covariance visualization}
 
 It is hard to represent graphically the appearance of this uncertainty model from the full 6D covariance. However, we can inspect the positional and orientational
 (respectively 3x3 upper-left and 3x3 lower-right sub-matrices) by representing them as confidence ellipsoids.
