@@ -295,10 +295,11 @@ At each reception of sensor data $\tilde\bfz_k$ at $t_k$, we integrate during $\
 \end{equation}
 %
 using the bias $\ol\bfb_i$ available in KF $i$. 
-In major cases, this function is split into the stages of data calibration $c()$ and retraction $\Exp()$,
+In major cases, this function is split into the stages of data calibration $c()$, producing a vector in the Lie algebra, and retraction $\Exp()$, retracting it onto the manifold,
 %
 \begin{align}
-    \bm\delta_k = \Exp(c(\tilde\bfz_k, \ol\bfb_i) \dt),
+    \bftau_k = c(\tilde\bfz_k, \ol\bfb_i) \dt \in T_\Epsilon \mathcal{M}\\
+    \bm\delta_k = \Exp(\bftau_k) \in \mathcal{M},
 \end{align}
 %
 where the former, $c()$, depends on the sensor model, and the second, $\Exp()$, on the deltas Lie group.
@@ -309,9 +310,9 @@ This single delta is integrated onto the delta pre-integrated so far using the d
     \label{eq:deltaPlusDelta}
 \end{equation}
 %
-which is represented in figure \figRef{fig:delta_time}.
+as can be seen in figure \figRef{fig:delta_time}.
 %with Jacobians $\mjac{\ol\D_{ik}}{\ol\D_{ij}}$ and $\mjac{\ol\D_{ik}}{\bm\delta_k}$. 
-The delta covariance, as well as the Jacobian of the pre-integrated delta with respect to biases, are also pre-integrated using the chain rule and standard covariance propagation,
+The pre-integrated delta covariance, as well as the Jacobian of the pre-integrated delta with respect to biases, are also pre-integrated using the chain rule and standard covariance propagation,
 %
 \begin{align}
     \Cov_\Delta^{ik} &= \mjac{\D_{ik}}{\D_{ij}}\Cov_\Delta^{ij}\mjac{\D_{ik}}{\D_{ij}}\tr 
@@ -328,30 +329,30 @@ where $\mjac{\bm\delta_k}{\bfb_i}$, $\mjac{\bm\delta_k}{\bfz_k}$ are the Jacobia
 \subsection{Residual definition}
 \label{sec:preint_residual}
 
-The successive $\ol\D_{ik}$, $\mjac{\D_{ik}}{\bfb_i}$, and $\Cov_\Delta^{ik}$ are kept in a buffers initialized at $t_i$. When a new \keyframe\ is added to the problem,
-a factor is created to which we pass $\ol\D_{im}$, $\ol\bfb_i$,  $\mjac{\D_{im}}{\bfb_i}$, and $\Cov_\Delta^{im}$, which are enough define the residual:
-
+The successive $\ol\D_{ik}$, $\mjac{\D_{ik}}{\bfb_i}$, and $\Cov_\Delta^{ik}$ are kept in a buffers initialized at $t_i$. When a new \keyframe\ is added to the problem at time $k=m$,
+a factor is created to which we pass $\ol\D_{im}$, $\ol\bfb_i$,  $\mjac{\D_{im}}{\bfb_i}$, and $\Cov_\Delta^{im}$, with which the residual can be defined:
+%
 % The pre-integrated $\ol\D_{im}$ is used at the end of the pre-integration to define the residual:
-
+%
 \begin{align}
     \bfe_{im}(\bfx^i, \bfx^m, \bias^i) = (\ol\D_{im} \oplus \mjac{\D_{im}}{\bfb_i}(\bfb_i-\ol\bfb_i) ) \ominus \hat\D_{im}
     \label{eq:preint_residual}
 \end{align}
 %
 with associated covariance $\Cov_\Delta^{im}$.
-$\bfb_i$ is the current  value of the sensor's calibration parameters,  $\hat\D_{im}=\bfx^m\boxminus\bfx^i$ is the expected delta between KFs, and $\{\op,\om\}$ are the 
+Here, $\bfb_i$ is the current  value of the sensor's calibration parameters,  $\hat\D_{im}=\bfx^m\boxminus\bfx^i$ is the expected delta between KFs, and $\{\op,\om\}$ are the 
  plus and minus operators described in section \secRef{sec:manifold_structure}. 
 % That is, $\{\op,\om\}$ are $\{+,-\}$ for vectors, and for rotations we have $\bfR\op\bm\theta\te\bfR\Exp(\bm\theta)$ and $\bfR_2\om\bfR_1\te\Log(\bfR_1\tr\bfR_2)$. 
 % The residual clearly depends on the KF states $\bfx^i,\bfx^m$ and the bias $\bfb_i$. It has an associated covariance  $\Cov_\Delta^{im}$.
 
-As for the IMU case, the calibration drift is modelled as the integration of a random walk. This drift is included as a factor in the factor graph by defining a residual error
-
+In cases where the calibration parameters are subject to drift, as it is the case for IMU biases, the calibration drift is modelled as the integration of a random walk. This drift is included as a factor in the factor graph by defining a residual error
+%
 \begin{equation}
     \bfe^{\bias}_{im}(\bias^i, \bias^m) = \bias^m - \bias^i
 \end{equation}
-
+%
 with associated covariance matrix
-
+%
 \begin{equation}
     \Cov_{\bias,im} = \bfW^c_{\bias} \Dt_{im}
 \end{equation}
@@ -370,7 +371,8 @@ development in this section can be found in the report \cite{sola2018micro}.
 \subsection{IMU pre-integraton on composite Lie group}
 \label{sec:imu_preint_composite}
 
-Let us come back to the IMU pre-integration problem, as stated by Forster \cite{lupton-09, forster2015imu}, defined in \secRef{sec:imu_preint_motivation}.
+Let us come back to the IMU pre-integration problem, as stated by Forster \cite{lupton-09, forster2015imu}, defined in \secRef{sec:imu_preint_motivation}, and show that we can rewrite the algorithm in terms of the generalized pre-integration described in \secRef{sec:general-preint}.
+
 The states involved in this integration are the base states $\bfx = [\posi{}{}, \bfv, \Rot{}{}]$ with deltas $\D=[\Dp,\Dv,\DR] \in \cM_{\D}$. 
 The IMU produces biased and noisy measurements $\tilde\bfz = [\tilde\bfa, \tilde{\bfomega}]$ of the base proper acceleration and angular velocity, 
 with bias $\bfb = [\bias_{a}, \bias_{\omega}]$ and noise $\noise = [\noise_{a}, \noise_{\omega}]$. 
@@ -573,7 +575,7 @@ For general functions $f:\cM\to\cN;y=f(x)$, we propagate uncertainty normally vi
 $\mjac{y}{x}\te\dpar{y}{x}$, \ie, $\Cov_y=\mjac{y}{x}\,\Cov_x\,\mjac{y}{x}\tr$. 
 These Jacobians map the tangent spaces of the manifolds $\cM,\cN$ at $x$ and $y$, and in case of vector spaces they resort to the classical Jacobian.
 They also satisfy the chain rule, which we use extensively in our developments.
-We provide ample reference and justification of this approach in the technical report \cite{sola2018micro}.
+Ample reference and justification of this approach can be found in \cite{sola2018micro}.
 
 A comment is however necessary for the present IMU case.
 It relates to the uncertainty of the last component of the tangent space \eqRef{equ:lie_algebra}, which is the time $\Dt$. This component has no uncertainty by definition. 
@@ -588,7 +590,7 @@ We therefore systematically marginalize this time component out of the covarianc
 %
 %
 %
-\subsubsection{IMU-preintegration pipeline on compact Lie groups}
+\subsubsection{Pre-integration pipeline}
 
 Here we recall the general pre-integration pipeline in the case of compact Lie group, pointing at the minor differences with composite Lie group case.
 The following pipeline of operations is performed to recursively pre-integrate IMU data into a unique measurement.
@@ -659,7 +661,7 @@ Pre-integration starts after each keyframe with $\ol\D_{ii} = \bfI$, $\bfSigma^\
 Pre-integration is complete (\figRef{fig:delta_time}) when $k=m$, which yields $\ol\D_{im}$, $\bfSigma^\Delta_{im}$ and $\mjac{\D_{im}}{\bfb}$.
 
 
-\subsubsection{IMU factor residual on compact Lie group}
+\subsubsection{Factor residual}
 Computation of the residual in the case of the Lie Delta group formulation follows the steps defined in \secRef{sec:general-preint}.
 % However, since the Delta is directly defined as a Lie group, the formulation is actually simplified because  ... 
 Use the pre-integrated Jacobian $\mjac{\D_{im}}{\bfb}$ to correct the pre-integrated delta $\ol\D_{im}$ to account for the new bias estimate $\bfb_i\neq\ol\bfb_i$,
@@ -691,7 +693,7 @@ In this last equation, the minus operator $\ominus$ is simply the traditional Li
 
 \subsection{About the choice of the proper Lie group}
 
-\subsubsection{IMU Lie group versus Forster's method}
+\subsubsection{Our IMU Lie group versus Forster's method}
 
 Mathematically, and disregarding methodology, the main difference between our method (\secRef{sec:imu_preint_composite}) and Forster's \cite{forster2017-TRO} (\secRef{sec:imu_preint_compact}) is to be found in the exponential map. 
 To see it, let us consider small rotation increments $\bth=\bw\dt$ captured at each single IMU sample. 
@@ -729,8 +731,8 @@ Regarding "compact group" designs, there is still another proposal, the $\SE_2(3
 which can be used for IMU pre-integration. This proposal differs from ours in the following aspects:
 
 \begin{itemize}
-    \item The group does not contain the time and therefore the composition law does not account for the whole integration. Some extra algebra needs to be added.
-    \item The group is easier to manipulate since the closed forms for the exponential map, the adjoint and the right-jacobian are easier to obtain.
+    \item The $\SE_2(3)$ group does not contain the time and therefore the composition law does not account for the whole integration. Some extra algebra needs to be added.
+    \item The $\SE_2(3)$ group is easier to manipulate since the closed forms for the exponential map, the adjoint and the right-jacobian are easier to obtain.
     \item Our group better separates between the delta states and the velocity of these states which depend only on the IMU data.
 \end{itemize}
 

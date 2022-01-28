@@ -123,7 +123,7 @@ It is tempting to propagate encoder noise $\noise_{\qa}$ trough FK using the kin
 However, the resolution of Solo encoder is actually very high: 0.002 degrees, which would account for a mere 10 \textit{micrometers} difference.
 Therefore, most of the measurement errors come from the other mentioned effects. Unfortunately, those are much harder to model, and all act at the same time
 in an unpredictable fashion. Thus, we opt for a simple additive noise on the foot position in the world:
-
+%
 \begin{equation}
     \posi{W}{L}^i = \posi{W}{L}^j + \noise_{LO}
 \end{equation}
@@ -131,11 +131,10 @@ in an unpredictable fashion. Thus, we opt for a simple additive noise on the foo
 where $\noise_{LO} \sim \Gaussian{0}{\Cov_{LO}}$ denotes a Gaussian noise accounting for potential roll/slip of the foot and kinematic inaccuracies.
 This noise can be modeled as white noise on the foot velocity $\noise_v$, which when integrated gives a random walk.  
 Its variance after $\Dt$ is 
-
+%
 \begin{equation}
     \Cov_{LO} = \Dt \Cov_v
 \end{equation}
-
 %
 where $\posim{B}{L}^i$ and $\posi{B}{L}^j$ are the contact positions in base frame at times $t_i$ and $t_j$ acquired from $\qa$ via forward kinematics. 
 The residual errors $\bfe^{LO}_l$ and their covariances can be added as a factor to the factor graph that we wish to build.
@@ -144,8 +143,7 @@ In the literature review and \figRef{fig:kin_models}, this method is referred to
 a relative transformation of the robot's base frame between $t_i$ and $t_j$, at least three stable feet contacts are necessary. When it is the case, it is possible to directly compute the
 relative transformation, which would be integrated as a separate residual, by solving an orthogonal Procrustes problem \cite{roston1991dead}.
 
-However, we did not find useful to implement a Procrustes based 6D transformation a factor. Instead, we add a single factor for each feet in stable contact. We proceed like this for several reasons. First of all, when at least 3 feet are in stable contact, the 6D transformation is implicitly computed by the solver.
-Secondly, for trotting gates common for quadrupeds, the robot is most of the time standing on only two legs. Thirdly, when fusing with other sensors (such as the IMU,
+However, for trotting gates common for quadrupeds, the robot is most of the time standing on only two legs, which makes the Procrustes problem computation rarely applicable. Instead, we add a single factor for each foot in stable contact. In fact, when at least 3 feet are in stable contact, the information extracted from these combined factors is the same as if we had pre-computed a 6D transformation from the Procrustes problem. Besides, when fusing with other sensors (such as the IMU,
 see \chpRef{chp:centroidal_estimation}), 1 or 2 legs in contact already provide sufficient information to make the desired variables observable.
 
 
@@ -160,7 +158,7 @@ If we only use leg odometry along with other sources of odometry such as an IMU 
 This residual can be assigned with a variance $\sigma_h^2$ which is hand-tuned. 
 The error and its covariance form a unary factor (only depends on one \keyframe\ ) 
 that can be added to the factor we want to build.
-Giving information about the height of the feet of the robot grounds the robot base height estimates.
+Giving information about the height of the feet of the robot grounds the robot base height estimates and cancels the accumulation of drift in the vertical direction.
 
 
 
