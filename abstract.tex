@@ -6,19 +6,26 @@
 
 \paragraph{Abstract}~
 
-Legged robots are complex mechanisms whose stable behavior depends on the proper estimation of several different quantities that must be observed at high speed and accuracy. While the robot state can mostly not be observed directly by any existing sensors, it is typically reconstructed by fusing very diverse sensor modalities.
+Legged robots are complex mechanisms whose stable behavior depends on the proper estimation of several different quantities that must be observed at 
+high speed and accuracy. While the robot state can mostly not be observed directly by any existing sensors, it is typically reconstructed by fusing very 
+diverse sensor modalities.
 These sources of information differ significantly on their acquisition frequencies, the nature of the data, and the computational processing cost. 
 While state estimation by sensor fusion is a common topic to most robotic platforms, it offers a particular challenge in legged robotics by their peculiar dynamics.
-For legged robots, on the one hand, the robot state is needed to maintain its sense of balance and locomote safely, and, on the other hand, a precise representation of the environment is required for navigation and interaction. 
+For legged robots, on the one hand, the robot state is needed to maintain its sense of balance and locomote safely, and, on the other hand, a precise representation 
+of the environment is required for navigation and interaction. 
 
 The current approach for many legged systems, in the literature, solve
 these problems independently, using cascades of estimators that may neglect some of the correlation present in the data.
-This artificial decoupling acts as strong priors that enable simple estimators to handle the estimation of each part of the cascade and stabilize the behavior of the overall estimation scheme. On the other hand, designing a cascade involves a lot of specialized work that hardly generalizes to new scenarios or new sensor modalities.
+This artificial decoupling acts as strong priors that enable simple estimators to handle the estimation of each part of the cascade and stabilize 
+the behavior of the overall estimation scheme. On the other hand, designing a cascade involves a lot of specialized work that hardly generalizes to new 
+scenarios or new sensor modalities.
 In this thesis, we rather defend the idea of building a single tightly-coupled estimator capable of estimating all quantities needed by the robot. 
-For this goal, the framework of a-posterio estimation, formalized as a factor graph, is very suitable. This assertion does not come as a surprise, as factor graphs are nowadays highly popular in the SLAM literature, yet they are still under-represented in legged robots systems.
+For this goal, the framework of a-posteriori estimation, formalized as a factor graph, is very suitable. This assertion does not come as a surprise, 
+as factor graphs are nowadays highly popular in the SLAM literature, yet they are still under-represented in legged robots systems.
 
-In this thesis, we investigate a few avenues that we believe are crucial to achieving these goals. First, we develop tailored sensor measurement models with attention to the correct mathematical formulation involving Lie theory.
-Second, we propose visual-inertial systems based on object-level detection, which provide relative transformation between the camera and the objects.
+In this thesis, we investigate a few avenues that we believe are crucial to achieving these goals. First, we develop tailored sensor measurement models 
+with attention to the correct mathematical formulation involving Lie theory.
+Second, we propose visual-inertial systems based on object-level detection that provide relative transformation between the camera and the objects.
 We provide covariance models for two kinds of objects: the first one is an analytical model for fiducial markers; the second
 is an empirical model for deep-learning-based object pose estimation.
 Third, we handle high-rate sensors by developing a generalization of the IMU pre-integration theory. We propose a new formulation of the IMU
@@ -27,7 +34,8 @@ Fourth, we show that pre-integration can also be applied to use force-torque sen
 By fusing it with a leg-kinematics based odometry and IMU, we show that this new formulation makes possible the tightly-coupled estimation
 of centroidal quantities within the context of Factor Graph estimation.
 
-The proposed theoretical ideas are implemented in a coherent estimation framework, extending the factor-graph software Wolf. Each new modality is validated in a dedicated experimental setup that allowed us to quantify its interest and relevance for legged robotics.
+The proposed theoretical ideas are implemented in a coherent estimation framework, extending the factor-graph software Wolf. Each new modality is 
+validated in a dedicated experimental setup that allowed us to quantify its interest and relevance for legged robotics.
 
 
 
@@ -50,7 +58,7 @@ Factor Graph, estimation, legged robots, SLAM, pre-integration, IMU, force senso
 Les robots à pattes sont des mécanismes complexes dont le comportement stable dépend de la bonne estimation de plusieurs quantités 
 qui doivent être observées à grande vitesse et avec précision. Bien que l'état du robot ne puisse généralement pas être observé directement par 
 les capteurs existants, il est généralement possible de le reconstruire en fusionnant des modalités de capteurs très diverses.
-Ces sources d'information diffèrent significativement au niveau de leurs fréquences d'acquisition, la nature des données et leurs coût de traitement informatique.
+Ces sources d'information diffèrent significativement au niveau de leurs fréquences d'acquisition, la nature des données et leurs coûts de traitement informatique.
 Alors que l'estimation d'état par fusion de capteurs est un sujet commun à la plupart des plateformes robotiques, elle offre un défi particulier à la 
 robotique à pattes du fait de leur dynamique particulière.
 Pour les robots à pattes, d'une part, l'état du robot est nécessaire pour maintenir son sens de l'équilibre et se déplacer en toute sécurité, et, 
@@ -58,7 +66,7 @@ d'autre part, une représentation précise de l'environnement est nécessaire po
 
 L'approche actuelle dominante pour de nombreux systèmes à pattes dans la littérature est de résoudre ces problèmes
 indépendamment, en utilisant des cascades d'estimateurs qui peuvent négliger une partie des corrélations présente dans les données.
-Ce découplage artificiel agit comme des priors forts qui permettent à des estimateurs simples de gérer l'estimation de chaque partie de la cascade et de stabiliser 
+Ce découplage artificiel agit comme des \textit{a priori} forts qui permettent à des estimateurs simples de gérer l'estimation de chaque partie de la cascade et de stabiliser 
 le comportement du schéma d'estimation global. D'un autre côté, la conception d'une cascade implique beaucoup de travail spécialisé qui ne se généralise guère à de 
 nouveaux scénarios ou à de nouvelles modalités de capteurs.
 Dans cette thèse, nous défendrions plutôt l'idée de construire un seul estimateur étroitement couplé capable d'estimer toutes les quantités nécessaires au robot.
@@ -66,7 +74,7 @@ Pour cet objectif, le cadre de l'estimation a-postério, formalisé sous la form
 car les graphes factoriels sont aujourd'hui très populaires dans la littérature SLAM. Ils sont cependant encore sous-représentés pour les robots à pattes.
 
 Dans cette thèse, nous étudions quelques pistes qui nous semblent cruciales pour atteindre ces objectifs. Tout d'abord, nous développons des modèles de mesure de 
-capteurs en prêtant attention à la formulation mathématique correcte fondé sur la théorie des groupes de Lie.
+capteurs en prêtant attention à la formulation mathématique correcte fondée sur la théorie des groupes de Lie.
 Deuxièmement, nous proposons des systèmes visuels inertiels basés sur des algorithmes de détection d'objets, qui fournissent une transformation relative entre la caméra 
 et les objets.
 Nous fournissons des modèles de covariance pour deux types d'objets : le premier est un modèle analytique pour les marqueurs fiduciaires ; la deuxième
