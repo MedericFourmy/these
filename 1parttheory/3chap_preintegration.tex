@@ -303,9 +303,40 @@ development in this section can be found in the report \cite{sola2018micro}.
 \subsection{IMU pre-integraton on composite Lie group \cite{forster2015imu}}
 
 Let us come back to the IMU pre-integration problem defined in \secRef{sec:imu_preint_motivation}.
-The states involved in this integration are the base states $\bfx = [\posi{}{}, \bfv, \Rot{}{}]$ with deltas $\bfDelta=[\Dp,\Dv,\DR]$. 
+The states involved in this integration are the base states $\bfx = [\posi{}{}, \bfv, \Rot{}{}]$ with deltas $\bfDelta=[\Dp,\Dv,\DR] \in \cM_{\bfDelta}$. 
 The IMU produces biased and noisy measurements $\tilde\bfz = [\tilde\bfa, \tilde{\bfomega}]$ of the base proper acceleration and angular velocity, 
 with bias $\bfb = [\bias_{a}, \bias_{\omega}]$ and noise $\noise = [\noise_{a}, \noise_{\omega}]$. 
+
+The group composition law $\bfDelta^{ik}=\bfDelta^{ij}\circ\bm\delta^k$ in \eqRef{eq:deltaPlusDelta} is defined as
+%
+\begin{equation} 
+    \label{eq:composition_delta}
+    \bfDelta \circ \bfdelta
+    =
+    \begin{bmatrix}
+        \Dp^{ij} + \Dv^{ij}\dt + \DR^{ij}\dpp^{k} \\
+        \Dv^{ij} + \DR^{ij}\dv^{k} \\
+        \DR^{ij}\dR^{k} 
+    \end{bmatrix}
+\end{equation}
+%
+with a group identity element composed of the identity element of its Lie groups:
+%
+\begin{equation}
+    \bfDelta_{\cE} = [\bfO_3, \bfO_3, \bfI_3],
+\end{equation}
+%
+its the resulting inverse
+%
+\begin{equation}
+    \bfDelta^{-1} =     \begin{bmatrix}
+    - \tr\DR(\Dp + \Dv \dt) \\
+    -\tr\DR \Dv \\
+    \tr\DR
+    \end{bmatrix}
+\end{equation}
+%
+
 
 The pre-integration method in  \cite{forster2017-TRO} can be put in the formalism above by defining 
 $\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta} as:
@@ -319,19 +350,6 @@ $\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta} as:
     (\tilde\bfa-\bfb_a-\noise_a)\dt \\
     \Exp((\tilde{\bfomega}-\bfb_\omega-\noise_\omega)\dt)
     \end{bmatrix}^k
-\end{align}
-%
-and the composition law $\bfDelta^{ik}=\bfDelta^{ij}\circ\bm\delta^k$ in \eqRef{eq:deltaPlusDelta} as
-%
-\begin{align} \label{eq:composition_delta}
-    \begin{split}
-    \Dp^{ik} 
-    &= \Dp^{ij} + \Dv^{ij}\dt + \DR^{ij}\dpp^{k} \\
-    \Dv_{ik} 
-    &= \Dv^{ij} + \DR^{ij}\dv^{k} \\
-    \DR^{ik} 
-    &= \DR^{ij}\dR^{k} 
-    \end{split}
 \end{align}
 
 Then, $\bfx_k=\bfx_i\boxplus\bfDelta_{ik}$ is \cite[eq.~32]{forster2017-TRO} and $\bfDelta_{ik}=\bfx_k\boxminus\bfx_i$ is \cite[eq.~33]{forster2017-TRO}. 
@@ -431,7 +449,7 @@ The exponential map transfers tangent elements to the group; the logarithmic map
 \end{align}
 %
 where $\Log()$ is obtained by identifying terms in \eqRef{equ:delta_Lie} and \eqRef{equ:exp}.
-Matrices $\bfP$ and $\bfQ$ are provided in the appendix's \secRef{sec:imu_}.
+Matrices $\bfP$ and $\bfQ$ are provided in the appendix's \secRef{sec:IMULieGroup}.
 
 
 \subsubsection{Jacobians, uncertainty}
