@@ -21,91 +21,7 @@ the scene.
 In this thesis, rather than investing time and energies in new vision processing algorithms, we chose to focus our attention on legged-robot state estimation. 
 In particular, we are interested in localizing the robot with respect to objects of interest such as stairs, tables, or the like, whose geometrical models are known.
 Approaches based on object-level measurement can provide an affordable alternative, and are readily available. These systems assume the presence of known objects 
-in the scene which can be detected in the images. Dedicated algorithms can then infer the object pose relative to the camera, 
-Track changes is off
-Everyone
-Track changes for everyone
-You
-Track changes for You
-Guests
-Track changes for guests
-You: MEH, interesting but not necessary
-Jan 29, 2022 2:15 AM • Edit
-Hit Enter to reply
-Current file
-Overview
-2.2. Fiducial marker
-W TB BTC W TO
-SLAM with extrinsics calibration
-SLAM X
-Localization with extrinsics calibration X
-Localization X X
-Mapping X X
-Table 2.1: Some possible estimation problems corresponding to fixing either of the variables.
-Fixed variables are checked.
-Figure 2.1: Kinematic tree of the object/camera measurement model
-This factor is general enough to be used in two applications that we successively
-describe, based on AprilTag fiducial markers and CosyPose. For both, we explain the the
-algorithm behind the pose measurements and propose covariances models
-2.2 Fiducial marker
-2.2.1 Markers Pose estimation algorithms
-Fiducial markers (such as ARToolkit [35], ARTag [36], ArUco [37]) are widely used in
-robotics and Augmented Reality (AR) applications as they provide an easy way to obtain a
-relative 6D pose between a calibrated camera and the marker. These markers are designed
-so that they are uniquely and robustly identifiable in any scene [33, 38].
-The pose extraction happens in two steps. First, the tag corners sub-pixel projections
-are extracted from the image along with the unique id of the detected tag. In this work
-we used the AprilTag library [33] for its performances and popularity within the robotics
-community. Second, knowing the tag size, we can compute the position of these corners in
-the local tag frame, as defined in Fig. 2.3. Recovering the pose of the tag from the corner
-projections and their local coordinates is then an instance of the Perspective-n-Point (PnP)
-algorithm [39], which requires at least four 2D-3D correspondences to compute a unique
-solution the 3D pose 1. A vast literature has been written on the topic, many methods
-relying on efficient analytical models [39, 40, 41, 42], sometimes refined by a nonlinear
-maximum likelihood step.
-1The P3P algorithm yields up to four geometrically feasible solutions, a fourth point being then used to
-select the right one.
-21
-Chapter 2: Object-level vision
-Figure 2.2: Illustration of the tag ambiguity problem. The red circles represent uncertainty in the
-corner detection due to pixel noise. The conic perspective projections of faces from two cubes with
-120 degrees orientation difference fall withing these regions and are, therefore, hard to distinguish.
-Figure taken from [43].
-2.2.2 Ambiguity in the pose estimation
-A known problem of fiducial markers is the orientation ambiguity of detections in noisy
-images. This phenomenon may make the PnP estimation of the tag orientation jump
-wildly from one frame to the next. This is due to the fact that the conic perspective
-projection of the corners is weak, that is the difference between two symmetrical tag
-orientations is very close. If this difference falls below the camera pixel noise, then the
-two solutions are indistinguishable, as shown in Fig. 2.2. This happens especially when
-the tag corner projection is close to a square, that is when the tag is orthogonal to the
-axis passing through the camera and tag origins. We refer to this situation as tags being
-fronto-parallel with respect to the camera. This phenomenon is intensified when the tag
-is far from the camera as it spans a smaller region of the image.
-One solution is to define the tag factor residual as the pixel error between the detected
-corners and their projection given the current tag pose estimate and let the optimizer find
-the most probable tag poses given the complete set of measurements. However, if one tag
-is wrongly initialized, the optimizer is not guaranteed to leave the local minimum with
-new measurements.
-Our solution is to bring the disambiguation to the front-end side. [41] provides an im-
-plementation of the PnP problem that retrieves both ambiguous poses. When expressed
-in the camera frame, both solutions share the tag position and differ only in their orien-
-tation. We typically want to select the solution with the smallest error. However, if the
-reprojection errors e1 and e2 are too close (we test for e2
-e1 < h with e1 ≤ e2 and h an
-empirical threshold), we increase the rotational part of the covariance matrix by a great
-factor to prevent a potential wrong tag orientation to influence the estimation.
-2.2.3 Covariance model
-Obtaining a covariance of the estimated transformation is an important step toward the
-integration of these measurements in a sensor fusion algorithm.
-Urban [44] (Eq. (23)) uses a careful parameterization of the homogeneous coordi-
-nates associated with 2D features to develop a maximum likelihood PnP algorithm and
-also proposes a covariance model based on the problem Hessian (Eq. (23)). However,
-the particular choice of variable parameterization makes the formulation of the covari-
-ance computation overcomplicated. We think that a simpler yet equivalent formulation is
-possible.
-22
- which can be used to build 
+in the scene which can be detected in the images. Dedicated algorithms can then infer the object pose relative to the camera, which can be used to build 
 \textit{object-level SLAM} systems. 
 
 In this chapter, we present two measurements models based on available software, that permit the implementation of this paradigm. The first one 
@@ -123,13 +39,11 @@ For applications fusing these models with IMU data, please refer to \chpRef{chp:
 
 
 \section{Relative 6D pose factor}
-In this section, we will derive a general 6D relative transformation factor between a \keyframe\ and a object, whose poses in world frame are respectively $\T{W}{B} \in \SE(3)$ and $\T{W}{O} \in \SE(3)$. In this chapter, we denote by $\T{}{} \in \SE(3)$ 6D transformations.
-
-Let us assume that an algorithm provides us $\Tm{C}{O}$, a measurement of the pose of an element 
+Let us assume that an algorithm provides us $\Tm{C}{O} \in \SE(3)$, a measurement of the pose of an element 
 of the scene with an attached frame $O$ with respect to the camera frame $C$.
 The kinematic chain of the problem described in \figRef{fig:camera_object_chain} unrolls as 
 $\T{W}{O} = \T{W}{B}\T{B}{C}\T{C}{O}$ where W and B correspond to the world and body frames. $\T{B}{C}$ corresponds to the extrinsic pose 
-of the camera.
+of the camera that has to be calibrated.
 Given measurement $\Tm{C}{O}$, this relation can therefore be turned into a residual relating 
 the robot pose, the camera extrinsics, and the object pose:
 
@@ -140,31 +54,6 @@ the robot pose, the camera extrinsics, and the object pose:
 \end{align}
 %
 where here $\Log_{\SE(3)}$ denotes the log map on $\SE(3)$.
-
-Depending on the nature of the problem, we can fix some of the variables of the residual. In table \tabRef{tab:res_var_fix}, various estimation problems are modelled depending on which variable is fixed.
-
-\begin{table}[h]
-    \centering
-    \begin{tabular}{|c|c|c|c|}
-        \hline
-        & $\T{W}{B}$ & $\T{B}{C}$ & $\T{W}{O}$  \\
-        \hline
-        SLAM with extrinsics calibration & & & \\
-        \hline
-        SLAM & & X & \\
-        \hline
-        Localization with extrinsics calibration & & X & \\
-        \hline
-        Localization &  & X & X \\
-        \hline
-        Mapping & X & X &  \\
-        \hline
-    \end{tabular}
-    \caption{Some possible estimation problems corresponding to fixing either of the variables. Fixed variables are checked.}
-    \label{tab:res_var_fix}
-\end{table}
-
-
 
 We also assume that we have access to the covariance of this measurement 
 \mbox{$\Cov_V \in \Reals^{6 \times 6}$}. 
