@@ -434,16 +434,15 @@ Finally, the calibration function $c()$ and exponential map $\Exp()$ are,
     \end{bmatrix}\begin{bmatrix}
     \tilde\bfa-\bfb_a-\noise_a \\
     \tilde{\bfomega}-\bfb_\omega-\noise_\omega
-    \end{bmatrix}
+    \end{bmatrix}\\
     \bfdelta &= \Exp(\bftau) = \begin{bmatrix}
     \frac12\bftau_a\dt^2 \\
     \bftau_a\dt \\
     \Exp(\bftau_\omega\dt)
     \end{bmatrix}
 \end{align}
-
-The pre-integration method in  \cite{forster2017-TRO} can be put in the general pre-integration formalism above by defining 
-$\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta} as:
+%
+giving
 %
 \begin{align}
     \bm\delta^k = \begin{bmatrix}
