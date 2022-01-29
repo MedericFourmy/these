@@ -29,7 +29,7 @@ Let us consider the estimation of a robot base state comprised of its pose and v
     [\bfp, \bfv, \Rot{}{}].
 \end{equation}
 
-We make a few hypothesis. First, we neglect effects due the rotation of the Earth by assuming 
+We make a few hypotheses. First, we neglect effects due to the rotation of the Earth by assuming 
 that our world frame (which is fixed \wrt the ground) is an inertial frame. This is a common simplification in robotics scenarios \cite{forster2017-TRO}. 
 Second, without loss of generality, we assume that the IMU frame is identical to the base frame in the following developments.
 
@@ -45,12 +45,12 @@ The IMU measurements are known to be noisy, biased, and affected by the gravity,
 \end{equation}
 %    
 The biases $\bias \triangleq [\bias_{\acc{}{}}, \bias_{\angvel{}{}}]$ need to be estimated in order to be able to cancel them, and are thus included in the estimator state.
-Fusing with other sensors will help making them observable.
+Fusing with other sensors will help make them observable.
 
 These biases may drift over time, more or less slowly depending on the quality of the IMU. This drift is modeled 
 as a random walk, which is close to the observed behavior for reasonably short periods of time \cite{hussen2015low}.
 
-A continuous-time dynamical model  based on strapdown integration of IMU measurements can then be derived:
+A continuous-time dynamical model  based on strap-down integration of IMU measurements can then be derived:
 %
 \begin{align}
 \begin{split}
@@ -111,7 +111,7 @@ which makes their integration trivial and thus allows us to concentrate in the u
 
 
 
-We are here in the position of illustrating why a naive definition of the data integration leads to very bad performance. 
+We are here in the position of illustrating why a naive definition of data integration leads to very bad performance. 
 By observing \eqRef{eq:IMUIntij} we can define a motion error, as follows. 
 First, we naively define the motion increments or "deltas"
 %
@@ -210,7 +210,7 @@ Then, each time a new $\bias_i$ value is computed, we can correct the delta line
     \D_{im}(\bias^i) = \ol\D_{im} \oplus \mjac{\D_{im}}{\bfb_i}(\bfb_i-\ol\bfb_i),
 \end{align}
 %
-that is, without the need of re-integration. This is why this method takes the name of delta pre-integration.
+that is, without the need for re-integration. This is why this method takes the name of delta pre-integration.
 
 With all these considerations, our residual error can be written as
 %
@@ -235,12 +235,12 @@ of the Lie-group structure of the deltas' geometry.
 \label{sec:general-preint}
 
 
-% Pre-integration refers to the integration of high rate proprioceptive sensory data in an efficient way in the context of factor graphs. 
+% Pre-integration refers to the integration of high rate proprioceptive sensory data efficiently in the context of factor graphs. 
 % As we have seen for IMU measurements, if a standard integration is conducted naively to derive a factor measurement between two \keyframes, 
 % then the data needs to be reintegrated at each solver iteration because the integral depends on the states we are to estimate. 
 % The IMU pre-integration theory solves this issue and can be generalized to many other proprioceptive sensors as shown in \cite{atchuthan-18-thesis,deray-19-selfcalib,fourmy2021contact}. 
-Pre-integration refers to the integration of high rate proprioceptive sensory data in an efficient way in the context of factor graphs. 
-The IMU preintegration theory can be generalized to many other proprioceotive sensors as shown in \cite{atchuthan-18-thesis,deray-19-selfcalib,fourmy2021contact}.
+Pre-integration refers to the integration of high rate proprioceptive sensory data efficiently in the context of factor graphs. 
+The IMU pre-integration theory can be generalized to many other proprioceotive sensors as shown in \cite{atchuthan-18-thesis,deray-19-selfcalib,fourmy2021contact}.
 
 The generalization makes use of the Lie group structure of the motion deltas, (see \secRef{sec:lie_groups}). Then, the motion data is interpreted as a member of the tangent 
 space of the group.
@@ -248,17 +248,17 @@ space of the group.
 Different Lie group structures can be chosen that satisfy the necessary properties. For the IMU, we explored the two variants: composite \cite{forster2015imu} and 
 compact group (our paper \cite{fourmy2019absolute}). 
 
-In \chpRef{chp:underactuade_dynamics}, we also use this generalized approach for the the pre-integration of force-torque sensors for the centroidal estimation of legged robots 
+In \chpRef{chp:underactuade_dynamics}, we also use this generalized approach for the pre-integration of force-torque sensors for the centroidal estimation of legged robots 
 based on the composite Lie group approach. This work was part of our published paper \cite{fourmy2021contact}.
 
 \bigskip
-This section starts by stating the need to define a well-defined delta, then defining its Lie group structure in detail, then describing the preintegration algorithm at the front-end, and finally the definition of the factor residual at the back-end.
+This section starts by stating the need to define a well-defined delta, then defining its Lie group structure in detail, then describing the pre-integration algorithm at the front-end, and finally the definition of the factor residual at the back-end.
 
 
 \subsection{Delta definition}
 
 The definition of the deltas needs to satisfy the property that such deltas $\D_{im}$ resulting from the integration of motion data from time $i$ to $m$ must 
-be independent from the initial state $\bfx^i$. The general rule to achieve this stems from observing that an unbiased and unnoisy sensor measuring null data should 
+be independent of the initial state $\bfx^i$. The general rule to achieve this stems from observing that an unbiased and unnoisy sensor measuring null data should 
 produce null deltas. This means that the deltas would be the deviations from the sensor trajectories exhibiting null data -- for example, a free-falling non-rotating 
 frame in  the case of an IMU (see \figRef{fig:fff}).
 Dependence on the small-varying parameters $\bfb$ such as sensor bias or other calibration parameters is then handled through linearization.
@@ -286,10 +286,10 @@ The Delta Lie group used in the specific application has to be defined, by descr
 \end{itemize}
 %
 Once these basic blocks are established, we shall refer to \secRef{sec:lie_groups} to define the $\oplus$ and $\ominus$ operators for the group.
-Likewise, in order to deal with the uncertainty of the integrated data, Jacobians of these operators will need to be obtained, for which we follow \cite{sola2018micro}.
+Likewise, to deal with the uncertainty of the integrated data, Jacobians of these operators will need to be obtained, for which we follow \cite{sola2018micro}.
 
-Also, we leverage the fact that motion data can easily be manipulated to be part of the tangent space of this group, since it expresses either velocities or increments on the
-state manifolds. In order to account for sensor self-calibration, this motion data is first corrected using currently known calibration parameters. %The resulting tangent vector is then retracted to the Lie group using the exponential map, then composed with the delta pre-integrated so far to obtain, recursively, a new value of the pre-integration.
+Also, we leverage the fact that motion data can easily be manipulated to be part of the tangent space of this group since it expresses either velocities or increments on the
+state manifolds. To account for sensor self-calibration, this motion data is first corrected using currently known calibration parameters. %The resulting tangent vector is then retracted to the Lie group using the exponential map, then composed with the delta pre-integrated so far to obtain, recursively, a new value of the pre-integration.
 
 \subsection{Delta pre-integration algorithm}
 
@@ -380,7 +380,7 @@ Here, $\bfb_i$ is the current  value of the sensor's calibration parameters,  $\
 % That is, $\{\op,\om\}$ are $\{+,-\}$ for vectors, and for rotations we have $\bfR\op\bm\theta\te\bfR\Exp(\bm\theta)$ and $\bfR_2\om\bfR_1\te\Log(\bfR_1\tr\bfR_2)$. 
 % The residual clearly depends on the KF states $\bfx^i,\bfx^m$ and the bias $\bfb_i$. It has an associated covariance  $\Cov_\Delta^{im}$.
 
-In cases where the calibration parameters are subject to drift, the calibration drift is modelled as the integration of a random walk. This drift is included as a second factor 
+In cases where the calibration parameters are subject to drift, the calibration drift is modeled as the integration of a random walk. This drift is included as a second factor 
 in the factor graph, with residual error defined by
 %
 \begin{equation}
@@ -398,15 +398,20 @@ with associated covariance matrix
 \label{sec:publish-state}
 
 Interestingly, the proposed algorithm allows for the publication, at the high rate of the motion sensor and with little lag, of the current state of the robot. 
-To do so, we take advantage of the delta preintegrated so far, which can be corrected in case we dispose of better estimates of the calibration parameters. The current state at time $t_k$ thus reads,
+To do so, we take advantage of the delta pre-integrated so far, which can be corrected in case we dispose of better estimates of the calibration parameters. 
+The current state at time $t_k$ thus reads,
 %
 \begin{align}
     \bfx^k = \bfx^i \boxplus (\ol\D_{ik} \oplus \bfJ^{\D_{ik}}_{\bfb_i} (\bfb_i - \ol\bfb_i)).
 \end{align}
 %
-This current state is optimal in the following sense. First, it uses the state $\bfx^i$ of the last keyframe, which has been eventually optimized by the back-end. Second, it uses the most updated version of the calibration parameters $\bfb_i$ to correct the preintegrated delta, thus minimizing the dead-reckoning drift of the motion increment from \keyframe\ time $t_i$ to the current time $t_k$.
+This current state is optimal in the following sense. First, it uses the state $\bfx^i$ of the last \keyframe, which has been eventually optimized by the back-end. 
+Second, it uses the most updated version of the calibration parameters $\bfb_i$ to correct the pre-integrated delta, thus minimizing the dead-reckoning drift of the motion 
+increment from \keyframe\ time $t_i$ to the current time $t_k$.
 
-The optimal state $\bfx^k$ is published at the rate of the motion sensor, which can reach the kHz, and might be used for closed-loop control of the robot. This is so regardless of the rate at which \keyframes\ are generated, and the rate at which the solver optimizes the problem. These rates, in any case but especially if they are slow, will logically impact the accuracy of the published state.
+The optimal state $\bfx^k$ is published at the rate of the motion sensor, which can reach the kHz, and might be used for closed-loop control of the robot. 
+This is so regardless of the rate at which \keyframes\ are generated, and the rate at which the solver optimizes the problem. These rates, in any case, but especially 
+if they are slow, will logically impact the accuracy of the published state.
 
 %
 %
@@ -517,7 +522,7 @@ yielding $\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta} as
 % The pre-integration method in  \cite{forster2017-TRO} can be put in the general pre-integration formalism above by defining 
 % $\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta} as:
 
-\subsubsection{Delta preintegration and factor residual}
+\subsubsection{Delta pre-integration and factor residual}
 
 The concatenation of the operations above lead exactly to the Forster's algorithm \cite{forster2017-TRO}:
 %
@@ -562,7 +567,7 @@ Being computed in the same manner, the definition of the $\boxminus$ and $\boxpl
 Notice a fourth, time interval component $\Dt$ as being also part of the delta definition.
 
 \subsubsection{Group operations}
-Group composition, identity and inverse stem from regular matrix product, identity, and inverse (with $\DR\inv=\DR\tr$),
+Group composition, identity, and inverse stem from regular matrix product, identity, and inverse (with $\DR\inv=\DR\tr$),
 %
 \begin{align}
     \D\circ\bm\delta 
@@ -681,7 +686,7 @@ which we will use to integrate IMU data.
 %
 \subsubsection{Pre-integration pipeline}
 
-Here we recall the general pre-integration pipeline in the case of compact Lie group, pointing at the minor differences with composite Lie group case.
+Here we recall the general pre-integration pipeline in the case of the compact Lie group, pointing at the minor differences with the composite Lie group case.
 The following pipeline of operations is performed to recursively pre-integrate IMU data into a unique measurement.
 
 \paragraph{Initialization}
@@ -801,13 +806,13 @@ In this last equation, the minus operator $\ominus$ is simply the traditional Li
 
 For general functions $f:\cM\to\cN;y=f(x)$, we propagate uncertainty normally via the Jacobians 
 $\mjac{y}{x}\te\dpar{y}{x}$, \ie, $\Cov_y=\mjac{y}{x}\,\Cov_x\,\mjac{y}{x}\tr$. 
-These Jacobians map the tangent spaces of the manifolds $\cM,\cN$ at $x$ and $y$, and in case of vector spaces they resort to the classical Jacobian.
+These Jacobians map the tangent spaces of the manifolds $\cM,\cN$ at $x$ and $y$, and in the case of vector spaces, they resort to the classical Jacobian.
 They also satisfy the chain rule, which we use extensively in our developments.
 Ample reference and justification of this approach can be found in \cite{sola2018micro}.
 
 A comment is however necessary for the present IMU case.
 It relates to the uncertainty of the last component of the tangent space \eqRef{eq:lie_algebra}, which is the time $\Dt$. This component has no uncertainty by definition. 
-Having it in the covariances would imply singularity and result in the risk of a number of well-known numerical issues. 
+Having it in the covariances would imply singularity and result in the risk of several well-known numerical issues. 
 We therefore systematically marginalize this time component out of the covariances, simply by removing the last row and column. 
 
 
@@ -854,7 +859,7 @@ which can be used for IMU pre-integration. This proposal differs from ours in th
 
 \begin{itemize}
     \item The $\SE_2(3)$ group does not contain the time and therefore the composition law does not account for the whole integration. Some extra algebra needs to be added.
-    \item The $\SE_2(3)$ group is easier to manipulate since the closed forms for the exponential map, the adjoint and the right-jacobian are easier to obtain.
+    \item The $\SE_2(3)$ group is easier to manipulate since the closed forms for the exponential map, the adjoint, and the right-jacobian are easier to obtain.
     \item Our group better separates between the delta states and the velocity of these states which depend only on the IMU data.
 \end{itemize}
 
@@ -881,35 +886,35 @@ for composite groups, which is vastly simpler.
 
 \section{Related works}
 
-Pre-integration principles were laid out by Lupton \cite{lupton-09} for a smoothing based visual inertial estimator. His work was motivated partly 
+Pre-integration principles were laid out by Lupton \cite{lupton-09} for a smoothing-based visual-inertial estimator. His work was motivated partly 
 by the fact that previous systems required a precise initialization of orientation and velocity (using a specialized routine) to begin to integrate IMU measurements. 
-With this new formulation, Lupton noted that pre-integration of IMU measurements permitted to use measurements immediately and delay the estimation of the initial 
+With this new formulation, Lupton noted that pre-integration of IMU data permitted the use of measurements immediately and delay the estimation of the initial 
 orientation about the gravity vector in particular. 
 
 This seminal work was quickly adopted by other authors using smoothing filters \cite{carlone2014eliminating}. As pioneering as this work was, it was however 
 limited by the use of Euler angles whose problematic geometric properties are notorious. Indelman \cite{Indelman-2013-7768} first proposed to use the exponential of the 
 matrix rotation group instead of Euler integration and to relax the assumptions of a non-rotating and flat earth of Lupton \cite{lupton-09}. Forster \cite{forster2015imu, forster2017-TRO}
-proposed the same formulation using instead quaternions. Various experiments brought to light three main problem with the Euler angle formulation, that are completely absent 
-from the quaternion "on-manifold" formulation. Firstly, first order integration of angular velocities using Euler angles is approximate, which leads to accumulated errors 
+proposed the same formulation using instead quaternions. Various experiments brought to light three main problems with the Euler angle formulation, that are completely absent 
+from the quaternion "on-manifold" formulation. Firstly, first-order integration of angular velocities using Euler angles is approximate, which leads to accumulated errors 
 for high angular velocities or sampling rate. Secondly, the log-likelihood of the angular displacement is not invariant under the action of rigid body transformations, 
-\eg the choice of the world frame influence the results of the estimation. Finally, the well known gimbal lock singularity of Euler angles has a consequence 
+\eg the choice of the world frame influence the results of the estimation. Finally, the well-known gimbal lock singularity of Euler angles has a consequence 
 on the covariance IMU noise covariance propagation, which is severely degraded when the robot trajectory comes close to the singularity. 
 \cite{shen2015tightly}, later improved in \cite{qin2018vins} proposed to use a more precise numerical integration procedure than the default forward Euler used by Forster. 
-Eckenhoff \cite{eckenhoff2019closed} derived closed form solutions of the pre-integration equations using various piecewise constant models.
+Eckenhoff \cite{eckenhoff2019closed} derived closed-form solutions of the pre-integration equations using various piecewise constant models.
 
 Barrau \cite{barrau2020mathematical} described a compact matrix Lie group for the propagation of pre-integration errors taking into account the earth rotation with aerospace
 inertial navigation system in view. This work was later extended \cite{brossard2021associating} and showed that the linearized bias update is slightly more precise than 
 the work of Forster \cite{forster2017-TRO}. Le Gentil \cite{le2020gaussian} used a different trajectory parametrization framework by formulating the pre-integration algorithm 
-in the context of Gaussian Process smoothing. Self calibration of IMU/Camera time offsets was also developped \cite{yang2020analytic}. 
+in the context of Gaussian Process smoothing. Self-calibration of IMU/Camera time offsets was also developed \cite{yang2020analytic}. 
 \cite{luo2021unified} derived a comprehensive collection of motion models depending on the various possible choices of reference frames and motion conditions. 
 
-As we saw the pre-integration theory began in the context of visual-inertial odometry. It was however adapted to other high rate sensors such wheel odometry \cite{quan2019tightly}, 
+As we saw the pre-integration theory began in the context of visual-inertial odometry. It was however adapted to other high rate sensors such as wheel odometry \cite{quan2019tightly}, 
 possibly including self-calibration \cite{deray-19-selfcalib}. In his thesis, Atchuthan (\cite{atchuthan-18-thesis}, Section 4.3) derived the general form of the pre-integration 
-equations as a sensor agnostic form that is integrated in state estimation WOLF \cite{sola2021wolf}. As previously mentioned, other team applied pre-integration theory in the 
-context of factor graph legged robot state estimation to derive new leg odometry factors \cite{hartley2018legged, wisth2019robust, wisth2020pre-integrated}.
+equations as a sensor agnostic form that is integrated in the state estimation framework WOLF \cite{sola2021wolf}. As previously mentioned, other teams applied pre-integration theory in the 
+context of factor graph legged robots state estimation to derive new leg odometry factors \cite{hartley2018legged, wisth2019robust, wisth2020pre-integrated}.
 It was also applied to integrate drone dynamics to estimate external forces disturbances \cite{nisar2019vimo}.
 
 In \chpRef{chp:underactuade_dynamics}, we propose to pre-integrate force-torque measurements that are present in some legged-robots. 
-We show that permits to estimate the centroidal quantities of the robot as well making the kinematic bias on center of mass measurements observable. 
+We show that permits to estimate the centroidal quantities of the robot as well making the kinematic bias on the center of mass measurements observable. 
 A practical implementation is demonstrated in \chpRef{chp:centroidal_estimation}, which is based on our paper \cite{fourmy2021contact}
 
