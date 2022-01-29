@@ -96,18 +96,18 @@ with a visual-inertial sensor (VIS) carried by a human operator and the \HRP{2} 
     IMU factors (blue) relate consecutive keyframes and the IMU biases.
     The lower branch controls bias drift along time.
     Visual factors (red) relate landmarks with poses $(\bfp_i,\bfR_i)$.}
-    \label{fig:graph}
+    \label{fig:VI_factor_graph}
 \end{figure}
 
 In graph-based optimization, the problem is well represented as a bipartite graph, where one type of node refers to the variables, 
 and the other type called \emph{factors} represents probabilistic constraints between variables, produced by the measurements.
 %
 % The state $\bfx$ is modeled as a multi-variate Gaussian distribution.
-In the case of landmark-based visual-inertial SLAM (see \figRef{fig:graph}), $\bfx$ includes robot poses and velocities 
+In the case of landmark-based visual-inertial SLAM (see \figRef{fig:VI_factor_graph}), $\bfx$ includes robot poses and velocities 
 $\bfx=(\bfp,\bfv,\bfR)$ and IMU biases $\bfb$, both at selected \keyframes\ along the trajectory, and landmark poses $\bfl \in \SE(3)$.
 Biases are considered constant between \keyframes\.
 %
-In line with the recent works on the subject, we write the MAP optimization as the least-squares minimization (\figRef{fig:graph}),
+In line with the recent works on the subject, we write the MAP optimization as the least-squares minimization (\figRef{fig:VI_factor_graph}),
 %
 \begin{align}\label{equ:least_squares}
     \cX^* = \argmin_\cX 

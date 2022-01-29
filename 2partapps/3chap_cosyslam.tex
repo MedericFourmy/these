@@ -4,21 +4,25 @@
 \bigskip
 
 
-Work presented in this chapter is taken from our paper \cite{debeunne2021cosyslam} (submitted at ICRA22).
+In this chapter we present a visual-inertial SLAM system based on a deep-learning-based pose estimation libary \cite{labbe2020cosypose}.
+We present experimental results from our paper \cite{debeunne2021cosyslam} (submitted at ICRA22).
 
 \section{Introduction}
 Navigation of legged robots using onboard exteroceptive sensors has gained a lot of traction in recent years due to their progressive deployment for 
 industrial applications \cite{bellicoso2018advances}. 
 For repeated travels, the map-less teach and repeat methods \cite{furgale2010visual, mattamala2021learning} avoid the need of a metric and globally coherent localization 
 by benefiting from the knowledge of a human operator. This works very well for applications in which such supervision is available, and a global map is not. 
-However, most of the time, in industrial environments, a map is obtainable as a CAD model or 3D scans, in which important assets can be labeled.
+% However, many times, in industrial environments, a map is obtainable as a CAD model or 3D scans, in which important assets can be labeled.
+Building a metric and semantic map of the environment may be useful to automatize navigation and exploration in larger environments. Besides,
+standard objects whose CAD model is known (such as gauges, valves, stairs, etc.) may often appear.
 
 Many representations of the environment are possible depending on the needs of the system. In \cite{fallon2014drift} a prior map defined as a LIDAR point-cloud is 
-used in a Bayes filter to localize a humanoid robot and perform online foot planning. Fankhauser \cite{fankhauser2014robot} takes as an input 
-an external odometry source to produce efficient robot-centric elevation maps while \cite{ kim2020vision} builds a global height map to navigate through cluttered 
+used in a Gaussian particle filter to localize a humanoid robot and perform online foot planning. Fankhauser \cite{fankhauser2014robot} takes as an input 
+an external odometry source to produce efficient robot-centric elevation maps while \cite{kim2020vision} builds a global height map to navigate through cluttered 
 environments. Other approaches \cite{wisth2021vilens} rely on a tight fusion between proprioceptive and exteroceptive sensors to make the odometry more robust. 
+A full overview of these systems can be found in our literature review (\secRef{sec:environment_awareness}).
 
-\begin{figure}%[!ht]
+\begin{figure}[h]
   \centering
   \includegraphics[width=0.80\textwidth]{figures/cosyslam/solo_closer_small.png}
   \caption{Experimental setup: a Realsense D435i is mounted on the Solo robot that localizes itself \wrt stairs. A motion capture system provides ground 
@@ -26,8 +30,8 @@ environments. Other approaches \cite{wisth2021vilens} rely on a tight fusion bet
   \label{fig:solo_and_stairs}
 \end{figure}
 
-These approaches build metric maps that do not usually leverage the presence of known assets in the scene. In \cite{SalasMoreno2013SLAMSL}, 
-the authors develop one of the first object-level SLAM algorithms from a depth sensor. Using a voting process based on point-cloud descriptors, 
+These approaches build metric maps that do not usually leverage the presence of known assets in the scene, although a few examples in the computer vision literature 
+exist. In \cite{SalasMoreno2013SLAMSL}, the authors develop one of the first object-level SLAM algorithms from a depth sensor. Using a voting process based on point-cloud descriptors, 
 a simultaneous recognition and pose estimation of known objects was performed and included as factors in a graph optimization estimator. 
 The method benefited from an active search of the objects in the scene, the detection being done in the SLAM loop.
 Aside from the robot trajectory and poses of objects, \cite{sucar2020nodeslam} also proposes to optimize the object shapes using a differentiable 
@@ -60,18 +64,16 @@ Then, a descriptor-based multi-view object proposal is performed as a post-proce
 
 
 As described in \secRef{sec:object_pose_est_algos}, deep-learning-based object detection systems have now reached an accuracy that make them candidates for mobile robotics applications.
-Applications range from robot manipulation, like sorting known objects [more precise name?], or localization \wrt known assets. For this last application, however,
-the direct output of CosyPose is not sufficient for two reasons. First, many objects have strong symmetries, which makes CosyPose estimation jumps from one to the other
+Applications range from robot manipulation, like sorting known objects, or localization \wrt known assets. For this last application, however,
+the direct output of CosyPose is not sufficient for two reasons. First, many objects have strong symmetries, which makes CosyPose orientation estimation jumps from one to the other
 depending on the frames. This output has, therefore, to be filtered using prior knowledge about the world or the robot's movements. Second, the robot needs to keep
 a memory of objects it has seen when they go out of its field of view.
 
 To address the challenges, we presented in \cite{debeunne2021cosyslam} a practical implementation of a SLAM system based on the design of an off-the-shelf 
 deep-learning object pose estimation algorithm \cite{labbe2020cosypose}. To integrate CosyPose measurements with other sensors, we propose a noise model based 
-on empirical data, presented in \secRef{sec:cosypose_covariance}. We also detail practical tricks to circumvent outliers in the network output. 
+on empirical data, presented in \secRef{sec:cosypose_covariance}. We also detail implementation details to circumvent outliers in the network output. 
 Experimental validations were conducted with a visual-inertial system, both handheld and mounted on a quadruped robot. Finally, we fine-tuned the pre-trained models 
 to perform stairs localization, as explained in \secRef{sec:retraining_with_stairs}. 
-
-
 
 
 
@@ -80,7 +82,7 @@ to perform stairs localization, as explained in \secRef{sec:retraining_with_stai
 
 \subsection{Factor Graph formulation}
 This section will be very short so as not to repeat ourselves: the problem has the same structure as the \apriltag-IMU VI system presented in \chpRef{chp:absolute_vi}, 
-thus it as the same factor graph. The \apriltag\ pose measurement model is replaced by the CosyPose measurement model, presented in \secRef{sec:learning_based_object_pose_est}.
+thus it as the same factor graph \figRef{fig:VI_factor_graph}. The \apriltag\ pose measurement model is replaced by the CosyPose measurement model, presented in \secRef{sec:learning_based_object_pose_est}.
 
 
 \subsection{Data association and Outlier rejection}

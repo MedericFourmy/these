@@ -149,7 +149,7 @@ see \chpRef{chp:centroidal_estimation}), 1 or 2 legs in contact already provide 
 
 
 \section{Terrain height}
-If we only use leg odometry along with other sources of odometry such as an IMU (see \ref{chp:centroidal_estimation}, the position of the robot drifts after some time. However, if we have prior knowledge about the foot terrain height $h \in \Reals$, it is easy to define, for each foot $l$ in contact, the residual:
+If we only use leg odometry along with other sources of odometry such as an IMU (see \chpRef{chp:centroidal_estimation}, the position of the robot drifts after some time. However, if we have prior knowledge about the foot terrain height $h \in \Reals$, it is easy to define, for each foot $l$ in contact, the residual:
 
 \begin{equation}
     \bfe^h_l(\posi{}{}, \Rot{}{}) = (\posi{}{} + \Rot{}{} \posi{b}{l})_z - h \quad, \quad e^{h}_l \in \Reals

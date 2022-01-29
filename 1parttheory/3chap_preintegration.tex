@@ -164,7 +164,7 @@ Then, we build a residual error as
     \label{eq:error_naive_pre-integration}
 \end{equation}
 %
-where $\ominus$ is the composite manifold lift operator defined in \ref{eq:composite_retract}.
+where $\ominus$ is the composite manifold lift operator defined in \eqRef{eq:composite_retract}.
 
 $\hat\D_{im}(\bfx^i, \bfx^m)$ only depends on state variables and, thus, is cheap to compute. It corresponds to the "expected" motion of the system, given the current state estimates. 
 $\D_{im}(\bias^i, \bfx^i)$ is the motion computed from the integration of (very many) IMU measurements during $\Dt_{im}$. However, since we "naively" integrated
@@ -814,5 +814,5 @@ equations as a sensor agnostic form that is integrated in state estimation WOLF 
 context of factor graph legged robot state estimation to derive new leg odometry factors \cite{hartley2018legged, wisth2019robust, wisth2020pre-integrated}.
 It was also applied to integrate drone dynamics to estimate external forces disturbances \cite{nisar2019vimo}.
 
-In \chpRef{chp:underactuade_dynamics}, we propose to pre-integrate force-torque measurements that are present in some legged-robots. We show that permits to estimate the centroidal quantities of the robot as well making the kinematic bias on center of mass measurements observable. A practical implementation is demonstrated in \ref{chp:centroidal_estimation}, which is based on our paper \cite{fourmy2021contact}
+In \chpRef{chp:underactuade_dynamics}, we propose to pre-integrate force-torque measurements that are present in some legged-robots. We show that permits to estimate the centroidal quantities of the robot as well making the kinematic bias on center of mass measurements observable. A practical implementation is demonstrated in \chpRef{chp:centroidal_estimation}, which is based on our paper \cite{fourmy2021contact}
 
