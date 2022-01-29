@@ -245,18 +245,22 @@ The IMU preintegration theory can be generalized to many other proprioceotive se
 The generalization makes use of the Lie group structure of the motion deltas, (see \secRef{sec:lie_groups}). Then, the motion data is interpreted as a member of the tangent 
 space of the group.
 
-Different Lie group structures can be chosen that satisfy the properties above. For the IMU, we explored the two variants: composite \cite{forster2015imu} and compact group 
-(our paper \cite{fourmy2019absolute}). 
+Different Lie group structures can be chosen that satisfy the necessary properties. For the IMU, we explored the two variants: composite \cite{forster2015imu} and 
+compact group (our paper \cite{fourmy2019absolute}). 
 
 In \chpRef{chp:underactuade_dynamics}, we also use this generalized approach for the the pre-integration of force-torque sensors for the centroidal estimation of legged robots 
 based on the composite Lie group approach. This work was part of our published paper \cite{fourmy2021contact}.
 
+\bigskip
+This section starts by stating the need to define a well-defined delta, then defining its Lie group structure in detail, then describing the preintegration algorithm at the front-end, and finally the definition of the factor residual at the back-end.
+
 
 \subsection{Delta definition}
 
-The definition of the deltas needs to satisfy the property that such deltas resulting from the integration of motion data must be independent on the initial state $\bfx^i$. 
-The general rule for this stems from observing that an unbiased and unnoisy sensor measuring null data should produce null deltas. This means that the deltas would be the 
-deviations from the state resulting from null data -- for example, a free-falling frame in  the case of an IMU.
+The definition of the deltas needs to satisfy the property that such deltas $\D_{im}$ resulting from the integration of motion data from time $i$ to $m$ must 
+be independent from the initial state $\bfx^i$. The general rule to achieve this stems from observing that an unbiased and unnoisy sensor measuring null data should 
+produce null deltas. This means that the deltas would be the deviations from the sensor trajectories exhibiting null data -- for example, a free-falling non-rotating 
+frame in  the case of an IMU (see \figRef{fig:fff}).
 Dependence on the small-varying parameters $\bfb$ such as sensor bias or other calibration parameters is then handled through linearization.
 
 The relation of the delta with initial and final states is then defined through the operators $\boxminus$ and $\boxplus$,
@@ -281,7 +285,8 @@ The Delta Lie group used in the specific application has to be defined, by descr
     \item the $\Exp$ and $\Log$ operators.  
 \end{itemize}
 %
-Likewise, in order to deal with the uncertainty of the integrated data, Jacobians of these operators will need to be obtained.
+Once these basic blocks are established, we shall refer to \secRef{sec:lie_groups} to define the $\oplus$ and $\ominus$ operators for the group.
+Likewise, in order to deal with the uncertainty of the integrated data, Jacobians of these operators will need to be obtained, for which we follow \cite{sola2018micro}.
 
 Also, we leverage the fact that motion data can easily be manipulated to be part of the tangent space of this group, since it expresses either velocities or increments on the
 state manifolds. In order to account for sensor self-calibration, this motion data is first corrected using currently known calibration parameters. %The resulting tangent vector is then retracted to the Lie group using the exponential map, then composed with the delta pre-integrated so far to obtain, recursively, a new value of the pre-integration.
@@ -303,7 +308,7 @@ First, $\ol\D_{ii}$ is initialized to the null motion via the identity of the gr
 Its covariance $\Cov_\Delta^{ii}$ and the Jacobian $\mjac{\D_i}{\bfb_i}$ are set to zero. 
 
 \paragraph{Calibration and retraction}
-Second, at each reception of sensor data $\tilde\bfz_k$ at $t_k$, we integrate during $\dt$ to obtain the delta corresponding to a single data sample
+Second, at each reception of sensor data $\tilde\bfz_k$ at time $k$, we integrate during $\dt$ to obtain the delta corresponding to a single data sample
 %
 \begin{align}
     \bm\delta_k &= f(\tilde\bfz_k, \ol\bfb_i, \dt)  ~~~~~\in \cM, 
@@ -319,10 +324,10 @@ it onto the manifold,
     \bm\delta_k &= \Exp(\bftau_k) ~~~~~~~~\in \cM,
 \end{align}
 %
-where the former, $c()$, depends on the sensor model, and the second, $\Exp()$, on the deltas Lie group.
+where the calibration, $c()$, depends on the sensor model, and the retraction, $\Exp()$, on the deltas Lie group.
 
 \paragraph{Composition}
-Third, single delta is integrated onto the delta pre-integrated so far using the delta composition law
+Third, this single delta is integrated onto the delta pre-integrated so far using the delta composition law
 %
 \begin{align}
     \ol\D_{ik} &= \ol\D_{ij} \circ \bm\delta_k ~~~~~\in \cM,
@@ -397,6 +402,7 @@ with associated covariance matrix
 In this section, we will revisit the IMU pre-integration using the general pipeline defined in the previous section. First, we will frame the on-manifold pre-integration
 of Forster \cite{forster2015imu, forster2017-TRO} as a delta pre-integration on a composite IMU delta group.
 Second, we will present an alternative formulation of IMU pre-integration on a new compact delta matrix Lie group $\cD$ that we presented in \cite{fourmy2019absolute}.
+We will finally discuss a few other alternatives.
 
 \subsection{IMU pre-integraton on composite Lie group}
 \label{sec:imu_preint_composite}
@@ -424,8 +430,8 @@ $j$ ($\bfx_j$, red) expressed in the free-falling frame at time $j$ ($\cG_j$, gr
 \label{fig:fff}
 \end{figure}
 
-This derives from the definition of the operator $\boxminus$ in \eqRef{eq:boxminus}, an example of which was detailed in \eqRef{eq:boxminus-forster}, 
-the operator $\boxplus$ in \eqRef{eq:boxplus} being just its inverse.
+This derives in the definition of the operator $\boxminus$ in \eqRef{eq:boxminus} as what we detailed in \eqRef{eq:boxminus-forster}, and the operator 
+$\boxplus$ in \eqRef{equ:boxplus} as being just its inverse.
 % Then, $\bfx_k=\bfx_i\boxplus\D_{ik}$ is \cite[eq.~32]{forster2017-TRO} and $\D_{ik}=\bfx_k\boxminus\bfx_i$ is \cite[eq.~33]{forster2017-TRO}. 
 Full details can be found in \cite[Section 3.4]{atchuthan-18-thesis}.
 
@@ -464,8 +470,7 @@ the resulting inverse being
     \end{bmatrix}
 \end{equation}
 %
-
-Finally, the calibration function $c()$ and exponential map $\Exp()$ are,
+The calibration function $c()$ and exponential map $\Exp()$ are,
 %
 \begin{align}
     \bftau &= \begin{bmatrix}
@@ -531,14 +536,16 @@ We propose a matrix form of the Lie group of IMU deltas as,
     ~.
 \end{align}
 %
-The three constituents of such deltas, namely $\Dp$, $\Dv$ and $\DR$, are defined exactly as in the composite case above. Notice a fourth component 
-$\Dt$ as being also part of the delta definition. Being computed in the same manner, the definition of the $\boxminus$ and $\boxplus$ operators is a trivial 
-manner of composing the matrix deltas from \eqRef{eq:boxminus-forster}, yielding proper expressions for
+The three main constituents of such deltas, namely $\Dp$, $\Dv$ and $\DR$, are defined exactly as in the composite case above. 
+Being computed in the same manner, the definition of the $\boxminus$ and $\boxplus$ operators is a trivial manner of forming the matrix deltas from 
+\eqRef{eq:boxminus-forster}, yielding proper expressions for
 %
 \begin{align*}
 \hat\D_{im} &= \bfx_m \boxminus \bfx_i &
 \bfx_m &= \bfx_i \boxplus \hat\D_{im}.
 \end{align*}
+%
+Notice a fourth, time interval component $\Dt$ as being also part of the delta definition.
 
 \subsubsection{Group operations}
 Group composition, identity and inverse stem from regular matrix product, identity, and inverse (with $\DR\inv=\DR\tr$),
@@ -620,7 +627,7 @@ where $\Log()$ is obtained by identifying terms in \eqRef{eq:delta_Lie} and \eqR
 Matrices $\bfP$ and $\bfQ$ are provided in the appendix's \secRef{sec:IMULieGroup}.
 
 
-\subsubsection{The case of IMU data leading to \texorpdfstring{$\bfv=0$}{bfv=0}}
+\paragraph{The case of IMU data, leading to \texorpdfstring{$\bfv=0$}{bfv=0}}
 \label{sec:IMU_case}
 
 We showed that IMU deltas could be interpreted as the motion relative to the free-falling frame (\figRef{fig:fff}), which has initial velocity $\bfv_i$, and the same physical analogy applies to the compact Lie group.
@@ -752,17 +759,17 @@ Computation of the residual in the case of the Lie Delta group formulation follo
 Use the pre-integrated Jacobian $\mjac{\D_{im}}{\bfb}$ to correct the pre-integrated delta $\ol\D_{im}$ to account for the new bias estimate $\bfb_i\neq\ol\bfb_i$,
 
 \begin{align}
-    \D_{im}(\bfb_i) &= \ol\D_{im}\circ\Exp(\mjac{\D_{im}}{\bfb}(\bfb_i-\ol\bfb_i)) 
+    \D_{im}(\bfb_i) &= \ol\D_{im}\oplus\mjac{\D_{im}}{\bfb}(\bfb_i-\ol\bfb_i) 
     ~.
 \end{align}
-
-Use \eqRef{eq:boxminus-forster} as $\boxminus$ to compute the expected delta from  $\bfx_i$ to $\bfx_m$,
+%
+Use \eqRef{equ:delta} as $\boxminus$ to compute the expected delta from  $\bfx_i$ to $\bfx_m$,
 %
 \begin{align}
     \widehat\D_{im}(\bfx_i,\bfx_m) &= \bfx_m \boxminus \bfx_i 
     ~.
 \end{align}
-
+%
 Compute the residual in the  tangent of $\cD$ at $\D_{im}$,
 %
 \begin{align}
@@ -772,7 +779,7 @@ Compute the residual in the  tangent of $\cD$ at $\D_{im}$,
 ~,
 \end{align}
 %
-and drop the $\Dt$ part from the residual after the $\Log()$ ---see comment in \secRef{sec:uncertainty}.
+%and drop the $\Dt$ part from the residual after the $\Log()$ ---see comment in \secRef{sec:uncertainty}.
 In this last equation, the minus operator $\ominus$ is simply the traditional Lie group "minus" operator defined in \cite{sola2018micro} and specialized for this particular group.
 
 \subsubsection{Jacobians, uncertainty}
