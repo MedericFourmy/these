@@ -190,7 +190,7 @@ and:
     \Rot{}{}^{i,T}(\posi{}{}^m - \posi{}{}^i - \vel{}{}^i \Dt^{im} - \frac{1}{2} \grav {\Dt^{im}}^2) \\
     \Rot{}{}^{i,T} (\vel{}{m} - \vel{}{i} - \grav \Dt^{im})  \\
     \Rot{}{}^{i,T} \Rot{}{}^{m}  
-    \end{bmatrix}.
+    \end{bmatrix}. \label{equ:boxminus-forster}
 \end{align}
 %
 Let us now emphasize the fact that $\D_{im}(\bias^i)$ as defined in \eqRef{eq:imu_delta} does not depend on $\bfx_i$, contrary to \eqRef{eq:imu_delta_naive}. 
@@ -235,9 +235,10 @@ For any motion sensor which data measurements we integrate, we need to find the 
 %
 \begin{align}
     \boxplus~&: \quad\quad \cM_{\bfx} \times \cM_{\D} \rightarrow \cM_{\bfx}; 
-    \quad\quad (\bfx_i,\D_{im}) \rightarrow \bfx_m=\bfx_i\boxplus \D_{im} \\
+    \quad\quad (\bfx_i,\D_{im}) \rightarrow \bfx_m=\bfx_i\boxplus \D_{im} \label{equ:boxplus}\\
     \boxminus~&: \quad\quad \cM_{\bfx} \times \cM_{\bfx} \rightarrow \cM_{\D}; 
     \quad\quad (\bfx_i,\bfx_m) \rightarrow \D_{im}=\bfx_m\boxminus \bfx_i~.
+    \label{equ:boxminus}
 \end{align}
 %
 Suitable $\D_{im}$ and $\boxplus$ have to be chosen so that the measurement integration $\D_{im}$ does not depend on the initial states $\bfx_i$.
@@ -276,7 +277,7 @@ We perform pre-integration incrementally following a few steps.
 First, $\ol\D_{ii}$ is initialized to the null motion via the identity of the group, $\D_{\cE}$. 
 Its covariance $\Cov_\Delta^{ii}$ and the Jacobian $\mjac{\D_i}{\bfb_i}$ are set to zero. 
 
-\paragraph{Motion data $\bm\delta$ computation}
+\paragraph{Single delta $\bm\delta$ computation}
 Second, at each reception of sensor data $\tilde\bfz_k$ at $t_k$, we integrate during $\dt$ to obtain the delta corresponding to a single data sample
 %
 \begin{align}
@@ -284,7 +285,7 @@ Second, at each reception of sensor data $\tilde\bfz_k$ at $t_k$, we integrate d
     \label{eq:data2delta}
 \end{align}
 %
-using the bias $\ol\bfb_i$ available in KF $i$. 
+using the calibration $\ol\bfb_i$ available in KF $i$. 
 In major cases, this function is split into the stages of data calibration $c()$, producing a vector in the tangent space, and retraction $\Exp()$, retracting it onto the manifold,
 %
 \begin{align}
@@ -303,8 +304,11 @@ Third, single delta is integrated onto the delta pre-integrated so far using the
 \end{align}
 %
 as can be seen in figure \figRef{fig:delta_time}.
-%with Jacobians $\mjac{\ol\D_{ik}}{\ol\D_{ij}}$ and $\mjac{\ol\D_{ik}}{\bm\delta_k}$. 
-The pre-integrated delta covariance, as well as the Jacobian of the pre-integrated delta with respect to biases, are also pre-integrated using the chain rule and standard covariance propagation,
+
+
+\paragraph{Pre-integration of covariance and Jacobian}
+
+The delta covariance, as well as the Jacobian of the pre-integrated delta with respect to the calibration parameters, are also pre-integrated using the chain rule and standard covariance propagation,
 %
 \begin{align}
     \Cov_\Delta^{ik} &= \mjac{\D_{ik}}{\D_{ij}}\Cov_\Delta^{ij}\mjac{\D_{ik}}{\D_{ij}}\tr 
@@ -373,19 +377,32 @@ with bias $\bfb = [\bias_{a}, \bias_{\omega}]$ and noise $\noise = [\noise_{a}, 
 
 \subsubsection{Definition of the deltas}
 
+The IMU deltas, as introduced in \cite{lupton-09, forster2015imu} can be defined \cite{atchuthan-18-thesis} as the motion increments, in terms of position, velocity and orientation, between the current IMU frame and another frame, that started at the IMU state at time $i$, $\bfx_i=(\bfp_i,\bfv_i,\bfR_i)$, and that falls freely and without rotating at the acceleration of gravity (\figRef{fig:fff}).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/fff}
+\caption{The free-falling, non-rotating frame $\cG_t$ follows a parabolic trajectory governed only by gravity $\bfg$ and determined by the initial conditions $\bfp_i$, $\bfv_i$ and $\bfR_i$ at time $i$ ($\cG_i=\bfx_i$, blue). The IMU delta $\D_{ij}$ between times $i$ and $j$ is defined as the state of the IMU at time $j$ ($\bfx_j$, red) expressed in the free-falling frame at time $j$ ($\cG_j$, green).}
+\label{fig:fff}
+\end{figure}
+
+This derives in the definition of the operator $\boxminus$ in \eqRef{equ:boxminus} as what we detailed in \eqRef{equ:boxminus-forster}, the operator $\boxplus$ in \eqRef{equ:boxplus} being just its inverse.
+% Then, $\bfx_k=\bfx_i\boxplus\D_{ik}$ is \cite[eq.~32]{forster2017-TRO} and $\D_{ik}=\bfx_k\boxminus\bfx_i$ is \cite[eq.~33]{forster2017-TRO}. 
+Full details can be found in \cite[Section 3.4]{atchuthan-18-thesis}.
+
 
 \subsubsection{Definition of the group operations}
 
-The group composition law $\D^{ik}=\D^{ij}\circ\bm\delta^k$ in \eqRef{eq:deltaPlusDelta} is defined as
+Given two IMU deltas $\D=[\Dp,\Dv,\DR]$ and $\bfdelta=[\dpp,\dv,\dR]$, the group composition law $\D=\D\circ\bm\delta$ in \eqRef{eq:deltaPlusDelta} is defined as
 %
 \begin{equation} 
     \label{equ:composition_delta}
-    \D \circ \bm\delta^k
+    \D \circ \bm\delta
     =
     \begin{bmatrix}
-        \Dp^{ij} + \Dv^{ij}\dt + \DR^{ij}\dpp^{k} \\
-        \Dv^{ij} + \DR^{ij}\dv^{k} \\
-        \DR^{ij}\dR^{k} 
+        \Dp + \Dv\dt + \DR\dpp \\
+        \Dv + \DR\dv \\
+        \DR\dR 
     \end{bmatrix}
 \end{equation}
 %
@@ -402,13 +419,28 @@ the resulting inverse being
 \begin{equation}
 \label{equ:inverse_delta}
     \D^{-1} =     \begin{bmatrix}
-    - \DR\tr(\Dp + \Dv \dt) \\
+    - \DR\tr(\Dp + \Dv \Dt) \\
     - \DR\tr \Dv \\
       \DR\tr
     \end{bmatrix}
 \end{equation}
 %
 
+Finally, the calibration function $c()$ and exponential map $\Exp()$ are,
+%
+\begin{align}
+    \bftau &= \begin{bmatrix}
+    \bftau_a \\ \bftau_\omega
+    \end{bmatrix}\begin{bmatrix}
+    \tilde\bfa-\bfb_a-\noise_a \\
+    \tilde{\bfomega}-\bfb_\omega-\noise_\omega
+    \end{bmatrix}
+    \bfdelta &= \Exp(\bftau) = \begin{bmatrix}
+    \frac12\bftau_a\dt^2 \\
+    \bftau_a\dt \\
+    \Exp(\bftau_\omega\dt)
+    \end{bmatrix}
+\end{align}
 
 The pre-integration method in  \cite{forster2017-TRO} can be put in the general pre-integration formalism above by defining 
 $\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta} as:
@@ -425,19 +457,7 @@ $\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta} as:
     \label{eq:delta_function}
 \end{align}
 
-Then, $\bfx_k=\bfx_i\boxplus\D_{ik}$ is \cite[eq.~32]{forster2017-TRO} and $\D_{ik}=\bfx_k\boxminus\bfx_i$ is \cite[eq.~33]{forster2017-TRO}. 
-Full details can be found in \cite[Section 3.4]{atchuthan-18-thesis}.
 
-\subsubsection{Interpretation of the IMU deltas}
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.8\textwidth]{figures/fff}
-\caption{The free-falling, non-rotating frame $\cG_t$ follows a parabolic trajectory governed only by gravity $\bfg$ and determined by the initial conditions $\bfp_i$, $\bfv_i$ and $\bfR_i$ at time $i$ ($\cG_i=\bfx_i$, blue). The IMU delta $\D_{ij}$ between times $i$ and $j$ is defined as the state of the IMU at time $j$ ($\bfx_j$, red) expressed in the free-falling frame at time $j$ ($\cG_j$, green).}
-\label{fig:fff}
-\end{figure}
-
-The IMU deltas, as introduced in \cite{lupton-09, forster2015imu} can be interpreted \cite{atchuthan-18-thesis} as the motion increments, in terms of position, velocity and orientation, between the current IMU frame and another frame, that started at the IMU state at time $i$, $\bfx_i=(\bfp_i,\bfv_i,\bfR_i)$, and falls freely and without rotating at the acceleration of gravity (\figRef{fig:fff}).
 
 
 
@@ -445,6 +465,9 @@ The IMU deltas, as introduced in \cite{lupton-09, forster2015imu} can be interpr
 \label{sec:imu_preint_compact}
 
 This formulation was proposed in our published paper \cite{fourmy2019absolute}.
+
+\subsubsection{Delta definition}
+
 We propose a matrix form of the Lie group of IMU deltas as,
 %
 \begin{align}\label{equ:delta_Lie}
@@ -456,18 +479,26 @@ We propose a matrix form of the Lie group of IMU deltas as,
     \end{bmatrix} \in \cD \subset \bbR^{5\times 5}
     ~.
 \end{align}
-
-Group composition, identity and inverse stem from regular matrix product, identity, and inverse (with $\DR\inv=\DR\tr$).
-
+%
+the three constituents of such deltas, namely $\Dp$, $\Dv$ and $\DR$, are defined exactly as in the composite case above. Notice a fourth component $\Dt$ as being also part of the delta definition.
+Being computed in the same manner, the definitions of the $\boxminus$ and $\boxplus$ operators is a trivial manner of composing the matrix deltas from \eqRef{equ:boxminus-forster}, having
+%
 \begin{align}
-    \D\cdot\bm\delta 
+\hat\D_{im} &= \bfx_m \boxminus \bfx_i \\
+\bfx_m &= \bfx_i \boxplus \hat\D_{im}.
+\end{align}
+
+\subsubsection{Group operations}
+Group composition, identity and inverse stem from regular matrix product, identity, and inverse (with $\DR\inv=\DR\tr$),
+%
+\begin{align}
+    \D\circ\bm\delta 
     &= 
     \begin{bmatrix}
     \DR\dR & \Dv + \DR\dv & \Dp+\Dv\dt + \DR\dpp \\
     \bf0 & 1 & \Dt+\dt \\
     \bf0 & 0 & 1
     \end{bmatrix}
-    ~.
     \label{eq:compact_composition}
     \\
     \D_\cE&=\begin{bmatrix}
@@ -481,7 +512,7 @@ Group composition, identity and inverse stem from regular matrix product, identi
     \DR\tr & -\DR\tr\Dv & -\DR\tr(\Dp-\Dv\Dt) \\
     \bf0 & 1 & -\Dt \\
     \bf0 & 0 & 1
-    \end{bmatrix} 
+    \end{bmatrix} ~.
     \label{equ:inverse}
 \end{align}
 %
@@ -490,7 +521,7 @@ Comparing against \eqsRef{equ:composition_delta}{equ:inverse_delta} we observe t
 
 \subsubsection{Lie algebra \texorpdfstring{$\mathfrak{d}$}{d} and exponential map}
 
-The compact Lie group defines a different Lie algebra parametrization and therefore a different exponential map.
+The compact Lie group defines a different Lie algebra parametrization than Forster's, and therefore a different exponential map.
 The Lie algebra elements $\bftau\hhat$ and their isomorphic Cartesian $\bftau$ have the forms
 %
 \begin{align}
@@ -499,7 +530,7 @@ The Lie algebra elements $\bftau\hhat$ and their isomorphic Cartesian $\bftau$ h
     \hatx{\bth} & \bfrho & \bfupsilon \\
     \bf0 & 0 & \Dt \\
     \bf0 & 0 & 0
-    \end{bmatrix} \in \mathfrak{d}
+    \end{bmatrix} ~~~\in \mathfrak{d}
     ,&
     \bftau &= \begin{bmatrix}
     \bfrho \\ \bfupsilon \\ \bth \\ \Dt
@@ -507,7 +538,7 @@ The Lie algebra elements $\bftau\hhat$ and their isomorphic Cartesian $\bftau$ h
     \te \Dt \begin{bmatrix}
     \bfv \\ \bfa \\ \bw \\ 1
     \end{bmatrix} 
-    \in \bbR^{10}
+    ~~~\in \bbR^{10}
     ,
 \end{align}
 %
@@ -537,7 +568,7 @@ where $\Log()$ is obtained by identifying terms in \eqRef{equ:delta_Lie} and \eq
 Matrices $\bfP$ and $\bfQ$ are provided in the appendix's \secRef{sec:IMULieGroup}.
 
 
-\subsubsection{The IMU case of \texorpdfstring{$\bfv=0$}{bfv=0}}
+\subsubsection{The case of IMU data leading to \texorpdfstring{$\bfv=0$}{bfv=0}}
 \label{sec:IMU_case}
 
 We showed that IMU deltas could be interpreted as the motion relative to the free-falling frame (\figRef{fig:fff}), which has initial velocity $\bfv_i$, and the same physical analogy applies to the compact Lie group.
@@ -593,6 +624,8 @@ We therefore systematically marginalize this time component out of the covarianc
 
 Here we recall the general pre-integration pipeline in the case of compact Lie group, pointing at the minor differences with composite Lie group case.
 The following pipeline of operations is performed to recursively pre-integrate IMU data into a unique measurement.
+
+Pre-integration starts after each keyframe with $\ol\D_{ii} = \bfI$, $\bfSigma^\Delta_{ii} = \bf0$ and $\mjac{\D_{ii}}{\bfb} = \bf0$, using $\ol\bfb_i = \bfb_i$ the current best estimate of the bias at time $i$.
 
 At the reception of each IMU measurement $\bfz_k=(\bfa,\bw)_k$, start by correcting it with available  bias estimates $\ol\bfb_i=(\bfa_b,\bw_b)_i$, 
 to produce the tangent vector $\bftau=\bm\nu\dt$. For this, set the velocity part of $\bm\nu$ to zero as the IMU is by definition at zero speed \wrt 
@@ -656,7 +689,6 @@ where $\Ad{\bm\delta}$ is the adjoint and $\mjac{}{r}$ is the right Jacobian ---
 \end{align}
 %
 
-Pre-integration starts after each keyframe with $\ol\D_{ii} = \bfI$, $\bfSigma^\Delta_{ii} = \bf0$ and $\mjac{\D_{ii}}{\bfb} = \bf0$, using $\ol\bfb_i = \bfb_i$ the current best estimate of the bias at time $i$.
 Pre-integration is complete (\figRef{fig:delta_time}) when $k=m$, which yields $\ol\D_{im}$, $\bfSigma^\Delta_{im}$ and $\mjac{\D_{im}}{\bfb}$.
 
 
