@@ -226,12 +226,26 @@ We will now show how this formulation can be generalized to other high rate sens
 \label{sec:general-preint}
 
 
+% Pre-integration refers to the integration of high rate proprioceptive sensory data in an efficient way in the context of factor graphs. 
+% As we have seen for IMU measurements, if a standard integration is conducted naively to derive a factor measurement between two \keyframes, 
+% then the data needs to be reintegrated at each solver iteration because the integral depends on the states we are to estimate. 
+% The IMU pre-integration theory solves this issue and can be generalized to many other proprioceptive sensors as shown in \cite{atchuthan-18-thesis,deray-19-selfcalib,fourmy2021contact}. 
 Pre-integration refers to the integration of high rate proprioceptive sensory data in an efficient way in the context of factor graphs. 
-As we have seen for IMU measurements, if a standard integration is conducted naively to derive a factor measurement between two \keyframes, 
-then the data needs to be reintegrated at each solver iteration because the integral depends on the states we are to estimate. 
-The IMU pre-integration theory solves this issue and can be generalized to many other proprioceptive sensors as shown in \cite{atchuthan-18-thesis,deray-19-selfcalib,fourmy2021contact}. 
+The IMU preintegration theory can be generalized to many other proprioceotive sensors as shown in \cite{atchuthan-18-thesis,deray-19-selfcalib,fourmy2021contact}.
 
-For any motion sensor which data measurements we integrate, we need to find the appropriate delta quantities $\D_{im}$ formulation so that there exists an operator $\boxplus$ (and its inverse $\boxminus$) that verify
+The generalization makes use of the Lie group structure of the motion deltas, (see \secRef{sec:lie_groups}). Then, the motion data is interpreted as a member of the tangent space of the group.
+
+Different Lie group structures can be chosen that satisfy the properties above. For the IMU, we explored the two variants: composite \cite{forster2015imu} and compact group (our paper \cite{fourmy2019absolute}). 
+
+In \chpRef{chp:underactuade_dynamics}, we also use this generalized approach for the the pre-integration of force-torque sensors for the centroidal estimation of legged robots based on the composite Lie group approach. This work was part of our published paper \cite{fourmy2021contact}.
+
+
+\subsection{Delta definition}
+
+The definition of the deltas needs to satisfy the property that such deltas resulting from the integration of motion data must be independent on the initial state $\bfx^i$. The general rule for this stems from observing that an unbiased and unnoisy sensor measuring null data should produce null deltas. This means that the deltas would be the deviations from the state resulting from null data -- for example, a free-falling frame in  the case of an IMU.
+Dependence on the small-varying parameters $\bfb$ such as sensor bias or other calibration parameters is then handled through linearization.
+
+The relation of the delta with initial and final states is then defined through the operators $\boxminus$ and $\boxplus$,
 %
 \begin{align}
     \boxplus~&: \quad\quad \cM_{\bfx} \times \cM_{\D} \rightarrow \cM_{\bfx}; 
@@ -241,25 +255,21 @@ For any motion sensor which data measurements we integrate, we need to find the 
     \label{equ:boxminus}
 \end{align}
 %
-Suitable $\D_{im}$ and $\boxplus$ have to be chosen so that the measurement integration $\D_{im}$ does not depend on the initial states $\bfx_i$.
 
+\subsection{Description of the Lie group and the tangent space}
 
-Thanks to the geometry of motion, such deltas have a group structure: they form a Lie group (see \secRef{sec:lie_groups}).
-The Delta Lie group used in the specific application has to be defined, by describing in particular its identity element $\D_{\cE}$, the composition law $\circ$, and the $\Exp$ and $\Log$ operators. Likewise, in order to deal with the uncertainty of the integrated data, Jacobians of these operators will need to be obtained. 
+The Delta Lie group used in the specific application has to be defined, by describing in particular:
+%
+\begin{itemize}
+    \item its identity element $\D_{\cE}$, 
+    \item its inverse element $\D\inv$, 
+    \item the composition law $\circ$, and 
+    \item the $\Exp$ and $\Log$ operators.  
+\end{itemize}
+%
+Likewise, in order to deal with the uncertainty of the integrated data, Jacobians of these operators will need to be obtained.
 
-The motion data usually expresses the way these deltas change, and can therefore easily be put in the tangent space of the Deltas Lie group. In order to account for sensor self-calibration, this motion data is first corrected using currently known calibration parameters. The resulting tangent vector is then retracted to the Lie group using the exponential map, then composed with the delta pre-integrated so far to obtain, recursively, a new value of the pre-integration.
-Dependence on the small-varying parameters $\bfb$ such as sensor bias or other calibration parameters is then handled through linearization.
-
-
-%The motion measurement at time $k$, $\bfz_k$, is the velocity of these deltas: it belongs to the tangent space of the group of deltas. 
-% The motion measurement may be biased (such as in the IMU case \eqRef{eq:imu_meas_model}), which forces us to include extra parameters as estimation variables.
-Different Lie group structures can be chosen that satisfy the properties above. For the IMU, we explored the two variants: composite \cite{forster2015imu} and compact group (our paper \cite{fourmy2019absolute}). 
-
-In \chpRef{chp:underactuade_dynamics}, we also use this generalized approach for the the pre-integration of force-torque sensors for the centroidal estimation of legged robots based on the composite Lie group approach. This work was part of our published paper \cite{fourmy2021contact}.
-
-
-
-
+Also, we leverage the fact that motion data can easily be manipulated to be part of the tangent space of this group, since it expresses either velocities or increments on the state manifolds. In order to account for sensor self-calibration, this motion data is first corrected using currently known calibration parameters. %The resulting tangent vector is then retracted to the Lie group using the exponential map, then composed with the delta pre-integrated so far to obtain, recursively, a new value of the pre-integration.
 
 \subsection{Delta pre-integration algorithm}
 
@@ -271,13 +281,13 @@ In \chpRef{chp:underactuade_dynamics}, we also use this generalized approach for
     \label{fig:delta_time}
 \end{figure}
 
-We perform pre-integration incrementally following a few steps. 
+From all the considerations exposed above, the delta pre-integration algorithm is performed recursively via the following steps.
 
 \paragraph{Initialization}
 First, $\ol\D_{ii}$ is initialized to the null motion via the identity of the group, $\D_{\cE}$. 
 Its covariance $\Cov_\Delta^{ii}$ and the Jacobian $\mjac{\D_i}{\bfb_i}$ are set to zero. 
 
-\paragraph{Single delta $\bm\delta$ computation}
+\paragraph{Calibration and retraction}
 Second, at each reception of sensor data $\tilde\bfz_k$ at $t_k$, we integrate during $\dt$ to obtain the delta corresponding to a single data sample
 %
 \begin{align}
@@ -285,8 +295,8 @@ Second, at each reception of sensor data $\tilde\bfz_k$ at $t_k$, we integrate d
     \label{eq:data2delta}
 \end{align}
 %
-using the calibration $\ol\bfb_i$ available in KF $i$. 
-In major cases, this function is split into the stages of data calibration $c()$, producing a vector in the tangent space, and retraction $\Exp()$, retracting it onto the manifold,
+using the calibration $\ol\bfb_i$ available in \keyframe\ $i$. 
+In major cases, this function is split into the stages of data \textbf{calibration} $c()$, producing a vector in the tangent space, and \textbf{retraction} $\Exp()$, retracting it onto the manifold,
 %
 \begin{align}
     \bftau_k &= c(\tilde\bfz_k, \ol\bfb_i) \dt ~~~~~\in \Reals^{dim(\cM)}\\
@@ -295,7 +305,7 @@ In major cases, this function is split into the stages of data calibration $c()$
 %
 where the former, $c()$, depends on the sensor model, and the second, $\Exp()$, on the deltas Lie group.
 
-\paragraph{Pre-integrated delta composition}
+\paragraph{Composition}
 Third, single delta is integrated onto the delta pre-integrated so far using the delta composition law
 %
 \begin{align}
@@ -306,7 +316,7 @@ Third, single delta is integrated onto the delta pre-integrated so far using the
 as can be seen in figure \figRef{fig:delta_time}.
 
 
-\paragraph{Pre-integration of covariance and Jacobian}
+\paragraph{Covariance and Jacobian}
 
 The delta covariance, as well as the Jacobian of the pre-integrated delta with respect to the calibration parameters, are also pre-integrated using the chain rule and standard covariance propagation,
 %
@@ -320,7 +330,11 @@ The delta covariance, as well as the Jacobian of the pre-integrated delta with r
 %
 where $\mjac{\bm\delta_k}{\bfb_i}$, $\mjac{\bm\delta_k}{\bfz_k}$ are the Jacobians of \eqRef{eq:data2delta} and $\mjac{\D_{ik}}{\D_{ij}}$, $\mjac{\D_{ik}}{\bm\delta_k}$ the Jacobians of \eqRef{eq:deltaPlusDelta}, computed according to Lie theory \cite{sola2018micro}, to which we give a brief introduction in \secRef{sec:lie_groups}.
 
-The motion delta computation and composition with the pre-integrated delta is performed recursively until a new \keyframe\ is added to the Factor Graph. When it 
+
+
+\bigskip
+
+These steps are performed recursively until a new \keyframe\ is added to the factor graph. When it 
 is the case, a motion factor is created as explained in the next section.
 
 
@@ -333,7 +347,7 @@ a factor is created to which we pass $\ol\D_{im}$, $\ol\bfb_i$,  $\mjac{\D_{im}}
 % The pre-integrated $\ol\D_{im}$ is used at the end of the pre-integration to define the residual:
 %
 \begin{align}
-    \bfe_{im}(\bfx^i, \bfx^m, \bias^i) = \hat\D_{im} \ominus (\ol\D_{im} \oplus \mjac{\D_{im}}{\bfb_i}(\bfb_i-\ol\bfb_i) )  
+    \bfe_{im}(\bfx^i, \bfx^m, \bias^i) =  (\ol\D_{im} \oplus \mjac{\D_{im}}{\bfb_i}(\bfb_i-\ol\bfb_i) ) \ominus \hat\D_{im} 
     \label{eq:preint_residual}
 \end{align}
 %
@@ -343,7 +357,7 @@ Here, $\bfb_i$ is the current  value of the sensor's calibration parameters,  $\
 % That is, $\{\op,\om\}$ are $\{+,-\}$ for vectors, and for rotations we have $\bfR\op\bm\theta\te\bfR\Exp(\bm\theta)$ and $\bfR_2\om\bfR_1\te\Log(\bfR_1\tr\bfR_2)$. 
 % The residual clearly depends on the KF states $\bfx^i,\bfx^m$ and the bias $\bfb_i$. It has an associated covariance  $\Cov_\Delta^{im}$.
 
-In cases where the calibration parameters are subject to drift, the calibration drift is modelled as the integration of a random walk. This drift is included as a factor in the factor graph by defining a residual error
+In cases where the calibration parameters are subject to drift, the calibration drift is modelled as the integration of a random walk. This drift is included as a second factor in the factor graph, with residual error defined by
 %
 \begin{equation}
     \bfe^{\bias}_{im}(\bias^i, \bias^m) = \bias^m - \bias^i
@@ -431,7 +445,7 @@ Finally, the calibration function $c()$ and exponential map $\Exp()$ are,
 \begin{align}
     \bftau &= \begin{bmatrix}
     \bftau_a \\ \bftau_\omega
-    \end{bmatrix}\begin{bmatrix}
+    \end{bmatrix} = \begin{bmatrix}
     \tilde\bfa-\bfb_a-\noise_a \\
     \tilde{\bfomega}-\bfb_\omega-\noise_\omega
     \end{bmatrix}\\
@@ -442,7 +456,7 @@ Finally, the calibration function $c()$ and exponential map $\Exp()$ are,
     \end{bmatrix}
 \end{align}
 %
-giving
+yielding $\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta} as
 %
 \begin{align}
     \bm\delta^k = \begin{bmatrix}
@@ -455,8 +469,21 @@ giving
     \end{bmatrix}^k
     \label{eq:delta_function}
 \end{align}
+%
+% The pre-integration method in  \cite{forster2017-TRO} can be put in the general pre-integration formalism above by defining 
+% $\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta} as:
 
+\subsubsection{Delta preintegration and factor residual}
 
+The concatenation of the operations above lead exactly to the Forster's algorithm \cite{forster2017-TRO}:
+%
+\begin{itemize}
+    \item Initialize $\D_{ii} = \D_\cE$, $\Sigma_\D=\bf0$, $\bfJ^\D_\bfb = \bf0$, and $\ol\bfb_i = \bfb_i$.
+    \item Calibrate data and retract to manifold using \eqRef{eq:delta_function}.
+    \item Compose $\ol\D$ using \eqRef{equ:composition_delta}.
+\end{itemize}
+%
+Likewise, the factor residual is computed following \secRef{sec:preint_residual} exactly.
 
 
 
@@ -479,13 +506,13 @@ We propose a matrix form of the Lie group of IMU deltas as,
     ~.
 \end{align}
 %
-the three constituents of such deltas, namely $\Dp$, $\Dv$ and $\DR$, are defined exactly as in the composite case above. Notice a fourth component $\Dt$ as being also part of the delta definition.
-Being computed in the same manner, the definitions of the $\boxminus$ and $\boxplus$ operators is a trivial manner of composing the matrix deltas from \eqRef{equ:boxminus-forster}, having
+The three constituents of such deltas, namely $\Dp$, $\Dv$ and $\DR$, are defined exactly as in the composite case above. Notice a fourth component $\Dt$ as being also part of the delta definition.
+Being computed in the same manner, the definition of the $\boxminus$ and $\boxplus$ operators is a trivial manner of composing the matrix deltas from \eqRef{equ:boxminus-forster}, yielding proper expressions for
 %
-\begin{align}
-\hat\D_{im} &= \bfx_m \boxminus \bfx_i \\
+\begin{align*}
+\hat\D_{im} &= \bfx_m \boxminus \bfx_i &
 \bfx_m &= \bfx_i \boxplus \hat\D_{im}.
-\end{align}
+\end{align*}
 
 \subsubsection{Group operations}
 Group composition, identity and inverse stem from regular matrix product, identity, and inverse (with $\DR\inv=\DR\tr$),
@@ -597,20 +624,6 @@ This gives immediately
 which we will use to integrate IMU data.
 
 
-\subsubsection{Jacobians, uncertainty}
-\label{sec:uncertainty}
-
-For general functions $f:\cM\to\cN;y=f(x)$, we propagate uncertainty normally via the Jacobians 
-$\mjac{y}{x}\te\dpar{y}{x}$, \ie, $\Cov_y=\mjac{y}{x}\,\Cov_x\,\mjac{y}{x}\tr$. 
-These Jacobians map the tangent spaces of the manifolds $\cM,\cN$ at $x$ and $y$, and in case of vector spaces they resort to the classical Jacobian.
-They also satisfy the chain rule, which we use extensively in our developments.
-Ample reference and justification of this approach can be found in \cite{sola2018micro}.
-
-A comment is however necessary for the present IMU case.
-It relates to the uncertainty of the last component of the tangent space \eqRef{equ:lie_algebra}, which is the time $\Dt$. This component has no uncertainty by definition. 
-Having it in the covariances would imply singularity and result in the risk of a number of well-known numerical issues. 
-We therefore systematically marginalize this time component out of the covariances, simply by removing the last row and column. 
-
 
 
 
@@ -624,8 +637,10 @@ We therefore systematically marginalize this time component out of the covarianc
 Here we recall the general pre-integration pipeline in the case of compact Lie group, pointing at the minor differences with composite Lie group case.
 The following pipeline of operations is performed to recursively pre-integrate IMU data into a unique measurement.
 
+\paragraph{Initialization}
 Pre-integration starts after each keyframe with $\ol\D_{ii} = \bfI$, $\bfSigma^\Delta_{ii} = \bf0$ and $\mjac{\D_{ii}}{\bfb} = \bf0$, using $\ol\bfb_i = \bfb_i$ the current best estimate of the bias at time $i$.
 
+\paragraph{Calibration}
 At the reception of each IMU measurement $\bfz_k=(\bfa,\bw)_k$, start by correcting it with available  bias estimates $\ol\bfb_i=(\bfa_b,\bw_b)_i$, 
 to produce the tangent vector $\bftau=\bm\nu\dt$. For this, set the velocity part of $\bm\nu$ to zero as the IMU is by definition at zero speed \wrt 
 the moving frame, as in \eqRef{eq:exp_compact_imu}. Obtain at the same time the respective Jacobians,
@@ -654,6 +669,7 @@ the moving frame, as in \eqRef{eq:exp_compact_imu}. Obtain at the same time the 
     \label{eq:preint_debiasing}
 \end{align}
 %
+\paragraph{Retraction}
 Second, use the exponential map \eqRef{eq:exp_compact_imu} to obtain the current delta step $\bm\delta_{jk}$ in the group manifold, and obtain Jacobian
 %
 \begin{align}
@@ -661,9 +677,12 @@ Second, use the exponential map \eqRef{eq:exp_compact_imu} to obtain the current
     &
     \mjac{\bm\delta}{\bftau} &= \mjac{}{r}(\bftau_k)
     ~.
-    %
-    \intertext{Third, use group composition \eqRef{eq:compact_composition} to update the pre-integrated delta; obtain Jacobians}
-    %
+\end{align}
+
+\paragraph{Composition}
+Third, use group composition \eqRef{eq:compact_composition} to update the pre-integrated delta; obtain Jacobians
+%
+\begin{align}
     \ol\D_{ik} &= \ol\D_{ij}\circ\bm\delta_{jk} ~,
     &
     \mjac{\D_{ik}}{\D_{ij}} &= \Ad{\bm\delta_{jk}}\inv
@@ -673,20 +692,30 @@ Second, use the exponential map \eqRef{eq:exp_compact_imu} to obtain the current
     ~,
 \end{align}
 %
-where $\Ad{\bm\delta}$ is the adjoint and $\mjac{}{r}$ is the right Jacobian ---see appendices \secRef{sec:imu_compact_adjoint}, \secRef{sec:imu_compact_right_jacobian} and technical paper \cite{sola2018micro} for reference. Fourth, propagate the delta covariance
+where $\Ad{\bm\delta}$ is the adjoint and $\mjac{}{r}$ is the right Jacobian ---see appendices \secRef{sec:imu_compact_adjoint}, \secRef{sec:imu_compact_right_jacobian} and technical paper \cite{sola2018micro} for reference. 
+
+\paragraph{Covariance}
+Fourth, propagate the delta covariance
 %
 \begin{align}
     \bfSigma^\Delta_{ik} &= \mjac{\D_{ik}}{\D_{ij}}\bfSigma^\Delta_{ij}\mjac{\D_{ik}}{\D_{ij}}\tr 
     + \mjac{\D_{ik}}{\bfz}\bfSigma_\bfz\mjac{\D_{ik}}{\bfz}\tr
     ~,
-    %
-    \intertext{with $\bfSigma_\bfz$ the covariance of the IMU measurements $\bfz$, and $\mjac{\D_{ik}}{\bfz}=\mjac{\D_{ik}}{\bm\delta}\mjac{\bm\delta}{\bftau}\mjac{\bftau}{\bfz}$ computed using the chain rule. Finally, integrate the Jacobian of the delta \wrt the biases}
-    %
+\end{align}    
+%
+with $\bfSigma_\bfz$ the covariance of the IMU measurements $\bfz$, and $\mjac{\D_{ik}}{\bfz}=\mjac{\D_{ik}}{\bm\delta}\mjac{\bm\delta}{\bftau}\mjac{\bftau}{\bfz}$ computed using the chain rule. 
+
+\paragraph{Jacobian}
+Finally, integrate the Jacobian of the delta \wrt the biases
+%
+\begin{align}
     \mjac{\D_{ik}}{\bfb} &= \mjac{\D_{ik}}{\D_{ij}}\mjac{\D_{ij}}{\bfb} 
     + \mjac{\D_{ik}}{\bm\delta_{jk}}\mjac{\bm\delta}{\bftau}\mjac{\bftau}{\bfb}
     ~.
 \end{align}
 %
+
+\bigskip
 
 Pre-integration is complete (\figRef{fig:delta_time}) when $k=m$, which yields $\ol\D_{im}$, $\bfSigma^\Delta_{im}$ and $\mjac{\D_{im}}{\bfb}$.
 
@@ -719,6 +748,20 @@ Compute the residual in the  tangent of $\cD$ at $\D_{im}$,
 %
 and drop the $\Dt$ part from the residual after the $\Log()$ ---see comment in \secRef{sec:uncertainty}.
 In this last equation, the minus operator $\ominus$ is simply the traditional Lie group "minus" operator defined in \cite{sola2018micro} and specialized for this particular group.
+
+\subsubsection{Jacobians, uncertainty}
+\label{sec:uncertainty}
+
+For general functions $f:\cM\to\cN;y=f(x)$, we propagate uncertainty normally via the Jacobians 
+$\mjac{y}{x}\te\dpar{y}{x}$, \ie, $\Cov_y=\mjac{y}{x}\,\Cov_x\,\mjac{y}{x}\tr$. 
+These Jacobians map the tangent spaces of the manifolds $\cM,\cN$ at $x$ and $y$, and in case of vector spaces they resort to the classical Jacobian.
+They also satisfy the chain rule, which we use extensively in our developments.
+Ample reference and justification of this approach can be found in \cite{sola2018micro}.
+
+A comment is however necessary for the present IMU case.
+It relates to the uncertainty of the last component of the tangent space \eqRef{equ:lie_algebra}, which is the time $\Dt$. This component has no uncertainty by definition. 
+Having it in the covariances would imply singularity and result in the risk of a number of well-known numerical issues. 
+We therefore systematically marginalize this time component out of the covariances, simply by removing the last row and column. 
 
 
 \subsection{About the choice of the proper Lie group}
