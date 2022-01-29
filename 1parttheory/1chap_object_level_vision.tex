@@ -514,7 +514,23 @@ as the level of confidence Mask-RCNN has in its prediction.
 % \item $\displaystyle s$ : mask-RCNN softmax output.
 % \end{itemize}
 
-To sum up, our model is parametrized by four values: $r$ - distance, $\varphi$ - azimuth, $\theta$ - elevation, $s$ - Mask-RCNN softmax output. 
+To sum up, our model is parameterized by four values: $r$ - distance, $\varphi$ - azimuth, $\theta$ - elevation, $s$ - Mask-RCNN softmax output. 
+
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{0.47\textwidth}
+        \includegraphics[width=\textwidth]{figures/cosyslam/s999.png}
+        \caption{$s$~=~0.999}
+    \end{subfigure}
+    \begin{subfigure}{0.47\textwidth}
+        \includegraphics[width=\textwidth]{figures/cosyslam/s996.png}
+        \caption{$s$~=~0.996}
+    \end{subfigure}
+    \caption{Example of values of the Mask-RCNN softmax output for various levels of occlusion. 
+    These shows the impressive robustness of the CosyPose to partial occlusions.}
+\end{figure}
+
 We can then compute the error of CosyPose relative to the motion capture data: 
 
 \begin{equation}
