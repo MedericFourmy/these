@@ -3,9 +3,8 @@
 \minitoc
 \bigskip
 
-
-
-Results presented in this section are taken from our published work \cite{fourmy2019absolute}.
+Results presented in this section are adapted from our published work \cite{fourmy2019absolute}. The opinions reflected are the ones we had
+at the time (and which mostly did not change).
 
 \section{Introduction}
 
@@ -24,7 +23,7 @@ or LIDAR \cite{stasse2006real, fallon2014drift, camurri2017multisensory}.
 %\label{fig:HRP2}
 %\end{figure}
 
-The difficulty in fusing inertial, kinematics and exteroceptive measurements stems from the disparity in the properties of each data source.
+The difficulty in fusing inertial, kinematics, and exteroceptive measurements stems from the disparity in the properties of each data source.
 Inertial and kinematic measurements come at high frequency (typically 100 Hz to 1 kHz) and are cheap to process, while images and laser scans 
 are obtained at some few images per second and are expensive to process. 
 On the other hand, inertial measurements are quickly deprecated while images and scans provide absolute information.
@@ -33,7 +32,7 @@ estimation when images and laser scans are not carefully merged.
 
 These difficulties explain that the first works to merge proprioceptive and exteroceptive sensors for legged localization 
 have been with staggered approach, first fusing inertial and kinematic measurements at high frequency, and then correcting 
-the localization drift with absolute localization computed the from camera and/or the LIDAR with low bandwidth and higher 
+the localization drift with absolute localization computed the from the camera and/or the LIDAR with low bandwidth and higher 
 delay~\cite{nobili2017heterogeneous,fallon2014drift}.
 
 Very recently, several concurrent approaches have been proposed to merge all relevant data in a unique estimator.
@@ -125,10 +124,10 @@ on large datasets consisting only of smooth motions.
 \subsection{Results}
 
 \subsection{Experimental setup}
-We have gathered several datasets in the experimental arena of the humanoid robots at LAAS-CNRS, a 3D environment about $10m \times 5m$ made of flat floor, stairs of various slopes and a 30cm wide beam.
+We have gathered several datasets in the experimental arena of the humanoid robots at LAAS-CNRS, a 3D environment about $10m \times 5m$ made of flat floor, stairs of various slopes, and a 30cm wide beam.
 The robot environment was augmented with about 20 fiducial ``\apriltag'' markers (of about 20 cm width).
 The tags have been randomly dispatched in the environment.
-They are fixed during a run, but may vary significantly between two sets of data, and their locations are not calibrated ---that is, we do not have ground-truth localization of the tags.
+They are fixed during a run but may vary significantly between two sets of data, and their locations are not calibrated ---that is, we do not have ground-truth localization of the tags.
 
 Each dataset is composed of 3 sequences:
 \begin{itemize}
@@ -170,10 +169,10 @@ Each dataset is composed of 3 sequences:
 
 The visual-inertial sensor (VIS) is comprised of a Memsic IMU running at 200 Hz and an Imagine Source camera.
 IMU and camera are hardware synchronized: the image acquisition is triggered by a micro-controller (STM32) synchronized with the IMU.
-We have validated that there is less than 2 ms synchronization error by the hardware (shutter time) and that this delay is stable.
+We have validated that there is less than a 2 ms synchronization error by the hardware (shutter time) and that this delay is stable.
 The camera and the IMU are collocated, with less than 10 cm of distance between IMU and camera focal. 
 The camera-to-IMU extrinsics parameter was calibrated using the Kalibr library \cite{furgale2013unified}.
-% Although our implementation of the least-squares estimator is able to handle sensor calibration, we have not tried to calibrate the camera-to-IMU extrinsic parameters online.
+% Although our implementation of the least-squares estimator can handle sensor calibration, we have not tried to calibrate the camera-to-IMU extrinsic parameters online.
 In each sequence, we have taken care that the camera is navigating in a comfortably-dense field of tags, even if it may not have always a tag in its field of view.
 The motion-capture data have been obtained from a calibrated 3D marker attached to the camera and are synchronized in post-process by maximizing the velocity norm 
 cross-correlation between MoCap and estimated state sequences.
@@ -232,8 +231,8 @@ For each case, \keyframes\ are created at a frequency of 6.6 Hz (every 5 images)
 \end{figure}
 
 \figRef{fig:results} presents a quantitative evaluation of the translational errors. In all cases, our estimator achieves errors consistently below a few centimeters. 
-The biggest errors are obtained for the walking datasets where the two humps correspond to phases where the robot is turning on itself and sees landmarks that it will not 
-see again later in the trajectory.
+The biggest errors are obtained for the walking datasets where the two humps correspond to phases where the robot is turning on itself and sees landmarks that will not be 
+seen again later in the trajectory.
 
 A high rate estimation of a humanoid robot velocity and in particular of its center of mass is critical for balance controllers. It can be recovered from motion capture through numerical differentiation of the positions, but this results in a quite noisy time series. It is especially visible when hard impacts make the robot shake at approximately 10 Hz. 
 The estimated velocity follows a familiar oscillatory damped system behavior while the mocap estimation is more erratic. 

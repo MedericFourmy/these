@@ -117,7 +117,7 @@ stairs and beams. The robot environment was augmented with objects of the datase
 We recorded two types of datasets: one for the uncertainty models and one for SLAM experiments. For the uncertainty models, reflective MoCap markers 
 were attached to the object to obtain the ground truth of their pose. For the SLAM, only the camera was tracked. We used the monocular RGB camera and the Bosh BMI085 
 IMU of an Intel Realsense L515 Camera for handheld trajectories. The Intel Realsense d435i was used with the same modalities 
-for the experiments on the quadruped robot Solo \cite{grimminger2020open} as shown in Fig. \figRef{figfig:solo_and_stairs}. 
+for the experiments on the quadruped robot Solo \cite{grimminger2020open} as shown in Fig. \figRef{fig:solo_and_stairs}. 
 The extrinsic calibration between the IMU and the camera was provided by Intel and the delays observed between IMU and Camera measurements were negligible. 
 Our datasets are publicly available at \url{https://homepages.laas.fr/mfourmy/icra22_cosyslam}.
 
@@ -129,7 +129,7 @@ Our datasets are publicly available at \url{https://homepages.laas.fr/mfourmy/ic
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=9cm]{figures/cosyslam/trajectory_circular.png}
+  \includegraphics[width=0.8\textwidth]{figures/cosyslam/trajectory_circular.png}
   \caption{Comparison between the MoCap, the output of CosySLAM with visual factors only and the output of CosySLAM with IMU fusion on the circular trajectory.}
   \label{fig:traj_circular}
 \end{figure}
@@ -145,7 +145,7 @@ This is therefore a challenging dataset to test the robustness of our algorithm.
 \begin{table}[h]
     \begin{center}
     \caption{Datasets description and results of the hand held videos}
-    \label{table:tless}
+    \label{tab:tless}
     % \begin{tabular}{|c|c{1.1cm}|c{1.1cm}|c{1.1cm}|c{1cm}|}
     \begin{tabular}{|c|c|c|c|c|}
         \hline 
@@ -170,7 +170,7 @@ This is therefore a challenging dataset to test the robustness of our algorithm.
 \end{table}
 
 It is interesting to analyze the gains brought by the IMU fusion. The most evident observation is that the output trajectory is smoother, which gives more consistency 
-to the result (Fig. \figRef{figfig:traj_circular}). But we can notice that the MTE is also reduced (Table \figRef{figtable:tless}). Indeed, the motion model is more precise thanks 
+to the result (Fig. \figRef{fig:traj_circular}). But we can notice that the MTE is also reduced (Table \tabRef{tab:tless}). Indeed, the motion model is more precise thanks 
 to IMU data. This makes the outlier rejection more efficient than the visual-only CosySLAM which makes a zero velocity assumption between \keyframes.
 
 
@@ -179,15 +179,15 @@ to IMU data. This makes the outlier rejection more efficient than the visual-onl
 \subsection{Localization and Mapping of stairs by Solo}
 
 With our retrained model (\secRef{sec:retraining_with_stairs}) we were able to perform SLAM in our experimental area, without augmenting it with other objects. 
-We recorded video sequences including stairs with a camera fixed on a Solo robot (\figRef{fig:map_stairs}). A stair has three discrete symmetries 
+We recorded video sequences including stairs with a camera fixed on a Solo robot (\ref{fig:map_stairs}). A stair has three discrete symmetries 
 that are hard to handle for an object pose estimator and the images provided by Solo were noisy because of the walk. 
 These scenarios are challenging for our SLAM system, but it maps successfully the stairs and the error on the position of the base of Solo remains reasonable 
-(Table \figRef{figtable:solo}).
+(Table \tabRef{tab:solo}).
 
 \begin{table}[h]
    \begin{center}
    \caption{Datasets description and results of the videos taken on Solo}
-   \label{table:solo}
+   \label{tab:solo}
     % \begin{tabular}{|c{2.2c1cm}|c{1.1cm}|c{1cm}|c{1cm}|}
     \begin{tabular}{|c|c|c|c|c|}
         \hline 
@@ -204,7 +204,7 @@ These scenarios are challenging for our SLAM system, but it maps successfully th
 \begin{figure}[!ht]
   \centering
   \includegraphics[width=\linewidth]{figures/cosyslam/mapped_stairs.png}
-  \caption{This trajectory was recorded on Solo walking along a climbing module made of three stairs using \cite{leziart:hal-03052451}'s controller. 
+  \caption{This trajectory was recorded on Solo walking along a climbing module made of three stairs using a walking controller \cite{leziart2021implementation}. 
   The green dots represent the trajectory of Solo provided by the MoCap, and the red dots the one produced by our visual-inertial SLAM. 
   The blue rectangles represent the map of the SLAM made of stairs.}
   \label{fig:map_stairs}

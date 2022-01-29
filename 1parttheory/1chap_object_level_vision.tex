@@ -320,7 +320,7 @@ In all cases, the covariance increases with the distance to the camera (the volu
 On top of that, we can see that, for both position and orientation, the uncertainty distribution is clearly anisotropic: 
 the uncertainty of the pose measurements is logically higher in the dimensions that lead to the least change in the aspect of the tag projection. 
 
-For the position uncertainty (\figRef{fig:apriltag_cov_P}), the shape of the covariance is easily interpretable: the uncertainty is the highest along the camera-tag axis.
+For the position uncertainty (\figRef{fig:apriltag_cov_P}), the shape of the covariance is easily interpretab: the uncertainty is the highest along the camera-tag axis.
 Besides, this uncertainty is not much influenced by the relative camera-tag orientation. 
 
 For the orientation uncertainty (\figRef{fig:apriltag_cov_O}), the shape of the covariance is harder to interpret: a high uncertainty about the orientation along 
@@ -556,7 +556,7 @@ The error of the object from the YCBV dataset seems more stable and smaller than
 This can be explained by the texture of the object and the absence of symmetries: T-LESS objects are known to be more challenging 
 for pose estimation and this is confirmed by our model.
 
-A more quantitative evaluation can be deduced from table \tabRef{table:empirical_models}. The translation error seems to be captured pretty well,
+A more quantitative evaluation can be deduced from table \tabRef{tab:empirical_models}. The translation error seems to be captured pretty well,
  as the RMSE is around the centimeter. However, the angular error seems a little less predictable, especially for T-LESS objects whose orientation 
  estimation can suffer from an important measurement noise due to the lack of textures. The $R^2\in[0,1]$ score is the coefficient of determination 
  and is often used to evaluate statistical models. Its interpretation is subject to debate and cannot conclude by itself on the absolute quality of the model. 
@@ -576,7 +576,7 @@ A more quantitative evaluation can be deduced from table \tabRef{table:empirical
          \hline
     \end{tabular}
     \caption{A quantitative evaluation of our models, these values are computed on test samples that were not used for training. }
-    \label{table:empirical_models}
+    \label{tab:empirical_models}
 \end{table}
 
 
