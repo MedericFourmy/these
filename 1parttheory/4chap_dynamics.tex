@@ -81,7 +81,13 @@ of the robot limbs $\AM_a(\qa, \dqa) \in \Reals^{3}$. The geometrical relation b
 \end{equation}
 
 
-The computed CoM position is considered to be affected by Gaussian noise and a slowly varying bias $\posim{B}{C} = \posi{B}{C} + \bfb_{c} + \noise_c$. 
+The computed CoM position is considered to be affected by Gaussian noise and a slowly varying bias 
+
+\begin{equation}
+    \posim{B}{C} = \posi{B}{C} + \bfb_{c} + \noise_c~.
+    \label{eq:com_kine_meas}
+\end{equation}
+
 This slowly varying bias corresponds to the sum of the kinodynamic model inaccuracies whose dependence on the configuration $\qa$ is hard to model. Instead,
 we will estimate this parameter by fusing centroidal kinematic measurements with the underactuated dynamics.
 
@@ -123,15 +129,17 @@ forces applied on a legged robot in a smoothing estimator. We propose to integra
 To this end, we derive the specificities of the pre-integration of external forces of a poly-articulated system. This is the main theoretical contribution
 of our paper \cite{fourmy2021contact}.
 
+\subsection{Newton-Euler integration}
 The Newton-Euler equations \eqRef{eq:NewtonEuler} relate the evolution of the CoM and AM due to gravity, external forces, and torques. 
 In the case of a legged robot with punctual contact feet, only forces $\forcem{}{L}$ are applied at each limb contact $L$, with no torque. 
 However, we will derive the equations in the general case where wrench are available (like for humanoids) since it is then easy to just set the 
-torque terms to zero. 
-We assume that at each limb contact we have access to noisy local force $\forcem{}{L} = \force{L}{L} + \noise_f$ and torques 
-$\torquem{}{L} = \torque{L}{L} + \noise_m$ measurements . 
-To transform them into the body frame $b$, we compute $\Rotm{}{L} \triangleq \Rot{B}{L}(\qa)  \in SO(3)$ and $\posim{}{L} \triangleq \posi{B}{L}(\qa) \in \Reals^3 $ from the joint configuration $\qa  \in \Reals^{12}$. 
-The lever arm $(\posi{}{L}-\bias_c)$ in \eqRef{eq:NewtonEuler} uses a measurement of the CoM position in base frame $ \posi{B}{C}(\qa) \in \Reals^3$. 
-This measure is biased due to inaccuracies in the robot model and therefore we add a bias variable to be estimated, $\bias_c \in \Reals^3$ so that $\posim{}{C} = \posi{B}{C}(\qa) + \bias_c + \noise_c$.
+torque terms to zero.
+
+We assume that at each limb contact we have access to noisy local force $\forcem{}{L} = \force{L}{L} + \noise_f$ and pure torques 
+$\torquem{}{L} = \torque{L}{L} + \noise_m$ measurements. 
+To transform them into the body frame $b$, we compute $\Rotm{}{L} \triangleq \Rot{B}{L}(\qa)  \in SO(3)$ and $\posim{}{L} \triangleq \posi{B}{L}(\qa) \in \Reals^3 $ from the joint configuration $\qa  \in \Reals^{12}$ using forward kinematics \secRef{sec:forward_kinematics}. 
+The lever arm $(\posi{}{L} - \bfc)$ in the Euler equation \eqRef{eq:NewtonEuler} uses a measurement of the CoM position in base frame $ \posi{B}{C}(\qa) \in \Reals^3$. 
+This measure is biased and noisy as explained before: we use again the measurment model \eqRef{eq:com_kine_meas}.
 Assuming constant forces during each interval $\dt$ 
 the integration of \eqRef{eq:NewtonEuler} yields the discrete dynamic model for the centroidal states:
 %
@@ -148,7 +156,28 @@ the integration of \eqRef{eq:NewtonEuler} yields the discrete dynamic model for 
 \end{equation}
 
 Analogously to the IMU case, it is possible to pre-integrate force measurements to derive a factor on the states 
-$\bfx_c=[\COM, \COMd, \AM, \Rot{}{}]$ using deltas $\D_c=[\D\COM, \D\COMd, \D\AM, \DR]$. 
+$\bfx_c=[\COM, \COMd, \AM, \Rot{}{}]$ by defining appropriate deltas $\D_c$ and $\boxminus$ verifying $\D^{im}=\bfx^k\boxminus\bfx^i$ between KFs $i$ and $m$. Developments similar to the IMU case (proof in \ref{sec:forster_proof}) lead us to define the expected deltas :
+%
+\begin{equation}
+    \D^{im} =
+    \begin{bmatrix}
+    \D\COM^{im} \\ \D\COMd^{im} \\ \D\AM^{im} \\ \DR^{im}
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        {\Rot{}{}^i}\tr (\COM^m - \COM^i - \COMd^i \Dt^{im})
+        \\
+        {\Rot{}{}^i}\tr (\COMd^{m} - \COMd^{i} - \bfg \Dt^{im})
+        \\
+        {\Rot{}{}^i}\tr (\AM^{m} - \AM^{i})
+        \\
+        {\Rot{}{}^i}\tr \Rot{}{}^m
+    \end{bmatrix}~.
+\end{equation}
+%
+
+
+
 The rotation measured by the gyroscope has to be included too for the pre-integration to work. 
 In this case, the bias vector is $\bias = [\bias_c, \bias_{\omega}]$, that is, CoM and gyro biases. We define the measurements  $\bfz^k$ to be:
 %
@@ -190,25 +219,6 @@ and the delta composition law in \eqRef{eq:deltaPlusDelta} as
     \label{eq:DeltaDTCompo}
 \end{equation}
 %
-The expected delta $\D^{ik}=\bfx^k\boxminus\bfx^i$ between KFs $i$ and $k$ reads
-%
-\begin{equation}
-    \D^{ik} =
-    \begin{bmatrix}
-    \D\COM^{ik} \\ \D\COMd^{ik} \\ \D\AM^{ik} \\ \DR^{ik}
-    \end{bmatrix}
-    =
-    \begin{bmatrix}
-        {\Rot{}{}^i}\tr (\COM^k - \COM^i - \COMd^i \Dt^{ik})
-        \\
-        {\Rot{}{}^i}\tr (\COMd^{k} - \COMd^{i} - \bfg \Dt^{ik})
-        \\
-        {\Rot{}{}^i}\tr (\AM^{k} - \AM^{i})
-        \\
-        {\Rot{}{}^i}\tr \Rot{}{}^k
-    \end{bmatrix}~.
-\end{equation}
-
 Finally, the propagation of the state $\bfx_i$ to $\bfx_k$ using $\D_{ik}$, which can be used to retrieve a state at any time $k$ between KFs in the trajectory, is
 %
 \begin{equation}
