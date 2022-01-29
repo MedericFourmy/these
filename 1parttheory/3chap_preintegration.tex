@@ -217,22 +217,6 @@ In this expression, $\ol\D_{im}$ only depends on data and has been integrated on
 These two observations were first made by Lupton \cite{lupton-09}, whose formulation relied on Euler angles, and were later formalized on \SO(3) using Lie theory
 by Forster \cite{forster2017-TRO}. 
 
-We also have to include a factor on the successive bias estimates taking into account the bias drift modelled as the integration of a random walk during $\Dt_{im}$:
-%
-\begin{equation}
-    \bfe^{\bias}_{im}(\bias^i, \bias^m) = \bias^m - \bias^i
-    \label{eq:bias_imu_drift}
-\end{equation}
-%
-with associated covariance matrix
-%
-\begin{equation}
-    \Cov^{\bias}_{im} = 
-    \begin{pmatrix}
-    \bfW^c_{\angvel{}{}} \Dt_{im} & \bf0 \\
-    \bf0 & \bfW^c_{\acc{}{}} \Dt_{im}
-    \end{pmatrix}
-\end{equation}
 
 We will now show how this formulation can be generalized to other high rate sensory data by abstracting a recursive implementation of the pre-integration that takes advantage of the Lie-group structure of the geometry of the deltas.
 
@@ -345,7 +329,7 @@ a factor is created to which we pass $\ol\D_{im}$, $\ol\bfb_i$,  $\mjac{\D_{im}}
 % The pre-integrated $\ol\D_{im}$ is used at the end of the pre-integration to define the residual:
 %
 \begin{align}
-    \bfe_{im}(\bfx^i, \bfx^m, \bias^i) = (\ol\D_{im} \oplus \mjac{\D_{im}}{\bfb_i}(\bfb_i-\ol\bfb_i) ) \ominus \hat\D_{im}
+    \bfe_{im}(\bfx^i, \bfx^m, \bias^i) = \hat\D_{im} \ominus (\ol\D_{im} \oplus \mjac{\D_{im}}{\bfb_i}(\bfb_i-\ol\bfb_i) )  
     \label{eq:preint_residual}
 \end{align}
 %
@@ -355,7 +339,7 @@ Here, $\bfb_i$ is the current  value of the sensor's calibration parameters,  $\
 % That is, $\{\op,\om\}$ are $\{+,-\}$ for vectors, and for rotations we have $\bfR\op\bm\theta\te\bfR\Exp(\bm\theta)$ and $\bfR_2\om\bfR_1\te\Log(\bfR_1\tr\bfR_2)$. 
 % The residual clearly depends on the KF states $\bfx^i,\bfx^m$ and the bias $\bfb_i$. It has an associated covariance  $\Cov_\Delta^{im}$.
 
-In cases where the calibration parameters are subject to drift, as it is the case for IMU biases \eqRef{eq:bias_imu_drift}, the calibration drift is modelled as the integration of a random walk. This drift is included as a factor in the factor graph by defining a residual error
+In cases where the calibration parameters are subject to drift, the calibration drift is modelled as the integration of a random walk. This drift is included as a factor in the factor graph by defining a residual error
 %
 \begin{equation}
     \bfe^{\bias}_{im}(\bias^i, \bias^m) = \bias^m - \bias^i
