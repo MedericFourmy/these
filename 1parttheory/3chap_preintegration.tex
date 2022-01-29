@@ -374,6 +374,20 @@ with associated covariance matrix
 \end{equation}
 
 
+\subsection{Publishing the current optimal state}
+\label{sec:publish-state}
+
+Interestingly, the proposed algorithm allows for the publication, at the high rate of the motion sensor and with little lag, of the current state of the robot. 
+To do so, we take advantage of the delta preintegrated so far, which can be corrected in case we dispose of better estimates of the calibration parameters. The current state at time $t_k$ thus reads,
+%
+\begin{align}
+    \bfx^k = \bfx^i \boxplus (\ol\D_{ik} \oplus \bfJ^{\D_{ik}}_{\bfb_i} (\bfb_i - \ol\bfb_i)).
+\end{align}
+%
+This current state is optimal in the following sense. First, it uses the state $\bfx^i$ of the last keyframe, which has been eventually optimized by the back-end. Second, it uses the most updated version of the calibration parameters $\bfb_i$ to correct the preintegrated delta, thus minimizing the dead-reckoning drift of the motion increment from \keyframe\ time $t_i$ to the current time $t_k$.
+
+The optimal state $\bfx^k$ is published at the rate of the motion sensor, which can reach the kHz, and might be used for closed-loop control of the robot. This is so regardless of the rate at which \keyframes\ are generated, and the rate at which the solver optimizes the problem. These rates, in any case but especially if they are slow, will logically impact the accuracy of the published state.
+
 %
 %
 %
