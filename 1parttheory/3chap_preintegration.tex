@@ -44,8 +44,8 @@ The IMU measurements are known to be noisy, biased, and affected by the gravity,
     \label{eq:imu_meas_model}
 \end{equation}
 %    
-The biases $\bias \triangleq [\bias_{\acc{}{}}, \bias_{\angvel{}{}}]$ need to be estimated in order to be able to cancel them,   that are thus included in the estimator state.
-Fusing with other sensors will help making them observable
+The biases $\bias \triangleq [\bias_{\acc{}{}}, \bias_{\angvel{}{}}]$ need to be estimated in order to be able to cancel them, and are thus included in the estimator state.
+Fusing with other sensors will help making them observable.
 
 These biases may drift over time, more or less slowly depending on the quality of the IMU. This drift is modeled 
 as a random walk, which is close to the observed behavior for reasonably short periods of time \cite{hussen2015low}.
@@ -63,7 +63,7 @@ A continuous-time dynamical model  based on strapdown integration of IMU measure
 \label{eq:imu_dyn_conti}
 \end{align}
 %
-where $\bfw_{\bfa}^c \in \mathcal{N}(0,\bfW_\bfa^c)$ and $\bfw_{\bw}^c \in \mathcal{N}(0,\bfW_\bw^c)$ are the bias' random walk continuous-time white noises.
+where $\bfw_{\bfa}^c \in \mathcal{N}(0,\bfW_\bfa^c)$ and $\bfw_{\bw}^c \in \mathcal{N}(0,\bfW_\bw^c)$ are the biases' random walk continuous-time white noises.
 
 Introducing the measurement equations \eqRef{eq:imu_meas_model} in the continuous dynamics equations \eqRef{eq:imu_dyn_conti} and using a zero order hold
 explicit Euler integration scheme during $\dt$ results in the discrete-time dynamics:
@@ -82,7 +82,8 @@ explicit Euler integration scheme during $\dt$ results in the discrete-time dyna
     \label{eq:imu_dyn_disc}
 \end{equation}
 %
-where $\bfw_{\bfa} \in \mathcal{N}(0,\bfW_\bfa)$ and $\bfw_{\bw} \in \mathcal{N}(0,\bfW_\bw)$ are the bias' random walk discrete-time white noises, satisfying $\bfW_\bfa=\bfW_\bfa^c \dt$ and $\bfW_\bw=\bfW_\bw^c\dt$.
+where $\bfw_{\bfa} \in \mathcal{N}(0,\bfW_\bfa)$ and $\bfw_{\bw} \in \mathcal{N}(0,\bfW_\bw)$ are the bias' random walk discrete-time white noises, 
+satisfying $\bfW_\bfa=\bfW_\bfa^c \dt$ and $\bfW_\bw=\bfW_\bw^c\dt$.
 
     
 Now, these equations relate consecutive states with data sampled at IMU frequency. To include these measurements in our smoothing estimator,
@@ -100,7 +101,7 @@ $t_i$ and $t_m$ by recursively applying \eqRef{eq:imu_dyn_disc}, we obtain:
     \label{eq:IMUIntij}
 \end{equation}
 %
-where we assume that IMU biases stay constant during $\Dt^{im}$
+where we assume that IMU biases stay constant during $\Dt_{im}$
 \begin{equation*}
     \bias^k \approx \bias^i  ~~~ \forall k \in [i..m],
 \end{equation*}
@@ -130,9 +131,9 @@ From the integration of the motion model, %we get
     \end{bmatrix} \triangleq
     \begin{bmatrix}
     \sum_{k=i}^{m} \Big[\vel{}{}^{k}\dt + \frac{1}{2}\grav \dt^2 
-    + \frac{1}{2}\Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^i - \noise_{\acc{}{}}^k)\dt^2 \Big] \\
-    \sum_{k=i}^{m} \Big[\grav \dt + \Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^i - \noise_{\acc{}{}}^k)\dt \Big]  \\
-    \prod_{k=i}^{m} \Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^i- \noise_{\angvel{}{}}^k)\dt)  
+    + \frac{1}{2}\Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^i)\dt^2 \Big] \\
+    \sum_{k=i}^{m} \Big[\grav \dt + \Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^i)\dt \Big]  \\
+    \prod_{k=i}^{m} \Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^i)\dt)  
     \end{bmatrix}
     \label{eq:imu_delta_naive}
 \end{align}
@@ -168,9 +169,12 @@ where $\ominus$ is the composite manifold lift operator defined in \eqRef{eq:com
 
 $\hat\D_{im}(\bfx^i, \bfx^m)$ only depends on state variables and, thus, is cheap to compute. It corresponds to the "expected" motion of the system, given the current state estimates. 
 $\D_{im}(\bias^i, \bfx^i)$ is the motion computed from the integration of (very many) IMU measurements during $\Dt_{im}$. However, since we "naively" integrated
-in the world frame, this term also depends on the initial state $\bfx_i$ and on IMU bias $\bias_i$. This implies that for each update of the estimate $\bfx_i$, the IMU measurements need to be re-integrated from the new $\bfx_i$ and for the new $\bfb^i$. This is highly inefficient and, therefore, not well adapted to the repeated evaluations required by nonlinear solvers.
+in the world frame, this term also depends on the initial state $\bfx_i$ and on IMU bias $\bias_i$. This implies that for each update of the estimate $\bfx_i$, the IMU measurements 
+need to be re-integrated from the new $\bfx_i$ and for the new $\bfb^i$. This is highly inefficient and, therefore, not well adapted to the repeated evaluations required by nonlinear 
+solvers.
 
-To solve this problem, we need to re-define the deltas so that $\D_{im}$ is independent of the estimated states, that is, only dependent on the measured data. This new definition reads \cite{lupton-09, forster2015imu} (proof in the annex \secRef{sec:forster_proof}):
+To solve this problem, we need to re-define the deltas so that $\D_{im}$ is independent of the estimated states, that is, only dependent on the measured data. This new definition 
+reads \cite{lupton-09, forster2015imu} (proof in the annex \secRef{sec:forster_proof}):
 %
 \begin{align}
     \D_{im}(\bias^i) \triangleq 
@@ -187,16 +191,19 @@ and:
 \begin{align}
     \hat\D_{im}(\bfx^i, \bfx^m) \triangleq 
     \begin{bmatrix}
-    \Rot{}{}^{i,T}(\posi{}{}^m - \posi{}{}^i - \vel{}{}^i \Dt^{im} - \frac{1}{2} \grav {\Dt^{im}}^2) \\
-    \Rot{}{}^{i,T} (\vel{}{m} - \vel{}{i} - \grav \Dt^{im})  \\
+    \Rot{}{}^{i,T}(\posi{}{}^m - \posi{}{}^i - \vel{}{}^i \Dt_{im} - \frac{1}{2} \grav \Dt_{im}^2) \\
+    \Rot{}{}^{i,T} (\vel{}{m} - \vel{}{i} - \grav \Dt_{im})  \\
     \Rot{}{}^{i,T} \Rot{}{}^{m}  
-    \end{bmatrix}. \label{equ:boxminus-forster}
+    \end{bmatrix}. 
+    \label{eq:boxminus-forster}
 \end{align}
 %
 Let us now emphasize the fact that $\D_{im}(\bias^i)$ as defined in \eqRef{eq:imu_delta} does not depend on $\bfx_i$, contrary to \eqRef{eq:imu_delta_naive}. 
 
-But we are not over yet. The dependency on the bias variable $\bfb^i$ in \eqRef{eq:imu_delta} still enforces the repeated reintegration of the measurements buffer to get $\D_{im}$ each time the solver produces a new estimate of $\bfb^i$. 
-Fortunately, because the variations in $\bias_i$ are small, a linearized approximation can be used. The IMU measurements can be pre-integrated using the prior bias estimation at time $t_i$, that we note $\ol\bfb_i$, to give the pre-integrated delta $\ol\D_{im}\triangleq\D_{im}(\ol\bfb_i)$.
+But we are not over yet. The dependency on the bias variable $\bfb^i$ in \eqRef{eq:imu_delta} still enforces the repeated reintegration of the measurements buffer 
+to get $\D_{im}$ each time the solver produces a new estimate of $\bfb^i$. 
+Fortunately, because the variations in $\bias_i$ are small, a linearized approximation can be used. The IMU measurements can be pre-integrated using the prior 
+bias estimation at time $t_i$, that we note $\ol\bfb_i$, to give the pre-integrated delta $\ol\D_{im}\triangleq\D_{im}(\ol\bfb_i)$.
 Then, each time a new $\bias_i$ value is computed, we can correct the delta linearly:
 %
 \begin{align}
@@ -212,13 +219,15 @@ With all these considerations, our residual error can be written as
     \label{eq:preint_residual}
 \end{align}
 %
-In this expression, $\ol\D_{im}$ only depends on data and has been integrated only once. The rest of the operations are small and can be made as many times as necessary in the solver side.
+In this expression, $\ol\D_{im}$ only depends on data and has been integrated only once. The rest of the operations are small and can be made as many times as necessary in the 
+solver side.
 
 These two observations were first made by Lupton \cite{lupton-09}, whose formulation relied on Euler angles, and were later formalized on \SO(3) using Lie theory
 by Forster \cite{forster2017-TRO}. 
 
 
-We will now show how this formulation can be generalized to other high rate sensory data by abstracting a recursive implementation of the pre-integration that takes advantage of the Lie-group structure of the geometry of the deltas.
+We will now show how this formulation can be generalized to other high rate sensory data by abstracting a recursive implementation of the pre-integration that takes advantage 
+of the Lie-group structure of the deltas' geometry.
 
 
 
@@ -233,26 +242,31 @@ We will now show how this formulation can be generalized to other high rate sens
 Pre-integration refers to the integration of high rate proprioceptive sensory data in an efficient way in the context of factor graphs. 
 The IMU preintegration theory can be generalized to many other proprioceotive sensors as shown in \cite{atchuthan-18-thesis,deray-19-selfcalib,fourmy2021contact}.
 
-The generalization makes use of the Lie group structure of the motion deltas, (see \secRef{sec:lie_groups}). Then, the motion data is interpreted as a member of the tangent space of the group.
+The generalization makes use of the Lie group structure of the motion deltas, (see \secRef{sec:lie_groups}). Then, the motion data is interpreted as a member of the tangent 
+space of the group.
 
-Different Lie group structures can be chosen that satisfy the properties above. For the IMU, we explored the two variants: composite \cite{forster2015imu} and compact group (our paper \cite{fourmy2019absolute}). 
+Different Lie group structures can be chosen that satisfy the properties above. For the IMU, we explored the two variants: composite \cite{forster2015imu} and compact group 
+(our paper \cite{fourmy2019absolute}). 
 
-In \chpRef{chp:underactuade_dynamics}, we also use this generalized approach for the the pre-integration of force-torque sensors for the centroidal estimation of legged robots based on the composite Lie group approach. This work was part of our published paper \cite{fourmy2021contact}.
+In \chpRef{chp:underactuade_dynamics}, we also use this generalized approach for the the pre-integration of force-torque sensors for the centroidal estimation of legged robots 
+based on the composite Lie group approach. This work was part of our published paper \cite{fourmy2021contact}.
 
 
 \subsection{Delta definition}
 
-The definition of the deltas needs to satisfy the property that such deltas resulting from the integration of motion data must be independent on the initial state $\bfx^i$. The general rule for this stems from observing that an unbiased and unnoisy sensor measuring null data should produce null deltas. This means that the deltas would be the deviations from the state resulting from null data -- for example, a free-falling frame in  the case of an IMU.
+The definition of the deltas needs to satisfy the property that such deltas resulting from the integration of motion data must be independent on the initial state $\bfx^i$. 
+The general rule for this stems from observing that an unbiased and unnoisy sensor measuring null data should produce null deltas. This means that the deltas would be the 
+deviations from the state resulting from null data -- for example, a free-falling frame in  the case of an IMU.
 Dependence on the small-varying parameters $\bfb$ such as sensor bias or other calibration parameters is then handled through linearization.
 
 The relation of the delta with initial and final states is then defined through the operators $\boxminus$ and $\boxplus$,
 %
 \begin{align}
     \boxplus~&: \quad\quad \cM_{\bfx} \times \cM_{\D} \rightarrow \cM_{\bfx}; 
-    \quad\quad (\bfx_i,\D_{im}) \rightarrow \bfx_m=\bfx_i\boxplus \D_{im} \label{equ:boxplus}\\
+    \quad\quad (\bfx_i,\D_{im}) \rightarrow \bfx_m=\bfx_i\boxplus \D_{im} \label{eq:boxplus}\\
     \boxminus~&: \quad\quad \cM_{\bfx} \times \cM_{\bfx} \rightarrow \cM_{\D}; 
     \quad\quad (\bfx_i,\bfx_m) \rightarrow \D_{im}=\bfx_m\boxminus \bfx_i~.
-    \label{equ:boxminus}
+    \label{eq:boxminus}
 \end{align}
 %
 
@@ -269,7 +283,8 @@ The Delta Lie group used in the specific application has to be defined, by descr
 %
 Likewise, in order to deal with the uncertainty of the integrated data, Jacobians of these operators will need to be obtained.
 
-Also, we leverage the fact that motion data can easily be manipulated to be part of the tangent space of this group, since it expresses either velocities or increments on the state manifolds. In order to account for sensor self-calibration, this motion data is first corrected using currently known calibration parameters. %The resulting tangent vector is then retracted to the Lie group using the exponential map, then composed with the delta pre-integrated so far to obtain, recursively, a new value of the pre-integration.
+Also, we leverage the fact that motion data can easily be manipulated to be part of the tangent space of this group, since it expresses either velocities or increments on the
+state manifolds. In order to account for sensor self-calibration, this motion data is first corrected using currently known calibration parameters. %The resulting tangent vector is then retracted to the Lie group using the exponential map, then composed with the delta pre-integrated so far to obtain, recursively, a new value of the pre-integration.
 
 \subsection{Delta pre-integration algorithm}
 
@@ -296,7 +311,8 @@ Second, at each reception of sensor data $\tilde\bfz_k$ at $t_k$, we integrate d
 \end{align}
 %
 using the calibration $\ol\bfb_i$ available in \keyframe\ $i$. 
-In major cases, this function is split into the stages of data \textbf{calibration} $c()$, producing a vector in the tangent space, and \textbf{retraction} $\Exp()$, retracting it onto the manifold,
+In most cases, this function is split into the stages of data \textbf{calibration} $c()$, producing a vector in the tangent space, and \textbf{retraction} $\Exp()$, retracting 
+it onto the manifold,
 %
 \begin{align}
     \bftau_k &= c(\tilde\bfz_k, \ol\bfb_i) \dt ~~~~~\in \Reals^{dim(\cM)}\\
@@ -318,7 +334,8 @@ as can be seen in figure \figRef{fig:delta_time}.
 
 \paragraph{Covariance and Jacobian}
 
-The delta covariance, as well as the Jacobian of the pre-integrated delta with respect to the calibration parameters, are also pre-integrated using the chain rule and standard covariance propagation,
+The delta covariance, as well as the Jacobian of the pre-integrated delta with respect to the calibration parameters, are also pre-integrated using the chain rule and standard 
+covariance propagation,
 %
 \begin{align}
     \Cov_\Delta^{ik} &= \mjac{\D_{ik}}{\D_{ij}}\Cov_\Delta^{ij}\mjac{\D_{ik}}{\D_{ij}}\tr 
@@ -328,7 +345,8 @@ The delta covariance, as well as the Jacobian of the pre-integrated delta with r
     + \mjac{\D_{ik}}{\bm\delta_k}\mjac{\bm\delta_k}{\bfb_i} ,
 \end{align}
 %
-where $\mjac{\bm\delta_k}{\bfb_i}$, $\mjac{\bm\delta_k}{\bfz_k}$ are the Jacobians of \eqRef{eq:data2delta} and $\mjac{\D_{ik}}{\D_{ij}}$, $\mjac{\D_{ik}}{\bm\delta_k}$ the Jacobians of \eqRef{eq:deltaPlusDelta}, computed according to Lie theory \cite{sola2018micro}, to which we give a brief introduction in \secRef{sec:lie_groups}.
+where $\mjac{\bm\delta_k}{\bfb_i}$, $\mjac{\bm\delta_k}{\bfz_k}$ are the Jacobians of \eqRef{eq:data2delta} and $\mjac{\D_{ik}}{\D_{ij}}$, $\mjac{\D_{ik}}{\bm\delta_k}$ the 
+Jacobians of \eqRef{eq:deltaPlusDelta}, computed according to Lie theory \cite{sola2018micro}, to which we give a brief introduction in \secRef{sec:lie_groups}.
 
 
 
@@ -357,7 +375,8 @@ Here, $\bfb_i$ is the current  value of the sensor's calibration parameters,  $\
 % That is, $\{\op,\om\}$ are $\{+,-\}$ for vectors, and for rotations we have $\bfR\op\bm\theta\te\bfR\Exp(\bm\theta)$ and $\bfR_2\om\bfR_1\te\Log(\bfR_1\tr\bfR_2)$. 
 % The residual clearly depends on the KF states $\bfx^i,\bfx^m$ and the bias $\bfb_i$. It has an associated covariance  $\Cov_\Delta^{im}$.
 
-In cases where the calibration parameters are subject to drift, the calibration drift is modelled as the integration of a random walk. This drift is included as a second factor in the factor graph, with residual error defined by
+In cases where the calibration parameters are subject to drift, the calibration drift is modelled as the integration of a random walk. This drift is included as a second factor 
+in the factor graph, with residual error defined by
 %
 \begin{equation}
     \bfe^{\bias}_{im}(\bias^i, \bias^m) = \bias^m - \bias^i
@@ -375,14 +394,15 @@ with associated covariance matrix
 %
 %
 \section{IMU pre-integration on Lie groups}
-In this section, we will revisit the IMU pre-integration using the general pipeline defined in the previous section. First, we will frame the on manifold pre-integration
+In this section, we will revisit the IMU pre-integration using the general pipeline defined in the previous section. First, we will frame the on-manifold pre-integration
 of Forster \cite{forster2015imu, forster2017-TRO} as a delta pre-integration on a composite IMU delta group.
 Second, we will present an alternative formulation of IMU pre-integration on a new compact delta matrix Lie group $\cD$ that we presented in \cite{fourmy2019absolute}.
 
 \subsection{IMU pre-integraton on composite Lie group}
 \label{sec:imu_preint_composite}
 
-Let us come back to the IMU pre-integration problem, as stated by Forster \cite{lupton-09, forster2015imu}, defined in \secRef{sec:imu_preint_motivation}, and show that we can rewrite the algorithm in terms of the generalized pre-integration described in \secRef{sec:general-preint}.
+Let us come back to the IMU pre-integration problem, as stated by Forster \cite{lupton-09, forster2015imu}, defined in \secRef{sec:imu_preint_motivation}, and show that we 
+can rewrite the algorithm in terms of the generalized pre-integration described in \secRef{sec:general-preint}.
 
 The states involved in this integration are the base states $\bfx = [\posi{}{}, \bfv, \Rot{}{}]$ with deltas $\D=[\Dp,\Dv,\DR] \in \cM_{\D}$. 
 The IMU produces biased and noisy measurements $\tilde\bfz = [\tilde\bfa, \tilde{\bfomega}]$ of the base proper acceleration and angular velocity, 
@@ -391,16 +411,21 @@ with bias $\bfb = [\bias_{a}, \bias_{\omega}]$ and noise $\noise = [\noise_{a}, 
 
 \subsubsection{Definition of the deltas}
 
-The IMU deltas, as introduced in \cite{lupton-09, forster2015imu} can be defined \cite{atchuthan-18-thesis} as the motion increments, in terms of position, velocity and orientation, between the current IMU frame and another frame, that started at the IMU state at time $i$, $\bfx_i=(\bfp_i,\bfv_i,\bfR_i)$, and that falls freely and without rotating at the acceleration of gravity (\figRef{fig:fff}).
+The IMU deltas, as introduced in \cite{lupton-09, forster2015imu} can be defined \cite{atchuthan-18-thesis} as the motion increments, in terms of position, velocity and orientation, 
+between the current IMU frame and another frame, that started at the IMU state at time $i$, $\bfx_i=(\bfp_i,\bfv_i,\bfR_i)$, and that falls freely and without rotating at 
+the acceleration of gravity (\figRef{fig:fff}).
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.8\textwidth]{figures/fff}
-\caption{The free-falling, non-rotating frame $\cG_t$ follows a parabolic trajectory governed only by gravity $\bfg$ and determined by the initial conditions $\bfp_i$, $\bfv_i$ and $\bfR_i$ at time $i$ ($\cG_i=\bfx_i$, blue). The IMU delta $\D_{ij}$ between times $i$ and $j$ is defined as the state of the IMU at time $j$ ($\bfx_j$, red) expressed in the free-falling frame at time $j$ ($\cG_j$, green).}
+\caption{The free-falling, non-rotating frame $\cG_t$ follows a parabolic trajectory governed only by gravity $\bfg$ and determined by the initial conditions 
+$\bfp_i$, $\bfv_i$ and $\bfR_i$ at time $i$ ($\cG_i=\bfx_i$, blue). The IMU delta $\D_{ij}$ between times $i$ and $j$ is defined as the state of the IMU at time 
+$j$ ($\bfx_j$, red) expressed in the free-falling frame at time $j$ ($\cG_j$, green).}
 \label{fig:fff}
 \end{figure}
 
-This derives in the definition of the operator $\boxminus$ in \eqRef{equ:boxminus} as what we detailed in \eqRef{equ:boxminus-forster}, the operator $\boxplus$ in \eqRef{equ:boxplus} being just its inverse.
+This derives from the definition of the operator $\boxminus$ in \eqRef{eq:boxminus}, an example of which was detailed in \eqRef{eq:boxminus-forster}, 
+the operator $\boxplus$ in \eqRef{eq:boxplus} being just its inverse.
 % Then, $\bfx_k=\bfx_i\boxplus\D_{ik}$ is \cite[eq.~32]{forster2017-TRO} and $\D_{ik}=\bfx_k\boxminus\bfx_i$ is \cite[eq.~33]{forster2017-TRO}. 
 Full details can be found in \cite[Section 3.4]{atchuthan-18-thesis}.
 
@@ -410,7 +435,7 @@ Full details can be found in \cite[Section 3.4]{atchuthan-18-thesis}.
 Given two IMU deltas $\D=[\Dp,\Dv,\DR]$ and $\bfdelta=[\dpp,\dv,\dR]$, the group composition law $\D=\D\circ\bm\delta$ in \eqRef{eq:deltaPlusDelta} is defined as
 %
 \begin{equation} 
-    \label{equ:composition_delta}
+    \label{eq:composition_delta}
     \D \circ \bm\delta
     =
     \begin{bmatrix}
@@ -431,7 +456,7 @@ with a group identity element composed of the identity element of its Lie groups
 the resulting inverse being
 %
 \begin{equation}
-\label{equ:inverse_delta}
+\label{eq:inverse_delta}
     \D^{-1} =     \begin{bmatrix}
     - \DR\tr(\Dp + \Dv \Dt) \\
     - \DR\tr \Dv \\
@@ -446,8 +471,8 @@ Finally, the calibration function $c()$ and exponential map $\Exp()$ are,
     \bftau &= \begin{bmatrix}
     \bftau_a \\ \bftau_\omega
     \end{bmatrix} = \begin{bmatrix}
-    \tilde\bfa-\bfb_a-\noise_a \\
-    \tilde{\bfomega}-\bfb_\omega-\noise_\omega
+    \tilde\bfa-\bfb_a \\
+    \tilde{\bfomega}-\bfb_\omega
     \end{bmatrix}\\
     \bfdelta &= \Exp(\bftau) = \begin{bmatrix}
     \frac12\bftau_a\dt^2 \\
@@ -463,11 +488,11 @@ yielding $\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta} as
     \delta\bfp\\\delta\bfv\\\delta\bfR
     \end{bmatrix}^k =
     \begin{bmatrix}
-    \tfrac12(\tilde\bfa-\bfb_a-\noise_a)\dt^2 \\
-    (\tilde\bfa-\bfb_a-\noise_a)\dt \\
-    \Exp((\tilde{\bfomega}-\bfb_\omega-\noise_\omega)\dt)
+    \tfrac12(\tilde\bfa-\bfb_a)\dt^2 \\
+    (\tilde\bfa-\bfb_a)\dt \\
+    \Exp((\tilde{\bfomega}-\bfb_\omega)\dt)
     \end{bmatrix}^k
-    \label{eq:delta_function}
+    \label{eq:delta_function_forster}
 \end{align}
 %
 % The pre-integration method in  \cite{forster2017-TRO} can be put in the general pre-integration formalism above by defining 
@@ -479,8 +504,8 @@ The concatenation of the operations above lead exactly to the Forster's algorith
 %
 \begin{itemize}
     \item Initialize $\D_{ii} = \D_\cE$, $\Sigma_\D=\bf0$, $\bfJ^\D_\bfb = \bf0$, and $\ol\bfb_i = \bfb_i$.
-    \item Calibrate data and retract to manifold using \eqRef{eq:delta_function}.
-    \item Compose $\ol\D$ using \eqRef{equ:composition_delta}.
+    \item Calibrate data and retract to manifold using \eqRef{eq:delta_function_forster}.
+    \item Compose $\ol\D$ using \eqRef{eq:composition_delta}.
 \end{itemize}
 %
 Likewise, the factor residual is computed following \secRef{sec:preint_residual} exactly.
@@ -496,7 +521,7 @@ This formulation was proposed in our published paper \cite{fourmy2019absolute}.
 
 We propose a matrix form of the Lie group of IMU deltas as,
 %
-\begin{align}\label{equ:delta_Lie}
+\begin{align}\label{eq:delta_Lie}
     \D &= 
     \begin{bmatrix}
     \DR & \Dv & \Dp \\
@@ -506,8 +531,9 @@ We propose a matrix form of the Lie group of IMU deltas as,
     ~.
 \end{align}
 %
-The three constituents of such deltas, namely $\Dp$, $\Dv$ and $\DR$, are defined exactly as in the composite case above. Notice a fourth component $\Dt$ as being also part of the delta definition.
-Being computed in the same manner, the definition of the $\boxminus$ and $\boxplus$ operators is a trivial manner of composing the matrix deltas from \eqRef{equ:boxminus-forster}, yielding proper expressions for
+The three constituents of such deltas, namely $\Dp$, $\Dv$ and $\DR$, are defined exactly as in the composite case above. Notice a fourth component 
+$\Dt$ as being also part of the delta definition. Being computed in the same manner, the definition of the $\boxminus$ and $\boxplus$ operators is a trivial 
+manner of composing the matrix deltas from \eqRef{eq:boxminus-forster}, yielding proper expressions for
 %
 \begin{align*}
 \hat\D_{im} &= \bfx_m \boxminus \bfx_i &
@@ -532,17 +558,17 @@ Group composition, identity and inverse stem from regular matrix product, identi
     \bf0 & 1 & 0 \\
     \bf0 & 0 & 1 
     \end{bmatrix} = \bfI_{5\times5}
-    \label{equ:identity}
+    \label{eq:identity}
     \\
     \D\inv &= \begin{bmatrix}
     \DR\tr & -\DR\tr\Dv & -\DR\tr(\Dp-\Dv\Dt) \\
     \bf0 & 1 & -\Dt \\
     \bf0 & 0 & 1
     \end{bmatrix} ~.
-    \label{equ:inverse}
+    \label{eq:inverse}
 \end{align}
 %
-Comparing against \eqsRef{equ:composition_delta}{equ:inverse_delta} we observe that this matrix Lie group behaves equivalently to Forster's IMU deltas above.
+Comparing against \eqsRef{eq:composition_delta}{eq:inverse_delta} we observe that this matrix Lie group behaves equivalently to Forster's IMU deltas above.
 
 
 \subsubsection{Lie algebra \texorpdfstring{$\mathfrak{d}$}{d} and exponential map}
@@ -551,7 +577,7 @@ The compact Lie group defines a different Lie algebra parametrization than Forst
 The Lie algebra elements $\bftau\hhat$ and their isomorphic Cartesian $\bftau$ have the forms
 %
 \begin{align}
-    \label{equ:lie_algebra}
+    \label{eq:lie_algebra}
     \bftau\hhat &= \begin{bmatrix}
     \hatx{\bth} & \bfrho & \bfupsilon \\
     \bf0 & 0 & \Dt \\
@@ -590,7 +616,7 @@ The exponential map transfers tangent elements to the group; the logarithmic map
     \label{eq:compact_log}
 \end{align}
 %
-where $\Log()$ is obtained by identifying terms in \eqRef{equ:delta_Lie} and \eqRef{eq:compact_exp}.
+where $\Log()$ is obtained by identifying terms in \eqRef{eq:delta_Lie} and \eqRef{eq:compact_exp}.
 Matrices $\bfP$ and $\bfQ$ are provided in the appendix's \secRef{sec:IMULieGroup}.
 
 
@@ -641,14 +667,14 @@ The following pipeline of operations is performed to recursively pre-integrate I
 Pre-integration starts after each keyframe with $\ol\D_{ii} = \bfI$, $\bfSigma^\Delta_{ii} = \bf0$ and $\mjac{\D_{ii}}{\bfb} = \bf0$, using $\ol\bfb_i = \bfb_i$ the current best estimate of the bias at time $i$.
 
 \paragraph{Calibration}
-At the reception of each IMU measurement $\bfz_k=(\bfa,\bw)_k$, start by correcting it with available  bias estimates $\ol\bfb_i=(\bfa_b,\bw_b)_i$, 
+At the reception of each IMU measurement $\bfz_k=(\bfa,\angvel{}{})_k$, start by correcting it with available  bias estimates $\ol\bfb_i=(\bias_a,\bias_{\omega})_i$, 
 to produce the tangent vector $\bftau=\bm\nu\dt$. For this, set the velocity part of $\bm\nu$ to zero as the IMU is by definition at zero speed \wrt 
 the moving frame, as in \eqRef{eq:exp_compact_imu}. Obtain at the same time the respective Jacobians,
 %
 \begin{align}
     \bftau_k &= 
     \begin{bsmallmatrix}
-    \bf0 \\ \bfa-\bfa_b \\ \bw-\bw_b \\ 1
+    \bf0 \\ \bfa - \bias_a \\ \bw - \bias_{\omega} \\ 1
     \end{bsmallmatrix}\dt, 
     &
     \mjac{\bftau}{\bfz} &= 
@@ -670,10 +696,10 @@ the moving frame, as in \eqRef{eq:exp_compact_imu}. Obtain at the same time the 
 \end{align}
 %
 \paragraph{Retraction}
-Second, use the exponential map \eqRef{eq:exp_compact_imu} to obtain the current delta step $\bm\delta_{jk}$ in the group manifold, and obtain Jacobian
+Second, use the exponential map \eqRef{eq:exp_compact_imu} to obtain the current delta step $\bm\delta^k$ in the group manifold, and obtain Jacobian
 %
 \begin{align}
-    \bm\delta_{jk} &= \Exp(\bftau_{k})~,
+    \bm\delta^k &= \Exp(\bftau_{k})~,
     &
     \mjac{\bm\delta}{\bftau} &= \mjac{}{r}(\bftau_k)
     ~.
@@ -683,12 +709,12 @@ Second, use the exponential map \eqRef{eq:exp_compact_imu} to obtain the current
 Third, use group composition \eqRef{eq:compact_composition} to update the pre-integrated delta; obtain Jacobians
 %
 \begin{align}
-    \ol\D_{ik} &= \ol\D_{ij}\circ\bm\delta_{jk} ~,
+    \ol\D_{ik} &= \ol\D_{ij}\circ\bm\delta^k ~,
     &
-    \mjac{\D_{ik}}{\D_{ij}} &= \Ad{\bm\delta_{jk}}\inv
+    \mjac{\D_{ik}}{\D_{ij}} &= \Ad{\bm\delta^k}\inv
     ~,&
-    \mjac{\D_{ik}}{\bm\delta_{jk}} = \bfI
-    \label{equ:pre_composition}
+    \mjac{\D_{ik}}{\bm\delta^k} = \bfI
+    \label{eq:pre_composition}
     ~,
 \end{align}
 %
@@ -710,7 +736,7 @@ Finally, integrate the Jacobian of the delta \wrt the biases
 %
 \begin{align}
     \mjac{\D_{ik}}{\bfb} &= \mjac{\D_{ik}}{\D_{ij}}\mjac{\D_{ij}}{\bfb} 
-    + \mjac{\D_{ik}}{\bm\delta_{jk}}\mjac{\bm\delta}{\bftau}\mjac{\bftau}{\bfb}
+    + \mjac{\D_{ik}}{\bm\delta^k}\mjac{\bm\delta}{\bftau}\mjac{\bftau}{\bfb}
     ~.
 \end{align}
 %
@@ -726,11 +752,11 @@ Computation of the residual in the case of the Lie Delta group formulation follo
 Use the pre-integrated Jacobian $\mjac{\D_{im}}{\bfb}$ to correct the pre-integrated delta $\ol\D_{im}$ to account for the new bias estimate $\bfb_i\neq\ol\bfb_i$,
 
 \begin{align}
-    \D_{im}(\bfb_i) &= \ol\D_{im}\cdot\Exp(\mjac{\D_{im}}{\bfb}(\bfb_i-\ol\bfb_i)) 
+    \D_{im}(\bfb_i) &= \ol\D_{im}\circ\Exp(\mjac{\D_{im}}{\bfb}(\bfb_i-\ol\bfb_i)) 
     ~.
 \end{align}
 
-Use \eqRef{equ:delta} as $\boxminus$ to compute the expected delta from  $\bfx_i$ to $\bfx_m$,
+Use \eqRef{eq:boxminus-forster} as $\boxminus$ to compute the expected delta from  $\bfx_i$ to $\bfx_m$,
 %
 \begin{align}
     \widehat\D_{im}(\bfx_i,\bfx_m) &= \bfx_m \boxminus \bfx_i 
@@ -742,7 +768,7 @@ Compute the residual in the  tangent of $\cD$ at $\D_{im}$,
 \begin{align}
     \bfe^\D_{im}(\bfx_i,\bfx_m,\bfb_i) 
     &=\widehat\D_{im}(\bfx_i,\bfx_m) \ominus \D_{im}(\bfb_i) \\
-    &=\Log(\D_{im}(\bfb_i)\inv \cdot \widehat\D_{im}(\bfx_i,\bfx_m)) \in \bbR^9
+    &=\Log(\D_{im}(\bfb_i)\inv \circ \widehat\D_{im}(\bfx_i,\bfx_m)) \in \bbR^9
 ~,
 \end{align}
 %
@@ -759,7 +785,7 @@ They also satisfy the chain rule, which we use extensively in our developments.
 Ample reference and justification of this approach can be found in \cite{sola2018micro}.
 
 A comment is however necessary for the present IMU case.
-It relates to the uncertainty of the last component of the tangent space \eqRef{equ:lie_algebra}, which is the time $\Dt$. This component has no uncertainty by definition. 
+It relates to the uncertainty of the last component of the tangent space \eqRef{eq:lie_algebra}, which is the time $\Dt$. This component has no uncertainty by definition. 
 Having it in the covariances would imply singularity and result in the risk of a number of well-known numerical issues. 
 We therefore systematically marginalize this time component out of the covariances, simply by removing the last row and column. 
 
@@ -770,7 +796,7 @@ We therefore systematically marginalize this time component out of the covarianc
 
 Mathematically, and disregarding methodology, the main difference between our method (\secRef{sec:imu_preint_composite}) and Forster's \cite{forster2017-TRO} (\secRef{sec:imu_preint_compact}) is to be found in the exponential map. 
 To see it, let us consider small rotation increments $\bth=\bw\dt$ captured at each single IMU sample. 
-In such cases, the matrices $\bfP,\bfQ$ appearing in the exponential map \eqRef{eq:compact_exp} and detailed in \eqRef{equ:RQP} can be approximated by $\bfP\approx\tfrac12\bfI$ and $\bfQ\approx\bfI$.
+In such cases, the matrices $\bfP,\bfQ$ appearing in the exponential map \eqRef{eq:compact_exp} and detailed in \eqRef{eq:RQP} can be approximated by $\bfP\approx\tfrac12\bfI$ and $\bfQ\approx\bfI$.
 The exponential becomes,
 %
 \begin{align}
@@ -784,12 +810,12 @@ The exponential becomes,
 ~,
 \end{align}
 %
-where we find the terms $\bfa\dt$ and $\tfrac12\bfa\dt^2$, which should sound familiar from Forster's method. 
-In effect, with this approximation, if we now compact all the steps \eqsRef{eq:preint_debiasing}{equ:pre_composition} of our integration into a cumulative expression,
+where we find the terms $\bfa\dt$ and $\tfrac12\bfa\dt^2$, which are exactly the terms obtained with Forster's method \eqRef{eq:delta_function_forster}. 
+In effect, with this approximation, if we now compact all the steps \eqsRef{eq:preint_debiasing}{eq:pre_composition} of our integration into a cumulative expression,
 %
 \begin{align}
     \D_{ik} = \prod_{j=i+1}^k \Exp\left(\begin{bmatrix}
-    \bf0 \\ (\bfa_j-\bfa_{bi}) \\ (\bw_j-\bw_{bi}) \\ 1
+    \bf0 \\ (\bias_a^i - \bias_a^j) \\ (\bias_{\angvel{}{}}^j-\bias_{\angvel{}{}}^j) \\ 1
     \end{bmatrix}\dt\right)
 ~,
 \end{align}
@@ -797,6 +823,8 @@ In effect, with this approximation, if we now compact all the steps \eqsRef{eq:p
 it is possible (although tedious) to show that both Forster's and our method are exactly equivalent when $\bw\dt\to0$.
 % , which is usually a valid hypothesis.
 % These differences should not constitute an argument against Forster, since in practice we typically have extremely small steps $\bw\dt$ and the approximation holds very well.
+
+
 
 \subsubsection{Further discussion regarding Lie group choice}
 
@@ -817,9 +845,9 @@ Therefore, it is apparent that depending on the structure of the defined Lie gro
 \end{itemize}
 
 In the context of filtering, using a compact group formulation of the robot state has been proven to improve greatly the basin of convergence of the so-called
-Invariant Kalman Filter \cite{barrau2018invariant, hartley2020contact} by avoiding the need to compute jacobians around the current estimates (which is done
-with the standard EKF), which may lead to an inconsistent estimate if the filter is initialized far from the optimal. 
-However, this issue is not so present with factor graph optimization since we repeatedly linearize around the new estimate.
+Invariant Kalman Filter \cite{barrau2018invariant, hartley2020contact}. This methods tackles one of the issues of standard EKF: 
+the jacobians are computed around the current estimates, which leads to an inconsistency of the estimate if the filter is initialized far from the optimal. 
+However, this issue is not so present with factor graph optimization since we repeatedly linearize around the new estimates.
 Nevertheless, it seems that compact Lie groups may provide slightly better performances than composite Lie groups \cite{brossard2021associating}, thanks 
 to a more precise linearization \wrt\ the IMU biases and a covariance propagation that better represents the geometry of the problem.
 
@@ -827,25 +855,28 @@ However one may ask whether these more elegant mathematical formulations and sli
 our modularity philosophy since for each new motion sensor, we need to find a new appropriate Lie group instead of being able to reuse the machinery developed
 for composite groups, which is vastly simpler.
 
+
+
+
 \section{Related works}
 
+Pre-integration principles were laid out by Lupton \cite{lupton-09} for a smoothing based visual inertial estimator. His work was motivated partly 
+by the fact that previous systems required a precise initialization of orientation and velocity (using a specialized routine) to begin to integrate IMU measurements. 
+With this new formulation, Lupton noted that pre-integration of IMU measurements permitted to use measurements immediately and delay the estimation of the initial 
+orientation about the gravity vector in particular. 
 
-Pre-integration principles were first proposed by Lupton \cite{lupton-09} to be applied to a smoothing based visual inertial estimator. His work was motivated partly 
-by the fact that previous systems required a precise initialization of position, orientation and velocity (using a specialized routine) to begin to integrate IMU measurements. 
-With this new formulation, Lupton noted that pre-integration of IMU measurements permitted to use measurements immediately and delay initial orientation about the gravity
-vector in particular. 
 This seminal work was quickly adopted by other authors using smoothing filters \cite{carlone2014eliminating}. As pioneering as this work was, it was however 
 limited by the use of Euler angles whose problematic geometric properties are notorious. Indelman \cite{Indelman-2013-7768} first proposed to use the exponential of the 
 matrix rotation group instead of Euler integration and to relax the assumptions of a non-rotating and flat earth of Lupton \cite{lupton-09}. Forster \cite{forster2015imu, forster2017-TRO}
 proposed the same formulation using instead quaternions. Various experiments brought to light three main problem with the Euler angle formulation, that are completely absent 
 from the quaternion "on-manifold" formulation. Firstly, first order integration of angular velocities using Euler angles is approximate, which leads to accumulated errors 
-for high angular velocities or sampling rate.  Secondly, the log-likelihood of the angular displacement is not invariant under the action of rigid body transformations, 
+for high angular velocities or sampling rate. Secondly, the log-likelihood of the angular displacement is not invariant under the action of rigid body transformations, 
 \eg the choice of the world frame influence the results of the estimation. Finally, the well known gimbal lock singularity of Euler angles has a consequence 
 on the covariance IMU noise covariance propagation, which is severely degraded when the robot trajectory comes close to the singularity. 
 \cite{shen2015tightly}, later improved in \cite{qin2018vins} proposed to use a more precise numerical integration procedure than the default forward Euler used by Forster. 
 Eckenhoff \cite{eckenhoff2019closed} derived closed form solutions of the pre-integration equations using various piecewise constant models.
 
-Barrau \cite{barrau2020mathematical} described a coupled matrix Lie group for the propagation of pre-integration errors taking into account the earth rotation for aerospace
+Barrau \cite{barrau2020mathematical} described a compact matrix Lie group for the propagation of pre-integration errors taking into account the earth rotation with aerospace
 inertial navigation system in view. This work was later extended \cite{brossard2021associating} and showed that the linearized bias update is slightly more precise than 
 the work of Forster \cite{forster2017-TRO}. Le Gentil \cite{le2020gaussian} used a different trajectory parametrization framework by formulating the pre-integration algorithm 
 in the context of Gaussian Process smoothing. Self calibration of IMU/Camera time offsets was also developped \cite{yang2020analytic}. 
@@ -857,5 +888,7 @@ equations as a sensor agnostic form that is integrated in state estimation WOLF 
 context of factor graph legged robot state estimation to derive new leg odometry factors \cite{hartley2018legged, wisth2019robust, wisth2020pre-integrated}.
 It was also applied to integrate drone dynamics to estimate external forces disturbances \cite{nisar2019vimo}.
 
-In \chpRef{chp:underactuade_dynamics}, we propose to pre-integrate force-torque measurements that are present in some legged-robots. We show that permits to estimate the centroidal quantities of the robot as well making the kinematic bias on center of mass measurements observable. A practical implementation is demonstrated in \chpRef{chp:centroidal_estimation}, which is based on our paper \cite{fourmy2021contact}
+In \chpRef{chp:underactuade_dynamics}, we propose to pre-integrate force-torque measurements that are present in some legged-robots. 
+We show that permits to estimate the centroidal quantities of the robot as well making the kinematic bias on center of mass measurements observable. 
+A practical implementation is demonstrated in \chpRef{chp:centroidal_estimation}, which is based on our paper \cite{fourmy2021contact}
 
