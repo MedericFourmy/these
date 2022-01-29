@@ -298,8 +298,8 @@ using the bias $\ol\bfb_i$ available in KF $i$.
 In major cases, this function is split into the stages of data calibration $c()$, producing a vector in the Lie algebra, and retraction $\Exp()$, retracting it onto the manifold,
 %
 \begin{align}
-    \bftau_k = c(\tilde\bfz_k, \ol\bfb_i) \dt \in T_\Epsilon \mathcal{M}\\
-    \bm\delta_k = \Exp(\bftau_k) \in \mathcal{M},
+    \bftau_k &= c(\tilde\bfz_k, \ol\bfb_i) \dt \in \Reals^{dim(\cM)}\\
+    \bm\delta_k &= \Exp(\bftau_k) \in \cM,
 \end{align}
 %
 where the former, $c()$, depends on the sensor model, and the second, $\Exp()$, on the deltas Lie group.
