@@ -25,7 +25,7 @@ in the scene which can be detected in the images. Dedicated algorithms can then 
 \textit{object-level SLAM} systems. 
 
 In this chapter, we present two measurements models based on available software, that permit to implement this paradigm. The first one 
-uses unique \apriltag\ fiducial markers \cite{wang2016iros} that are disposed sparsely in the scene. The second uses a deep learning-based method \cite{labbe2020cosypose}
+uses unique \apriltag\ fiducial markers \cite{wang2016iros} (to which we may refer to informaly as simply \textit{tags}) that are disposed sparsely in the scene. The second uses a deep learning-based method \cite{labbe2020cosypose}
 to obtain relative poses from object of interest, such as stairs. Instead of artificially augmenting the environment with fiducial markers, we assume 
 that objects of interest exist in the scene, whose CAD models are known. 
 Both systems lack ways to estimate the uncertainty of their output and we therefore propose methods for the computation of the measurements covariances.
@@ -78,21 +78,48 @@ algorithm behind the pose measurements and propose covariances models
 
 Fiducial markers (such as ARToolkit \cite{kato1999marker}, ARTag \cite{fiala2005artag}, ArUco \cite{garrido2014automatic}) are widely used in robotics and Augmented Reality (AR) applications as they provide an easy way to obtain a relative 6D pose 
 between a calibrated camera and the marker. These markers are designed so that they are uniquely and robustly identifiable in any scene 
-\cite{wang2016iros,romero2018speeded}. For square markers, the outputs of the algorithm are sub-pixel projections of the square corners, whose 
-corresponding position in the local reference frame of the tag is known (using the tag dimensions). Recovering their pose is then an instance 
-of the Perspective n Point (PnP) algorithm \cite{gao2003complete}, which requires at least three 2D-3D correspondences to compute the 3D pose. 
+\cite{wang2016iros,romero2018speeded}. 
+
+The pose extraction happens in two steps. First, the tag corners sub-pixel projections are extracted from the image along with the unique id of the detected tag. In this work we used the \apriltag\ library \cite{wang2016iros} for its performances and popularity within the robotics community. Second, knowing the tag size, we can compute the position of these corners in the local tag frame, as defined in \figRef{fig:apriltag_coordinate_frame}. Recovering the pose of the tag from the corner projections and their local coordinates is then an instance 
+of the Perspective-n-Point (PnP) algorithm \cite{gao2003complete}, which requires at least four 2D-3D correspondences to compute a unique solution the 3D pose \footnote{The P3P algorithms yields up to four geometrically feasible solution, a fourth point being then used to select the right one.}. 
 A vast literature has been written on the topic, many methods relying on efficient analytical models
-\cite{gao2003complete, lepetit2009epnp, collins2014infinitesimal, terzakis2020consistently}, sometimes refined by a nonlinear maximum likelihood step. 
+\cite{gao2003complete, lepetit2009epnp, collins2014infinitesimal, terzakis2020consistently}, sometimes refined by a nonlinear maximum likelihood step.
+
+
+
+
+\subsection{Ambiguity in the pose estimation}
+
+A known problem of fiducial markers is the orientation ambiguity of detections in noisy images. This phenomenon may make the PnP estimation of the tag orientation jump wildly from one frame to the next. This is due to the fact that the conic perspective projection of the corners is weak, that is the difference between two symmetrical tag orientations is very close. If this difference falls below the camera pixel noise, then the two solutions are indistinguishable, as shown in \figRef{fig:tag_ambiguity}. This happens especially when the tag corner projection is close to a square, that is when the tag is orthogonal to the axis passing through the camera and tag origins. This phenomenon is intensified when the tag is far from the camera as it spans a smaller region of the image. 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/tag_ambiguity.png}
+    \caption{Illustration of the tag ambiguity problem. The red circles represent uncertainty in the corner detection due to pixel noise. The conic perspective projections of faces from two cubes with 120 degrees orientation difference fall withing these regions and are, therefore, hard to distinguish. Figure taken from \cite{8206468}.}
+    \label{fig:tag_ambiguity}
+\end{figure}
+
+One solution is to define the tag factor residual as the pixel error between the detected corners and their projection given the
+current tag pose estimate and let the optimizer find the most probable tag poses given the complete set of measurements. However, if one tag is wrongly initialized, 
+the optimizer is not guaranteed to leave the local minimum with new measurements. 
+
+Our solution is to bring the disambiguation to the front-end side.
+\cite{collins2014infinitesimal} provides an implementation of the PnP problem that retrieves both ambiguous poses. When expressed in the camera frame, 
+both solutions share the tag position and differ only in their orientation. We typically want to select the solution with the smallest error. 
+However, if the reprojection errors $e_1$ and $e_2$ are too close (we test for $\tfrac{e_2}{e_1} < h$ with $e_1 \leq e_2$ and $h$ an empirical threshold), 
+we increase the rotational part of the covariance matrix by a great factor to prevent a potential wrong tag orientation to influence the estimation.
+
+
 
 \subsection{Covariance model}
 Obtaining a covariance of the estimated transformation is an important step toward the integration of these measurements in a sensor fusion algorithm.
 
 Urban \cite{urban2016mlpnp} (Eq. (23)) uses a careful parameterization of the homogeneous coordinates associated with 2D features to develop
-a maximum likelihood PnP algorithm and also proposises a covariance model based on the problem Hessian (Eq. (23)).  However, the particular choice of variable parameterization makes the formulation of the covariance computation overcomplicated.
+a maximum likelihood PnP algorithm and also proposes a covariance model based on the problem Hessian (Eq. (23)).  However, the particular choice of variable parameterization makes the formulation of the covariance computation overcomplicated.
 We think that a simpler yet equivalent formulation is possible. 
 
 Usually, when a nonlinear mapping of noise variables from one space to another is available, we can propagate the covariance through the nonlinearity
-as shown in Eq. \eqRef{eq:cov_propagation}.  
+as shown in Eq. \eqRef{eq:cov_propagation}. 
 Instead of directly obtaining Jacobians from the PnP algorithms, we found that a natural way to proceed is to take the opposite 
 direction as follows. It should somehow be possible, knowing the marker size and the relative pose measurement, and assuming pixel noise, to
 recover $\Cov_{\T{}{}}$. A simple model of pixel noise is to assume isotropic Gaussian noise on the pixels. If we stack four pixel (the four tag corners) 
@@ -119,22 +146,22 @@ is in general hard to analytically differentiate. Instead, if we consider the in
 %
 that maps the relative pose to the projection of the tag in the image, a rather simple jacobian expression can be derived using the chain rule, as follows.
 
-Let's define the marker corner coordinates in the marker frame like shown in \figRef{fig:tag_coordinate_frame}. As a convention 
-\cite{wang2016iros} we order the corners counter-clockwise starting from bottom left (looking straight at the tag). 
+Let us define the marker corner coordinates in the marker frame like shown in \figRef{fig:apriltag_coordinate_frame}. As a convention 
+\cite{wang2016iros}, we order the corners counter-clockwise starting from bottom left (looking straight at the tag). 
 
 \begin{equation}
-    c =
+    \bfc =
     \begin{pmatrix}
-    c_1 \\ c_2 \\ c_3 \\ c_4
+    \bfc_1 \\ \bfc_2 \\ \bfc_3 \\ \bfc_4
     \end{pmatrix}
     ~~
-    c_1 =  \begin{pmatrix} -\frac{w}{2} \\ \frac{w}{2} \\ 0 \end{pmatrix}
+    \bfc_1 =  \begin{pmatrix} -\frac{w}{2} \\ \frac{w}{2} \\ 0 \end{pmatrix}
     ~ 
-    c_2 =  \begin{pmatrix} \frac{w}{2} \\ \frac{w}{2} \\ 0 \end{pmatrix}
+    \bfc_2 =  \begin{pmatrix} \frac{w}{2} \\ \frac{w}{2} \\ 0 \end{pmatrix}
     ~
-    c_3 =  \begin{pmatrix} \frac{w}{2} \\ -\frac{w}{2} \\ 0 \end{pmatrix}
+    \bfc_3 =  \begin{pmatrix} \frac{w}{2} \\ -\frac{w}{2} \\ 0 \end{pmatrix}
     ~
-    c_4 =  \begin{pmatrix} -\frac{w}{2} \\ -\frac{w}{2} \\ 0 \end{pmatrix}.
+    \bfc_4 =  \begin{pmatrix} -\frac{w}{2} \\ -\frac{w}{2} \\ 0 \end{pmatrix}.
 \end{equation}
 
 %
@@ -142,37 +169,46 @@ Let's define the marker corner coordinates in the marker frame like shown in \fi
     \centering
     \includegraphics[width=0.5\textwidth]{figures/tag12_frame.pdf}
     \caption{\apriltag~local coordinate systems and corners conventions \cite{wang2016iros}}
-    \label{fig:tag_coordinate_frame}
+    \label{fig:apriltag_coordinate_frame}
 \end{figure}
 
-Then, assuming that images are corrected (no distortion), the pinpoint camera model gives us that
+Then, assuming that images are corrected (no distortion), the pinhole camera model gives us that
 
 \begin{equation}
-    \bfx_i = \text{eucl}(h_i) = \text{eucl}(K\T{C}{O} c_i)
+    \bfx_i = \text{eucl}(\bfh_i) = \text{eucl}(\bfK\T{C}{O} \bfc_i)
 \end{equation}
-for each corner $c_i$, where $h_i$ are the homogeneous coordinates representing the projected corners and $eucl$ is the function that maps homogeneous coordinates to euclidean pixel coordinates, defined as
+%
+for each corner $c_i$, where $h_i$ are the homogeneous coordinates representing the projected corners and $eucl$ (for "euclideanization") is the function that maps homogeneous coordinates to euclidean pixel coordinates, defined as
+%
 \begin{equation}
     \begin{split}
-        \text{eucl}: \Reals^3 &\rightarrow \Reals^2 \\
-        \bfh = \begin{pmatrix}x\\y\\z\end{pmatrix} &\rightarrow \bfx = \begin{pmatrix}x/z\\y/z\end{pmatrix}
+        \text{eucl}: \Reals^3 
+        &\rightarrow \Reals^2 \\
+        \bfh = \begin{pmatrix}x\\y\\z\end{pmatrix} 
+        &\rightarrow \bfx = \begin{pmatrix}x/z\\y/z\end{pmatrix}
     \end{split}.
 \end{equation}
 
-We need to compute the jacobian of each corner projection with respect to the estimated relative pose $J^{x_i}_{\T{}{}} = J^{x_i}_{h_i} J^{h_i}_{\T{}{}}$. 
-Regarding the transformation, we will consider it to be an element of $\Reals(3)\times \SO(3)$ since the translation and rotation part 
-of transformation are treated separately in our solver. The expressions of those functions are therefore expressed as:
+We need to compute the jacobian of each corner projection with respect to the estimated relative pose, decomposed using the chain rule as  
 
-% DROP dependency on C L for clearer notation?
+\begin{equation}
+    \bfJ^{\bfx_i}_{\T{}{}} = \bfJ^{\bfx_i}_{\bfh_i} \bfJ^{\bfh_i}_{\T{}{}}.   
+\end{equation}
+
+Regarding the transformation, we will consider it to be an element of the composite Lie group $\left<\Reals(3)\times \SO(3)\right>$ since the translation and rotation part 
+of transformation are treated separately in our solver. The expressions of those functions are, therefore, expressed as:
+
 \begin{equation}
     \begin{split}
-        &h_i = K(\Rot{C}{O}c_i + \posi{C}{O}) \\
-        &J^{h_i}_{\posi{C}{O}} = K ~~~~~~ J^{h_i}_{\Rot{C}{O}} = -K\Rot{C}{O}[c_i]_{\times}  \\  
-        &J^{h_i}_{\T{C}{O}} = [J^{h_i}_{\posi{C}{O}} ~J^{h_i}_{\Rot{C}{O}}] = K [I_3 ~~~ -\Rot{C}{O} [c_i]_{\times}]
+        &\bfh_i = \bfK(\Rot{C}{O}\bfc_i + \posi{C}{O}) \\
+        &\bfJ^{\bfh_i}_{\posi{C}{O}} = \bfK ~~~~~~ \\ &\bfJ^{\bfh_i}_{\Rot{C}{O}} = -\bfK\Rot{C}{O}[\bfc_i]_{\times}  \\  
+        &\bfJ^{\bfh_i}_{\T{C}{O}} = [\bfJ^{\bfh_i}_{\posi{C}{O}} ~~~ \bfJ^{\bfh_i}_{\Rot{C}{O}}] = \bfK [\bfI_3 ~~~ -\Rot{C}{O} [\bfc_i]_{\times}]
     \end{split}
 \end{equation}
+%
 while the euclideanization jacobian is found to be
 \begin{equation}
-    J^{x_i}_{h_i}
+    \bfJ^{\bfx_i}_{\bfh_i}
     =
     \begin{pmatrix}
     1/z_i & 0 & -x_i/z_i^2 \\
@@ -180,59 +216,63 @@ while the euclideanization jacobian is found to be
     \end{pmatrix}.
 \end{equation}
 
-
-Finally, we can stack the 4 jacobians to get the full jacobian to be used for covariance propagation.
+Finally, we stack the 4 jacobians to get the full jacobian to be used for covariance propagation:
+%
 \begin{equation}
-    J \triangleq J^{\bfx}_{\T{C}{O}}=
+    \bfJ \triangleq \bfJ^{\bfx}_{\T{C}{O}}=
     \begin{pmatrix}
-    J^{\bfx_1}_{\T{C}{O}} \\ J^{\bfx_2}_{\T{C}{O}} \\ J^{\bfx_3}_{\T{C}{O}} \\ J^{\bfx_4}_{\T{C}{O}}
+    \bfJ^{\bfx_1}_{\T{C}{O}} \\ 
+    \bfJ^{\bfx_2}_{\T{C}{O}} \\ 
+    \bfJ^{\bfx_3}_{\T{C}{O}} \\ 
+    \bfJ^{\bfx_4}_{\T{C}{O}}
     \end{pmatrix}
     ~ \in \Reals^{8 \times 6}
 \end{equation}.
 
-We therefore have the covariance propagation equation $\Cov_{\bfx} = J \Cov_{\T{}{}} J\tr$. 
-This equation must be inverted in order to recover the needed covariance $\Cov_{\T{}{}}$. $J$ being non square and full column rank for four corners ($J \in \Reals^{8 \times 6}$, 
-we can use the right pseudo inverse $J^{+} = (J\tr J)^{-1}J\tr$. Left and right multiplying by respectively $J^{+}$ and $J^{+,\top}$, we obtain: $\Cov_{\T{}{}} = J^{+} \Cov_{\bfx} J^{+,\top}$. 
-Given that the pixel noise covariance is isotropic as explained above:
-$\Cov_{\bfx} = \sigma_x^2 \bfI$. This equation finally simplifies to:
+We therefore have the covariance propagation equation $\Cov_{\bfx} = \bfJ \Cov_{\T{}{}} \bfJ\tr$. 
+This equation must be inverted in order to recover the needed covariance $\Cov_{\T{}{}}$. $\bfJ$ being non square and full column rank for four corners ($\bfJ \in \Reals^{8 \times 6}$, 
+we can use the right pseudo inverse $\bfJ^{+} = (\bfJ\tr \bfJ)^{-1}\bfJ\tr$.  Multiplying left and right by respectively $\bfJ^{+}$ and $\bfJ^{+,\top}$, we obtain: $\Cov_{\T{}{}} = \bfJ^{+} \Cov_{\bfx} \bfJ^{+,\top}$. 
+Given that the pixel noise covariance is isotropic as explained above,
+$\Cov_{\bfx} = \sigma_x^2 \bfI$, this equation finally simplifies to:
 
 \begin{align}
     \Cov_{\T{}{}} 
-    &=  (J\tr J)^{-1}J \tr \sigma_x^2 \bfI ((J\tr J)^{-1}J\tr)\tr \\
-    &=  \sigma_x^2 (J\tr J)^{-1} J\tr J (J\tr J)^{-1} \\
-    &= \sigma_{x}^2(J\tr J)^{-1}.
+    &=  (\bfJ\tr \bfJ)^{-1}\bfJ \tr \sigma_x^2 \bfI ((\bfJ\tr \bfJ)^{-1}\bfJ\tr)\tr \\
+    &=  \sigma_x^2 (\bfJ\tr \bfJ)^{-1} \bfJ\tr \bfJ (\bfJ\tr \bfJ)^{-1} \\
+    &= \sigma_{x}^2(\bfJ\tr \bfJ)^{-1}.
 \end{align}
 
 Note that the derivations above are not limited to a square tag with four corners and could be used for any object defined as
 a set of points in its local coordinate system provided their configuration is not degenerate and makes the PnP computation possible \cite{gao2003complete}.  
 We have therefore a compact model informed by the geometry of the measurement model with a single tuning parameter in the pixel noise $\sigma_x$.
 
-Another interpretation of these derivations is the Laplace approximation presented in \ref{chp:MAP_covariance}. 
-In fact, the PnP problem is best described as the minimization of the reprojection errors:
+% Another interpretation of these derivations is the Laplace approximation presented in \ref{chp:MAP_covariance}. 
+% In fact, the PnP problem is best described as the minimization of the reprojection errors:
 
-\begin{equation}
-    \T{C}{O}* \argmin \frac{1}{\sigma_x^2} ||\tilde{\bfx} - \text{proj}_{w}(T{C}{O})||^2
-\end{equation}
+% \begin{equation}
+%     \T{C}{O}* \argmin \frac{1}{\sigma_x^2} ||\tilde{\bfx} - \text{proj}_{w}(T{C}{O})||^2
+% \end{equation}
 
-We find the Maximum-A-Posterior solution \footnote{In this case, no prior is used, so we could talk instead of the Maximum likelihood.} of the problem using a dedicated algorithm \cite{collins2014infinitesimal}.
-Then, the computation of the covariance resorts to computing the Jacobians of the likelihood and inverting the Hessian matrix $J\tr J$. 
+% We find the Maximum-A-Posterior solution \footnote{In this case, no prior is used, so we could talk instead of the Maximum likelihood.} of the problem using a dedicated algorithm \cite{collins2014infinitesimal}.
+% Then, the computation of the covariance resorts to computing the Jacobians of the likelihood and inverting the Hessian matrix $J\tr J$. 
 
 \subsection{Covariance visualization}
 
-It is hard to represent graphically the appearance of this uncertainty model from the full 6D covariance. However, we can inspect the positional and orientational
-(respectively 3x3 upper-left and 3x3 lower-right sub-matrices) by representing them as confidence ellipsoids.
-In fact, for a random variable $x$ with a size $k$ multivariate normal distributions with mean $\mu \in \Reals^3$ and 
+It is hard to represent graphically the appearance of this uncertainty model from the full 6D covariance. However, we can inspect the positional and orientational uncertainty
+(respectively the 3x3 upper-left and 3x3 lower-right sub-matrices) by representing them as confidence ellipsoids.
+
+The principle is the following. For a 3D random variable $x \sim \Gaussian{\mu}{\Cov}$ described by a multivariate normal distributions with mean ${\bf\mu} \in \Reals^3$ and 
 covariance matrix $\Cov \in \Reals^{3 \times 3}$, the statistics:
 %
 \begin{equation}
-    (x - \mu)\tr \Cov^{-1}(x - \mu) = \chi^2
+    (\bfx - {\bf\mu})\tr \Cov^{-1}(\bfx - {\bf\mu}) = \chi^2
     \label{eq:chi2}
 \end{equation}
 %
 follows a chi-square distribution with 3 degrees of freedom. Since \eqRef{eq:chi2} is the equation of an ellipse centered at $\mu$ and shape governed by $\Cov$, we can then plot confidence volumes as ellipsoids by replacing the right-hand side of  
-\eqRef{eq:chi2} by the critical value of the chi-square distribution for the desired confidence interval (we chose $\alpha=99\%$). We simulate a 
-realistic scenario using calibration data from a laboratory Realsense camera, 15cm tags and $\sigma_x = 2~pixels$. An example of a simulated scene is given
-in \figRef{fig:apriltag_cov}. 
+\eqRef{eq:chi2} by the critical value of the chi-square distribution for the desired confidence interval (we chose $\alpha=99\%$). 
+
+We simulate a realistic scenario using calibration data from a laboratory Realsense camera, 15cm tags and $\sigma_x = 2~pixels$. An example of a simulated scene is given in \figRef{fig:apriltag_cov}. 
 
 \begin{figure}[h]
     \centering
@@ -269,38 +309,6 @@ explains the higher uncertainty on the depth measurement. Similar reasoning can 
 \end{figure}
 
 A quantitative comparison with \cite{urban2016mlpnp} would be interesting as well as an experimental validation campaign.
-
-
-\subsection{Ambiguity in the pose estimation}
-
-A known problem of fiducial markers is the orientation ambiguity for noisy images. Close to fronto-parallel pose (identical orientation as 
-the camera frame), the estimated orientation can jump between two solutions of orientations several tenths of degrees apart \cite{8206468}, as shown in \figRef{fig:tag_ambiguity}.
-
-\begin{figure}
-    \centering
-    \includegraphics[width=0.7\textwidth]{figures/tag_ambiguity.png}
-    \caption{Caption}
-    \label{fig:tag_ambiguity}
-\end{figure}
-
-
-This problem has been addressed by an analytical algorithm called Infinitesimal Plane-based Pose Estimation \cite{collins2014infinitesimal} that can 
-provide both ambiguous solutions.
-
-It is well known that the pose extraction from planar markers suffers from an inherent ambiguity between two fairly different rotations as described in 
-\cite{8206468} for instance. One solution is to define the tag factor residual as the pixel error between the detected corners and their projection given the
-current tag pose estimate and let the optimizer find the most probable tag poses given the complete set of measurements. However if one tag is wrongly initialized, 
-the optimizer is not guaranteed to leave the local minimum with new measurements. Our solution is to bring the disambiguation to the front-end side.
-\cite{collins2014infinitesimal} provides an implementation of the PnP problem that retrieves both ambiguous poses. When expressed in the camera frame, 
-both solutions share the tag position and differ only in their orientation. We typically want to select the solution with the smallest error. 
-However, if the reprojection errors $e_1$ and $e_2$ are too close (we test for $\tfrac{e_2}{e_1} < h$ with $e_1 \leq e_2$ and $h$ an empirical threshold), 
-we increase the rotational part of the covariance matrix by a great factor to prevent a potential wrong tag orientation to influence the estimation.
-
-
-
-
-
-
 
 
 
