@@ -23,7 +23,7 @@ It can be shown that he Hessian is the \textit{information matrix} of the proble
 sparse positive definite matrix.
 
 \begin{equation}
-    p(\cX | \cZ) \approx \Gaussian{\cX^{MAP}}{\bfH^{-1}}
+    p(\cX | \cZ) \sim \Gaussian{\cX^{MAP}}{\bfH^{-1}}
     \label{eq:map_laplace}
 \end{equation}
 
@@ -56,7 +56,7 @@ The problem is stated as estimating the depth $x \in \Reals$ of a landmark in th
  \end{figure}
 %
 where $y=u - v$ is a disparity measurement ($u$ and $v$ are pixels corresponding to the projection of the landmark in each camera), $f$ is the focal
-length of the cameras (in pixels), $b$ is the horizontal distance between cameras (the baseline, in meters), and $n_y \approx \Gaussian{0}{\sigma_y^2}$ 
+length of the cameras (in pixels), $b$ is the horizontal distance between cameras (the baseline, in meters), and $n_y \sim \Gaussian{0}{\sigma_y^2}$ 
 is the measurements noise (in pixels), assumed to be Gaussian. We also assume that we have prior knowledge about the 
 estimated value $x_p$, with a standard deviation of $\sigma_p$.
 

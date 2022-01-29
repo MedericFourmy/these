@@ -7,30 +7,31 @@
 The field of computer vision comprises a wide range of methods to extract information about the real world from images taken by digital cameras. 
 This information can be used to infer the structure of the environment (mapping or object tracking), about the movement of the system to which is 
 attached the camera (localization), or both at the same time (Simultaneous Localization And Mapping, \aka\ SLAM). In the context of robotics, the images 
-are obtained one after an other at a constant rate. This leads to a somewhat continuous evolution of the image appearance, which can be leveraged by in 
-various ways  (feature tracking, motion models etc.). We are here interested in solving SLAM, which is the most general application of this methods and 
+are obtained one after another at a constant rate. This leads to a somewhat continuous evolution of the image appearance, which can be leveraged in 
+various ways  (feature tracking, motion models, etc.). We are here interested in solving SLAM, which is the most general application of this method and 
 is used when a robot needs to localize itself in an a priori unknown environment. A vast literature of dedicated algorithms have been developed in this 
 regard, with approaches ranging from geometrical constraints using sparse feature detection \cite{mur2015orb, ferrera2021ov} or photometric consistencies 
 \cite{newcombe2011dtam, engel2014lsd, engel2017direct}, certain methods combining ideas from both approaches \cite{forster2014svo, forster2016svo}.
 
-These algorithms aim at being generalizable to any kind of environments and have their respective strengths and weaknesses \cite{fuentes2015visual}. 
-Although open-source code is available for most, these pieces of software may be difficult to integrate in other frameworks. Besides, 
+These algorithms aim at being generalizable to any kind of environment and have their respective strengths and weaknesses \cite{fuentes2015visual}. 
+Although open-source code is available for most, these pieces of software may be difficult to integrate into other frameworks. Besides, 
 though providing quite accurate localization, maps obtained from these methods are rarely immediately useful, lacking semantic information about 
-the scene usable by a legged robot. 
+the scene. 
 
 In this thesis, rather than investing time and energies in new vision processing algorithms, we chose to focus our attention on legged-robot state estimation. 
-In particular, we are interested in localizing the robot with respect to objects of interest such as stairs, tables or the like, whose geometrical models are known.
+In particular, we are interested in localizing the robot with respect to objects of interest such as stairs, tables, or the like, whose geometrical models are known.
 Approaches based on object-level measurement can provide an affordable alternative, and are readily available. These systems assume the presence of known objects 
 in the scene which can be detected in the images. Dedicated algorithms can then infer the object pose relative to the camera, which can be used to build 
 \textit{object-level SLAM} systems. 
 
-In this chapter, we present two measurements models based on available software, that permit to implement this paradigm. The first one 
-uses unique \apriltag\ fiducial markers \cite{wang2016iros} (to which we may refer to informaly as simply \textit{tags}) that are disposed sparsely in the scene. The second uses a deep learning-based method \cite{labbe2020cosypose}
-to obtain relative poses from object of interest, such as stairs. Instead of artificially augmenting the environment with fiducial markers, we assume 
+In this chapter, we present two measurements models based on available software, that permit the implementation of this paradigm. The first one 
+uses unique \apriltag\ fiducial markers \cite{wang2016iros} (to which we may refer to as \textit{tags} informally) that are laid out sparsely in the scene. 
+The second uses a deep learning-based method \cite{labbe2020cosypose}
+to obtain relative poses from an object of interest, such as a pair of stairs. Instead of artificially augmenting the environment with fiducial markers, we assume 
 that objects of interest exist in the scene, whose CAD models are known. 
-Both systems lack ways to estimate the uncertainty of their output and we therefore propose methods for the computation of the measurements covariances.
+Both systems lack ways to estimate the uncertainty of their output and we, therefore, propose methods for the computation of the measurements covariances.
 
-In both models, we assume that we have a calibrated camera, and that the images have been corrected for distortions. The camera reference frame $C$ has its origin at 
+In both models, we assume that we have a calibrated camera and that the images have been corrected for distortions. The camera reference frame $C$ has its origin at 
 the camera optical center and follows the convention X-Y-Z = Righ-Down-Front, Front being the optical axis direction, looking through the lens. This chapter starts by 
 introducing the measurement model based on a general 6D factor used by both systems. Methods to recover the covariance of both algorithms are then given. 
 For applications fusing these models with IMU data, please refer to \chpRef{chp:absolute_vi} and \chpRef{chp:cosyslam}.
@@ -58,7 +59,7 @@ We also assume that we have access to the covariance of this measurement
 \mbox{$\Cov_V \in \Reals^{6 \times 6}$}. 
 
 This factor is general enough to be used in two applications that we successively describe, based on \apriltag\ fiducial markers and CosyPose. For both, we explain the
-algorithm behind the pose measurements and propose covariances models
+the algorithm behind the pose measurements and propose covariances models
 
 % We will now describe two applications of this factor, one using \apriltag\ fiducial markers and one using 
 % a deep-learning object pose estimation algorithm.
@@ -76,12 +77,17 @@ algorithm behind the pose measurements and propose covariances models
 \section{Fiducial marker}
 \subsection{Markers Pose estimation algorithms}
 
-Fiducial markers (such as ARToolkit \cite{kato1999marker}, ARTag \cite{fiala2005artag}, ArUco \cite{garrido2014automatic}) are widely used in robotics and Augmented Reality (AR) applications as they provide an easy way to obtain a relative 6D pose 
+Fiducial markers (such as ARToolkit \cite{kato1999marker}, ARTag \cite{fiala2005artag}, ArUco \cite{garrido2014automatic}) are widely used in robotics 
+and Augmented Reality (AR) applications as they provide an easy way to obtain a relative 6D pose 
 between a calibrated camera and the marker. These markers are designed so that they are uniquely and robustly identifiable in any scene 
 \cite{wang2016iros,romero2018speeded}. 
 
-The pose extraction happens in two steps. First, the tag corners sub-pixel projections are extracted from the image along with the unique id of the detected tag. In this work we used the \apriltag\ library \cite{wang2016iros} for its performances and popularity within the robotics community. Second, knowing the tag size, we can compute the position of these corners in the local tag frame, as defined in \figRef{fig:apriltag_coordinate_frame}. Recovering the pose of the tag from the corner projections and their local coordinates is then an instance 
-of the Perspective-n-Point (PnP) algorithm \cite{gao2003complete}, which requires at least four 2D-3D correspondences to compute a unique solution the 3D pose \footnote{The P3P algorithms yields up to four geometrically feasible solution, a fourth point being then used to select the right one.}. 
+The pose extraction happens in two steps. First, the tag corners sub-pixel projections are extracted from the image along with the unique id of the detected tag. 
+In this work we used the \apriltag\ library \cite{wang2016iros} for its performances and popularity within the robotics community. Second, knowing the tag size, 
+we can compute the position of these corners in the local tag frame, as defined in \figRef{fig:apriltag_coordinate_frame}. Recovering the pose of the tag from the 
+corner projections and their local coordinates is then an instance 
+of the Perspective-n-Point (PnP) algorithm \cite{gao2003complete}, which requires at least four 2D-3D correspondences to compute a unique solution the 3D pose 
+\footnote{The P3P algorithm yields up to four geometrically feasible solutions, a fourth point being then used to select the right one.}. 
 A vast literature has been written on the topic, many methods relying on efficient analytical models
 \cite{gao2003complete, lepetit2009epnp, collins2014infinitesimal, terzakis2020consistently}, sometimes refined by a nonlinear maximum likelihood step.
 
@@ -89,13 +95,22 @@ A vast literature has been written on the topic, many methods relying on efficie
 
 
 \subsection{Ambiguity in the pose estimation}
+\label{sec:tag_ambiguity}
 
-A known problem of fiducial markers is the orientation ambiguity of detections in noisy images. This phenomenon may make the PnP estimation of the tag orientation jump wildly from one frame to the next. This is due to the fact that the conic perspective projection of the corners is weak, that is the difference between two symmetrical tag orientations is very close. If this difference falls below the camera pixel noise, then the two solutions are indistinguishable, as shown in \figRef{fig:tag_ambiguity}. This happens especially when the tag corner projection is close to a square, that is when the tag is orthogonal to the axis passing through the camera and tag origins. This phenomenon is intensified when the tag is far from the camera as it spans a smaller region of the image. 
+A known problem of fiducial markers is the orientation ambiguity of detections in noisy images. This phenomenon may make the PnP estimation of the 
+tag orientation jump wildly from one frame to the next. This is due to the fact that the conic perspective projection of the corners is weak, 
+that is the difference between two symmetrical tag orientations is very close. If this difference falls below the camera pixel noise, 
+then the two solutions are indistinguishable, as shown in \figRef{fig:tag_ambiguity}. This happens especially when the tag corner projection is 
+close to a square, that is when the tag is orthogonal to the axis passing through the camera and tag origins. 
+We refer to this situation as tags being \textit{fronto-parallel} with respect to the camera.
+This phenomenon is intensified when the tag is far from the camera as it spans a smaller region of the image. 
 
 \begin{figure}
     \centering
     \includegraphics[width=0.7\textwidth]{figures/tag_ambiguity.png}
-    \caption{Illustration of the tag ambiguity problem. The red circles represent uncertainty in the corner detection due to pixel noise. The conic perspective projections of faces from two cubes with 120 degrees orientation difference fall withing these regions and are, therefore, hard to distinguish. Figure taken from \cite{8206468}.}
+    \caption{Illustration of the tag ambiguity problem. The red circles represent uncertainty in the corner detection due to pixel noise. 
+    The conic perspective projections of faces from two cubes with 120 degrees orientation difference fall withing these regions and are, therefore, 
+    hard to distinguish. Figure taken from \cite{8206468}.}
     \label{fig:tag_ambiguity}
 \end{figure}
 
@@ -115,7 +130,8 @@ we increase the rotational part of the covariance matrix by a great factor to pr
 Obtaining a covariance of the estimated transformation is an important step toward the integration of these measurements in a sensor fusion algorithm.
 
 Urban \cite{urban2016mlpnp} (Eq. (23)) uses a careful parameterization of the homogeneous coordinates associated with 2D features to develop
-a maximum likelihood PnP algorithm and also proposes a covariance model based on the problem Hessian (Eq. (23)).  However, the particular choice of variable parameterization makes the formulation of the covariance computation overcomplicated.
+a maximum likelihood PnP algorithm and also proposes a covariance model based on the problem Hessian (Eq. (23)).  However, the particular choice of variable 
+parameterization makes the formulation of the covariance computation overcomplicated.
 We think that a simpler yet equivalent formulation is possible. 
 
 Usually, when a nonlinear mapping of noise variables from one space to another is available, we can propagate the covariance through the nonlinearity
@@ -147,7 +163,7 @@ is in general hard to analytically differentiate. Instead, if we consider the in
 that maps the relative pose to the projection of the tag in the image, a rather simple jacobian expression can be derived using the chain rule, as follows.
 
 Let us define the marker corner coordinates in the marker frame like shown in \figRef{fig:apriltag_coordinate_frame}. As a convention 
-\cite{wang2016iros}, we order the corners counter-clockwise starting from bottom left (looking straight at the tag). 
+\cite{wang2016iros}, we order the corners counter-clockwise starting from bottom-left (looking straight at the tag). 
 
 \begin{equation}
     \bfc =
@@ -178,7 +194,8 @@ Then, assuming that images are corrected (no distortion), the pinhole camera mod
     \bfx_i = \text{eucl}(\bfh_i) = \text{eucl}(\bfK\T{C}{O} \bfc_i)
 \end{equation}
 %
-for each corner $c_i$, where $h_i$ are the homogeneous coordinates representing the projected corners and $eucl$ (for "euclideanization") is the function that maps homogeneous coordinates to euclidean pixel coordinates, defined as
+for each corner $c_i$, where $h_i$ are the homogeneous coordinates representing the projected corners and $eucl$ (for "euclideanization") is the function that maps 
+homogeneous coordinates to euclidean pixel coordinates defined as
 %
 \begin{equation}
     \begin{split}
@@ -230,10 +247,10 @@ Finally, we stack the 4 jacobians to get the full jacobian to be used for covari
 \end{equation}.
 
 We therefore have the covariance propagation equation $\Cov_{\bfx} = \bfJ \Cov_{\T{}{}} \bfJ\tr$. 
-This equation must be inverted in order to recover the needed covariance $\Cov_{\T{}{}}$. $\bfJ$ being non square and full column rank for four corners ($\bfJ \in \Reals^{8 \times 6}$, 
-we can use the right pseudo inverse $\bfJ^{+} = (\bfJ\tr \bfJ)^{-1}\bfJ\tr$.  Multiplying left and right by respectively $\bfJ^{+}$ and $\bfJ^{+,\top}$, we obtain: $\Cov_{\T{}{}} = \bfJ^{+} \Cov_{\bfx} \bfJ^{+,\top}$. 
-Given that the pixel noise covariance is isotropic as explained above,
-$\Cov_{\bfx} = \sigma_x^2 \bfI$, this equation finally simplifies to:
+This equation must be inverted in order to recover the needed covariance $\Cov_{\T{}{}}$. $\bfJ$ being non square and full column rank for four 
+corners ($\bfJ \in \Reals^{8 \times 6}$, we can use the right pseudo inverse $\bfJ^{+} = (\bfJ\tr \bfJ)^{-1}\bfJ\tr$. Multiplying left and right by 
+respectively $\bfJ^{+}$ and $\bfJ^{+,\top}$, we obtain: $\Cov_{\T{}{}} = \bfJ^{+} \Cov_{\bfx} \bfJ^{+,\top}$. Given that the pixel noise covariance is 
+isotropic as explained above, $\Cov_{\bfx} = \sigma_x^2 \bfI$, this equation finally simplifies to:
 
 \begin{align}
     \Cov_{\T{}{}} 
@@ -253,15 +270,17 @@ We have therefore a compact model informed by the geometry of the measurement mo
 %     \T{C}{O}* \argmin \frac{1}{\sigma_x^2} ||\tilde{\bfx} - \text{proj}_{w}(T{C}{O})||^2
 % \end{equation}
 
-% We find the Maximum-A-Posterior solution \footnote{In this case, no prior is used, so we could talk instead of the Maximum likelihood.} of the problem using a dedicated algorithm \cite{collins2014infinitesimal}.
+% We find the Maximum-A-Posterior solution \footnote{In this case, no prior is used, so we could talk instead of the Maximum likelihood.} of the problem using a 
+dedicated algorithm \cite{collins2014infinitesimal}.
 % Then, the computation of the covariance resorts to computing the Jacobians of the likelihood and inverting the Hessian matrix $J\tr J$. 
 
 \subsection{Covariance visualization}
 
-It is hard to represent graphically the appearance of this uncertainty model from the full 6D covariance. However, we can inspect the positional and orientational uncertainty
-(respectively the 3x3 upper-left and 3x3 lower-right sub-matrices) by representing them as confidence ellipsoids.
+It is hard to represent graphically the appearance of this uncertainty model from the full 6D covariance. However, we can inspect the positional and 
+orientational uncertainty (respectively the 3x3 upper-left and 3x3 lower-right sub-matrices) by representing them as confidence ellipsoids.
 
-The principle is the following. For a 3D random variable $x \sim \Gaussian{\mu}{\Cov}$ described by a multivariate normal distributions with mean ${\bf\mu} \in \Reals^3$ and 
+The principle is the following. For a 3D random variable $x \sim \Gaussian{\mu}{\Cov}$ described by a multivariate normal 
+distributions with mean ${\bf\mu} \in \Reals^3$ and 
 covariance matrix $\Cov \in \Reals^{3 \times 3}$, the statistics:
 %
 \begin{equation}
@@ -269,37 +288,74 @@ covariance matrix $\Cov \in \Reals^{3 \times 3}$, the statistics:
     \label{eq:chi2}
 \end{equation}
 %
-follows a chi-square distribution with 3 degrees of freedom. Since \eqRef{eq:chi2} is the equation of an ellipse centered at $\mu$ and shape governed by $\Cov$, we can then plot confidence volumes as ellipsoids by replacing the right-hand side of  
+follows a chi-square distribution with 3 degrees of freedom. Since \eqRef{eq:chi2} is the equation of an ellipse centered at $\mu$ and shape 
+governed by $\Cov$, we can then plot confidence volumes as ellipsoids by replacing the right-hand side of  
 \eqRef{eq:chi2} by the critical value of the chi-square distribution for the desired confidence interval (we chose $\alpha=99\%$). 
 
-We simulate a realistic scenario using calibration data from a laboratory Realsense camera, 15cm tags and $\sigma_x = 2~pixels$. An example of a simulated scene is given in \figRef{fig:apriltag_cov}. 
+We simulate a realistic scenario using calibration data from a laboratory Realsense camera, 15cm tags and $\sigma_x = 2~\text{pixels}$. 
+\figRef{fig:apriltag_cov_P} and \figRef{fig:apriltag_cov_P} show how the uncertainty on position and orientation relate to different factors.
 
 \begin{figure}[h]
     \centering
-    \begin{subfigure}{.49\linewidth}
+    \begin{subfigure}{.50\linewidth}
         \centering
-        \includegraphics[width=\textwidth]{figures/apriltag_cov_posi.png}
-        \caption{Relative position covariances \label{fig:apriltag_cov_posi}}
+        \includegraphics[width=\textwidth]{figures/apriltag_cov_P_015.png}
+        \caption{Relative position covariances, 15cm tags \label{fig:apriltag_cov_P_015}}
     \end{subfigure}%
     \hfill
-    \begin{subfigure}{.49\linewidth}
+    \begin{subfigure}{.50\linewidth}
         \centering
-        \includegraphics[width=\textwidth]{figures/apriltag_cov_orientation.png}
-        \caption{Relative orientations covariances \label{fig:apriltag_cov_orientation}}
+        \includegraphics[width=\textwidth]{figures/apriltag_cov_P_030.png}
+        \caption{Relative position covariances, 30cm tags \label{fig:apriltag_cov_P_030}}
     \end{subfigure}%
-    \caption{Representation of the analytic covariance model. The single frame at the bottom represents the pose of the virtual camera, others are identical 
-    \apriltags placed in front of the camera at different distances but identical orientations, covariances are represented in orange, centered at the corresponding tag position.
-    (\subref{fig:apriltag_cov_posi}) shows that the main positional uncertainty is along the camera-tag axis, which corresponds to the distance information. 
-    (\subref{fig:apriltag_cov_orientation}) shows that in contrary the rotation along the camera-tag axis is by far the most precise.}
-    \label{fig:apriltag_cov}
+    \caption{Position uncertainty from the analytical covariance model. The single frame at the bottom represents the pose of the virtual camera, others are identical 
+    \apriltags placed in front of the camera at different distances but identical orientations. Covariances are represented in orange, centered at the corresponding tag 
+    position.
+    (\subref{fig:apriltag_cov_P_015}) shows that the main positional uncertainty is along the camera-tag axis, which corresponds to the distance information. 
+    In (\subref{fig:apriltag_cov_P_030}), tags are twice the size, which shrinks their position uncertainty.}
+    \label{fig:apriltag_cov_P}
 \end{figure}
 
-We can see that the error distribution is clearly anisotropic. The uncertainty of the pose measurements
-is logically higher in the dimensions that lead to the least change in the aspect of the tag projection. For a fronto-parallel tag, the highest 
-uncertainty is along the z-axis, which corresponds to a high depth uncertainty.
+In all cases, the covariance increases with the distance to the camera (the volume of the ellipses increases).
+On top of that, we can see that, for both position and orientation, the uncertainty distribution is clearly anisotropic: 
+the uncertainty of the pose measurements is logically higher in the dimensions that lead to the least change in the aspect of the tag projection. 
+
+For the position uncertainty (\figRef{fig:apriltag_cov_P}), the shape of the covariance is easily interpretable: the uncertainty is the highest along the camera-tag axis.
+Besides, this uncertainty is not much influenced by the relative camera-tag orientation. 
+
+For the orientation uncertainty (\figRef{fig:apriltag_cov_O}), the shape of the covariance is harder to interpret: a high uncertainty about the orientation along 
+one axis corresponds to a dilatation of the ellipse along this axis. For instance, in \figRef{fig:apriltag_cov_O_10deg}, tags placed
+along the Z-axis of the camera frame have a very high uncertainty along the X and Y-axis (in camera frame). Their uncertainty ellipses seem, therefore, very flat
+along the Z-axis. \figRef{fig:apriltag_cov_O_10deg} directly relates to our discussion about tag pose ambiguity in \secRef{sec:tag_ambiguity}. Tags close
+to fronto-parallel configuration (along the camera Z-axis) have a very high rotational uncertainty compared to tags that have a more important relative 
+orientation as in \figRef{fig:apriltag_cov_O_10deg}.
+
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{.50\linewidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/apriltag_cov_O_10deg.png}
+        \caption{Relative orientation covariances, 10 degree orientation \label{fig:apriltag_cov_O_10deg}}
+    \end{subfigure}%
+    \hfill
+    \begin{subfigure}{.50\linewidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/apriltag_cov_O_45deg.png}
+        \caption{Relative position covariances, 45 degree orientation \label{fig:apriltag_cov_O_45deg}}
+    \end{subfigure}%
+    \caption{Orientation uncertainty from the analytical covariance model. The single frame at the bottom represents the pose of the virtual camera, others are identical 
+    \apriltags placed in front of the camera at different distances but identical orientations. Covariances are represented in orange, centered at the corresponding tag 
+    position.
+    In (\subref{fig:apriltag_cov_O_10deg}) . 
+    (\subref{fig:apriltag_cov_O_45deg}) shows the same configuration for tag twice the size, whose relative position is less uncertain.}
+    \label{fig:apriltag_cov_O}
+\end{figure}
+
+
 In \figRef{fig:apriltag_proj}, 3 tags are projected: the first (black) is half a meter away from the camera in fronto-parallel orientation, the second (orange)
 10cm to the right, and the third (rose) 10cm behind. We can see that the appearance of difference of appearance due to a depth-wise movement is much smaller, which 
-explains the higher uncertainty on the depth measurement. Similar reasoning can be made for orientation as well. 
+explains the higher uncertainty on the depth measurement.
 
 \begin{figure}[h]
     \centering
@@ -308,9 +364,9 @@ explains the higher uncertainty on the depth measurement. Similar reasoning can 
     \label{fig:apriltag_proj}
 \end{figure}
 
-A quantitative comparison with \cite{urban2016mlpnp} would be interesting as well as an experimental validation campaign.
-
-
+This covariance seems well behaved and captures the physical intuitions about the measurement uncertainties. 
+This was leveraged in the context of a visual-inertial SLAM system implemented in \chpRef{chp:absolute_vi}. 
+A quantitative comparison with \cite{urban2016mlpnp} would be interesting as well as an experimental validation campaign to further strengthen our results.
 
 
 %
@@ -343,7 +399,7 @@ this direction.
 \subsection{CosyPose}
 The front end of the SLAM system designed for this project includes object detection and object pose estimation. 
 This function is provided by CosyPose \cite{labbe2020cosypose}, a deep learning-based 6D pose estimator that reaches state-of-the-art
- performances for 6D object pose estimation. % and which was awarded at the BOP contest \cite{hodan2020bop}. 
+ performances for 6D object pose estimation.
 In the original paper, a single-view pose estimator and a multi-view algorithm were introduced. In our context, only the single-view module is used, 
 while object tracking is handled by the SLAM framework. 
 
@@ -353,28 +409,22 @@ by an index $\alpha$ and associated with an object candidate $O_{\alpha}$. Its 6
 is then computed as follows.
 
 \begin{figure}[]
-    \begin{subfigure}{.5\textwidth} % this sets the figure to be max half the width of the page
+    \begin{subfigure}{.5\textwidth}
         \centering
-        % include first image
-        \includegraphics[width=.9\linewidth]{figures/cosyslam/convergence_1.png}  % this sets the image to fill 90% of the available space -> 45% of the line width in total. 
-        % \caption{\label{fig:cosypose-convergence_1}}
+        \includegraphics[width=.9\linewidth]{figures/cosyslam/convergence_1.png}  
     \end{subfigure}
     \begin{subfigure}{.5\textwidth}
         \centering
-        % include second image
         \includegraphics[width=.9\linewidth]{figures/cosyslam/convergence_2.png}  
-        % \caption{\label{fig:cosypose-convergence_2}}
     \end{subfigure}
 
     \label{fig:fig}
     \begin{subfigure}{\textwidth}
         \centering
-        % include first image
-        \includegraphics[width=.45\linewidth]{figures/cosyslam/convergence_3.png}   % this width should be half of the width of the other two images
-        % \caption{\label{fig:cosypose-convergence_3}}
-        
+        \includegraphics[width=.45\linewidth]{figures/cosyslam/convergence_3.png}
     \end{subfigure}
-    \caption{\label{fig:cosypose-convergence} Progressive convergence of a stair step estimated pose over successive iterations of CosyPose.}
+    \caption{Progressive convergence of a stair step estimated pose over successive iterations of CosyPose.}
+    \label{fig:cosypose-convergence}
 \end{figure}
 
 
@@ -509,7 +559,7 @@ for pose estimation and this is confirmed by our model.
 A more quantitative evaluation can be deduced from table \tabRef{table:empirical_models}. The translation error seems to be captured pretty well,
  as the RMSE is around the centimeter. However, the angular error seems a little less predictable, especially for T-LESS objects whose orientation 
  estimation can suffer from an important measurement noise due to the lack of textures. The $R^2\in[0,1]$ score is the coefficient of determination 
- and is often used to evaluate statistical models. Its interpretation is subject to debate and cannot conclude by itself on the absolute quality of model. 
+ and is often used to evaluate statistical models. Its interpretation is subject to debate and cannot conclude by itself on the absolute quality of the model. 
  However, a score higher than 0 demonstrates that the model is more accurate than a baseline average model.
 
 \begin{table}[h]
