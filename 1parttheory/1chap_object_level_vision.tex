@@ -74,7 +74,8 @@ the algorithm behind the pose measurements and propose covariances models
 
 %
 %
-\section{Fiducial marker}
+\section{Fiducial markers}
+\label{sec:fiducial_markers}
 \subsection{Markers Pose estimation algorithms}
 
 Fiducial markers (such as ARToolkit \cite{kato1999marker}, ARTag \cite{fiala2005artag}, ArUco \cite{garrido2014automatic}) are widely used in robotics 
@@ -374,11 +375,12 @@ A quantitative comparison with \cite{urban2016mlpnp} would be interesting as wel
 %
 %
 \section{Learning-based object pose estimation}
+\label{sec:learning_based_object_pose_est}
 In this section, we propose to integrate a deep-learning-based object pose estimation algorithm \cite{labbe2020cosypose} to our measurement models. 
 
 
 \subsection{Object pose estimation algorithms}
-\label{sec:object_pose_est}
+\label{sec:object_pose_est_algos}
 The problem of object pose estimation can simply be stated: given a calibrated camera and a set of known object models, detect those objects in the current image 
 frame and extract camera-objects poses. Traditionally, competing methods were developed using either local features matching or learning-based methods.
 As shown by the most recent BOP challenge results \cite{hodan2020bop}, deep-learning methods now clearly dominate the field in terms of accuracy. 
@@ -564,6 +566,7 @@ A more quantitative evaluation can be deduced from table \tabRef{tab:empirical_m
 
 \begin{table}[h]
     \centering
+    \caption{A quantitative evaluation of our models, these values are computed on test samples that were not used for training. }
     \begin{tabular}{|c|c|c|c|}
         \hline 
           & $\displaystyle R^{2}$ & RMSE ang. err. (°) & RMSE trans. err. (cm) \\
@@ -575,7 +578,6 @@ A more quantitative evaluation can be deduced from table \tabRef{tab:empirical_m
          T-LESS-26 & 0.68 & 22 & 0.6 \\
          \hline
     \end{tabular}
-    \caption{A quantitative evaluation of our models, these values are computed on test samples that were not used for training. }
     \label{tab:empirical_models}
 \end{table}
 
