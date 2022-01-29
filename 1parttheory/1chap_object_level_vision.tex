@@ -84,12 +84,6 @@ of the Perspective n Point (PnP) algorithm \cite{gao2003complete}, which require
 A vast literature has been written on the topic, many methods relying on efficient analytical models
 \cite{gao2003complete, lepetit2009epnp, collins2014infinitesimal, terzakis2020consistently}, sometimes refined by a nonlinear maximum likelihood step. 
 
-A known problem of fiducial markers is the orientation ambiguity for noisy images. Close to fronto-parallel pose (identical orientation as 
-the camera frame), the estimated orientation can jump between two solutions of orientations several tenths of degrees apart 
-\cite{collins2014infinitesimal}. 
-This problem has been addressed by an analytical algorithm called Infinitesimal Plane-based Pose Estimation \cite{collins2014infinitesimal} that can 
-provide both ambiguous solutions so that the end-user may make an informed choice based on other data.
-
 \subsection{Covariance model}
 Obtaining a covariance of the estimated transformation is an important step toward the integration of these measurements in a sensor fusion algorithm.
 
@@ -278,6 +272,21 @@ A quantitative comparison with \cite{urban2016mlpnp} would be interesting as wel
 
 
 \subsection{Ambiguity in the pose estimation}
+
+A known problem of fiducial markers is the orientation ambiguity for noisy images. Close to fronto-parallel pose (identical orientation as 
+the camera frame), the estimated orientation can jump between two solutions of orientations several tenths of degrees apart \cite{8206468}, as shown in \figRef{fig:tag_ambiguity}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/tag_ambiguity.png}
+    \caption{Caption}
+    \label{fig:tag_ambiguity}
+\end{figure}
+
+
+This problem has been addressed by an analytical algorithm called Infinitesimal Plane-based Pose Estimation \cite{collins2014infinitesimal} that can 
+provide both ambiguous solutions.
+
 It is well known that the pose extraction from planar markers suffers from an inherent ambiguity between two fairly different rotations as described in 
 \cite{8206468} for instance. One solution is to define the tag factor residual as the pixel error between the detected corners and their projection given the
 current tag pose estimate and let the optimizer find the most probable tag poses given the complete set of measurements. However if one tag is wrongly initialized, 
@@ -287,8 +296,6 @@ both solutions share the tag position and differ only in their orientation. We t
 However, if the reprojection errors $e_1$ and $e_2$ are too close (we test for $\tfrac{e_2}{e_1} < h$ with $e_1 \leq e_2$ and $h$ an empirical threshold), 
 we increase the rotational part of the covariance matrix by a great factor to prevent a potential wrong tag orientation to influence the estimation.
 
-
-Necker's cube
 
 
 
