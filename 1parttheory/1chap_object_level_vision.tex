@@ -48,7 +48,7 @@ Given measurement $\Tm{C}{O}$, this relation can therefore be turned into a resi
 the robot pose, the camera extrinsics, and the object pose:
 
 \begin{align}
-    \bfe_V (\T{W}{B}, \T{B}{C}, \T{W}{O}) 
+    \bfe^V (\T{W}{B}, \T{B}{C}, \T{W}{O}) 
     &= \left[ (\T{W}{B}\T{B}{C})^{-1}\T{W}{O} \right] \ominus \Tm{C}{O} ~ \in \Reals^6 \\
     &= \Log_{\SE(3)} ( (\T{W}{B} \T{B}{C} \Tm{C}{O})^{-1} \T{W}{O}) ~ \in \Reals^6
 \end{align}
