@@ -77,7 +77,7 @@ for the drift to remain below around 5mm on all axes.
 \subsection{Centroidal estimation}
 
 Now, on the same trajectory, we deploy the full estimator with all factors described in Section \figRef{figsec:factor-graph} to jointly 
-estimate the base and centroidal quantities. A ground truth on the centroidal quantities is difficult to obtain since no direct 
+estimate the base and centroidal quantities. A ground-truth on the centroidal quantities is difficult to obtain since no direct 
 sensor can provide us with this information contrary to the base state. 
 We can however validate our method by comparing it to a two step procedure: first, estimate the base state with a state Kalman filter as 
 implemented in \cite{bledt2018cheetah}, then compute the centroidal quantities directly from the robot kinematic model. 
