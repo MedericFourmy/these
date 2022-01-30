@@ -53,9 +53,9 @@ represented by the factor graph of \figRef{fig:centroidal_factor_graph}.
     \label{fig:centroidal_factor_graph}
 \end{figure}
 
-In this estimator, we have two motion sensors, IMU and force-torque, whose measurements we pre-integrate as explained in \ref{sec:imu_preint_composite} and
-\ref{sec:force_torque_preint} respectively. Base states and centroidal states are tightly constrained by the centroidal kinematics factor, which relates almost all 
-estimation variables at a given \keyframes\.
+In this estimator, we have two motion sensors, IMU and force-torque, whose measurements we pre-integrate as explained in \secRef{sec:imu_preint_composite} and
+\secRef{sec:force_torque_preint} respectively. Base states and centroidal states are tightly constrained by the centroidal kinematics factor, which relates almost all 
+estimation variables at a given \keyframes.
 
 This estimator is implemented in WOLF \cite{sola2021wolf} and is experimentally validated on the Solo-12 quadruped robot as explained in the following sections. 
 
