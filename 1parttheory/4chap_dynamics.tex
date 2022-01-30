@@ -3,9 +3,12 @@
 \minitoc
 \bigskip
 
+In this chapter, we discuss how a tight coupling of the force measurements in the MAP formulation can lead to the direct estimation
+of centroidal quantities, \ie\ the robot center of mass (CoM) position and velocity, and its angular momentum.
 
-As explained in the literature review, centroidal estimation is crucial for legged robots balancing. However, this aspect has not been explored in the case of a factor graph 
-estimator (whose application to legged-robots) is relatively recent. We propose to fuse the centroidal kinematics of the robots with pre-integration of the force-torque measurements 
+
+Centroidal estimation is crucial for legged robots balancing. However, this aspect has not been explored in the case of a factor graph 
+estimator (whose application to legged-robots) is relatively recent. We propose to fuse the centroidal kinematics of the robots with the pre-integration of the force-torque measurements 
 of the platform.
 
 We will first review the dynamical model of legged robots, then describe how we propose to use them as measurement models for quadruped and humanoid robots alike.
@@ -133,7 +136,7 @@ at a certain timestamp. We use this factor in the application presented in \chpR
 In this section, we apply the generalized pre-integration algorithm to the problem of using measured external
 forces applied on a legged robot in a smoothing estimator. We propose to integrate the underactuated dynamics \eqRef{NewtonEuler} using force-torque measurements.
 To this end, we derive the specificities of the pre-integration of external forces of a poly-articulated system. This is the main theoretical contribution
-of our paper \cite{fourmy2021contact}.
+of this chapter.
 
 \subsection{Newton-Euler integration}
 The Newton-Euler equations \eqRef{eq:NewtonEuler} relate the evolution of the CoM and AM due to gravity, external forces, and torques. 
@@ -300,51 +303,6 @@ yielding $\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta_com} as
     \end{bmatrix}
     \label{eq:data2delta_com}
 \end{equation}
-%
-% The pre-integration method in  \cite{forster2017-TRO} can be put in the general pre-integration formalism above by defining 
-% $\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta} as:
-
-
-
-
-
-% We now derive the group operations
-
-% The following operators are enough to particularize the method in \secRef{sec:general-preint} to the contact forces/torque case.
-% Integrating $\bfz_k$ during $\dt$ yields $\bm\delta_k$ in \eqRef{eq:data2delta} as
-% %
-% \begin{equation}
-%         \bm\delta^{k}(\bfz^k, \bfb^i, \dt) =
-%         \begin{bmatrix}
-%         \frac{1}{2m} \sum_l \Rotm{}{L}^k \forcem{}{L}^k \dt^2
-%         \\
-%         \frac{1}{m} \sum_l \Rotm{}{L}^k \forcem{}{L}^k \dt 
-%         \\
-%         \sum_l\left[ (\posim{}{L}^k - (\posim{}{C}^k - \bias_c^i)) \times \Rotm{}{L}^k \forcem{}{L}^k + \Rotm{}{L}^k\torquem{}{L}^k) \right] \dt
-%         \\
-%         \Exp((\angvelm{}{}^k - \bias_{\omega}^i)\dt)
-%         \end{bmatrix}
-%     \normalsize
-% \end{equation}
-% %
-% and the delta composition law in \eqRef{eq:deltaPlusDelta} as
-% %
-% \begin{equation}
-%     \D \circ \bm\delta = 
-%     \begin{bmatrix}
-%     \D\COM + \D\COMd \dt + \DR  \delta\COM
-%     \\
-%     \D\COMd + \DR  \delta \COMd
-%     \\
-%     \D\AM + \DR  \delta \AM
-%     \\
-%     \DR\dR
-%     \end{bmatrix}
-%     ~.
-%     \label{eq:DeltaDTCompo}
-% \end{equation}
-% %
-
 
 
 
@@ -366,10 +324,36 @@ The factor residual is again computed following \secRef{sec:preint_residual} exa
 The reader will have noticed the high similarity between the centroidal motion delta group defined here and the composite IMU delta Lie group defined 
 in \secRef{sec:imu_preint_composite} (\eg between equations \eqRef{eq:com_boxminus} and \eqRef{eq:boxminus-forster}). If we only consider the center of mass, 
 its velocity, and the orientation of the base equations, they are in fact the same. 
-Indeed, the force sensors provide local second order information on the CoM position, which is akin to the IMU acceleration measurements. 
+Indeed, the force sensors provide local second-order information on the CoM position, which is akin to the IMU acceleration measurements. 
 
 Where the problems differ however is in the inclusion of the angular momentum (the second part of the Newton-Euler equations \eqRef{eq:NewtonEuler}). This equation introduces the dependence on 
-the CoM lever bias $\bias_c$, which is also present in the centroidal kinematics residual \eqref{eq:CK_residual}. \cite{rotella2015humanoid} showed that, including the same set of measurements on centroidal quantities as
-us, the state space centroidal system with centroidal kinematics bias is made observable, provide we have a prior estimation of the base states . In our case, base states are
+the CoM lever bias $\bias_c$, which is also present in the centroidal kinematics residual \eqref{eq:CK_residual}. \cite{rotella2015humanoid} showed that including the same set of measurements on centroidal quantities as
+us, the state space centroidal system with centroidal kinematics bias is made observable, provide we have a prior estimation of the base states. In our case, base states are
 state variables estimated in conjunction with the centroidal states. However, if the base states are made observable by other sensor sources, then the same observability analysis
 should apply to the centroidal states in our case. This is confirmed by experimental results presented in \ref{chp:centroidal_estimation}.
+
+
+\section{Conclusion}
+
+In this chapter, we have proposed the first step toward a whole-body estimator
+based on MAP. On the first hand, we have introduced centroidal states into the MAP
+problem, in addition to the previous decision variables, classical estimated in SLAM.
+The centroidal states are related to the basis states through the centroidal kinematics,
+which is typically used in state-of-the-art estimators. While the same relation is
+here used, the classical centroidal estimator only loosely couples these two estimated
+quantities, then being unable to exploit other observations on the centroidal states
+to also contribute to the estimation of the basis.
+Then we draw the relation between the force measurements and the centroidal states,
+which enriches the MAP factor graph and enables us to take advantage of the tight coupling
+between basis and centroidal states. The force sensors are related to the centroidal states
+in a somehow similar relation to the IMU is connected to the base state. As shown
+previously on more theoretical estimation work, the force sensors provide the
+observability condition to unbias the COM position despite (unavoidable) kinematic
+and inertial calibration problem of the robot model.
+
+We will show in the experimental part of this thesis how this tight coupling can
+be implemented on a quadruped robot, although a significant experimental work
+remains to be done to demonstrate its interest in practice. As previously said, this
+contribution is a first step toward building a whole-body estimator, \ie an estimator
+that would be able to estimate all robot related quantities by fusing any
+available sensors, in particular, grid sensors such as robot skin and distributed IMUs.

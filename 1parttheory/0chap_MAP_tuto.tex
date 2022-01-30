@@ -353,6 +353,7 @@ $\oplus$ and $\ominus$:
 \begin{align}
     \text{Retraction}~&: \quad\quad \cM \times \Reals^n \rightarrow \cM; \quad\quad (\bfx_1,\bftau) \rightarrow \bfx_2 = \bfx_1 \oplus \bftau   \\
     \text{Lift}~      &: \quad\quad \cM \times \cM \rightarrow \Reals^n; \quad\quad (\bfx_1,\bfx_2) \rightarrow \bftau = \bfx_2 \ominus \bfx_1
+    \label{eq:retract_lift}
 \end{align}
 
 
@@ -724,8 +725,9 @@ We highlight the parts that differ from the regular Gauss-Newton algorithm with 
 When the estimation algorithm has converged we can also obtain the covariance on the estimates (details and illustration are available in the 
 appendix \chpRef{chp:MAP_covariance}). This is however a costly computation that is usually reserved for offline investigation of the estimation quality. 
 
-\section{Conclusion}
 
+
+\section{Conclusion}
 
 We have described a general algorithm to solve NLLS problems with variables belonging to manifolds and weighted by covariance matrices. This problem
 comes from framing the state estimation as a MAP problem and using multiple assumptions on the nature of the measurement models. These measurement models

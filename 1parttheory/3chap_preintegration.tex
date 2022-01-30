@@ -10,7 +10,7 @@ are defined between \keyframes\ selected at a relatively low frequency, at times
 which is not trivial in general.
 
 In this chapter, we first describe the example of the integration of IMU measurements which motivates the development of the pre-integration theory \cite{lupton-09,forster2017-TRO}.
-We then express this pre-integration in more abstract mathematical terms so as to generalize it to other high-rate sensors \cite{atchuthan-18-thesis}. 
+We then express this pre-integration in more abstract mathematical terms to generalize it to other high-rate sensors \cite{atchuthan-18-thesis}. 
 Then, we describe a possible reformulation of the original IMU-pre-integration algorithm \cite{forster2017-TRO} by exploiting a new Lie group that we 
 proposed in \cite{fourmy2019absolute}. We conclude the chapter with a discussion of related works.
 
@@ -18,8 +18,10 @@ proposed in \cite{fourmy2019absolute}. We conclude the chapter with a discussion
 \section{A motivational example: IMU integration for graph optimization}
 \label{sec:imu_preint_motivation}
 
-In this section we will introduce the IMU measurement model and explain why a naive integration of these measurements in the world frame does not immediately
-lead to a viable factor. We will then introduce the observations that lead to the development of the so-called IMU pre-integration algorithm by Lupton \cite{lupton-09}.
+In this section, we will introduce the IMU measurement model and explain why a naive integration of these measurements in the world frame does not immediately
+lead to a viable factor in practice. We will then introduce the observations that lead to the development of the so-called IMU pre-integration algorithm by Lupton \cite{lupton-09},
+which we reformulated with what we hope to be a more systematic approach. This systematic formulation will then be used 
+in the following chapters to account for force measurements.
 
 Let us consider the estimation of a robot base state comprised of its pose and velocity in the world frame,
 %
@@ -87,8 +89,9 @@ satisfying $\bfW_\bfa=\bfW_\bfa^c \dt$ and $\bfW_\bw=\bfW_\bw^c\dt$.
 
     
 Now, these equations relate consecutive states with data sampled at IMU frequency. To include these measurements in our smoothing estimator,
-one solution would be to introduce new states at the rate of the IMU. However, the size of the problem would grow very quickly. A better option
-is to integrate IMU measurements during extended periods of time, that is between \keyframes. If we simply integrate the sequence of IMU measurements $\cZ_{im}$ between timestamps 
+one solution would be to introduce new states at the rate of the IMU. However, the size of the problem would grow very quickly due to the high acquisition rate of IMUs. 
+A better option is to integrate IMU measurements during extended periods, that is between \keyframes. 
+If we simply integrate the sequence of IMU measurements $\cZ_{im}$ between timestamps 
 $t_i$ and $t_m$ by recursively applying \eqRef{eq:imu_dyn_disc}, we obtain:
 %
 \begin{equation}
@@ -240,7 +243,7 @@ of the Lie-group structure of the deltas' geometry.
 % then the data needs to be reintegrated at each solver iteration because the integral depends on the states we are to estimate. 
 % The IMU pre-integration theory solves this issue and can be generalized to many other proprioceptive sensors as shown in \cite{atchuthan-18-thesis,deray-19-selfcalib,fourmy2021contact}. 
 Pre-integration refers to the integration of high rate proprioceptive sensory data efficiently in the context of factor graphs. 
-The IMU pre-integration theory can be generalized to many other proprioceotive sensors as shown in \cite{atchuthan-18-thesis,deray-19-selfcalib,fourmy2021contact}.
+The IMU pre-integration theory can be generalized to many other proprioceptive sensors as shown in \cite{atchuthan-18-thesis,deray-19-selfcalib,fourmy2021contact}.
 
 The generalization makes use of the Lie group structure of the motion deltas, (see \secRef{sec:lie_groups}). Then, the motion data is interpreted as a member of the tangent 
 space of the group.
@@ -555,7 +558,7 @@ We propose a matrix form of the Lie group of IMU deltas as,
     ~.
 \end{align}
 %
-The three main constituents of such deltas, namely $\Dp$, $\Dv$ and $\DR$, are defined exactly as in the composite case above. 
+The three main constituents of such deltas, namely $\Dp$, $\Dv$, and $\DR$, are defined exactly as in the composite case above. 
 Being computed in the same manner, the definition of the $\boxminus$ and $\boxplus$ operators is a trivial manner of forming the matrix deltas from 
 \eqRef{eq:boxminus-forster}, yielding proper expressions for
 %
@@ -799,7 +802,7 @@ Compute the residual in the  tangent of $\cD$ at $\D_{im}$,
 \end{align}
 %
 %and drop the $\Dt$ part from the residual after the $\Log()$ ---see comment in \secRef{sec:uncertainty}.
-In this last equation, the minus operator $\ominus$ is simply the traditional Lie group "minus" operator defined in \cite{sola2018micro} and specialized for this particular group.
+In this last equation, the minus operator $\ominus$ is the lift operator defined in \eqRef{eq:retract_lift} and specialized for this particular group.
 
 \subsubsection{Jacobians, uncertainty}
 \label{sec:uncertainty}
@@ -871,7 +874,7 @@ Therefore, it is apparent that depending on the structure of the defined Lie gro
 \end{itemize}
 
 In the context of filtering, using a compact group formulation of the robot state has been proven to improve greatly the basin of convergence of the so-called
-Invariant Kalman Filter \cite{barrau2018invariant, hartley2020contact}. This methods tackles one of the issues of standard EKF: 
+Invariant Kalman Filter \cite{barrau2018invariant, hartley2020contact}. This method tackles one of the issues of standard EKF: 
 the Jacobians are computed around the current estimates, which leads to an inconsistency of the estimate if the filter is initialized far from the optimal. 
 However, this issue is not so present with factor graph optimization since we repeatedly linearize around the new estimates.
 Nevertheless, it seems that compact Lie groups may provide slightly better performances than composite Lie groups \cite{brossard2021associating}, thanks 
@@ -893,7 +896,7 @@ orientation about the gravity vector in particular.
 
 This seminal work was quickly adopted by other authors using smoothing filters \cite{carlone2014eliminating}. As pioneering as this work was, it was however 
 limited by the use of Euler angles whose problematic geometric properties are notorious. Indelman \cite{Indelman-2013-7768} first proposed to use the exponential of the 
-matrix rotation group instead of Euler integration and to relax the assumptions of a non-rotating and flat earth of Lupton \cite{lupton-09}. Forster \cite{forster2015imu, forster2017-TRO}
+matrix rotation group instead of Euler integration and to relax the assumptions of non-rotating and flat earth of Lupton \cite{lupton-09}. Forster \cite{forster2015imu, forster2017-TRO}
 proposed the same formulation using instead quaternions. Various experiments brought to light three main problems with the Euler angle formulation, that are completely absent 
 from the quaternion "on-manifold" formulation. Firstly, first-order integration of angular velocities using Euler angles is approximate, which leads to accumulated errors 
 for high angular velocities or sampling rate. Secondly, the log-likelihood of the angular displacement is not invariant under the action of rigid body transformations, 
@@ -902,7 +905,7 @@ on the covariance IMU noise covariance propagation, which is severely degraded w
 \cite{shen2015tightly}, later improved in \cite{qin2018vins} proposed to use a more precise numerical integration procedure than the default forward Euler used by Forster. 
 Eckenhoff \cite{eckenhoff2019closed} derived closed-form solutions of the pre-integration equations using various piecewise constant models.
 
-Barrau \cite{barrau2020mathematical} described a compact matrix Lie group for the propagation of pre-integration errors taking into account the earth rotation with aerospace
+Barrau \cite{barrau2020mathematical} described a compact matrix Lie group for the propagation of pre-integration errors taking into account the earth rotation with the aerospace
 inertial navigation system in view. This work was later extended \cite{brossard2021associating} and showed that the linearized bias update is slightly more precise than 
 the work of Forster \cite{forster2017-TRO}. Le Gentil \cite{le2020gaussian} used a different trajectory parametrization framework by formulating the pre-integration algorithm 
 in the context of Gaussian Process smoothing. Self-calibration of IMU/Camera time offsets was also developed \cite{yang2020analytic}. 
@@ -918,3 +921,21 @@ In \chpRef{chp:underactuade_dynamics}, we propose to pre-integrate force-torque 
 We show that permits to estimate the centroidal quantities of the robot as well making the kinematic bias on the center of mass measurements observable. 
 A practical implementation is demonstrated in \chpRef{chp:centroidal_estimation}, which is based on our paper \cite{fourmy2021contact}
 
+
+
+\section{Conclusion}
+
+In this chapter, we have recalled the mathematics of the pre-integration,
+which is very important when handling high-frequency measurements strongly
+correlated with Lie-group quantities. Pre-integration was first introduced for
+handling IMU in the MAP framework, as we also did in our experiments. We
+introduced here a reformulation of the original mathematics, which lead to
+minor practical differences, but mostly allows us to more systematically generalize
+to other measurements. We also believe that this formulation, relying on
+Lie theory, gives some easier intuition to catch, at least when the reader is
+familiar with Lie groups.
+
+We are now going to use this formulation to handle force sensors, which also
+stream meaningful information at high (1kHz) frequency, and integrate to
+to an extended MAP problem where the centroidal quantities are also estimated
+simultaneously to previously estimated basis state and map variables.
