@@ -76,16 +76,23 @@ of the robot limbs $\AM_a(\qa, \dqa) \in \Reals^{3}$. The geometrical relation b
     \end{split}
 \end{equation}
 
-
-The computed CoM position is considered to be affected by Gaussian noise and a slowly varying bias 
+By definition, computation of the CoM position from the kinodynamic model resorts to the formula
 
 \begin{equation}
-    \posim{B}{C} = \posi{B}{C} + \bfb_{c} + \noise_c~.
+    \posi{B}{\COM} = \sum_{i=1}^{n} m_i \posi{B}{\COM_i}(\qa),
+\end{equation}
+%
+were $m_i$ are the individual segment masses and $\posi{B}{\COM_i}$ the levers between the base and the center of mass of each segment, computed from the robot configurations $\qa$. In general, these terms are not exactly accurate as our model of the robot may not be faithful to the real system. The computation of $\posi{B}{\COM}$ is therefore biased. Worse, this bias is not constant, since it nonlinearly depends on the robot limbs configuration. 
+
+We chose a simple additive model on the CoM kinematics noisy measurements
+
+\begin{equation}
+    \posim{B}{C} = \posi{B}{C} + \bfb_{c} + \noise_c~,
     \label{eq:com_kine_meas}
 \end{equation}
+%
+where is a Gaussian noise and $\bfb_{c}$ is a varying bias that we wish to estimate.
 
-This slowly varying bias corresponds to the sum of the kinodynamic model inaccuracies whose dependence on the configuration $\qa$ is hard to model. Instead,
-we will estimate this parameter by fusing centroidal kinematic measurements with the underactuated dynamics.
 
 The angular velocity from the IMU is used and its bias $\bfb_\bw$ has to be incorporated in the factor, $\angvelm{}{} = \angvel{B}{B} + \bfb_{\omega} + \noise_{\omega}$.  
 In the end, the equations used to derive the factor are:
@@ -193,16 +200,17 @@ with the same assumptions as for the IMU (constant between two \keyframes\, affe
 
 The state variables on which the pre-integration is applied are defined as $\bfx=[\COM, \COMd, \AM, \Rot{}{}]$.
 Note that the rotation has to be included to be able to define residuals in the local frame.
-By recursively applying \eqRef{eq:COMDiscrete} between timestamps $i$ and $m$ and rearranging the terms \footnote{proof similar to the IMU case described in 
-\secRef{sec:forster_proof}}, we can write an equation of the sort
-%
-\begin{equation}
-    \widehat\D_{im}(\bfx_i, \bfx_m) = \D_{im}(\bias_i),
-\end{equation}
-%
-where the expected motion delta $\widehat\D^{im} = [\widehat\D\COM^{im}, \widehat\D\COMd^{im}, \widehat\D\AM^{im}, \widehat\DR^{im}]$ are related to the states through the 
-$\boxminus$ operator by
+% By recursively applying \eqRef{eq:COMDiscrete} between timestamps $i$ and $m$ and rearranging the terms \footnote{proof similar to the IMU case described in 
+% \secRef{sec:forster_proof}}, we can write an equation of the sort
+% %
+% \begin{equation}
+%     \widehat\D_{im}(\bfx_i, \bfx_m) = \D_{im}(\bias_i),
+% \end{equation}
+% %
+% where the expected motion delta $\widehat\D^{im} = [\widehat\D\COM^{im}, \widehat\D\COMd^{im}, \widehat\D\AM^{im}, \widehat\DR^{im}]$ are related to the states through the 
+% $\boxminus$ operator by
 
+The definition of delta and $\boxminus$ operator in the force-torque pre-integration case is:
 
 \begin{equation}
     \widehat\D^{im} = \bfx^m \boxminus \bfx_i =
