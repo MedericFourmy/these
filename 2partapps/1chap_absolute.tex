@@ -105,7 +105,7 @@ and the other type called \emph{factors} represents probabilistic constraints be
 % The state $\bfx$ is modeled as a multi-variate Gaussian distribution.
 In the case of landmark-based visual-inertial SLAM (see \figRef{fig:VI_factor_graph}), $\bfx$ includes robot poses and velocities 
 $\bfx=(\bfp,\bfv,\bfR)$ and IMU biases $\bfb$, both at selected \keyframes\ along the trajectory, and landmark poses $\bfl \in \SE(3)$.
-Biases are considered constant between \keyframes\.
+Biases are considered constant between \keyframes.
 %
 In line with the recent works on the subject, we write the MAP optimization as the least-squares minimization (\figRef{fig:VI_factor_graph}),
 %
@@ -215,7 +215,7 @@ cross-correlation between MoCap and estimated state sequences.
 \end{figure}
 
 
-\subsection{Localization precision}
+\subsection{Absolute localization}
 
 We consider four datasets that are summarized in table \tabRef{tab:datasets}. They cover different tasks on which a consistent 
 estimation of the robot movement is necessary. The first one is a relatively long sequence consisting of two loops with the VIS handheld. 
@@ -227,21 +227,27 @@ the estimator was not used for feedback control. To compare our results with the
 trajectories given that 4 DoFs are unobservable in VI estimation.
 For each case, \keyframes\ are created at a frequency of 6.6 Hz (every 5 images) if tags are detected in the corresponding image.
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.8\textwidth]{figures/absolute/vz_descending_onestep.eps}
-    \caption{Descending stairs (one step): the robot first lowers its center of mass and then touches the next step with results in vibrations from the impact.}
-    \label{fig:vz_descending_onestep}
-\end{figure}
 
 \figRef{fig:results} presents a quantitative evaluation of the translational errors. In all cases, our estimator achieves errors consistently below a few centimeters. 
 The biggest errors are obtained for the walking datasets where the two humps correspond to phases where the robot is turning on itself and sees landmarks that will not be 
 seen again later in the trajectory.
 
-A high rate estimation of a humanoid robot velocity and in particular of its center of mass is critical for balance controllers. It can be recovered from motion capture through numerical differentiation of the positions, but this results in a quite noisy time series. It is especially visible when hard impacts make the robot shake at approximately 10 Hz. 
-The estimated velocity follows a familiar oscillatory damped system behavior while the mocap estimation is more erratic. 
-%In this sense, our estimator seems to be more fit for feedback control than the use of the MoCap.
+\subsection{High-rate velocity estimation}
 
+A high rate estimation of a humanoid robot velocity and in particular of its center of mass is critical for balance controllers. It can be recovered from motion capture through numerical differentiation of the positions, but this results in a quite noisy time series. It is especially visible when hard impacts make the robot when descending stairs for instance.
+
+\figRef{fig:vz_descending_onestep} presents a zoom-in one part of the stairs descending trajectory. Here, within 2.5 seconds, \HRP{2} lowers its base and then its foot touches the next step. The velocity is thus first negative until the impact of the foot on the step. Then, the estimated velocity follows a familiar oscillatory damped system behavior while the mocap estimation is more erratic. 
+
+The high rate estimate of the velocity is obtained by integrating IMU measurements with optimally estimated biases from the last \keyframe optimized by the solver, as explained in \secRef{sec:publish-state}. The smoothness of the trajectory is a good indicator that the problem has converged to a consistent state.
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/absolute/vz_descending_onestep.eps}
+    \caption{Descending stairs (one step): the robot first lowers its base and then touches the next step with results in vibrations from the impact.
+    Vibrations at approximately 10Hz visible in both the Mocap ground-truth and optimal state estimation. Note that the estimation in this case has a smoother curve.}
+    \label{fig:vz_descending_onestep}
+\end{figure}
 
 \subsection{Related works}
 Two \apriltag\ based visual-inertial SLAM systems have been implemented in the previous years. 
