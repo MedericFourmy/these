@@ -185,9 +185,10 @@ residual definition. Instead, we resort to the generalized pre-integration algor
 \subsection{Force-torque pre-integration on composite Lie group}
 
 This section follows the same structure and logic as the two IMU pre-integration algorithm described in \ref{sec:imu_preint_composite} and \ref{sec:imu_preint_compact} since
-we use the same generalized pre-integration pipeline defined in \ref{sec:pre-integration-pipeline}. 
-To apply this pipeline to a new motion sensor, we need to define the delta $\D_c$ Lie group relating the centroidal states (and base orientation) between two \keyframes\ thanks to the $\boxminus$ operator 
-$\D^{im}=\bfx^k\boxminus\bfx^i$. The sensor measurements $\bfz^k$ involved in the integration are kinematics, gyro, and force-torques  measurements:
+we use the same generalized pre-integration pipeline. 
+% To apply this pipeline to a new motion sensor, we need to define the delta $\D_c$ Lie group relating the centroidal states (and base orientation) between two \keyframes\ thanks to the $\boxminus$ operator 
+% $\D^{im}=\bfx^k\boxminus\bfx^i$. 
+The sensor measurements $\bfz^k$ involved in the integration are kinematics, gyro, and force-torques  measurements:
 %
 \begin{equation}
     \bfz^k = \left[ \posim{}{C}, \angvelm{}{}, \left[\forcem{}{L}, \torquem{L}{L}, \posim{}{L}, \Rotm{}{L} \right]_{L=1..4}\right]^k
@@ -213,18 +214,19 @@ Note that the rotation has to be included to be able to define residuals in the 
 % where the expected motion delta $\widehat\D^{im} = [\widehat\D\COM^{im}, \widehat\D\COMd^{im}, \widehat\D\AM^{im}, \widehat\DR^{im}]$ are related to the states through the 
 % $\boxminus$ operator by
 
-The definition of delta and $\boxminus$ operator in the force-torque pre-integration case follow from observing that a body subject to no force and torque will free-fall at the acceleration of gravity while keeping a constant angular momentum. The deltas, defined as the motion between such free-falling frame and the current state, can therefore be written as:
+The definition of delta and $\boxminus$ operator comprises two parts. For the  force-torque pre-integration onto centroidal dynamics, we observe that a body subject to no force and torque will free-fall at the acceleration of gravity while keeping a constant angular momentum. For the orientation part, as we did for the IMU, a null angular velocity means a non-rotating frame. The deltas, defined as the motion between such free-falling frames and the current state, can therefore be written as:
 %
 \begin{equation}
-    \widehat\D^{im} = \bfx^m \boxminus \bfx^i =
+    \widehat\D^{im} = \bfx^m \boxminus \bfx^i 
+    \triangleq
     \begin{bmatrix}
         \widehat\D\COM^{im} \\ \widehat\D\COMd^{im} \\ \widehat\D\AM^{im} \\ \widehat\DR^{im}
     \end{bmatrix}
     =
     \begin{bmatrix}
-        {\Rot{}{}^i}\tr (\COM^m - \COM^i - \COMd^i \Dt^{im})
+        {\Rot{}{}^i}\tr (\COM^m - \COM^i - \COMd^i \Dt_{im} - \frac{1}{2} \bfg \Dt_{im}^{2})
         \\
-        {\Rot{}{}^i}\tr (\COMd^{m} - \COMd^{i} - \bfg \Dt^{im})
+        {\Rot{}{}^i}\tr (\COMd^{m} - \COMd^{i} - \bfg \Dt_{im})
         \\
         {\Rot{}{}^i}\tr (\AM^{m} - \AM^{i})
         \\
@@ -233,18 +235,18 @@ The definition of delta and $\boxminus$ operator in the force-torque pre-integra
     \label{eq:com_boxminus}
 \end{equation}
 %
-The inverse operation $\boxplus$ is obtained as
+With this definition, the pre-integrated deltas are guaranteed to depend only on the sensor measurements and bias, and not on the initial state $\bfx^i$. The inverse operation $\boxplus$ is obtained as
 %
 \begin{equation}
-    \bfx^k = \bfx^i \boxplus \D^{ik} =
+    \bfx^m = \bfx^i \boxplus \D^{im} \triangleq
     \begin{bmatrix}
-    \COM^i + \COMd^i \Dt^{ik} + \Rot{}{}^i \Delta \COM^{ik} + \frac{1}{2} \bfg \Dt^{ik,2}
+    \COM^i + \COMd^i \Dt^{im} + \Rot{}{}^i \Delta \COM^{im} + \frac{1}{2} \bfg \Dt_{im}^{2}
     \\
-    \COMd^i + \Rot{}{}^i \Delta \COMd^{ik} + \grav \Dt^{ik}
+    \COMd^i + \Rot{}{}^i \Delta \COMd^{im} + \grav \Dt^{im}
     \\
-    \AM^i + \Rot{}{}^i \Delta \AM^{ik}
+    \AM^i + \Rot{}{}^i \Delta \AM^{im}
     \\
-    \Rot{}{}^i \DR^{ik}
+    \Rot{}{}^i \DR^{im}
     \end{bmatrix}
 \end{equation}
 
@@ -287,7 +289,7 @@ the resulting inverse being
 \label{eq:inverse_delta_com}
 \end{equation}
 %
-The calibration function $c()$ and exponential map $\Exp()$ are combined to integrate one step of measurement $\tilde\bfz$
+The calibration function $c()$ and exponential map $\Exp()$ are combined to integrate one step of measurement $\tilde\bfz$,
 yielding $\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta_com} as
 %
 \begin{equation}
