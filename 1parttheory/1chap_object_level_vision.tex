@@ -26,7 +26,7 @@ in the scene which can be detected in the images. Dedicated algorithms can then 
 
 In this chapter, we present two measurements models based on available software, that permit the implementation of this paradigm. The first one 
 uses unique \apriltag\ fiducial markers \cite{wang2016iros} (to which we may refer to as \textit{tags} informally) that are laid out sparsely in the scene. 
-The second uses a deep learning based method \cite{labbe2020cosypose}
+The second uses a deep-learning based method \cite{labbe2020cosypose}
 to obtain relative poses from an object of interest, such as a pair of stairs. Instead of artificially augmenting the environment with fiducial markers, we assume 
 that objects of interest exist in the scene, whose CAD models are known. 
 Both systems lack ways to estimate the uncertainty of their output and we, therefore, propose methods for the computation of the measurements covariances.
@@ -41,7 +41,7 @@ For applications fusing these models with IMU data, please refer to \chpRef{chp:
 \section{Relative 6D pose factor}
 In this section, we will derive a general 6D relative transformation factor between a \keyframe\ and a object, whose poses in world frame are respectively $\T{W}{B} \in \SE(3)$ and $\T{W}{O} \in \SE(3)$. In this chapter, we denote by $\T{}{} \in \SE(3)$ 6D transformations.
 
-Let us assume that an algorithm provides us $\Tm{C}{O}$, a measurement of the pose of an element 
+Let us assume that an algorithm estimates directly $\Tm{C}{O}$, a measurement of the pose of an element 
 of the scene with an attached frame $O$ with respect to the camera frame $C$.
 The kinematic chain of the problem described in \figRef{fig:camera_object_chain} unrolls as 
 $\T{W}{O} = \T{W}{B}\T{B}{C}\T{C}{O}$ where W and B correspond to the world and body frames. $\T{B}{C}$ corresponds to the extrinsic pose 
@@ -86,7 +86,7 @@ We also assume that we have access to the covariance of this measurement
 \mbox{$\Cov_V \in \Reals^{6 \times 6}$}. 
 
 This factor is general enough to be used in two applications that we successively describe, based on \apriltag\ fiducial markers and CosyPose. For both, we explain the
-the algorithm behind the pose measurements and propose covariances models
+the algorithm behind the pose measurements and propose covariance models.
 
 % We will now describe two applications of this factor, one using \apriltag\ fiducial markers and one using 
 % a deep-learning object pose estimation algorithm.
@@ -149,9 +149,8 @@ Our solution is to bring the disambiguation to the front-end side.
 \cite{collins2014infinitesimal} provides an implementation of the PnP problem that retrieves both ambiguous poses. When expressed in the camera frame, 
 both solutions share the tag position and differ only in their orientation. We typically want to select the solution with the smallest error. 
 However, if the reprojection errors $e_1$ and $e_2$ are too close (we test for $\tfrac{e_2}{e_1} < h$ with $e_1 \leq e_2$ and $h$ an empirical threshold), 
-we increase the rotational part of the covariance matrix by a great factor to prevent a potential wrong tag orientation to influence the estimation.
-
-
+we increase the rotational part of the covariance matrix by a great factor to cancel the influence of the wrong tag orientation on the 
+overall MAP problem
 
 \subsection{Covariance model}
 Obtaining a covariance of the estimated transformation is an important step toward the integration of these measurements in a sensor fusion algorithm.
@@ -178,7 +177,7 @@ The PnP algorithm provides us with a function $\text{pnp}$ defined as:
 \end{equation}
 %
 where w denotes the dependency on the width of the marker. This $\text{pnp}_w$ function implementation depends on the specificities of the PnP algorithm used and  
-is in general hard to analytically differentiate. Instead, if we consider the inverse function
+is in general hard to analytically differentiate. Instead, if we consider the inverse function.
 
 \begin{equation}
     \begin{split}
@@ -186,10 +185,10 @@ is in general hard to analytically differentiate. Instead, if we consider the in
                            \T{C}{O} &\rightarrow \bfx = \text{proj}_w(\T{C}{O})
     \end{split},
 \end{equation}
-%
-that maps the relative pose to the projection of the tag in the image, a rather simple Jacobian expression can be derived using the chain rule, as follows.
 
-Let us define the marker corner coordinates in the marker frame like shown in \figRef{fig:apriltag_coordinate_frame}. As a convention 
+This function $\text{proj}$ maps the relative pose to the projection of the tag in the image, a rather simple Jacobian expression can be derived using the chain rule, as follows.
+
+We denote the marker corner coordinates in the marker frame as shown in \figRef{fig:apriltag_coordinate_frame}. As a convention 
 \cite{wang2016iros}, we order the corners counter-clockwise starting from bottom-left (looking straight at the tag). 
 
 \begin{equation}
@@ -221,7 +220,7 @@ Then, assuming that images are corrected (no distortion), the pinhole camera mod
     \bfx_i = \text{eucl}(\bfh_i) = \text{eucl}(\bfK\T{C}{O} \bfc_i)
 \end{equation}
 %
-for each corner $c_i$, where $h_i$ are the homogeneous coordinates representing the projected corners and $eucl$ (for "euclideanization") is the function that maps 
+for each corner $c_i$, where $h_i$ are the homogeneous coordinates representing the projected corners and $eucl$ is the function that maps 
 homogeneous coordinates to euclidean pixel coordinates defined as
 %
 \begin{equation}
@@ -250,7 +249,7 @@ of transformation are treated separately in our solver. The expressions of those
     \end{split}
 \end{equation}
 %
-while the euclideanization Jacobian is found to be
+while the Jacobian of the map from homogeneous coordinates to euclidean pixels is
 \begin{equation}
     \bfJ^{\bfx_i}_{\bfh_i}
     =
@@ -347,7 +346,7 @@ In all cases, the covariance increases with the distance to the camera (the volu
 On top of that, we can see that, for both position and orientation, the uncertainty distribution is clearly anisotropic: 
 the uncertainty of the pose measurements is logically higher in the dimensions that lead to the least change in the aspect of the tag projection. 
 
-For the position uncertainty (\figRef{fig:apriltag_cov_P}), the shape of the covariance is easily interpretab: the uncertainty is the highest along the camera-tag axis.
+For the position uncertainty (\figRef{fig:apriltag_cov_P}), the shape of the covariance is easily interpretable: the uncertainty is the highest along the camera-tag axis.
 Besides, this uncertainty is not much influenced by the relative camera-tag orientation. 
 
 For the orientation uncertainty (\figRef{fig:apriltag_cov_O}), the shape of the covariance is harder to interpret: a high uncertainty about the orientation along 
@@ -402,13 +401,13 @@ A quantitative comparison with \cite{urban2016mlpnp} would be interesting as wel
 %
 \section{Learning-based object pose estimation}
 \label{sec:learning_based_object_pose_est}
-In this section, we propose to integrate a deep-learning based object pose estimation algorithm \cite{labbe2020cosypose} to our measurement models. 
+In this section, we propose to integrate a deep-learning based algorithm to object pose estimation \cite{labbe2020cosypose} to our measurement models. 
 
 
-\subsection{Object pose estimation algorithms}
+\subsection{Object pose estimation}
 \label{sec:object_pose_est_algos}
 The problem of object pose estimation can simply be stated: given a calibrated camera and a set of known object models, detect those objects in the current image 
-frame and extract camera-objects poses. Traditionally, competing methods were developed using either local features matching or learning based methods.
+frame and extract camera-objects poses. Traditionally, competing methods were developed using either local features matching or learning-based methods.
 As shown by the most recent BOP challenge results \cite{hodan2020bop}, deep-learning methods now clearly dominate the field in terms of accuracy. 
 At the time of the writing, the highest-ranking non-learning based pose extraction method \cite{konig2020hybrid} (object detection is deep learning based) 
 actually uses depth measurement measurements and is dominated by a purely RGB, deep-learning based model \cite{haugaard2021surfemb}, though \cite{konig2020hybrid} 
@@ -418,7 +417,7 @@ In terms of accuracy, these results advocate for the use of deep-learning purely
 for these to be used in robotics applications \cite{labbe2021single}. 
 We use the CosyPose model of Labbe et al. \cite{labbe2020cosypose} which at the time ranked first in the BOP challenge leaderboard.
 This approach mixes a new state-of-the-art single-view pose estimation algorithm with a multi-view algorithm using RANSAC and Bundle Adjustment. 
-It achieved first in most of the 2020 BOP challenge categories \cite{hodan2020bop}. This system obtains precision in the order of centimeters 
+This system obtains precision in the order of centimeters 
 on real objects whose 3D model is known. Its performances make it a good candidate as a direct 6D pose sensor to perform a multi-sensor fusion. 
 In the context of legged robots, this is very useful to localize the robot relative to objects it needs to interact with, such as objects 
 to manipulate or stairs to climb. While CosyPose is not yet able to generalize to unseen classes of objects, rapid progress is expected in 
@@ -426,7 +425,7 @@ this direction.
 
 \subsection{CosyPose}
 The front end of the SLAM system designed for this project includes object detection and object pose estimation. 
-This function is provided by CosyPose \cite{labbe2020cosypose}, a deep learning based 6D pose estimator that reaches state-of-the-art
+This function is provided by CosyPose \cite{labbe2020cosypose}, a deep-learning based 6D pose estimator that reaches state-of-the-art
  performances for 6D object pose estimation.
 In the original paper, a single-view pose estimator and a multi-view algorithm were introduced. In our context, only the single-view module is used, 
 while object tracking is handled by the SLAM framework. 
@@ -456,8 +455,8 @@ is then computed as follows.
 \end{figure}
 
 
-The single-view pose estimation procedure of CosyPose is an improvement over the one proposed in DeepIm \cite{deepim_2019}. The general idea is to iteratively 
-use the same neural network to iteratively converge to the object pose (\figRef{fig:cosypose-convergence}). It takes as input the cropped image  of the detected 
+The single-view procedure for pose estimation of CosyPose is an improvement over the one proposed in DeepIm \cite{deepim_2019}. The general idea is to iteratively 
+use the same neural network to iteratively converge to the object pose (\figRef{fig:cosypose-convergence}). It takes as input the cropped image of the detected 
 object bounding box and a rendered image based on the current object pose solution $\T{C}{O_{\alpha},k-1}$ at iteration $k-1$. 
 It returns a transformation update $\T{O_{\alpha},k-1}{O_{\alpha},k}$ that brings the rendered image closer to the cropped image. In practice, 
 two neural networks with the same structure are trained independently: one for coarse pose estimation, \ie, the first iteration of the iterative process, 
@@ -503,7 +502,7 @@ as the inverse of the Iterative Closest Point output. The methods targeted for d
 is to use an off-the-shelf pose estimation neural network, as is the case for this paper. For instance, Bayesian Neural Networks \cite{jospin2020hands} 
 need to be trained explicitly for uncertainty prediction while Monte Carlo (MC) Dropout \cite{gal2016dropout} requires multiple forward passes at run-time.
 
-In our work CosySLAM \cite{debeunne2021cosyslam} (submitted at ICRA22), we present a practical implementation of a SLAM system based on the design of an off-the-shelf deep learning object 
+In our work CosySLAM \cite{debeunne2021cosyslam}, we present a practical implementation of a SLAM system based on the design of an off-the-shelf deep learning object 
 pose estimation algorithm \cite{labbe2020cosypose}, which empirical results are presented in \chpRef{chp:cosyslam}. 
 To integrate these measurements with other sensors, we propose a noise model based on empirical data.
 
@@ -517,7 +516,7 @@ MC dropout would require several forward passes through the network for each ite
 
 We need to compute the covariance without changing the architecture of the network and at an affordable cost. 
 We propose to make an empirical error model based on polynomial regression in order to compute the covariance matrix. 
-The idea is to parametrize the average error on each $\se(3)$ component returned by CosyPose. We conduct an empirical study on several video 
+The idea is to parametrize the average error on each $\se(3)$ component returned by CosyPose. We conducted an empirical study on several video 
 sequences that explore the variations of the parameter set for several object types. The error is computed by comparing the $\SE(3)$ transformations 
 between the camera $C$ and an object $O$ returned by CosyPose $\T{C}{O}$ with the same transformation given by a motion capture system. 
 We then use the error predictions of our parametric model as a proxy to the true 6 covariances during model fitting. 
@@ -575,7 +574,9 @@ Thus, a degree 2 polynomial regression seemed to offer a good compromise.  Quant
 (see Fig.~\figRef{fig:empirical_err} for a few examples of fitted polynomials).
 
 
-
+In general, this empirical model led to good experimental results, with the drawback that it needs to be trained (ideally with real data)
+for each new object. If possible, the covariance model should directly result from CosyPose nominal training.
+We started to investigate this direction (with the Msc thesis of Cesar Debeunne) but mostly let it be here as an open perspective.
 
 
 
@@ -583,7 +584,7 @@ Thus, a degree 2 polynomial regression seemed to offer a good compromise.  Quant
 \subsubsection{Empirical covariance}
 
 As explained in Sec. II, we have trained empirical models to evaluate the covariance of the estimation of CosyPose. 
-To validate these models, we propose to exhibit a few intuitive observations and a quantitative statistical analysis. 
+To validate these models, we propose to exhibit a few intuitive observations and quantitative statistical analysis. 
 One of the parameters involved in our model is the absolute distance between the camera and the object, noted $r$. 
 Our trained models show an expected behavior regarding this parameter: the global error increases when the camera moves away from the object. 
 %
@@ -653,3 +654,53 @@ Thus, we generate training data on $10m \times 10m$ scenes, and we increase the 
 
 An illustration of the performances of CosyPose on a set of 3 stair steps is given on \figRef{fig:cosypose-ycbv}: 
 the pose of each step is here independently estimated which leads to local accuracy but global inconsistency. 
+
+
+
+\section{Conclusion}
+
+In this chapter, we have introduced our 2 first practical factors. Both
+handle a direct relation between the camera and an object of the scene,
+hence being related to semantic (or object-level) SLAM.
+The first factor, using fiducial markers, mostly has a practical interest and
+will be used in the first experimental setup to validate the IMU factors.
+It mostly boiled down to defining a new uncertainty model, that we were able to
+analytically derive directly from the PnP algorithm.
+The singularity of the 4 point projections are simply handled by rejecting rotation
+information when it is detected.
+The same factor is then extended to handle a complete object pose estimator,
+that we have implemented on top of the award-winning CosyPose detector.
+Here also we have tried to directly derivate the uncertainty model from the
+algorithm (by training a neural network able to predict both the mean and
+the covariance), but finally relied on an empirical model trained a posteriori.
+Beyond the practical interest of this new perception feature inserted in the
+MAP framework, this second work also contributed to the domain of
+neural-based object pose estimation, by proposing a sound and generic
+way of sequential estimation, i.e. aggregating measurements across time and
+fusing them with other sensors (IMU, etc) to improve the estimation quality.
+We will experimentally show in the last part of this thesis the importance
+of this temporal sensor fusion, as CosyPose alone, despite the quality of the
+algorithm, is not able to provide enough performance guarantee to be
+embedded in a robot feedback loop.
+
+This chapter paves the way to extending our work to true semantic SLAM,
+i.e mapping while directly extracting the location of an object of interest. With
+CosyPose, we directly identify the accurate pose of known objects. This is
+important in our context for two reasons. First, the recognized objects can
+later be used to close the localization loop with a high degree of accuracy.
+Second, the object can be used (\eg in a motion planner) even if out of the
+perception range of the robot. A direct practical use case is for the legged
+robot to step on an object that is typically not in the field of view (because
+legged robots typically do not have cameras pointing on their feet).
+While the inclusion on the MAP framework seems satisfactory in practice,
+some interesting theoretical work might focus on the insertion of raw
+information extracted from the trackers, instead of the overall object pose.
+This would avoid possible singularities to invalidate the complete pose
+information while partial information might benefit the MAP estimator
+(as we already discussed in the practical case of the PnP algorithm for
+fiducial markers), or even including latent information directly in the MAP.
+It is also important to work on a more systematic way of evaluating the
+uncertainty, in particular for neural-based estimators. Finally, some recent
+work on extending object pose estimator to classes of objects, or even to
+unseen objects, open very interesting directions to extend this work
+to semantic SLAM.

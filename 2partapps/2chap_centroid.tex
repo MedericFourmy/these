@@ -46,7 +46,7 @@ represented by the factor graph of \figRef{fig:centroidal_factor_graph}.
     \includegraphics[width=0.6\textwidth]{figures/centroidal/centroidal_factor_graph.pdf}
     \caption{Factor graph representation of the tightly-coupled base-centroidal state estimation problem.
              Each round node corresponds to an estimated state variable with transparent names. Each square corresponds to a factor, that is a measurement residual.
-             The colors of the residuals are as follow. \textbf{Red}: leg odometry (\secRef{sec:leg_odometry}), \textbf{green}: IMU pre-integration and IMU bias drift 
+             The colors of the residuals are as follow. \textbf{Red}: leg-odometry (\secRef{sec:leg_odometry}), \textbf{green}: IMU pre-integration and IMU bias drift 
              (\secRef{sec:preint_residual}, \textbf{purple}: centroidal kinematics (\ref{sec:centroidal_kinematics}, \textbf{blue}: force-torque pre-integration and
              centroidal kinematics bias drift))
              }
@@ -105,7 +105,7 @@ for the drift to remain below around 5mm on all axes.
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.6\textwidth]{figures/centroidal/base_position_err_IKn.pdf}
-    \caption{\textit{sinXYZ} trajectory base position error with different numbers of feet used for the leg odometry factors: 
+    \caption{\textit{sinXYZ} trajectory base position error with different numbers of feet used for the leg-odometry factors: 
     1 (blue), 2 (orange), 3 (green), 4 (red) from the IMU+kinematics estimator}
     \label{fig:ErrIKn}
 \end{figure}

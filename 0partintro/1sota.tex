@@ -123,7 +123,7 @@ Bloesch \cite{bloesch2018technical} classifies kinematic measurement models in t
 Those measurement models are summarized in \figRef{fig:kin_models}.
 
 
-\textit{Feet matching} is the earliest example of leg odometry to be used in the leg robotics literature. Pioneered by \cite{roston1991dead} 
+\textit{Feet matching} is the earliest example of leg-odometry to be used in the leg robotics literature. Pioneered by \cite{roston1991dead} 
 \footnote{An earlier example might exist in \cite{waldron1986adaptive} even though the technical report is unclear about the method they used: 
 "Leg-position feedback is used from legs in support phase for the purpose of correcting for gyro and integration drift in the inertial reference system."},
 multiple feet matching provides a relative 6D pose between moments during which at least three feet are in stable contact with the ground.
@@ -262,7 +262,7 @@ inconsistent because of linearization issues.
 
 All in all, one of the major factors affecting the choice in favor of either a tightly or loosely-coupled estimator is the quality of the platform sensors. Other factors may include personal experience of the designer, software/hardware architecture, need for modularity etc. 
 A very high-end IMU such as the Atlas fiber optics IMU will be able to compute a very consistent orientation and even biases inside its internal 
-filter using an approximate motion model. On the other end, a lower quality IMU may require data fusion from sources such as leg odometry, 
+filter using an approximate motion model. On the other end, a lower quality IMU may require data fusion from sources such as leg-odometry, 
 provided that this source of information is not too biased. Progress in miniaturization and production of MEMS-based IMUs, which equip most 
 legged robots nowadays, seem to guide to the use of staged approaches for quadruped robots \cite{bledt2018cheetah, leziart2021implementation}. 
 However, these IMU classes still represent a significant portion of the robot's price. Furthermore, we believe that, in the long-range, tightly-coupled
@@ -517,7 +517,7 @@ to represent a closed static industrial environment, the final trials happened i
 LIDAR localization very noisy. 
 
 \cite{hornung2014monte} proposed to apply Monte Carlo Localization using depth measurements (LIDAR) thanks to a highly efficient data structure called Octomap \cite{hornung2013octomap}.
-The algorithm is validated on a NAO humanoid robot and used a learned leg odometry motion model, pitch and roll information from the IMU as well as an edge-based vision measurement model.
+The algorithm is validated on a NAO humanoid robot and used a learned leg-odometry motion model, pitch and roll information from the IMU as well as an edge-based vision measurement model.
 The MIT team \cite{fallon2014drift} uses the same method but replaced the motion model with an inertial kinematics proprioceptive filter. Other occupancy mapping algorithms 
 such as Bayesian generalized kernel OctoMap (BGKOctoMap) \cite{doherty2017bayesian} try to infer unobserved parts of the of map by considering correlations between grid cells. This inference model
 has the interesting property to smoothly transition to sanely defined prior (like a uniform probability distribution) while keeping similar computation time as the Octomap.

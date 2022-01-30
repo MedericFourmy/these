@@ -4,17 +4,17 @@
 
 The \textit{state} of the robot is a reduced set of variables of particular interest to the roboticist, be it for control, parameter identification, etc.
 For example, on a quadruped robot, the state may typically be composed of the base position, velocity, and orientation, the center of mass (CoM) position 
-and velocity, joint angles etc.  
+and velocity, joint angles, etc.  
 Those quantities may not directly be measurable, due to their physical nature (the center of mass is a virtual point) or because sensor data
 is too noisy, biased, or impractical to obtain (\eg GPS for localization is bad close to flat surfaces because of beam reflections). 
 Those latent variables can however be estimated by fusing multiple sensors data using a state estimator (aka. observer in automation). 
 The task of \textit{estimation} can then simply be stated as finding the robot state given these measurements. We formalized this intuition
-following the approach by find the mode of the posterior distribution on the states. 
+following the approach by finding the mode of the posterior distribution on the states. 
 
 Probabilistic theory applied to signal processing and information theory has been the bedrock of the state estimation theory development.
 For probabilistic estimators, states are random variables, that, in the robotics context, are mostly continuous.
 The goal is to find the best estimate using sensor measurements.
-In the Bayesian perspective, this means to to find a distribution over a collection of random variables $\cX$ given a set 
+In the Bayesian perspective, this means to find a distribution over a collection of random variables $\cX$ given a set 
 of measurements $\cZ$, $p(\cX | \cZ)$, which is known as the \textit{posterior} distribution. 
 The Bayes law represents this inference:
 %
@@ -58,9 +58,9 @@ result in the highest posterior probability. The estimation problem is, in this 
 \end{equation}
 
 Notice that the $p(\cZ)$ term does not appear anymore on the right side since it is constant relative to $\cX$.
-States variables $\cX$ in our case are a collection of $n$ random variables $\{\cX_i\}_{i \in [1..n]}$ that each relate to a physical quantity of 
+States variables $\cX$ in our case are a collection of $n$ random variables $\{\cX_i\}_{i \in [1..n]}$ that each relate to a physical quantity of 
 interest (\eg the initial robot position, constant camera parameters, orientation of an object in the scene, IMU biases, etc.). Measurements $\cZ$ are 
-similarly a collection of $m$ individual sensor measurements $\{\bfz_i\}_{i \in [1..m]}$.
+similarly a collection of $m$ individual sensor measurements $\{\bfz_i\}_{i \in [1..m]}$.
 
 Additional assumptions have to be made to obtain a numerical implementation of this problem.
 First, the measurements are supposed to be conditionally independent of each other, so that the likelihood function can be factorized 
@@ -127,7 +127,7 @@ on the weighted squared residuals sum.
 
 A vast part of the literature on MAP estimation has been dedicated to the implementation of efficient \adhoc\ NLLS solvers. Most of them are 
 gradient-based algorithm, typically some variation of the Gauss-Newton algorithm, such as the Levenberg-Marquardt algorithm \cite{boyd2004convex}.
-We chose to use the Ceres solver \cite{ceres-solver} for its maturity and wide range of features and because it was already integrated in the team state 
+We chose to use the Ceres solver \cite{ceres-solver} for its maturity and wide range of features and because it was already integrated with the team state 
 estimation framework WOLF \cite{sola2021wolf}.
 
 
@@ -226,13 +226,13 @@ with respect to $\Delta \bfx$ and equaling to 0, giving the linear system of equ
     \label{eq:linear_syst_GN}
 \end{equation}
 
-Substituting $\bfH$ by its expression, the Gauss-Newton step is found by solving the linear system, that is to say inverting $\bfH$:
+Substituting $\bfH$ by its expression, the Gauss-Newton step is found by solving the linear system, that is to say, inverting $\bfH$:
 %
 \begin{equation*}
     \Delta \bfx_{GN}^* = - \bfH^{-1} \bfJ\tr \bfr = - (\bfJ\tr \bfJ)^{-1} \bfJ\tr \bfr = -  \bfJ^{+} \bfr
 \end{equation*}
 %
-where $\bfJ^{+}$ is the (right) pseudo inverse of the residual gradient. 
+where $\bfJ^{+}$ is the (right) pseudo-inverse of the residual gradient. 
 
 Taking a Gauss-Newton step then refers to applying the optimal step to get a new estimate:
 
@@ -243,7 +243,7 @@ Taking a Gauss-Newton step then refers to applying the optimal step to get a new
 
 In practice, the individual Jacobians \eqRef{eq:res_jacobian} are usually obtained by automatic differentiation, \eg using dual number \cite{ceres-solver} 
 and $\bfJ^{+}$ is not constructed explicitly. Efficient linear system solvers based on the Cholesky
-factorization of $\bfH$ and on the QR factorization of $\bfJ$ are commonly used in SLAM since they can exploit the sparsity of these
+factorization of $\bfH$ and the QR factorization of $\bfJ$ are commonly used in SLAM since they can exploit the sparsity of these
 matrices.
 
 
@@ -291,8 +291,8 @@ The Levenberg-Marquardt algorithm is only one example of a vast family of algori
 to mitigate the shortcomings of the "pure" Gauss-Newton algorithm. Other examples include the Trust region algorithm Dogleg. For very large structure-from-motion problems, Conjugate Gradient Descent is also used as an alternative to Gauss-Newton derivates, though extra care has to 
 be taken toward the conditioning of the Hessian \cite{jian2012generalized}.
 
-Those algorithms are trade offs between accuracy, speed, memory budget, and implementation complexity, 
-that suits better in different applications. It seems that, for robotics, Levenberg-Marquardt has proven to be a good trade off between the real-time and
+Those algorithms are trade-offs between accuracy, speed, memory budget, and implementation complexity, 
+that suit better in different applications. It seems that, for robotics, Levenberg-Marquardt has proven to be a good trade-off between the real-time and
 accuracy requirements. 
 
 
@@ -327,7 +327,7 @@ we give a very brief introduction, illustrating properties with the important ex
 \subsection{Smooth manifold structure}
 \label{sec:manifold_structure}
 A \textit{smooth manifold} $\cM$, or differentiable manifold, is a topological space that can be pictured as a smooth surface embedded in a higher dimensional vector space.
-The smoothness property ((there are no spikes or edges on the manifold) means that to each manifold point $\bfx$ corresponds a unique tangent \mbox{(hyper-)plane} $\cT_{\bfx}\cM$, called the tangent space . The tangent space is a vector space on which traditional calculus operations are applicable. 
+The smoothness property ((there are no spikes or edges on the manifold) means that to each manifold point $\bfx$ corresponds a unique tangent \mbox{(hyper-)plane} $\cT_{\bfx}\cM$, called the tangent-space. The tangent space is a vector space on which traditional calculus operations are applicable. 
 
 The dimension of this vector space is equal to the dimension of the manifold as well as the degrees of freedom of its elements.
 We will denote by $p$ the dimension of the space in which the manifold is embedded and by $n$ the dimension of the manifold.
@@ -364,7 +364,7 @@ $\oplus$ and $\ominus$:
 \end{figure}
 
 As in \cite{sola2018micro}, we use the concept of composite manifold, which allows us to deal with a collection of elements $\bfx^i$ living in their respective manifold $\cM^i$, which very often occur in robotics. We define the composite manifold as the concatenation $\cM_c \triangleq \left<\cM^1, \dots, \cM^M \right>$. The element of this composite manifold is denoted by $\cX$.
-We will also write composite equivalent of the retraction $\oplus$ and 
+We will also write a composite Lie group  equivalent of the retraction $\oplus$ and 
 lift $\ominus$ operations. It consists in applying operations to individual elements of the manifold and its tangent space:
 
 \begin{equation}
@@ -414,13 +414,13 @@ obtained by solving
 
 
 Concerning residual formulation in \eqRef{eq:error_expectation}, if the measurement $\bfz_i$ is itself an element of a manifold, 
-then the vector substraction needs to be replaced:
+then the vector subtraction needs to be replaced:
 
 \begin{equation}
     \bfe_i(\cX_{S_i}) = \bfh(\cX_{S_i}) \ominus \bfz_i,
 \end{equation}
 
-Note that many state variables actually belong to vector spaces (such as the robot position), which are trivial manifolds. For those, the $\oplus$ and $\ominus$ operators
+Note that many state variables belong to vector spaces (such as the robot position), which are trivial manifolds. For those, the $\oplus$ and $\ominus$ operators
 simply reduce to the addition and subtraction of Cartesian vectors.  
 
 
@@ -439,7 +439,7 @@ where $\bar{\bfx}$ designates the mean value of the distribution on $\bfx$.
 We define a zero mean "Cartesian" Gaussian distribution on the tangent space, the covariance being defined as:
 
 \begin{equation}
-    \Cov_{\bfx} \triangleq \mathbb{E}[\bftau\bftau\tr] = \mathbb{E}[(\bfx \ominus \bar{\bfx})(\bfx \ominus \bar{\bfx})\tr] \in \Reals^{n \times n}
+    \Cov_{\bfx} \triangleq \mathbb{E}[\bftau\bftau\tr] = \mathbb{E}[(\bfx \ominus \bar{\bfx})(\bfx \ominus \bar{\bfx})\tr] \in \Reals^{n \times n}
 \end{equation}
 %
 where $\mathbb{E}[\cdot]$ denotes the expectation operator.
@@ -448,11 +448,11 @@ By a slight abuse of notation, we note that the manifold distribution is $\bfx \
 As an illustration, the group of unit quaternions $\mathbb{H} = \left\{ \bfq \in \Reals^4~|~\bfq \odot \bfq^*=1 \right\}$ under quaternion multiplication 
 $\odot$ is a manifold (the $S^3$ sphere, p=4 and n=3) \cite{sola2012quaternion}. 
 The tangent space is the set of antisymmetric matrices, which is isomorphic to the angle axis rotation vectors $\bftheta \in \Reals^3$.
-If we naively define the covariance matrix of a quaternion as \mbox{$\mathbb{E}[(\bfq - \bar{\bfq})(\bfq - \bar{\bfq})\tr] \in \Reals^{4 \times 4}$}, 
+If we naively define the covariance matrix of a quaternion as \mbox{$\mathbb{E}[(\bfq - \bar{\bfq})(\bfq - \bar{\bfq})\tr] \in \Reals^{4 \times 4}$}, 
 this covariance matrix is ill-defined. The covariance must be more properly defined as a $3 \times 3$ real matrix on the angle axis space.
 
-In general, covariances can be propagated through nonlinear function of random variables using the chain rule. For instance, if $\bfx \in \Reals^{n_x}$ and 
-$\bfy \in \Reals^{n_y}$ are Cartesian multivariate Gaussian distribution related by the nonlinear function $f$, propagating the $\bfx$ covariance 
+In general, covariances can be propagated through nonlinear function of random variables using the chain rule. For instance, if $\bfx \in \Reals^{n_x}$ and 
+$\bfy \in \Reals^{n_y}$ are Cartesian multivariate Gaussian distribution related by the nonlinear function $f$, propagating the $\bfx$ covariance 
 $\Cov_{\bfx} \in \Reals^{n_x \times n_x}$ through f writes:
 
 \begin{equation}
@@ -475,8 +475,8 @@ Examples of manifold Jacobian derivations in the context of Lie groups can be fo
 
 \subsection{Lie groups for robotic state estimation}
 \label{sec:lie_groups}
-Riemmanian geometry is enough to deal with optimization problems with variables living on smooth manifold. However, many of these state variables, 
-in the context of robotics, also exhibit a group structure, which give them extra interesting properties.
+Riemannian geometry is enough to deal with optimization problems with variables living on smooth manifolds. However, many of these state variables, 
+in the context of robotics, also exhibit a group structure, which gives them extra interesting properties.
 
 A \textit{group} is an ordered pair ($\cG$, $\circ$) comprised of a set $\cG$ and a composition law $\circ$ that together satisfy the group axioms:
 
@@ -491,7 +491,7 @@ $\forall~\bfx,\bfy,\bfz \in \cG$.
 Simply stated, a \text{Lie group} is a group whose elements live in a smooth manifold $\cM$.
 
 A vector can represent a displacement from one point to another along a straight line in the euclidean space, or directly a point (displacement from the origin).
-Analogously, an element of a Lie group represents either a path from one element to another along a geodesic of the manifold, or directly an element of the group 
+Analogously, an element of a Lie group represents either a path from one element to another along a geodesic of the manifold or directly an element of the group 
 (displacement from the identity element $\cE$).
 
 In particular, the identity element $\cE$ relates to a notion of a global reference from which each element of the manifold can be compared.
@@ -524,7 +524,7 @@ It can be shown \cite{sola2018micro} that taking the time difference of a rotati
     \dot{\Rot{}{}} = \Rot{}{} [\angvel{}{}]\hhat \in \cT_{\Rot{}{}}\SO(3)    
 \end{equation}
 %
-where $[\cdot]\hhat$ is the skew-symmetric operator associated to the cross product. 
+where $[\cdot]\hhat$ is the skew-symmetric operator associated with the cross product. 
 \mbox{$[\angvel{}{}]\hhat = \angvel{}{} \times \cdot$}. The Lie algebra $\so(3)$ is therefore the 3 dimensional vector space of antisymmetric matrices.
 For a constant $\angvel{}{}$, this defines an ordinary differential equation (ODE) whose solution
 is $\Rot{}{}(t)=\Rot{}{0}\exp([\angvel{}{}]\hhat t)$ where exp is the matrix exponential:
@@ -551,7 +551,7 @@ This corresponds to the $\oplus$ retraction operator. Conversely, the lift $\omi
 logarithm on the relative rotation as described here:
 
 \begin{align}
-    \Rot{}{2} &= \Rot{}{1}\oplus \prescript{1}{}{\bftheta} = \Rot{}{1} \Exp(\prescript{1}{}{\bftheta})  \\ 
+    \Rot{}{2} &= \Rot{}{1}\oplus \prescript{1}{}{\bftheta} = \Rot{}{1} \Exp(\prescript{1}{}{\bftheta})  \\ 
     \prescript{1}{}{\bftheta} &= \Rot{}{2}\ominus \Rot{}{1} = \Log(\Rot{}{1}\tr\Rot{}{2}) 
 \end{align}
 
@@ -597,7 +597,7 @@ to be rotated from one frame to another. Those operations are illustrated in \fi
 \section{Factor Graphs: a visual language for robotics estimation}
 \label{sec:factor_graphs}
 
-A crucial aspect of solving the MAP problem is the fact that the the likelihood function is factorizable. This represents the fact that the problem
+A crucial aspect of solving the MAP problem is the fact that the likelihood function is factorizable. This represents the fact that the problem
 exhibits a particular structure that has important computational implications. We will first explain how this factorization can be described 
 visually using a graphical model known as the \textit{Factor Graph} and then link this representation to the sparsity of the matrices involved
 in solving the NLLS problem.
@@ -657,10 +657,10 @@ Dellaert and Kaess \cite{dellaert2006square} were the first to
 recognize the link between NLLS problems and factor graphs \cite{dong2019minisam}. Over the last two decades, they have grown in popularity among roboticists as a visual language to describe 
 estimation problems \cite{dellaert2017factor} and planning problems \cite{dong2016motion}. As Frank Dellaert puts it \footnote{Citation from a recent talk,
 see \href{https://www.youtube.com/watch?v=-yCC7mpgL4w}{this video}, around 15:30.}, factor graphs are "an amazing thing to write on blackboards".   
-Aside from providing insights over the computational structure of the problems, they can be used as a common language between engineering teams
+Aside from providing insights into the computational structure of the problems, they can be used as a common language between engineering teams
 to convey insights about the nature of the problems to solve.
 
-% The SLAM problem hereby represented as a factor graph in only one example of the vast family of estimation problem that can be modeled as a factor graph
+% The SLAM problem hereby represented as a factor graph in only one example of the vast family of estimation problems that can be modeled as a factor graph
 % (other including \eg target tracking, structure-from-motion, control and planning \cite{}). 
 
 The problems typically represented by factor graphs and found in estimation are very sparse.
@@ -724,22 +724,18 @@ We highlight the parts that differ from the regular Gauss-Newton algorithm with 
 When the estimation algorithm has converged we can also obtain the covariance on the estimates (details and illustration are available in the 
 appendix \chpRef{chp:MAP_covariance}). This is however a costly computation that is usually reserved for offline investigation of the estimation quality. 
 
-\bigskip
-\bigskip
-\bigskip
-\bigskip
-\bigskip
+\section{Conclusion}
 
 
 We have described a general algorithm to solve NLLS problems with variables belonging to manifolds and weighted by covariance matrices. This problem
 comes from framing the state estimation as a MAP problem and using multiple assumptions on the nature of the measurement models. These measurement models
-are described as residuals weighted by their respective covariance matrices, representing the confidence we have on the sensor measurements. Factor Graphs can 
+are described as residuals weighted by their respective covariance matrices, representing the confidence we have in the sensor measurements. Factor Graphs can 
 represent visually those problems and their connectivity is closely related to the sparsity of the linear problems appearing in the optimization algorithm.
 
 In our opinion, two equally important research directions start from here: (i) finding new solvers extending these ideas to new sets of problems, such as multi-robot or multi-hypothesis problems, and (ii)
-formulating new, efficient, and generalizable measurement models. This thesis mostly theoretically contribute to the direction of extending
+formulating new, efficient, and generalizable measurement models. This thesis mostly theoretically contributes to the direction of extending
 the estimation model (ii) while we mostly rely on existing algorithms (i) to solve the subsequent problems.
-In state estimation for robotics, a commonly used denomination is to refer to the solver implementation as the \textit{backend} while the measurement models are referred to as \textit{front-ends}.
+A commonly used denomination in the context of robotics state estimation is to refer to the solver implementation as the \textit{backend} while the measurement models are referred to as \textit{front-ends}.
 
 The next chapters each concentrate on a range of sensor modalities useful for legged robots:
 object pose retrieval from vision algorithms, a generalized preintegration theory for high rate sensors, legged robot kinematics, and the application 
