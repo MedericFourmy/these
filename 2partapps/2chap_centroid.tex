@@ -18,8 +18,24 @@ In this section we present results of the application of the estimator on a data
 This movement and another one are displayed in the companion video \url{https://peertube.laas.fr/videos/watch/16822d27-3557-4e35-9a0d-ce5b0aea4c27}.
 
 We use the state estimation framework WOLF, developed at IRI-Barcelona, which relies on Google Ceres \cite{ceres-solver} as the graph solver. 
-The robot kinematics and dynamics computations are handled by the Pinocchio library \cite{carpentier2015pinocchio}. For all runs, KFs were created 
+The robot kinematics and dynamics computations are handled by the Pinocchio library \cite{carpentier2019pinocchio}. For all runs, \keyframes\ were created 
 at 4Hz for fair comparison.
+
+
+
+\section{Problem statement}
+azdoijaozidjoaij
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/centroidal/centroidal_factor_graph.pdf}
+    \caption{Factor graph representation of the tightly-coupled base-centroidal state estimation problem.
+             Each round node corresponds to an estimated state variable with transparent names. Each square corresponds to a factor, that is a measurement residual.
+             The color of the residuals are as follow. \textbf{Red}: leg odometry (\secRef{sec:leg_odometry}), \textbf{green}: IMU pre-integration and IMU bias drift 
+             (\secRef{sec:preint_residual}, \textbf{purple}: centroidal kinematics (\ref{sec:centroidal_kinematics}, \textbf{blue}: force-torque pre-integration and
+             centroidal kinematics bias drift))
+             }
+    \label{fig:centroidal_factor_graph}
+\end{figure}
 
 
 \section{Experimental setup}
@@ -90,12 +106,12 @@ The estimated CoM velocity closely follows the velocity of the base as shown in 
 
 
 
-% \begin{figure}[t]
-%     \centering
-%     \includegraphics[height=0.6\columnwidth]{figures/centroidal/com_position_povcdl_sin.pdf}
-%     \caption{Base position (blue) vs CoM (red) from the full estimator}
-%     \label{default}
-% \end{figure}
+\begin{figure}[t]
+    \centering
+    \includegraphics[height=0.6\columnwidth]{figures/centroidal/com_position_povcdl_sin.pdf}
+    \caption{Base position (blue) vs CoM (red) from the full estimator}
+    \label{default}
+\end{figure}
 
 \begin{figure}[t]
     \centering

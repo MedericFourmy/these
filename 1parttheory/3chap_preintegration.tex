@@ -441,12 +441,12 @@ between the current IMU frame and another frame, that started at the IMU state a
 the acceleration of gravity (\figRef{fig:fff}).
 
 \begin{figure}[t]
-\centering
-\includegraphics[width=0.8\textwidth]{figures/fff}
-\caption{The free-falling, non-rotating frame $\cG_t$ follows a parabolic trajectory governed only by gravity $\bfg$ and determined by the initial conditions 
-$\bfp_i$, $\bfv_i$ and $\bfR_i$ at time $i$ ($\cG_i=\bfx_i$, blue). The IMU delta $\D_{ij}$ between times $i$ and $j$ is defined as the state of the IMU at time 
-$j$ ($\bfx_j$, red) expressed in the free-falling frame at time $j$ ($\cG_j$, green).}
-\label{fig:fff}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/fff}
+    \caption{The free-falling, non-rotating frame $\cG_t$ follows a parabolic trajectory governed only by gravity $\bfg$ and determined by the initial conditions 
+    $\bfp_i$, $\bfv_i$ and $\bfR_i$ at time $i$ ($\cG_i=\bfx_i$, blue). The IMU delta $\D_{ij}$ between times $i$ and $j$ is defined as the state of the IMU at time 
+    $j$ ($\bfx_j$, red) expressed in the free-falling frame at time $j$ ($\cG_j$, green).}
+    \label{fig:fff}
 \end{figure}
 
 This derives in the definition of the operator $\boxminus$ in \eqRef{eq:boxminus} as what we detailed in \eqRef{eq:boxminus-forster}, and the operator 
@@ -680,17 +680,17 @@ which we will use to integrate IMU data.
 
 
 
-
 %
 %
 %
 \subsubsection{Pre-integration pipeline}
+\label{sec:pre-integration-pipeline}
 
 Here we recall the general pre-integration pipeline in the case of the compact Lie group, pointing at the minor differences with the composite Lie group case.
 The following pipeline of operations is performed to recursively pre-integrate IMU data into a unique measurement.
 
 \paragraph{Initialization}
-Pre-integration starts after each keyframe with $\ol\D_{ii} = \bfI$, $\bfSigma^\Delta_{ii} = \bf0$ and $\mjac{\D_{ii}}{\bfb} = \bf0$, using $\ol\bfb_i = \bfb_i$ the current best estimate of the bias at time $i$.
+Pre-integration starts after each \keyframe\ with $\ol\D_{ii} = \bfI$, $\bfSigma^\Delta_{ii} = \bf0$ and $\mjac{\D_{ii}}{\bfb} = \bf0$, using $\ol\bfb_i = \bfb_i$ the current best estimate of the bias at time $i$.
 
 \paragraph{Calibration}
 At the reception of each IMU measurement $\bfz_k=(\bfa,\angvel{}{})_k$, start by correcting it with available  bias estimates $\ol\bfb_i=(\bias_a,\bias_{\omega})_i$, 
@@ -911,7 +911,7 @@ in the context of Gaussian Process smoothing. Self-calibration of IMU/Camera tim
 As we saw the pre-integration theory began in the context of visual-inertial odometry. It was however adapted to other high rate sensors such as wheel odometry \cite{quan2019tightly}, 
 possibly including self-calibration \cite{deray-19-selfcalib}. In his thesis, Atchuthan (\cite{atchuthan-18-thesis}, Section 4.3) derived the general form of the pre-integration 
 equations as a sensor agnostic form that is integrated in the state estimation framework WOLF \cite{sola2021wolf}. As previously mentioned, other teams applied pre-integration theory in the 
-context of factor graph legged robots state estimation to derive new leg odometry factors \cite{hartley2018legged, wisth2019robust, wisth2020pre-integrated}.
+context of factor graph legged robots state estimation to derive new leg odometry factors \cite{hartley2018legged, wisth2019robust, wisth2020preintegrated}.
 It was also applied to integrate drone dynamics to estimate external forces disturbances \cite{nisar2019vimo}.
 
 In \chpRef{chp:underactuade_dynamics}, we propose to pre-integrate force-torque measurements that are present in some legged-robots. 

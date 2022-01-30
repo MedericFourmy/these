@@ -20,14 +20,14 @@ one of the major theoretical contributions of this thesis.
 
 \section{Centroidal dynamics}
 \label{sec:centroidal_dynamics}
-The robot dynamics is described by the Lagragian dynamics:
+The robot dynamics is described by the Lagrangian dynamics:
 %
 \begin{equation}\label{eq:wbdyn}
   \bfM(\q) \dvq + h(\q,\vq) = \bm\tau_q + \sum_l \bfJ_l\tr \wrench{}{l}
 \end{equation}
 %
 where $\q,\vq,\dvq,\bm\tau_q$ are the position, velocity, acceleration and torques of the robot in configuration space,
-$\wrench{}{l} \triangleq [\force{}{l},\bfm_l]$ are the contact wrenches (force and pure moment),
+$\wrench{}{l} \triangleq [\force{}{l},\bfm_l]$ are the contact force-torques,
 $\bfM$ is the generalized inertia matrix, $h$ the sum of gravity, Coriolis and centrifugal forces, and $\bfJ_l$ the jacobians of the contact points.
 Because of the underactuated nature of legged robots, the configuration is often separated into $\q=(\posi{W}{B}, \prescript{W}{}{\bfq}_B ,\qa)$ where $\posi{W}{B}$ 
 is the position of the robot base in world frame (typically, the torso or in our case the IMU), $\prescript{W}{}{\bfq}_B$ the orientation of the base body with respect 
@@ -48,7 +48,7 @@ and the $\posi{}{l}$ are the positions of the contact points in world frame. The
 the underactuation: the robot can move only if applying the proper forces and torques to the environment, as the joint torques alone cannot lead to any modification 
 of CoM or AM.
 
-The classical approach in estimation of legged robot state is to first estimate the base state and then to reconstruct the centroidal state in world frame
+The classical approach in legged robot state estimation is to first estimate the base state and then to reconstruct the centroidal state in world frame
 %
 \begin{equation}
     (\bfc,\dot{\bfc},\AM) \triangleq (\posi{W}{C},\vel{W}{C},\prescript{W}{}{\AM})
@@ -63,6 +63,7 @@ As observed in~\cite{carpentier2016center}, a proper fusion of the force measure
 
 
 \section{Centroidal kinematics}
+\label{sec:centroidal_kinematics}
 %
 We need to relate base states to centroidal quantities to ground their estimate. 
 For that, we can rely on the inertial-kinematic model to compute the CoM position \wrt base frame $\posi{B}{C}(\qa) \in \Reals^3$, the CoM velocity \wrt 
@@ -108,7 +109,7 @@ In the end, the equations used to derive the factor are:
 Then, the residual $\bfe^{CK} \in \Reals^9$ is then expressed as:
 %
 \begin{equation}
-    \bfe^{CK}=
+    \bfe^{CK}(\posi{}{}, \vel{}{}, \Rot{}{}, \COM, \COMd, \AM, \bias_c, \bias_{\angvel{}{}})=
     \begin{bmatrix}
         \Rot{}{}\tr(\COM - \posi{}{}) + \bias_{c} - \posim{B}{C}
         \\
@@ -119,30 +120,33 @@ Then, the residual $\bfe^{CK} \in \Reals^9$ is then expressed as:
     \label{eq:CKFactor}
 \end{equation}
 
-[Computation of Covariance in the annex?]
+This factor is added to the factor graph as a link between base states and centroidal states and, therefore, depends on almost all variables of the problem
+at a certain timestamp. We use this factor in the application presented in \chpRef{chp:centroidal_estimation}, whose factor graph is represented in 
+\figRef{fig:centroidal_factor_graph}.
 
 
 
-\section{External force pre-integration}
+\section{Force-torque pre-integration}
 In this section, we apply the generalized pre-integration algorithm to the problem of using measured external
-forces applied on a legged robot in a smoothing estimator. We propose to integrate the underactuated dynamics \eqRef{NewtonEuler} using wrench measurements.
+forces applied on a legged robot in a smoothing estimator. We propose to integrate the underactuated dynamics \eqRef{NewtonEuler} using force-torque measurements.
 To this end, we derive the specificities of the pre-integration of external forces of a poly-articulated system. This is the main theoretical contribution
 of our paper \cite{fourmy2021contact}.
 
 \subsection{Newton-Euler integration}
 The Newton-Euler equations \eqRef{eq:NewtonEuler} relate the evolution of the CoM and AM due to gravity, external forces, and torques. 
 In the case of a legged robot with punctual contact feet, only forces $\forcem{}{L}$ are applied at each limb contact $L$, with no torque. 
-However, we will derive the equations in the general case where wrench are available (like for humanoids) since it is then easy to just set the 
+However, we will derive the equations in the general case where force-torque are available (like for humanoids) since it is then easy to just set the 
 torque terms to zero.
 
 We assume that at each limb contact we have access to noisy local force $\forcem{}{L} = \force{L}{L} + \noise_f$ and pure torques 
 $\torquem{}{L} = \torque{L}{L} + \noise_m$ measurements. 
-To transform them into the body frame $b$, we compute $\Rotm{}{L} \triangleq \Rot{B}{L}(\qa)  \in SO(3)$ and $\posim{}{L} \triangleq \posi{B}{L}(\qa) \in \Reals^3 $ from the joint configuration $\qa  \in \Reals^{12}$ using forward kinematics \secRef{sec:forward_kinematics}. 
+To transform them into the body frame $b$, we compute $\Rotm{}{L} \triangleq \Rot{B}{L}(\qa)  \in SO(3)$ and $\posim{}{L} \triangleq \posi{B}{L}(\qa) \in \Reals^3 $ 
+from the joint configuration $\qa  \in \Reals^{12}$ using forward kinematics \secRef{sec:forward_kinematics}. 
 The lever arm $(\posi{}{L} - \bfc)$ in the Euler equation \eqRef{eq:NewtonEuler} uses a measurement of the CoM position in base frame $ \posi{B}{C}(\qa) \in \Reals^3$. 
-This measure is biased and noisy as explained before: we use again the measurment model \eqRef{eq:com_kine_meas}.
-Assuming constant forces during each interval $\dt$ 
-the integration of \eqRef{eq:NewtonEuler} yields the discrete dynamic model for the centroidal states:
-%
+This measure is biased and noisy as explained before: we use again the measurement model \eqRef{eq:com_kine_meas}.
+Assuming constant forces during each interval $\dt$ the integration of \eqRef{eq:NewtonEuler} yields the discrete dynamic model for the centroidal states:
+
+
 \begin{equation}
     \begin{split}
         \COM^{k} &= \COM^{k-1} + \COMd^{k-1} \dt+\frac{1}{2} \bfg \dt^2 + \frac{1}{2m} \Rot{}{}^{k-1} \sum_L \Rotm{}{L}^k (\forcem{}{L}^k - \noise_{f}) \dt^2
@@ -151,18 +155,59 @@ the integration of \eqRef{eq:NewtonEuler} yields the discrete dynamic model for 
         \\
         \AM^{k} &= \AM^{k-1} +\Rot{}{}^k \sum_L \left[ (\posim{}{L}^k  - \posim{}{C}^k +  \bias_{c}^k + \noise_{c}) \times \Rotm{}{L}^k(\forcem{}{L}^k - \noise_{f}) 
                                                         + \Rotm{}{L}^k(\torquem{L}{L} - \noise_m)\right]\dt
+        \\
+        \Rot{}{}^k &= \Rot{}{}^{k-1}\Exp(\angvelm{}{}^k - \bias_{\angvel{}{}}^k - \noise_{\angvel{}{}}^k)
     \end{split}
     \label{eq:COMDiscrete}
 \end{equation}
 
-Analogously to the IMU case, it is possible to pre-integrate force measurements to derive a factor on the states 
-$\bfx_c=[\COM, \COMd, \AM, \Rot{}{}]$ by defining appropriate deltas $\D_c$ and $\boxminus$ verifying $\D^{im}=\bfx^k\boxminus\bfx^i$ between KFs $i$ and $m$. Developments similar to the IMU case 
-(proof in \secRef{sec:forster_proof}) lead us to define the expected deltas :
-%
+Note that the orientation of the system $\Rot{}{}$ appears in the centroidal states equations to relate the local kinematic and force measurement to the world frame in
+which we conduct the integration. We, therefore, have to include the dynamical model of the orientation by integrating gyroscope measurements $\angvelm{}{}$. 
+
+As illustrated in \secRef{sec:imu_preint_motivation}, recursively applying \eqRef{eq:COMDiscrete} and defining a naive difference in the world frame leads to an inefficient
+residual definition. Instead, we resort to the generalized pre-integration algorithm that we developed in \ref{sec:general-preint}.
+
+
+
+
+
+
+\subsection{Force-torque pre-integration on composite Lie group}
+
+This section follows the same structure and logic as the two IMU pre-integration algorithm described in \ref{sec:imu_preint_composite} and \ref{sec:imu_preint_compact} since
+we use the same generalized pre-integration pipeline defined in \ref{sec:pre-integration-pipeline}. 
+To apply this pipeline to a new motion sensor, we need to define the delta $\D_c$ Lie group relating the centroidal states (and base orientation) between two \keyframes\ thanks to the $\boxminus$ operator 
+$\D^{im}=\bfx^k\boxminus\bfx^i$. We will integrate, kinematics, force-torques, and gyro measurements $\bfz^k$:
+
 \begin{equation}
-    \D^{im} =
+    \bfz^k = \left[ \posim{}{C}, \angvelm{}{}, \left[\forcem{}{L}, \torquem{L}{L}, \posim{}{L}, \Rotm{}{L} \right]_{L=1..4}\right]^k
+\end{equation}
+%
+that we assume to be synchronized.
+
+As we explained, $\posim{}{C}$ and $\angvelm{}{}$ are corrupted by noise and biases. Thus, these biases  $\bias = [\bias_c, \bias_{\omega}]$ are added to the estimator
+with the same assumptions as for the IMU (constant between two \keyframes\, affected by a random walk drift).
+
+
+\subsubsection{Definition of the delta group}
+
+The state variables on which the pre-integration is applied are defined as $\bfx=[\COM, \COMd, \AM, \Rot{}{}]$.
+Note that the rotation has to be included to be able to define residuals in the local frame.
+By recursively applying \eqRef{eq:COMDiscrete} between timestamps $i$ and $m$ and rearranging the terms \footnote{proof similar to the IMU case described in 
+\secRef{sec:forster_proof}}, we can write an equation of the sort 
+
+\begin{equation}
+    \widehat\D_{im}(\bfx_i, \bfx_m) = \D_{im}(\bias_i),
+\end{equation}
+
+where the expected motion delta $\widehat\D^{im} = [\widehat\D\COM^{im}, \widehat\D\COMd^{im}, \widehat\D\AM^{im}, \widehat\DR^{im}]$ are related to the states through the 
+$\boxminus$ operator by
+
+
+\begin{equation}
+    \widehat\D^{im} =
     \begin{bmatrix}
-    \D\COM^{im} \\ \D\COMd^{im} \\ \D\AM^{im} \\ \DR^{im}
+        \widehat\D\COM^{im} \\ \widehat\D\COMd^{im} \\ \widehat\D\AM^{im} \\ \widehat\DR^{im}
     \end{bmatrix}
     =
     \begin{bmatrix}
@@ -174,65 +219,146 @@ $\bfx_c=[\COM, \COMd, \AM, \Rot{}{}]$ by defining appropriate deltas $\D_c$ and 
         \\
         {\Rot{}{}^i}\tr \Rot{}{}^m
     \end{bmatrix}~.
-\end{equation}
-%
-
-
-
-The rotation measured by the gyroscope has to be included too for the pre-integration to work. 
-In this case, the bias vector is $\bias = [\bias_c, \bias_{\omega}]$, that is, CoM and gyro biases. We define the measurements  $\bfz^k$ to be:
-%
-\begin{equation}
-    \bfz^k = \left[ \posim{}{C}^k, \angvelm{}{}^k, \left[\forcem{}{L}^k, \torquem{L}{L}, \posim{}{L}^k, \Rotm{}{L}^k \right]_{L=1..4}\right]
+    \label{eq:com_boxminus}
 \end{equation}
 
-The following operators are enough to particularize the method in \secRef{sec:general-preint} to the contact forces/torque case.
-Integrating $\bfz_k$ during $\dt$ yields $\bm\delta_k$ in \eqRef{eq:data2delta} as
-%
+Its inverse operation $\boxplus$ is obtained as
+
 \begin{equation}
-        \bm\delta^{k}(\bfz^k, \bfb^i, \dt) =
-        \begin{bmatrix}
-        \frac{1}{2m} \sum_l \Rotm{}{L}^k \forcem{}{L}^k \dt^2
-        \\
-        \frac{1}{m} \sum_l \Rotm{}{L}^k \forcem{}{L}^k \dt 
-        \\
-        \sum_l\left[ (\posim{}{L}^k - (\posim{}{C}^k - \bias_c^i)) \times \Rotm{}{L}^k \forcem{}{L}^k + \Rotm{}{L}^k\torquem{}{L}^k) \right] \dt
-        \\
-        \Exp((\angvelm{}{}^k - \bias_{\omega}^i)\dt)
-        \end{bmatrix}
-    \normalsize
-\end{equation}
-%
-and the delta composition law in \eqRef{eq:deltaPlusDelta} as
-%
-\begin{equation}
-    \D \circ \bm\delta = 
+    \bfx^k = \bfx^i \boxplus \D^{ik} =
     \begin{bmatrix}
-    \D\COM + \D\COMd \dt + \DR  \delta\COM
+    \COM^i + \COMd^i \Dt^{ik} + \Rot{}{}^i \Delta \COM^{ik} + \frac{1}{2} \bfg \Dt^{ik,2}
     \\
-    \D\COMd + \DR  \delta \COMd
+    \COMd^i + \Rot{}{}^i \Delta \COMd^{ik} + \grav \Dt^{ik}
     \\
-    \D\AM + \DR  \delta \AM
+    \AM^i + \Rot{}{}^i \Delta \AM^{ik}
     \\
-    \DR\dR
+    \Rot{}{}^i \DR^{ik}
     \end{bmatrix}
-    ~.
-    \label{eq:DeltaDTCompo}
+\end{equation}
+
+
+\subsubsection{Definition of the group operations}
+
+Given two centroidal deltas $\D=[\D\COM,\D\COMd,\D\AM, \DR]$ and $\bfdelta=[[\delta\COM,\delta\COMd,\delta\AM, \dR]]$, 
+the group composition law $\D=\D\circ\bm\delta$ is defined as
+%
+\begin{equation} 
+    \D \circ \bm\delta
+    =
+    \begin{bmatrix}
+        \D\COM + \D\COMd\dt + \DR\delta\COM \\
+        \D\COMd + \DR\delta\COMd \\
+        \D\AM + \DR\delta\AM \\
+        \DR\dR 
+    \end{bmatrix}
+    \label{eq:composition_delta_com}
 \end{equation}
 %
-Finally, the propagation of the state $\bfx_i$ to $\bfx_k$ using $\D_{ik}$, which can be used to retrieve a state at any time $k$ between KFs in the trajectory, is
+with a group identity element composed of the identity element of its Lie groups:
 %
 \begin{equation}
-	\bfx^k = \bfx^i \boxplus \D^{ik} =
-	\begin{bmatrix}
-	\COM^i + \COMd^i \Dt^{ik} + \Rot{}{}^i \Delta \COM^{ik} + \frac{1}{2} \bfg \Dt^{ik,2}
-	\\
-	\COMd^i + \Rot{}{}^i \Delta \COMd^{ik} + \grav \Dt^{ik}
-	\\
-	\AM^i + \Rot{}{}^i \Delta \AM^{ik}
-	\\
-	\Rot{}{}^i \DR^{ik}
-	\end{bmatrix}
+    \D_{\cE} = \begin{bmatrix}
+    \bf0_3\\ \bf0_3 \\ \bf0_3 \\ \bfI_3
+    \end{bmatrix},
 \end{equation}
+%
+the resulting inverse being
+%
+\begin{equation}
+    \D^{-1} =     
+    \begin{bmatrix}
+    - \DR\tr(\D\COM + \D\COMd \Dt) \\
+    - \DR\tr \D\COMd \\
+    - \DR\tr \D\AM \\
+      \DR\tr
+    \end{bmatrix}
+\label{eq:inverse_delta_com}
+\end{equation}
+%
+The calibration function $c()$ and exponential map $\Exp()$ are combined to integrate one step of measurement $\tilde\bfz$
+yielding $\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta_com} as
+%
+\begin{equation}
+    \bm\delta^{k}(\bfz^k, \bfb^i, \dt) =
+    \begin{bmatrix}
+    \frac{1}{2m} \sum_l \Rotm{}{L}^k \forcem{}{L}^k \dt^2
+    \\
+    \frac{1}{m} \sum_l \Rotm{}{L}^k \forcem{}{L}^k \dt 
+    \\
+    \sum_l\left[ (\posim{}{L}^k - (\posim{}{C}^k - \bias_c^i)) \times \Rotm{}{L}^k \forcem{}{L}^k + \Rotm{}{L}^k\torquem{}{L}^k) \right] \dt
+    \\
+    \Exp((\angvelm{}{}^k - \bias_{\omega}^i)\dt)
+    \end{bmatrix}
+    \label{eq:data2delta_com}
+\end{equation}
+%
+% The pre-integration method in  \cite{forster2017-TRO} can be put in the general pre-integration formalism above by defining 
+% $\bm\delta=f(\tilde\bfz,\bfb,\dt)$ in \eqRef{eq:data2delta} as:
 
 
+
+
+
+% We now derive the group operations
+
+% The following operators are enough to particularize the method in \secRef{sec:general-preint} to the contact forces/torque case.
+% Integrating $\bfz_k$ during $\dt$ yields $\bm\delta_k$ in \eqRef{eq:data2delta} as
+% %
+% \begin{equation}
+%         \bm\delta^{k}(\bfz^k, \bfb^i, \dt) =
+%         \begin{bmatrix}
+%         \frac{1}{2m} \sum_l \Rotm{}{L}^k \forcem{}{L}^k \dt^2
+%         \\
+%         \frac{1}{m} \sum_l \Rotm{}{L}^k \forcem{}{L}^k \dt 
+%         \\
+%         \sum_l\left[ (\posim{}{L}^k - (\posim{}{C}^k - \bias_c^i)) \times \Rotm{}{L}^k \forcem{}{L}^k + \Rotm{}{L}^k\torquem{}{L}^k) \right] \dt
+%         \\
+%         \Exp((\angvelm{}{}^k - \bias_{\omega}^i)\dt)
+%         \end{bmatrix}
+%     \normalsize
+% \end{equation}
+% %
+% and the delta composition law in \eqRef{eq:deltaPlusDelta} as
+% %
+% \begin{equation}
+%     \D \circ \bm\delta = 
+%     \begin{bmatrix}
+%     \D\COM + \D\COMd \dt + \DR  \delta\COM
+%     \\
+%     \D\COMd + \DR  \delta \COMd
+%     \\
+%     \D\AM + \DR  \delta \AM
+%     \\
+%     \DR\dR
+%     \end{bmatrix}
+%     ~.
+%     \label{eq:DeltaDTCompo}
+% \end{equation}
+% %
+
+
+
+
+\subsubsection{Delta pre-integration and factor residual}
+
+The concatenation of the operations above lead exactly the algorithm we implemented in \cite{fourmy2021contact}:
+%
+\begin{itemize}
+    \item Initialize $\D_{ii} = \D_\cE$, $\Sigma_\D=\bf0$, $\bfJ^\D_\bfb = \bf0$, and $\ol\bfb_i = \bfb_i$.
+    \item Calibrate data and retract to manifold using \eqRef{eq:data2delta_com}.
+    \item Compose $\ol\D$ using \eqRef{eq:composition_delta_com}.
+\end{itemize}
+%
+The factor residual is again computed following \secRef{sec:preint_residual} exactly.
+
+
+
+\subsubsection{Comment on the link with IMU composite pre-integration}
+The reader will have notice the high similarity between the centroidal motion delta group defined here and the composite IMU delta Lie group defined 
+in \secRef{sec:imu_preint_composite} (\eg between equations \eqRef{eq:com_boxminus} and \eqRef{eq:boxminus-forster}). If we only consider the center of mass, 
+its velocity, and the orientation of the base equations, they are in fact the same. 
+Indeed, the force sensors provide local second order information on the CoM position which is akin to the IMU acceleration measurements. 
+
+Where the problems differ however is in the inclusion of the angular momentum (the Euler part of \eqRef{eq:NewtonEuler}). This equation introduces the dependence on 
+the CoM lever bias $\bias_c$ which makes this variable observable.
