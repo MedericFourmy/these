@@ -4,12 +4,13 @@
 \bigskip
 
 
-In this chapter, we propose a tightly coupled base and centroidal estimator that was presented published in our published paper \cite{fourmy2021contact}.
+In this chapter, we propose a tightly coupled base and centroidal estimator that fuses IMU, kinematics, centroidal kinematics, and force-torque measurements.
+This work was first presented in our published paper \cite{fourmy2021contact}.
 
 \section{Introduction}
 
 As mentioned in the literature review, centroidal states are key to the control of legged robots. Indeed, they provide rich information about the general
-behavior of the system and can be used to check for the stability of the system. The centroidal state estimation is rich, especially for humanoid
+behavior of the system and can be used to check for the stability of the system. The centroidal state estimation literature is rich, especially for humanoid
 robots (see \secRef{sec:centroidal_est_lit}). To our knowledge, all of the centroidal estimators proposed in the literature can be classified as loosely-coupled estimators 
 (following the terminology introduced in \secRef{sec:proprio_filters}): they rely on prior knowledge of a base state. For instance, Piperakis \cite{piperakis2018nonlinear} 
 describes the whole pipeline: first, an inertial-kinematics EKF estimates the base state, then an EKF uses this fixed base state to obtain centroidal states. 
@@ -29,7 +30,17 @@ at 4Hz for fair comparison.
 
 
 \section{Problem statement}
-azdoijaozidjoaij
+
+We wish need to define an estimator capable to observe both base states (position, orientation, velocity) and centroidal states (CoM, CoM velocity, angular momentum) from proprioception
+only. We assume that the following measurements are available on the robot: IMU data, kinematics (leg odometry), centroidal kinematics, and force-torque sensors. 
+Since the IMU measurements \eqRef{eq:imu_meas_model} and CoM local position from the kinematics \eqref{eq:com_kine_meas} are biased, we also need to integrate them to the estimated
+variables.
+
+Bloesch \cite{bloesch2013state} showed that the base states of legged robots and IMU biases are observable using a tightly coupled estimator based on IMU and kinematics measurements.
+On the other end, Rotella \cite{rotella2015humanoid} showed that the centroidal state of a robot and a bias on the centroidal kinematics can be obtained by fusing 
+force-torque sensor measurements with centroidal kinematics, based on prior knowledge of the base states. We join the two problems into a single state estimation problem, 
+represented by the factor graph of \figRef{fig:centroidal_factor_graph}.  
+
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.6\textwidth]{figures/centroidal/centroidal_factor_graph.pdf}
@@ -42,6 +53,11 @@ azdoijaozidjoaij
     \label{fig:centroidal_factor_graph}
 \end{figure}
 
+In this estimator, we have two motion sensors, IMU and force-torque, whose measurements we pre-integrate as explained in \ref{sec:imu_preint_composite} and
+\ref{sec:force_torque_preint} respectively. Base states and centroidal states are tightly constrained by the centroidal kinematics factor, which relates almost all 
+estimation variables at a given \keyframes\.
+
+This estimator is implemented in WOLF \cite{sola2021wolf} and is experimentally validated on the Solo-12 quadruped robot as explained in the following sections. 
 
 \section{Experimental setup}
 %  
@@ -51,7 +67,7 @@ equation \eqref{eq:wbdyn}. Knowing the robot configuration and derivatives $\q,\
 recovering forces from this equation results in solving an over-determined linear system. Some of these quantities are hard to obtain directly 
 since they depend on the state being estimated (\eg base orientation) or on numerical differentiation ($\ddqa$). For these reasons, we pre-calculated 
 these forces by benefiting from an internal filter of the 3DM-CX5-25 IMU for the base orientation, centered window differentiation of encoder speed 
-measurements for the articulation acceleration $\ddqa$ and neglecting the influence of linear velocity. Fig. \figRef{figfig:force_est} shows an example of 
+measurements for the articulation acceleration $\ddqa$ and neglecting the influence of linear velocity. Fig. \figRef{fig:force_est} shows an example of 
 the force reconstruction of one leg using the robot proprioceptive sensors.
 %
 \begin{figure}
@@ -63,32 +79,32 @@ the force reconstruction of one leg using the robot proprioceptive sensors.
 
 \subsection{Base estimation through inertial kinematic fusion}
 First, to validate the use of our kinematic factor, we include uniquely the IMU and LO factors to obtain an Inertial Kinematics  estimator which 
-conceptually includes the same information as estimators such as \cite{bloesch2013state}. In Fig.~\figRef{figfig:PosiIK4}, we compare our state estimation 
+conceptually includes the same information as estimators such as \cite{bloesch2013state}. In \figRef{fig:PosiIK4}, we compare our state estimation 
 at 1kHz with motion capture (Mo-Cap) up-sampled from 200Hz to 1kHz.
-Velocity in base frame is also shown in Fig.~\figRef{figfig:VelIK4}.
-%
-\begin{figure}[t]
+Velocity in base frame is also shown in \figRef{fig:VelIK4}.
+
+\begin{figure}[h]
     \centering
-    \includegraphics[height=0.6\columnwidth]{figures/centroidal/base_position_IK4.pdf}
+    \includegraphics[width=0.6\textwidth]{figures/centroidal/base_position_IK4.pdf}
     \caption{\textit{sinXYZ} trajectory base position from the IMU+Kinematics (IK) estimator (blue) vs Mo-Cap (red)}
     \label{fig:PosiIK4}
 \end{figure}
-%
-\begin{figure}[t]
+
+\begin{figure}[h]
     \centering
-    \includegraphics[height=0.6\columnwidth]{figures/centroidal/base_velocity_base_frame_IK4.pdf}
+    \includegraphics[width=0.6\textwidth]{figures/centroidal/base_velocity_base_frame_IK4.pdf}
     \caption{\textit{sinXYZ} trajectory base velocity in base frame from the IMU+kinematics estimator (blue) vs Mo-Cap (red)}
     \label{fig:VelIK4}
 \end{figure}
 
 Artificially removing contact factors (considering only 1, 2 or 3 feet in contact) can help us gain confidence in the use of this kinematic factor 
-in situations where we rarely have all feet in contact, like for example with trotting gaits. In Fig.~\figRef{figfig:ErrIKn}, we can see that only considering 
+in situations where we rarely have all feet in contact, like for example with trotting gaits. In \figRef{fig:ErrIKn}, we can see that only considering 
 1 foot in contact during the whole trajectory results in a drifting position, but as soon as 2 or more feet are in contact, the system is constrained enough 
 for the drift to remain below around 5mm on all axes. 
 %
-\begin{figure}[t]
+\begin{figure}[h]
     \centering
-    \includegraphics[height=0.6\columnwidth]{figures/centroidal/base_position_err_IKn.pdf}
+    \includegraphics[width=0.6\textwidth]{figures/centroidal/base_position_err_IKn.pdf}
     \caption{\textit{sinXYZ} trajectory base position error with different numbers of feet used for the leg odometry factors: 
     1 (blue), 2 (orange), 3 (green), 4 (red) from the IMU+kinematics estimator}
     \label{fig:ErrIKn}
@@ -104,38 +120,37 @@ We can however validate our method by comparing it to a two step procedure: firs
 implemented in \cite{bledt2018cheetah}, then compute the centroidal quantities directly from the robot kinematic model. 
 The full estimator should be able to infer a bias on the $\posim{B}{C}$ measure so we artificially add a constant disturbance 
 in the robot dynamic model on the lever of the base link of [0.03, 0.06, 0.04]\,cm, which then corresponds to a CoM bias of 
-[-0.0197, -0.0394,  0.0263] cm. Fig.~\figRef{figfig:bias_est} shows that the bias estimated with our method closely matches the introduced bias. 
-Fig.~\figRef{figfig:comparison_KF_wolf} shows a comparison between the base and CoM reconstruction with our method and with the two-step base Kalman filter 
+[-0.0197, -0.0394,  0.0263] cm. \figRef{fig:bias_est} shows that the bias estimated with our method closely matches the introduced bias. 
+\figRef{fig:comparison_KF_wolf} shows a comparison between the base and CoM reconstruction with our method and with the two-step base Kalman filter 
 with geometric CoM. Note that the base-CoM difference on the z axis reflects the fact that limbs of the robot naturally lowers  its CoM. 
-The estimated CoM velocity closely follows the velocity of the base as shown in Fig.~\figRef{figfig:com_base_vel}.
+The estimated CoM velocity closely follows the velocity of the base as shown in \figRef{fig:com_base_vel}.
 
 
-
-\begin{figure}[t]
+\begin{figure}[h]
     \centering
-    \includegraphics[height=0.6\columnwidth]{figures/centroidal/com_position_povcdl_sin.pdf}
+    \includegraphics[width=0.6\textwidth]{figures/centroidal/com_position_povcdl_sin.pdf}
     \caption{Base position (blue) vs CoM (red) from the full estimator}
     \label{default}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[h]
     \centering
-    \includegraphics[height=0.6\columnwidth]{figures/centroidal/com_velocity_povcdl_sin.pdf}
+    \includegraphics[width=0.6\textwidth]{figures/centroidal/com_velocity_povcdl_sin.pdf}
     \caption{Base (blue) vs CoM (red) velocities   from the full estimator}
     \label{fig:com_base_vel}
 \end{figure}
 
 
-\begin{figure}[t]
+\begin{figure}[h]
     \centering
-    \includegraphics[width=0.8\columnwidth]{figures/centroidal/com_bias_est.pdf}
+    \includegraphics[width=0.6\textwidth]{figures/centroidal/com_bias_est.pdf}
     \caption{Estimation of bias on CoM measurement from the full estimator along x-y-z axis ( red-green-blue) in base frame}
     \label{fig:bias_est}
 \end{figure}
 
 \begin{figure}[t]
     \centering
-    \includegraphics[height=0.6\columnwidth]{figures/centroidal/base_com_position_wolf_vs_KF.pdf}
+    \includegraphics[width=0.6\textwidth]{figures/centroidal/base_com_position_wolf_vs_KF.pdf}
     \caption{Comparison of the estimates between decoupled the Kalman filter base estimator and geometric CoM reconstruction (blue) and 
     the tightly coupled estimator presented in this paper (red) on the \textit{sinXYZ} trajectory with artificial base link CoM bias.}
     \label{fig:comparison_KF_wolf}
