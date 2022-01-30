@@ -117,7 +117,7 @@ Then, the residual $\bfe^{CK} \in \Reals^9$ is then expressed as:
         \\
         \Rot{}{}\tr\AM - \left[\Inertia (\angvelm{}{} - \bias_{\omega}) + \AM_a \right]
     \end{bmatrix}
-    \label{eq:CKFactor}
+    \label{eq:CK_residual}
 \end{equation}
 
 This factor is added to the factor graph as a link between base states and centroidal states and, therefore, depends on almost all variables of the problem
@@ -160,6 +160,10 @@ Assuming constant forces during each interval $\dt$ the integration of \eqRef{eq
     \end{split}
     \label{eq:COMDiscrete}
 \end{equation}
+
+This model is adapted well adapted to humanoid robots with 6axis force-torque sensors at their flat feet or quadrupeds with 3D force sensors at their (approximately) 
+point feet. Indeed, for quadruped with point feet, no pure moment is applied by the ground of the robot. In this case, the same equations can be kept, simply setting the
+pure torques  $\torque{}{}$ terms to zero.
 
 Note that the orientation of the system $\Rot{}{}$ appears in the centroidal states equations to relate the local kinematic and force measurement to the world frame in
 which we conduct the integration. We, therefore, have to include the dynamical model of the orientation by integrating gyroscope measurements $\angvelm{}{}$. 
@@ -361,4 +365,7 @@ its velocity, and the orientation of the base equations, they are in fact the sa
 Indeed, the force sensors provide local second order information on the CoM position which is akin to the IMU acceleration measurements. 
 
 Where the problems differ however is in the inclusion of the angular momentum (the Euler part of \eqRef{eq:NewtonEuler}). This equation introduces the dependence on 
-the CoM lever bias $\bias_c$ which makes this variable observable.
+the CoM lever bias $\bias_c$, which is also present in the centroidal kinematics residual \eqref{eq:CK_residual}. \cite{rotella2015humanoid} showed that, including the same set of measurements on centroidal quantities as
+us, the state space centroidal system with centroidal kinematics bias is made observable, having a the base states priors. In our case, base states are
+state variables estimated in conjunction with the centroidal states. However, if the base states are made observable by other sensor sources, then the same obvserbility analysis
+should apply to the centroidal states in our case. This is confirmed by experimental results presented in \ref{chp:centroidal_estimation}.
