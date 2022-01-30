@@ -234,20 +234,29 @@ seen again later in the trajectory.
 
 \subsection{High-rate velocity estimation}
 
-A high rate estimation of a humanoid robot velocity and in particular of its center of mass is critical for balance controllers. It can be recovered from motion capture through numerical differentiation of the positions, but this results in a quite noisy time series. It is especially visible when hard impacts make the robot when descending stairs for instance.
+A high rate estimation of a humanoid robot velocity and in particular of its center of mass is critical for balance controllers. It can be recovered 
+from motion capture through numerical differentiation of the positions, but this results in a quite noisy time series. It is especially visible when hard impacts 
+make the robot when descending stairs for instance.
 
-\figRef{fig:vz_descending_onestep} presents a zoom-in one part of the stairs descending trajectory. Here, within 2.5 seconds, \HRP{2} lowers its base and then its foot touches the next step. The velocity is thus first negative until the impact of the foot on the step. Then, the estimated velocity follows a familiar oscillatory damped system behavior while the mocap estimation is more erratic. 
+\figRef{fig:vz_descending_onestep} presents a zoom-in one part of the stairs descending trajectory. Here, within 2.5 seconds, \HRP{2} lowers 
+its base and then its foot touches the next step. The velocity is thus first negative until the impact of the foot on the step. Then, the estimated velocity follows 
+a familiar oscillatory damped system behavior while the mocap estimation is more erratic. 
 
-The high rate estimate of the velocity is obtained by integrating IMU measurements with optimally estimated biases from the last \keyframe optimized by the solver, as explained in \secRef{sec:publish-state}. The smoothness of the trajectory is a good indicator that the problem has converged to a consistent state.
+The high rate estimate of the velocity is obtained by integrating IMU measurements with optimally estimated biases from the last \keyframe 
+optimized by the solver, as explained in \secRef{sec:publish-state}. The smoothness of the trajectory is a good indicator that the problem has converged to a consistent state.
 
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.8\textwidth]{figures/absolute/vz_descending_onestep.eps}
+    % \includegraphics[width=0.8\textwidth]{figures/absolute/vz_descending_onestep.pdf}
+    \includegraphics[width=0.8\textwidth]{figures/absolute/vz_descending_onestep_with_kf.pdf}
     \caption{Descending stairs (one step): the robot first lowers its base and then touches the next step with results in vibrations from the impact.
-    Vibrations at approximately 10Hz visible in both the Mocap ground-truth and optimal state estimation. Note that the estimation in this case has a smoother curve.}
+    Vibrations at approximately 10Hz visible in both the Mocap ground-truth and optimal state estimation. Note that the estimation in this case has a smoother curve.
+    \keyframes\ are introduced at 6.6Hz (every $\approx 150 ms$) and are represented by vertical red bars. State in between is obtained by applying the pre-integrated 
+    delta from the last \keyframe\ to the current time to the estimate of the last \keyframe\ state estimate (see \secRef{sec:publish-state}).
     \label{fig:vz_descending_onestep}
 \end{figure}
+
 
 \subsection{Related works}
 Two \apriltag\ based visual-inertial SLAM systems have been implemented in the previous years. 
