@@ -4,16 +4,21 @@
 \bigskip
 
 
-In this chapter, we present work published in our paper \cite{fourmy2021contact}.
-
-- Prelaminary work on Inertial Kinematics estimation
-- Centroidal estimation results
+In this chapter, we propose a tightly coupled base and centroidal estimator that was presented published in our published paper \cite{fourmy2021contact}.
 
 \section{Introduction}
 
+As mentioned in the literature review, centroidal states are key to the control of legged robots. Indeed, they provide rich information about the general
+behavior of the system and can be used to check for the stability of the system. The centroidal state estimation is rich, especially for humanoid
+robots (see \secRef{sec:centroidal_est_lit}). To our knowledge, all of the centroidal estimators proposed in the literature can be classified as loosely-coupled estimators 
+(following the terminology introduced in \secRef{sec:proprio_filters}): they rely on prior knowledge of a base state. For instance, Piperakis \cite{piperakis2018nonlinear} 
+describes the whole pipeline: first, an inertial-kinematics EKF estimates the base state, then an EKF uses this fixed base state to obtain centroidal states. 
+Since the factor graph optimization framework that we use theoretically reaches its full potential when the maximum number of cross-correlation
+are considered, we did not find this solution satisfactory. In \cite{fourmy2021contact}, we proposed a tightly-coupled estimator that jointly estimates
+base and centroidal states using IMU, kinematics, and force measurements.
 
-In this section we present results of the application of the estimator on a dataset taken at LAAS-CNRS on the open source robot Solo-12 
-\cite{grimminger2020open} that we recently built:
+
+We present results of the application of the estimator on a dataset taken at LAAS-CNRS on the open source robot Solo-12 \cite{grimminger2020open}:
 \textit{sinXYZ} corresponds to a trajectory where the robot moves by following a sine wave reference with the feet fixed in place. 
 This movement and another one are displayed in the companion video \url{https://peertube.laas.fr/videos/watch/16822d27-3557-4e35-9a0d-ce5b0aea4c27}.
 
