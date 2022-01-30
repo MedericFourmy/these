@@ -59,7 +59,7 @@ Consequently, we are not able to recover the exact centroidal state if there is 
 
 Yet, we can see from the centroidal dynamics that the force measurements are connected to the variation of the centroidal state.
 As observed in~\cite{carpentier2016center}, a proper fusion of the force measurements with an estimation of the state of the base makes the centroidal state observable.
-
+We achieve this by adding two different kinds of information to the factor graph: centroidal kinematics and pre-integrated forces and torques. The derivation of their involved factors is presented hereafter.
 
 
 \section{Centroidal kinematics}
@@ -92,7 +92,7 @@ The computed CoM position is considered to be affected by Gaussian noise and a s
 This slowly varying bias corresponds to the sum of the kinodynamic model inaccuracies whose dependence on the configuration $\qa$ is hard to model. Instead,
 we will estimate this parameter by fusing centroidal kinematic measurements with the underactuated dynamics.
 
-The angular velocity from the IMU is used and its bias has to be incorporated in the factor $\angvelm{}{} = \angvel{B}{B} + \bfb_{\omega} + \noise_{\omega}$.  
+The angular velocity from the IMU is used and its bias $\bfb_\bw$ has to be incorporated in the factor, $\angvelm{}{} = \angvel{B}{B} + \bfb_{\omega} + \noise_{\omega}$.  
 In the end, the equations used to derive the factor are:
 %
 \begin{equation}
@@ -106,7 +106,7 @@ In the end, the equations used to derive the factor are:
     \end{split}
 \end{equation}
 
-Then, the residual $\bfe^{CK} \in \Reals^9$ is then expressed as:
+The residual $\bfe^{CK} \in \Reals^9$ is finally expressed as:
 %
 \begin{equation}
     \bfe^{CK}(\posi{}{}, \vel{}{}, \Rot{}{}, \COM, \COMd, \AM, \bias_c, \bias_{\angvel{}{}})=
@@ -198,18 +198,18 @@ with the same assumptions as for the IMU (constant between two \keyframes\, affe
 The state variables on which the pre-integration is applied are defined as $\bfx=[\COM, \COMd, \AM, \Rot{}{}]$.
 Note that the rotation has to be included to be able to define residuals in the local frame.
 By recursively applying \eqRef{eq:COMDiscrete} between timestamps $i$ and $m$ and rearranging the terms \footnote{proof similar to the IMU case described in 
-\secRef{sec:forster_proof}}, we can write an equation of the sort 
-
+\secRef{sec:forster_proof}}, we can write an equation of the sort
+%
 \begin{equation}
     \widehat\D_{im}(\bfx_i, \bfx_m) = \D_{im}(\bias_i),
 \end{equation}
-
+%
 where the expected motion delta $\widehat\D^{im} = [\widehat\D\COM^{im}, \widehat\D\COMd^{im}, \widehat\D\AM^{im}, \widehat\DR^{im}]$ are related to the states through the 
 $\boxminus$ operator by
 
 
 \begin{equation}
-    \widehat\D^{im} =
+    \widehat\D^{im} = \bfx^m \boxminus \bfx_i =
     \begin{bmatrix}
         \widehat\D\COM^{im} \\ \widehat\D\COMd^{im} \\ \widehat\D\AM^{im} \\ \widehat\DR^{im}
     \end{bmatrix}
@@ -244,7 +244,7 @@ Its inverse operation $\boxplus$ is obtained as
 
 \subsubsection{Definition of the group operations}
 
-Given two centroidal deltas $\D=[\D\COM,\D\COMd,\D\AM, \DR]$ and $\bfdelta=[[\delta\COM,\delta\COMd,\delta\AM, \dR]]$, 
+Given two centroidal deltas $\D=[\D\COM,\D\COMd,\D\AM, \DR]$ and $\bfdelta=[\delta\COM,\delta\COMd,\delta\AM, \dR]$, 
 the group composition law $\D=\D\circ\bm\delta$ is defined as
 %
 \begin{equation} 
@@ -359,13 +359,13 @@ The factor residual is again computed following \secRef{sec:preint_residual} exa
 
 
 \subsubsection{Comment on the link with IMU composite pre-integration}
-The reader will have notice the high similarity between the centroidal motion delta group defined here and the composite IMU delta Lie group defined 
+The reader will have noticed the high similarity between the centroidal motion delta group defined here and the composite IMU delta Lie group defined 
 in \secRef{sec:imu_preint_composite} (\eg between equations \eqRef{eq:com_boxminus} and \eqRef{eq:boxminus-forster}). If we only consider the center of mass, 
 its velocity, and the orientation of the base equations, they are in fact the same. 
-Indeed, the force sensors provide local second order information on the CoM position which is akin to the IMU acceleration measurements. 
+Indeed, the force sensors provide local second order information on the CoM position, which is akin to the IMU acceleration measurements. 
 
 Where the problems differ however is in the inclusion of the angular momentum (the Euler part of \eqRef{eq:NewtonEuler}). This equation introduces the dependence on 
 the CoM lever bias $\bias_c$, which is also present in the centroidal kinematics residual \eqref{eq:CK_residual}. \cite{rotella2015humanoid} showed that, including the same set of measurements on centroidal quantities as
 us, the state space centroidal system with centroidal kinematics bias is made observable, having a the base states priors. In our case, base states are
-state variables estimated in conjunction with the centroidal states. However, if the base states are made observable by other sensor sources, then the same obvserbility analysis
+state variables estimated in conjunction with the centroidal states. However, if the base states are made observable by other sensor sources, then the same observability analysis
 should apply to the centroidal states in our case. This is confirmed by experimental results presented in \ref{chp:centroidal_estimation}.
