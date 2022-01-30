@@ -39,21 +39,48 @@ For applications fusing these models with IMU data, please refer to \chpRef{chp:
 
 
 \section{Relative 6D pose factor}
-Let us assume that an algorithm provides us $\Tm{C}{O} \in \SE(3)$, a measurement of the pose of an element 
+In this section, we will derive a general 6D relative transformation factor between a \keyframe\ and a object, whose poses in world frame are respectively $\T{W}{B} \in \SE(3)$ and $\T{W}{O} \in \SE(3)$. In this chapter, we denote by $\T{}{} \in \SE(3)$ 6D transformations.
+
+Let us assume that an algorithm provides us $\Tm{C}{O}$, a measurement of the pose of an element 
 of the scene with an attached frame $O$ with respect to the camera frame $C$.
 The kinematic chain of the problem described in \figRef{fig:camera_object_chain} unrolls as 
 $\T{W}{O} = \T{W}{B}\T{B}{C}\T{C}{O}$ where W and B correspond to the world and body frames. $\T{B}{C}$ corresponds to the extrinsic pose 
-of the camera that has to be calibrated.
+of the camera.
 Given measurement $\Tm{C}{O}$, this relation can therefore be turned into a residual relating 
 the robot pose, the camera extrinsics, and the object pose:
 
 \begin{align}
-    \bfe^V (\T{W}{B}, \T{B}{C}, \T{W}{O}) 
+    \bfe_V (\T{W}{B}, \T{B}{C}, \T{W}{O}) 
     &= \left[ (\T{W}{B}\T{B}{C})^{-1}\T{W}{O} \right] \ominus \Tm{C}{O} ~ \in \Reals^6 \\
     &= \Log_{\SE(3)} ( (\T{W}{B} \T{B}{C} \Tm{C}{O})^{-1} \T{W}{O}) ~ \in \Reals^6
 \end{align}
 %
 where here $\Log_{\SE(3)}$ denotes the log map on $\SE(3)$.
+
+Depending on the nature of the problem, we can fix some of the variables of the residual. In table \tabRef{tab:res_var_fix}, various estimation problems are modelled depending on which variable is fixed.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        & $\T{W}{B}$ & $\T{B}{C}$ & $\T{W}{O}$  \\
+        \hline
+        SLAM with extrinsics calibration & & & \\
+        \hline
+        SLAM & & X & \\
+        \hline
+        Localization with extrinsics calibration & & X & \\
+        \hline
+        Localization &  & X & X \\
+        \hline
+        Mapping & X & X &  \\
+        \hline
+    \end{tabular}
+    \caption{Some possible estimation problems corresponding to fixing either of the variables. Fixed variables are checked.}
+    \label{tab:res_var_fix}
+\end{table}
+
+
 
 We also assume that we have access to the covariance of this measurement 
 \mbox{$\Cov_V \in \Reals^{6 \times 6}$}. 
@@ -70,7 +97,6 @@ the algorithm behind the pose measurements and propose covariances models
     \caption{Kinematic tree of the object/camera measurement model}
     \label{fig:camera_object_chain}
 \end{figure}
-
 
 %
 %
