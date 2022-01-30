@@ -124,6 +124,8 @@ on the weighted squared residuals sum.
 
 A vast part of the literature on MAP estimation has been dedicated to the implementation of efficient \adhoc NLLS solvers. Most of them are 
 gradient-based algorithm, typically some variation of the Gauss-Newton algorithm, such as the Levenberg-Marquardt algorithm \cite{boyd2004convex}.
+We chose to use the Ceres solver \cite{ceres-solver} for its maturity and wide range of features and because it was already integrated in the team state 
+estimation framework WOLF \cite{sola2021wolf}.
 
 
 
@@ -232,7 +234,8 @@ Taking a Gauss-Newton step then refers to applying the optimal step to get a new
     \label{eq:gaussian_step}
 \end{equation}
 
-In practice, the individual Jacobians \eqRef{eq:res_jacobian} are usually obtained by automatic differentiation, \eg using dual number \cite{ceres-solver} and $\bfJ^{+}$ is not constructed explicitly. Efficient linear system solvers based on the Cholesky
+In practice, the individual Jacobians \eqRef{eq:res_jacobian} are usually obtained by automatic differentiation, \eg using dual number \cite{ceres-solver} 
+and $\bfJ^{+}$ is not constructed explicitly. Efficient linear system solvers based on the Cholesky
 factorization of $\bfH$ and on the QR factorization of $\bfJ$ are commonly used in SLAM since they can exploit the sparsity of these
 matrices.
 
@@ -651,7 +654,7 @@ to convey insights about the nature of the problems to solve.
 % (other including \eg target tracking, structure-from-motion, control and planning \cite{}). 
 
 The problems typically represented by factor graphs and found in estimation are very sparse.
-Many specialized solvers \cite{grisetti2011g2o, kaess2012isam2, ila2017slam++} have been implemented to exploit this sparsity. A discussion of the particularities of factor graph-based NNLS solvers can be found in \cite{dellaert2017factor, sola2017course}.
+Many specialized solvers \cite{grisetti2011g2o, kaess2012isam2, ila2017slam++} have been implemented to exploit this sparsity. A discussion of the particularities of factor-graph-based NNLS solvers can be found in \cite{dellaert2017factor, sola2017course}.
 
 
 
