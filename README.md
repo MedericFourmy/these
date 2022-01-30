@@ -10,21 +10,5 @@ Use `build.sh` and `clean.sh` scripts
 ### Merge page de garde and rest of the thesis
 `./merge_first_and_these.sh`
 
-## TO DO
-- preintegration related works Joan's comments
-- Curve with solo estimated forces for dynamic trajectories to show why we were limited
-- cite end to end ML estimation+control?
-- automatize term definition/lexicon
-- Camurri Thesis Table 2.1 extended for all legged robot estimation cited papers
-    -> split between base est and centroidal est?  
-- CosyPose cov model, explain calibration procedure?
-- explore CosyPose covariance models?
-- Idea from Strasdat: 1 sentence summary of each chapter
-
-## TO DEFINE
-
-## COMMONLY used abreviations -> to define?
-
-## Sketch TODO
-- preintegration algo (as an algo)
-- kinematic chain for the robot calibration
+### All previous actions combined
+`./merge_first_and_these.sh`

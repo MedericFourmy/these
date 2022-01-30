@@ -19,3 +19,5 @@ then
     biber these
     pdflatex these
 fi
+
+echo "\nthese.pdf generated"
