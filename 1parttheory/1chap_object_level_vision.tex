@@ -290,16 +290,6 @@ Note that the derivations above are not limited to a square tag with four corner
 a set of points in its local coordinate system provided their configuration is not degenerate and makes the PnP computation possible \cite{gao2003complete}.  
 We have therefore a compact model informed by the geometry of the measurement model with a single tuning parameter in the pixel noise $\sigma_x$.
 
-% Another interpretation of these derivations is the Laplace approximation presented in \chpRef{chp:MAP_covariance}. 
-% In fact, the PnP problem is best described as the minimization of the reprojection errors:
-
-% \begin{equation}
-%     \T{C}{O}* \argmin \frac{1}{\sigma_x^2} ||\tilde{\bfx} - \text{proj}_{w}(T{C}{O})||^2
-% \end{equation}
-
-% We find the Maximum-A-Posterior solution \footnote{In this case, no prior is used, so we could talk instead of the Maximum likelihood.} of the problem using a 
-% dedicated algorithm \cite{collins2014infinitesimal}.
-% Then, the computation of the covariance resorts to computing the Jacobians of the likelihood and inverting the Hessian matrix $J\tr J$. 
 
 \subsection{Covariance visualization}
 
