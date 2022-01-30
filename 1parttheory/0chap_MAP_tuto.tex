@@ -2,12 +2,14 @@
 \minitoc
 \bigskip
 
-
-Let us explicit the terms of this chapter's title. The \textit{state} of the robot is a reduced set of variables of particular interest to the roboticist, be it for control, parameter identification, etc.
+The \textit{state} of the robot is a reduced set of variables of particular interest to the roboticist, be it for control, parameter identification, etc.
+For example, on a quadruped robot, the state may typically be composed of the base position, velocity, and orientation, the center of mass (CoM) position 
+and velocity, joint angles etc.  
 Those quantities may not directly be measurable, due to their physical nature (the center of mass is a virtual point) or because sensor data
 is too noisy, biased, or impractical to obtain (\eg GPS for localization is bad close to flat surfaces because of beam reflections). 
 Those latent variables can however be estimated by fusing multiple sensors data using a state estimator (aka. observer in automation). 
-The task of \textit{estimation} can then simply be stated as finding the most likely robot state given these measurements. 
+The task of \textit{estimation} can then simply be stated as finding the robot state given these measurements. We formalized this intuition
+following the approach by find the mode of the posterior distribution on the states. 
 
 Probabilistic theory applied to signal processing and information theory has been the bedrock of the state estimation theory development.
 For probabilistic estimators, states are random variables, that, in the robotics context, are mostly continuous.
@@ -33,8 +35,9 @@ property of this approximation is the fact that multimodal distributions can be 
 for multi hypothesis problems such as the kidnapped robot problem \cite{dellaert1999monte} or target tracking \cite{gustafsson2002particle}. 
 
 Another type of approximate inference, with scarcer applications in robotics until now, is variational inference (\cite{koller2009probabilistic}, chapter 11). 
-The idea here is fit the parameters of a candidate distribution (often a Gaussian) so that the Kullback-Leibler 
-divergence between the posterior and the candidate distribution is minimized. Very recent works start 
+The idea here is to fit the parameters of a candidate distribution so that the Kullback-Leibler 
+divergence between the posterior and the candidate distribution is minimized. Gaussian distributions are then
+often used because closed forms of their divergence are easy to evaluate. Very recent works start 
 to find applications in robotics as an alternative to MAP-based graph optimization \cite{barfoot2020exactly, wong2020variational} 
 or to Bayes filtering \cite{lambert2022recursive}. 
 
@@ -122,7 +125,7 @@ Notice that we included the prior in the sum of the residuals, as it is mathemat
 The weights are the inverse of the measurement covariances: the more uncertain a measurement is, the higher its covariance and, therefore, the lower its influence
 on the weighted squared residuals sum. 
 
-A vast part of the literature on MAP estimation has been dedicated to the implementation of efficient \adhoc NLLS solvers. Most of them are 
+A vast part of the literature on MAP estimation has been dedicated to the implementation of efficient \adhoc\ NLLS solvers. Most of them are 
 gradient-based algorithm, typically some variation of the Gauss-Newton algorithm, such as the Levenberg-Marquardt algorithm \cite{boyd2004convex}.
 We chose to use the Ceres solver \cite{ceres-solver} for its maturity and wide range of features and because it was already integrated in the team state 
 estimation framework WOLF \cite{sola2021wolf}.
@@ -139,10 +142,12 @@ estimation framework WOLF \cite{sola2021wolf}.
 %
 %
 \section{The Gauss-Newton algorithm and some variants}
-In this section, we will give a brief introduction to a commonly used way in robotics to solve the MAP problem expressed as an NNLS problem efficiently: the Gauss-Newton algorithm.
-For now, we will assume that state variables and measurements all live in vector spaces to simplify the derivations. For many practical robotics applications,
-some state variables (such as rotation matrices) live in more complex manifolds.
-We will extend the method to manifold states in \secRef{sec:manifold_GN}. This section is based on tutorials such as \cite{dellaert2017factor,sola2017course}. 
+In this section, we will give a brief introduction to a classical numerical algorithm used in robotics to solve an NNLS problem efficiently: the Gauss-Newton algorithm.
+We will use this solver to address the MAP problem.
+For many practical robotics applications, some state variables (such as rotation matrices) live on manifolds. For now, we will assume that state variables and measurements 
+all live in vector spaces to simplify the derivations and we will extend the method to manifold states in \secRef{sec:manifold_GN}. 
+
+We purposely keep this tutorial to a minimal version; the reader is referred to \cite{dellaert2017factor,sola2017course} for an extended version.
 
 
 
@@ -150,8 +155,10 @@ We will extend the method to manifold states in \secRef{sec:manifold_GN}. This s
 The Gauss-Newton algorithm is an iterative algorithm to find the minimum of NLLS cost functions that can be decomposed in a series of steps.
 \begin{enumerate}
     \item Initialize the state estimate at an initial value $\check{\cX} := \cX^0$
-    \item Approximate the NLLS cost function around the current estimate as a quadratic function
-    \item Find the optimal step $\Delta \bfx^*$ by solving a linear set of equations \eqRef{eq:linear_syst_GN}
+    \item Approximate the NLLS cost function around the current estimate as a quadratic function:  
+    $\cF(\Delta \bfx) \approx \cL(\check{\cX} + \Delta \bfx)$ (see \ref{eq:gaussian_step_quadratic_eq} below)
+    \item Find the optimal step $\Delta \bfx^*$ as the root of $\cF(\Delta \bfx)$, corresponding to a linear set of 
+    equations (see \eqRef{eq:linear_syst_GN} below)
     \item Update the current state estimate $\check{\cX} := \check{\cX} + \Delta \bfx^*$
     \item Loop over steps 2-4 until convergence
 \end{enumerate}
@@ -198,12 +205,12 @@ where $J_i$ is the Jacobian of the residual at $\check{\cX}_{S_i}$:
 
 We can note $N = \sum_{i=1}^{n}dim(\bfx_i)$ and $M = \sum_{i=1}^{m}dim(\bfe_i)$.
 We stack up the $\Delta \bfx_i$ column vectors as $\Delta \bfx \in \Reals^N$ and the residual Jacobians at the linearization point 
-$\bfJ \in \Reals^{M \times N}$. We call this new function $\cF(\Delta \bfx) \triangleq \cL(\check{\cX} + \Delta \bfx)$, so that the linearized cost function writes:  
+$\bfJ \in \Reals^{M \times N}$. We call this new function $\cF(\Delta \bfx) \approx \cL(\check{\cX} + \Delta \bfx)$, so that the linearized cost function writes:  
 %
 \begin{equation}
-    \cF(\Delta \bfx) \triangleq \cL(\check{\cX} + \Delta \bfx) 
-    \approx ||\check{\bfr} + \bfJ \Delta \bfx||^2 
+    \cF(\Delta \bfx) \approx ||\check{\bfr} + \bfJ \Delta \bfx||^2 
     = \check{\cL} +  2\check{\bfr}\tr \bfJ \Delta \bfx + \Delta \bfx\tr \bfJ\tr \bfJ \Delta \bfx.
+    \label{eq:gaussian_step_quadratic_eq}
 \end{equation}
 
 $\cF(\Delta \bfx)$ is therefore a local parabolic approximation of 
@@ -242,9 +249,10 @@ matrices.
 
 \subsection{The Levenberg-Marquardt variants}
 \label{sec:LM}
-The Gauss-Newton algorithm is only as valid as the quadratic approximation of its cost function is. Close to the optimum, this approximation
-is quite good and leads to a quadratic convergence of the optimization procedure. If the current estimate is farther from the optimum and the
-local shape of the cost function is flat, that is if the hessian has small eigenvalues, the resulting step can be too large and lead to a 
+The quality of the Gauss-Newton step depends on the validity of the quadratic approximation of its cost function. When the cost is truly quadratic, this approximation
+is quite good and leads to a near quadratic (super linear) convergence of the optimization procedure. Otherwise, for example in the typical 
+pathological situation where the local shape of the cost function is flat, that is if the hessian has small eigenvalues, 
+the resulting step can largely differ from the optimal descent direction or even lead to a 
 divergent behavior. The Levenberg-Marquardt is an extension of the Gauss-Newton algorithm in which the linear system \eqRef{eq:linear_syst_GN} is modified
 to alleviate this phenomenon.
 
@@ -258,9 +266,9 @@ Levenberg \cite{levenberg1944method} contribution was to propose to dampen the H
 \end{equation}
 %
 where $\alpha$ and $\lambda$ are scalar coefficients that can be tuned depending on the evolution of the cost function. 
-In particular, $\lambda$ controls the amount of damping: if a given $\lambda$ computed step is wrong (the cost function goes up),
-$\lambda$ is increased so that the Hessian influence is diminished. For large values, the steps are close to a gradient descent step.
-$\alpha$ provides a way to tune the size of the gradient steps.
+In particular, $\lambda$ controls the amount of damping: if a step computed with a given $\lambda$ step is wrong (the cost function goes up),
+$\lambda$ is increased so that the Hessian influence is regularized. For large values, the steps are close to a gradient descent step.
+$\alpha$ provides a way to tune the size of the descent steps.
 
 
 
@@ -303,7 +311,8 @@ In our case, taking care of the manifold structure is necessary and enough to de
 
 Besides, many of these robotics state variables also exhibit a group structure.
 Especially useful are the existence of an identity element (that can be thought of as the origin of the group), 
-the existence of inverse for each element, the adjoint linear map, and the possibility to interpolate between elements.
+the existence of a unique inverse for each element, the possibility to interpolate between elements, and
+the consequent existence of the adjoint linear map.
 
 If a variable has these two properties, they can be described as belonging to a so-called Lie group, whose properties we will review.
 We will introduce operations such as the exponential map that are necessary to describe the measurement models proposed in the following chapters.
@@ -404,7 +413,8 @@ obtained by solving
 \end{equation}
 
 
-Concerning residual formulation in \eqRef{eq:error_expectation}, if the measurement $\bfz_i$ is itself an element of a manifold, then the Cartesian minus needs to be replaced:
+Concerning residual formulation in \eqRef{eq:error_expectation}, if the measurement $\bfz_i$ is itself an element of a manifold, 
+then the vector substraction needs to be replaced:
 
 \begin{equation}
     \bfe_i(\cX_{S_i}) = \bfh(\cX_{S_i}) \ominus \bfz_i,
@@ -511,13 +521,13 @@ Let us explicit the manifold structure of $\SO(3)$.
 It can be shown \cite{sola2018micro} that taking the time difference of a rotation matrices results in an element of its local tangent space:
 
 \begin{equation}
-    \dot{\Rot{}{}} = \Rot{}{} [\angvel{}{}]_{\times} \in \cT_{\Rot{}{}}\SO(3)    
+    \dot{\Rot{}{}} = \Rot{}{} [\angvel{}{}]\hhat \in \cT_{\Rot{}{}}\SO(3)    
 \end{equation}
 %
-where $[\cdot]_{\times}$ is the skew-symmetric operator associated to the cross product. 
-\mbox{$[\angvel{}{}]_{\times} = \angvel{}{} \times \cdot$}. The Lie algebra $\so(3)$ is therefore the 3 dimensional vector space of antisymmetric matrices.
+where $[\cdot]\hhat$ is the skew-symmetric operator associated to the cross product. 
+\mbox{$[\angvel{}{}]\hhat = \angvel{}{} \times \cdot$}. The Lie algebra $\so(3)$ is therefore the 3 dimensional vector space of antisymmetric matrices.
 For a constant $\angvel{}{}$, this defines an ordinary differential equation (ODE) whose solution
-is $\Rot{}{}(t)=\Rot{}{0}\exp([\angvel{}{}]_{\times}t)$ where exp is the matrix exponential:
+is $\Rot{}{}(t)=\Rot{}{0}\exp([\angvel{}{}]\hhat t)$ where exp is the matrix exponential:
 
 \begin{equation}
     \exp(\bfA) = \sum_{k=0}^{\infty} \frac{\bfA^k}{k!}.
@@ -527,11 +537,11 @@ For $\SO(3)$ and most other Lie groups, properties of the Lie algebra simplify t
 In the $\SO(3)$ case, this formula is known as the Rodrigues' formula:
 
 \begin{equation}
-    \Exp(\bftheta) = \exp([\bftheta]_{\times}) = \bfI + [\bfu]_{\times}\sin(\theta) + [\bfu]_{\times}^2(1 - \cos(\theta))
+    \Exp(\bftheta) = \exp([\bftheta]\hhat) = \bfI + [\bfu]\hhat\sin(\theta) + [\bfu]^{\wedge,2}(1 - \cos(\theta))
 \end{equation}
 %
 where $\bftheta \triangleq \theta \bfu \in \Reals^3$ and $\theta$ is the norm of the rotation vector (angle in radians) and $\bfu$ its unitary direction.
-Finally, we have denoted by $\Exp$ the composition of the $hat$ operator ($\bftheta\hhat \triangleq [\bftheta]_{\times} \in \so(3)$) and the matrix exponential: $\Exp(\bftau) \triangleq \exp(\bftau\hhat)$. 
+Finally, we have denoted by $\Exp$ the composition of the $hat$ operator ($\bftheta\hhat \triangleq [\bftheta]\hhat \in \so(3)$) and the matrix exponential: $\Exp(\bftau) \triangleq \exp(\bftau\hhat)$. 
 The inverse operation, that maps elements from the group to the Lie algebra, is defined as the $\Log$ map. A general representation of
 Lie group operations can be found in \figRef{fig:lie_group}
 
@@ -545,7 +555,7 @@ logarithm on the relative rotation as described here:
     \prescript{1}{}{\bftheta} &= \Rot{}{2}\ominus \Rot{}{1} = \Log(\Rot{}{1}\tr\Rot{}{2}) 
 \end{align}
 
-\begin{figure}[h]
+\begin{figure}[b]
     \centering
     \includegraphics[width=0.7\textwidth]{figures/lie_group.pdf}
     \caption{Representations of a Lie group including the identity element $\cE$, operations of composition
@@ -587,7 +597,7 @@ to be rotated from one frame to another. Those operations are illustrated in \fi
 \section{Factor Graphs: a visual language for robotics estimation}
 \label{sec:factor_graphs}
 
-A crucial aspect of solving the MAP problem is the factorizibility of the likelihood function. This represents the fact that the problem
+A crucial aspect of solving the MAP problem is the fact that the the likelihood function is factorizable. This represents the fact that the problem
 exhibits a particular structure that has important computational implications. We will first explain how this factorization can be described 
 visually using a graphical model known as the \textit{Factor Graph} and then link this representation to the sparsity of the matrices involved
 in solving the NLLS problem.
@@ -654,7 +664,9 @@ to convey insights about the nature of the problems to solve.
 % (other including \eg target tracking, structure-from-motion, control and planning \cite{}). 
 
 The problems typically represented by factor graphs and found in estimation are very sparse.
-Many specialized solvers \cite{grisetti2011g2o, kaess2012isam2, ila2017slam++} have been implemented to exploit this sparsity. A discussion of the particularities of factor-graph-based NNLS solvers can be found in \cite{dellaert2017factor, sola2017course}.
+Many specialized solvers \cite{grisetti2011g2o, kaess2012isam2, ila2017slam++} have been implemented to exploit this sparsity. 
+Let us discuss the basis of sparse NLLS to conclude this chapter.
+% A discussion of the particularities of factor-graph-based NNLS solvers can be found in \cite{dellaert2017factor, sola2017course}.
 
 
 
@@ -666,7 +678,7 @@ Each residual of the NLLS problem is a function of a small subset of the state v
 The Jacobian matrix of the residuals $\bfJ \in \Reals^{M \times N}$ is a big sparse matrix of dimensions 
 \begin{itemize}
     \item M rows = $\sum_{i=1}^{m}dim(\bfe_i) \rightarrow~$ the sum of residual dimensions
-    \item N columns = $\sum_{i=1}^{n}dim(\cT_{\bfx_i}\cM_i)~\rightarrow$ the sum of variables tangent spaces dimensions 
+    \item N columns = $\sum_{i=1}^{n}dim(\cT_{\bfx_i}\cM_i)~\rightarrow$ the sum of variables tangent-spaces dimensions 
 \end{itemize}   
 
 Each block column corresponds to one of the state variables and each row corresponds to a residual. For each row, only the blocks corresponding to the
@@ -688,9 +700,8 @@ state variables that the residual depends on are non-zero. For instance, the mat
 
 
 The approximate Hessian matrix $\bfH \in \Reals^{N \times N}$ displays a similarly remarkable sparsity that makes the resolution of the linear system
-at each step very efficient. Algorithms such as the Schur complement, Cholesky factorization, and QR factorization were applied by different authors to the 
-problem of SLAM and estimation. Descriptions of these linear solvers can be found in \cite{sola2017course, dellaert2017factor}.
-
+at each step very efficient. Algorithms such as the Schur complement \cite[A.5.5]{boyd2004convex}, Cholesky factorization \cite[C.3]{boyd2004convex}, 
+and QR factorization \cite[C.5]{boyd2004convex} were applied by different authors to the problem of SLAM and estimation. 
 
 \subsection{The algorithm (revisited)}
 To tie things together, we now recapitulate the Gauss-Newton algorithm in the context of variables living on manifolds. 
@@ -703,7 +714,7 @@ We highlight the parts that differ from the regular Gauss-Newton algorithm with 
     The linear approximation is done using the notation of Jacobian on manifolds described in \secRef{sec:uncertainty_on_manifolds}.
     $\Delta \bfx$ is defined as the Cartesian representation of a composite tangent space element.  
     \item Find the optimal step $\Delta \bfx^*$ by solving a linear set of equations \eqRef{eq:linear_syst_GN} \\
-    This part does not change. As mentioned in \secRef{sec:LM}, alternatives to vanilla Gauss-Newton such as the Levenberg-Marquardt algorithm
+    This part does not change. As mentioned in \secRef{sec:LM}, globalization of Gauss-Newton such as the Levenberg-Marquardt algorithm
     may alter the linear system to solved for increased performance.
     \item Update the current state estimate $\check{\cX} := \check{\cX} \oplus \Delta \bfx^*$ \\
     The update of the current state is done using the retraction operator $\oplus$ of the composite manifold \eqRef{eq:composite_retract}.
@@ -722,10 +733,15 @@ appendix \chpRef{chp:MAP_covariance}). This is however a costly computation that
 
 We have described a general algorithm to solve NLLS problems with variables belonging to manifolds and weighted by covariance matrices. This problem
 comes from framing the state estimation as a MAP problem and using multiple assumptions on the nature of the measurement models. These measurement models
-are described as residuals weighted by their respective covariance matrices, representing the confidence we have on the sensor measurements. Factor Graphs can represent visually those problems and their connectivity is closely related to the sparsity of the linear problems appearing in the optimization algorithm.
+are described as residuals weighted by their respective covariance matrices, representing the confidence we have on the sensor measurements. Factor Graphs can 
+represent visually those problems and their connectivity is closely related to the sparsity of the linear problems appearing in the optimization algorithm.
 
-Even though finding new solvers extending these ideas to new sets of problems, such as multi robot or multi hypothesis problems, is still an active research, 
-formulating new, efficient, and generalizable measurement models is equally important. The next chapters each concentrate on a range of sensor modalities useful for legged robots:
+In our opinion, two equally important research directions start from here: (i) finding new solvers extending these ideas to new sets of problems, such as multi-robot or multi-hypothesis problems, and (ii)
+formulating new, efficient, and generalizable measurement models. This thesis mostly theoretically contribute to the direction of extending
+the estimation model (ii) while we mostly rely on existing algorithms (i) to solve the subsequent problems.
+In state estimation for robotics, a commonly used denomination is to refer to the solver implementation as the \textit{backend} while the measurement models are referred to as \textit{front-ends}.
+
+The next chapters each concentrate on a range of sensor modalities useful for legged robots:
 object pose retrieval from vision algorithms, a generalized preintegration theory for high rate sensors, legged robot kinematics, and the application 
 of preintegration to legged robots force measurements.
 

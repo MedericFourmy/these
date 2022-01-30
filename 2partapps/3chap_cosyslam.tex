@@ -4,7 +4,7 @@
 \bigskip
 
 
-In this chapter we present a visual-inertial SLAM system based on a deep-learning-based pose estimation libary \cite{labbe2020cosypose}.
+In this chapter we present a visual-inertial SLAM system based on a deep-learning based pose estimation libary \cite{labbe2020cosypose}.
 We present experimental results from our paper \cite{debeunne2021cosyslam} (submitted at ICRA22).
 
 \section{Introduction}
@@ -63,7 +63,7 @@ Then, a descriptor-based multi-view object proposal is performed as a post-proce
 % requires multiple forward passes at run-time.
 
 
-As described in \secRef{sec:object_pose_est_algos}, deep-learning-based object detection systems have now reached an accuracy that make them candidates for mobile robotics applications.
+As described in \secRef{sec:object_pose_est_algos}, deep-learning based object detection systems have now reached an accuracy that make them candidates for mobile robotics applications.
 Applications range from robot manipulation, like sorting known objects, or localization \wrt known assets. For this last application, however,
 the direct output of CosyPose is not sufficient for two reasons. First, many objects have strong symmetries, which makes CosyPose orientation estimation jumps from one to the other
 depending on the frames. This output has, therefore, to be filtered using prior knowledge about the world or the robot's movements. Second, the robot needs to keep
