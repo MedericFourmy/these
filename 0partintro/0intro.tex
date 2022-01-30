@@ -7,13 +7,13 @@ actions, an agent needs a representation of the current state of the world, whic
 then affect this state, which is reflected in a change of its sensors output. This creates a feedback loop, that, if designed well, leads to a stable, 
 auto-regulated system.
 
-For robotics applications \footnote{Exception of direct sensory feedback such as Visual Servoing.}, actions are decided by a control algorithm and 
+For most robotics applications, actions are decided by a control algorithm and 
 the representation may be limited to a set of physically meaningful variables (robot position, orientation, position of a set of stairs). 
 This representation is built by an estimator that fuses several sources of information. 
 The challenge is then to choose the set of appropriate sensors for each application and to design an efficient estimation algorithm to fuse them.
 
 In this thesis, we are interested in extending the perceptual capabilities of legged robots (humanoids and quadrupeds). This kind of robot requires both a high-rate (1kHz),
-low latency estimates of its physical quantities to balance itself, like a precise direction of the gravity, and an accurate environment representation for safe navigation and interaction.
+low latency estimates (<1ms) of its physical quantities to balance itself, like a precise direction of the gravity, and an accurate environment representation for safe navigation and interaction.
 These tasks are oftentimes handled separately in the literature. We believe that it is possible to improve existing systems by a tight integration of the
 many sensor modalities available on such a platform.
 
@@ -30,26 +30,27 @@ used to model the systems. The progression of the perception side of the loop, e
 steps that accompany the evolution of robotics, from fixed manipulators to agile legged robots. 
 
 The first major robotic use was in the industrial space: 
-starting in the early 60's \footnote{The Unimate manipulator was adopted by General Motors to displace hot die casting pieces to cooling tanks, first tests starting in 1961.}, 
+starting in the early 60's \footnote{The Unimate manipulator was adopted by General Motors to displace hot die casting pieces to cooling tanks or to assembly lines, first tests starting in 1961.}, 
 arm manipulators have been progressively integrated into many assembly lines, especially in the automotive industry. 
 This application requires the performance of highly precise, repetitive tasks, which are predefined by specialized human operators.
 These highly rigid robots are position-controlled and fixed to the ground, which usually limits the perception needs to the relative angles between their different parts.
 
 On the other end of the spectrum, researchers started to equip wheeled mobile platforms in controlled laboratory environments with exteroceptive sensors 
-\cite{Nilsson1984ShakeyTR, chatila1985position} to apply planning algorithms, using mainly range sensors to control the presence of obstacles, along with wheel odometry
+\cite{Nilsson1984ShakeyTR, chatila1985position} to apply planning algorithms, using mainly range sensors to control the presence of obstacles, along with wheel odometry \footnote{Odometry is, in the large sense, a information about the relative motion of a robot obtained the integration of a motion sensor (wheel encoder, IMU, Doppler Velocity Logs etc.}
 to detect relative displacement. 
 Research on mobile robotics moved to outdoors applications, using motorized vehicles as research platforms. The 2005 DARPA grand challenge
 offered one of the first large scale proof of concept of autonomous cars, where a few teams managed to safely drive 150 miles paths in desert-environments 
 \cite{thrun2006stanley}, while the 2007 DARPA Urban challenge concentrated on urban road environments \cite{urmson2008autonomous}. In both cases, cars were 
 equipped with GPS, IMU's, cameras, and a metric map of the path. Most teams relied heavily on global positioning, exteroceptive sensors being used for 
-minor checks and corrections \cite{hillel2014recent}. Nowadays, the most successful autonomous car systems (such as Tesla [CITE Karpathy?] and comma.ai \cite{comma2020openpilot}) 
+minor checks and corrections \cite{hillel2014recent}. Nowadays, the most successful autonomous car systems (such as Tesla \footnote{A. Karpathy presentation of Tesla vision stack: \url{https://www.youtube.com/watch?v=g6bOwQdCJrc}} and comma.ai \cite{comma2020openpilot}) 
 seem to tend toward exclusive use of vision for local navigation (lane following, lane changing, overtaking, etc.) \footnote{As A. Karpathy puts it, “Lidar is really a shortcut”}. 
 
 % Mature systems now exhibit almost human-level performance, though some hard corner cases,
 % especially involving other humans behavior predictions, are still on the table.
 % Though relying mostly on global positioning (fusing GPS and IMU \cite{hillel2014recent}), exteroceptive sensing 
 
-In this landscape of autonomous systems, legged robots (such as humanoid or quadrupeds) are singular in many regards. 
+In this landscape of autonomous systems, legged robots (such as humanoid 
+or quadrupeds) are singular in many regards. 
 First and foremost, they are inherently unstable dynamical systems that require continuous active control by applying forces at chosen locations of the environment. 
 Therefore, they require an acute sense of balance, in which Inertial Measurement Units and contact detection play important roles. 
 %which was primarily handled by Inertial Measurement Units in early applications ([CITE RAIBERT+HONDA]) 
@@ -104,7 +105,7 @@ In particular, the perception should be adapted to real-time control at the high
 The estimated state should accurately reflect both the dynamics of the robot as well as its environment structure. Balance controllers in particular require a precise estimation of the gravity vector direction, as well centroidal quantities (center of mass, angular momentum etc.).
 In our opinion, this implies that a fusion of as many sources of
 information as possible is necessary. In addition, in order to maximize the precision of the estimator, all correlations between variables should in principle be taken into account. 
-We also need to perform online calibration for certain sensor biases and fixed parameters. To achieve these goal, the development of \textit{tightly coupled} estimators, 
+We also need to perform online calibration for certain sensor biases and fixed parameters. To achieve these goals, the development of \textit{tightly coupled} estimators, 
 that exploit as many data correlations as possible between the sensor measurements, should be undertaken.
 
 It is not yet exactly clear what is the optimal set of sensors that needs to be integrated on legged platforms (though Inertial Measurement Units, kinesthesis, and 
@@ -134,7 +135,7 @@ I have organized this thesis as follows:
 \textbf{Chapter 2} presents a literature overview for of state estimation legged robots. 
 
 \bigskip
-\textbf{Chapter 3} serves as general introduction to Factor Graph optimization using the Maximum A Posteriori. We put the emphasis
+\textbf{Chapter 3} serves as general introduction to Factor Graph optimization using the Maximum-A-Posteriori. We put the emphasis
 on the special treatment of variables belonging to manifolds and give a brief introduction to Lie theory, which is used extensively in chapter 6.
 
 \bigskip
@@ -151,7 +152,7 @@ then extended to a compact Lie group formulation.
 The following chapters present three different applications where we fuse several of the sensing modalities described so far.
 Regarding their practical implementation, we contributed to different parts of the WOLF state estimation framework \cite{sola2021wolf} which was 
 submitted to RAL journal this year. We present these applications in the chronological order of their development, reflecting the opinions that
-we had at these respective times.
+we had at those respective times.
 
 \bigskip
 \textbf{Chapter 7} presents the first application, which is a visual-inertial object-level SLAM system based on fiducial markers. This chapter describes
