@@ -31,7 +31,7 @@ at 4Hz for fair comparison.
 
 \section{Problem statement}
 
-We wish need to define an estimator capable to observe both base states (position, orientation, velocity) and centroidal states (CoM, CoM velocity, angular momentum) from proprioception
+We wish to define an estimator capable of observing both base states (position, orientation, velocity) and centroidal states (CoM, CoM velocity, angular momentum) from proprioception
 only. We assume that the following measurements are available on the robot: IMU data, kinematics (leg odometry), centroidal kinematics, and force-torque sensors. 
 Since the IMU measurements \eqRef{eq:imu_meas_model} and CoM local position from the kinematics \eqref{eq:com_kine_meas} are biased, we also need to integrate them to the estimated
 variables.
@@ -41,12 +41,12 @@ On the other end, Rotella \cite{rotella2015humanoid} showed that the centroidal 
 force-torque sensor measurements with centroidal kinematics, based on prior knowledge of the base states. We join the two problems into a single state estimation problem, 
 represented by the factor graph of \figRef{fig:centroidal_factor_graph}.  
 
-\begin{figure}[h]
+\begin{figure}[t]
     \centering
     \includegraphics[width=0.6\textwidth]{figures/centroidal/centroidal_factor_graph.pdf}
     \caption{Factor graph representation of the tightly-coupled base-centroidal state estimation problem.
              Each round node corresponds to an estimated state variable with transparent names. Each square corresponds to a factor, that is a measurement residual.
-             The color of the residuals are as follow. \textbf{Red}: leg odometry (\secRef{sec:leg_odometry}), \textbf{green}: IMU pre-integration and IMU bias drift 
+             The colors of the residuals are as follow. \textbf{Red}: leg odometry (\secRef{sec:leg_odometry}), \textbf{green}: IMU pre-integration and IMU bias drift 
              (\secRef{sec:preint_residual}, \textbf{purple}: centroidal kinematics (\ref{sec:centroidal_kinematics}, \textbf{blue}: force-torque pre-integration and
              centroidal kinematics bias drift))
              }
