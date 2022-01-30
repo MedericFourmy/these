@@ -859,7 +859,7 @@ which can be used for IMU pre-integration. This proposal differs from ours in th
 
 \begin{itemize}
     \item The $\SE_2(3)$ group does not contain the time and therefore the composition law does not account for the whole integration. Some extra algebra needs to be added.
-    \item The $\SE_2(3)$ group is easier to manipulate since the closed forms for the exponential map, the adjoint, and the right-jacobian are easier to obtain.
+    \item The $\SE_2(3)$ group is easier to manipulate since the closed forms for the exponential map, the adjoint, and the right-Jacobian are easier to obtain.
     \item Our group better separates between the delta states and the velocity of these states which depend only on the IMU data.
 \end{itemize}
 
@@ -872,7 +872,7 @@ Therefore, it is apparent that depending on the structure of the defined Lie gro
 
 In the context of filtering, using a compact group formulation of the robot state has been proven to improve greatly the basin of convergence of the so-called
 Invariant Kalman Filter \cite{barrau2018invariant, hartley2020contact}. This methods tackles one of the issues of standard EKF: 
-the jacobians are computed around the current estimates, which leads to an inconsistency of the estimate if the filter is initialized far from the optimal. 
+the Jacobians are computed around the current estimates, which leads to an inconsistency of the estimate if the filter is initialized far from the optimal. 
 However, this issue is not so present with factor graph optimization since we repeatedly linearize around the new estimates.
 Nevertheless, it seems that compact Lie groups may provide slightly better performances than composite Lie groups \cite{brossard2021associating}, thanks 
 to a more precise linearization \wrt\ the IMU biases and a covariance propagation that better represents the geometry of the problem.

@@ -187,7 +187,7 @@ is in general hard to analytically differentiate. Instead, if we consider the in
     \end{split},
 \end{equation}
 %
-that maps the relative pose to the projection of the tag in the image, a rather simple jacobian expression can be derived using the chain rule, as follows.
+that maps the relative pose to the projection of the tag in the image, a rather simple Jacobian expression can be derived using the chain rule, as follows.
 
 Let us define the marker corner coordinates in the marker frame like shown in \figRef{fig:apriltag_coordinate_frame}. As a convention 
 \cite{wang2016iros}, we order the corners counter-clockwise starting from bottom-left (looking straight at the tag). 
@@ -233,7 +233,7 @@ homogeneous coordinates to euclidean pixel coordinates defined as
     \end{split}.
 \end{equation}
 
-We need to compute the jacobian of each corner projection with respect to the estimated relative pose, decomposed using the chain rule as  
+We need to compute the Jacobian of each corner projection with respect to the estimated relative pose, decomposed using the chain rule as  
 
 \begin{equation}
     \bfJ^{\bfx_i}_{\T{}{}} = \bfJ^{\bfx_i}_{\bfh_i} \bfJ^{\bfh_i}_{\T{}{}}.   
@@ -250,7 +250,7 @@ of transformation are treated separately in our solver. The expressions of those
     \end{split}
 \end{equation}
 %
-while the euclideanization jacobian is found to be
+while the euclideanization Jacobian is found to be
 \begin{equation}
     \bfJ^{\bfx_i}_{\bfh_i}
     =
@@ -260,7 +260,7 @@ while the euclideanization jacobian is found to be
     \end{pmatrix}.
 \end{equation}
 
-Finally, we stack the 4 jacobians to get the full jacobian to be used for covariance propagation:
+Finally, we stack the 4 Jacobians to get the full Jacobian to be used for covariance propagation:
 %
 \begin{equation}
     \bfJ \triangleq \bfJ^{\bfx}_{\T{C}{O}}=

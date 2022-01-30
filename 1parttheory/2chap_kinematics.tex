@@ -78,7 +78,7 @@ It is also possible to obtain the pose relative to the base $\T{b}{k}$ by simply
 
 % Differential FK is not used anywhere so...
 % FK is a nonlinear function of the robot configuration. 
-% To obtain the relative spatial velocity, we have to compute the jacobian $\bfJ_k$ of FK with respect to the configuration.
+% To obtain the relative spatial velocity, we have to compute the Jacobian $\bfJ_k$ of FK with respect to the configuration.
 % The differential forward kinematics (DFK) is then simply:
 
 % \begin{equation}
@@ -115,7 +115,7 @@ We can immediately derive the residual $\bfe^{LO}$ expression for each foot $l$ 
 To obtain a proper measurement model, we need to model the influence of measurement inaccuracies.
 This equation depends on relative positions $\posim{B}{L}^i$ and $\posim{B}{L}^j$ that are computed using FK. The quality of the computation depends on several things:
 the robot kinematic model (calibration), deviations from the rigid body model (\eg segment/joint flexibilities, backlash), encoder noise.
-It is tempting to propagate encoder noise $\noise_{\qa}$ trough FK using the kinematic jacobian \cite{bloesch2013state, hartley2018legged}:
+It is tempting to propagate encoder noise $\noise_{\qa}$ trough FK using the kinematic Jacobian \cite{bloesch2013state, hartley2018legged}:
 
 \begin{equation}
     \posim{B}{L} = FK(\qa + \noise_{\qa}) \approx FK(\qa) + \bfJ_L\noise_{\qa}, \quad \quad \Cov_{p} = \bfJ_L \Cov_{\qa} \bfJ_L

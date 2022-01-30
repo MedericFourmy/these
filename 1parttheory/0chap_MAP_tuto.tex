@@ -661,7 +661,7 @@ Many specialized solvers \cite{grisetti2011g2o, kaess2012isam2, ila2017slam++} h
 
 \subsection{Sparsity of the NLLS problem}
 
-Each residual of the NLLS problem is a function of a small subset of the state variables. Therefore, each factor node in the Factor Graph representation of the problem is connected to but a few of the variable nodes. This makes for a graph with low connectivity. We will show that this low connectivity is linked to an important sparsity of the jacobian matrix of the residuals.
+Each residual of the NLLS problem is a function of a small subset of the state variables. Therefore, each factor node in the Factor Graph representation of the problem is connected to but a few of the variable nodes. This makes for a graph with low connectivity. We will show that this low connectivity is linked to an important sparsity of the Jacobian matrix of the residuals.
 
 The Jacobian matrix of the residuals $\bfJ \in \Reals^{M \times N}$ is a big sparse matrix of dimensions 
 \begin{itemize}

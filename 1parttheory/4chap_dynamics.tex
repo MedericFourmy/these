@@ -23,7 +23,7 @@ The robot dynamics is described by the Lagrangian dynamics:
 %
 where $\q,\vq,\dvq,\bm\tau_q$ are the position, velocity, acceleration and torques of the robot in configuration space,
 $\wrench{}{l} \triangleq [\force{}{l},\bfm_l]$ are the contact force-torques,
-$\bfM$ is the generalized inertia matrix, $h$ the sum of gravity, Coriolis and centrifugal forces, and $\bfJ_l$ the jacobians of the contact points.
+$\bfM$ is the generalized inertia matrix, $h$ the sum of gravity, Coriolis and centrifugal forces, and $\bfJ_l$ the Jacobians of the contact points.
 Because of the underactuated nature of legged robots, the configuration is often separated into $\q=(\posi{W}{B}, \prescript{W}{}{\bfq}_B ,\qa)$ where $\posi{W}{B}$ 
 is the position of the robot base in world frame (typically, the torso or in our case the IMU), $\prescript{W}{}{\bfq}_B$ the orientation of the base body with respect 
 to the world and $\qa$ are the joint configuration of the actuated joints. The configuration velocity has a similar separation, as described in \secRef{sec:forward_kinematics}.
