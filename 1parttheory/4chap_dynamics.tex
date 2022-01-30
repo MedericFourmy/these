@@ -91,7 +91,7 @@ We chose a simple additive model on the CoM kinematics noisy measurements
     \label{eq:com_kine_meas}
 \end{equation}
 %
-where is a Gaussian noise and $\bfb_{c}$ is a varying bias that we wish to estimate.
+where $\noise_c$ is a Gaussian noise and $\bfb_{c}$ is a varying bias that we wish to estimate.
 
 
 The angular velocity from the IMU is used and its bias $\bfb_\bw$ has to be incorporated in the factor, $\angvelm{}{} = \angvel{B}{B} + \bfb_{\omega} + \noise_{\omega}$.  
@@ -164,12 +164,12 @@ Assuming constant forces during each interval $\dt$ the integration of \eqRef{eq
     \label{eq:COMDiscrete}
 \end{equation}
 
-This model is adapted well adapted to humanoid robots with 6axis force-torque sensors at their flat feet or quadrupeds with 3D force sensors at their (approximately) 
+This model is well adapted to humanoid robots with 6axis force-torque sensors at their flat feet or quadrupeds with 3D force sensors at their (approximately) 
 point feet. Indeed, for quadruped with point feet, no pure moment is applied by the ground of the robot. In this case, the same equations can be kept, simply setting the
 pure torques  $\torque{}{}$ terms to zero.
 
 Note that the orientation of the system $\Rot{}{}$ appears in the centroidal states equations to relate the local kinematic and force measurement to the world frame in
-which we conduct the integration. We, therefore, have to include the dynamical model of the orientation by integrating gyroscope measurements $\angvelm{}{}$. 
+which we conduct the integration. We, therefore, have to include the dynamical model of the orientation by integrating gyroscope measurements $\angvelm{}{}$ together with forces and torques. 
 
 As illustrated in \secRef{sec:imu_preint_motivation}, recursively applying \eqRef{eq:COMDiscrete} and defining a naive difference in the world frame leads to an inefficient
 residual definition. Instead, we resort to the generalized pre-integration algorithm that we developed in \ref{sec:general-preint}.
@@ -184,16 +184,16 @@ residual definition. Instead, we resort to the generalized pre-integration algor
 This section follows the same structure and logic as the two IMU pre-integration algorithm described in \ref{sec:imu_preint_composite} and \ref{sec:imu_preint_compact} since
 we use the same generalized pre-integration pipeline defined in \ref{sec:pre-integration-pipeline}. 
 To apply this pipeline to a new motion sensor, we need to define the delta $\D_c$ Lie group relating the centroidal states (and base orientation) between two \keyframes\ thanks to the $\boxminus$ operator 
-$\D^{im}=\bfx^k\boxminus\bfx^i$. We will integrate, kinematics, force-torques, and gyro measurements $\bfz^k$:
-
+$\D^{im}=\bfx^k\boxminus\bfx^i$. The sensor measurements $\bfz^k$ involved in the integration are kinematics, gyro, and force-torques  measurements:
+%
 \begin{equation}
     \bfz^k = \left[ \posim{}{C}, \angvelm{}{}, \left[\forcem{}{L}, \torquem{L}{L}, \posim{}{L}, \Rotm{}{L} \right]_{L=1..4}\right]^k
 \end{equation}
 %
 that we assume to be synchronized.
 
-As we explained, $\posim{}{C}$ and $\angvelm{}{}$ are corrupted by noise and biases. Thus, these biases  $\bias = [\bias_c, \bias_{\omega}]$ are added to the estimator
-with the same assumptions as for the IMU (constant between two \keyframes\, affected by a random walk drift).
+As we explained, $\posim{}{C}$ and $\angvelm{}{}$ are corrupted by noise and biases. Thus, these biases  $\bias = [\bias_c, \bias_{\omega}]$ are added to the estimator.
+As we did in the IMU case, we assume them constant between two \keyframes\ and affected by a random walk drift.
 
 
 \subsubsection{Definition of the delta group}
@@ -210,10 +210,10 @@ Note that the rotation has to be included to be able to define residuals in the 
 % where the expected motion delta $\widehat\D^{im} = [\widehat\D\COM^{im}, \widehat\D\COMd^{im}, \widehat\D\AM^{im}, \widehat\DR^{im}]$ are related to the states through the 
 % $\boxminus$ operator by
 
-The definition of delta and $\boxminus$ operator in the force-torque pre-integration case is:
-
+The definition of delta and $\boxminus$ operator in the force-torque pre-integration case follow from observing that a body subject to no force and torque will free-fall at the acceleration of gravity while keeping a constant angular momentum. The deltas, defined as the motion between such free-falling frame and the current state, can therefore be written as:
+%
 \begin{equation}
-    \widehat\D^{im} = \bfx^m \boxminus \bfx_i =
+    \widehat\D^{im} = \bfx^m \boxminus \bfx^i =
     \begin{bmatrix}
         \widehat\D\COM^{im} \\ \widehat\D\COMd^{im} \\ \widehat\D\AM^{im} \\ \widehat\DR^{im}
     \end{bmatrix}
@@ -229,9 +229,9 @@ The definition of delta and $\boxminus$ operator in the force-torque pre-integra
     \end{bmatrix}~.
     \label{eq:com_boxminus}
 \end{equation}
-
-Its inverse operation $\boxplus$ is obtained as
-
+%
+The inverse operation $\boxplus$ is obtained as
+%
 \begin{equation}
     \bfx^k = \bfx^i \boxplus \D^{ik} =
     \begin{bmatrix}
@@ -263,7 +263,7 @@ the group composition law $\D=\D\circ\bm\delta$ is defined as
     \label{eq:composition_delta_com}
 \end{equation}
 %
-with a group identity element composed of the identity element of its Lie groups:
+with a group identity element composed of the identity element of its components:
 %
 \begin{equation}
     \D_{\cE} = \begin{bmatrix}
@@ -280,7 +280,7 @@ the resulting inverse being
     - \DR\tr \D\COMd \\
     - \DR\tr \D\AM \\
       \DR\tr
-    \end{bmatrix}
+    \end{bmatrix}.
 \label{eq:inverse_delta_com}
 \end{equation}
 %
@@ -368,8 +368,8 @@ in \secRef{sec:imu_preint_composite} (\eg between equations \eqRef{eq:com_boxmin
 its velocity, and the orientation of the base equations, they are in fact the same. 
 Indeed, the force sensors provide local second order information on the CoM position, which is akin to the IMU acceleration measurements. 
 
-Where the problems differ however is in the inclusion of the angular momentum (the Euler part of \eqRef{eq:NewtonEuler}). This equation introduces the dependence on 
+Where the problems differ however is in the inclusion of the angular momentum (the second part of the Newton-Euler equations \eqRef{eq:NewtonEuler}). This equation introduces the dependence on 
 the CoM lever bias $\bias_c$, which is also present in the centroidal kinematics residual \eqref{eq:CK_residual}. \cite{rotella2015humanoid} showed that, including the same set of measurements on centroidal quantities as
-us, the state space centroidal system with centroidal kinematics bias is made observable, having a the base states priors. In our case, base states are
+us, the state space centroidal system with centroidal kinematics bias is made observable, provide we have a prior estimation of the base states . In our case, base states are
 state variables estimated in conjunction with the centroidal states. However, if the base states are made observable by other sensor sources, then the same observability analysis
 should apply to the centroidal states in our case. This is confirmed by experimental results presented in \ref{chp:centroidal_estimation}.
