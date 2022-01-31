@@ -72,8 +72,8 @@ where $x_{true}$ is the true depth that we seek to estimate.
 Notice that the prior standard deviation is quite big, assuming a great uncertainty about the prior value. We simulate noisy measurements by drawing samples 
 $\{y_{i \in [1..m]}\}$ of the measurement model using $x_{true}$ (we drew $m=10$ measurements). For a low dimensional problem such as this one, 
 it is possible to compute the full posterior distribution $p(x|\bfy)$ by numerical integration, which is referred to as the "grid approximation" by 
-\cite{mcelreath2018statistical}. We can make this computation almost arbitrarily precise since the computations are quite cheap. The prior and density distribution are represented in \figRef{fig:MAP_stereo1D}. Applying the Laplacian approximation to
-compute a posterior approximation involves minimizing the negative log-likelihood:
+\cite{mcelreath2018statistical}. We can make this computation almost arbitrarily precise since the computations are quite cheap. The prior and density distribution are represented in \figRef{fig:MAP_stereo1D}. 
+Applying the Laplacian approximation to compute a posterior approximation involves minimizing the negative log-likelihood:
 
 \begin{equation}
     \frac{1}{2 \sigma_p^2}(x - x_p)^2 + \frac{1}{2\sigma_y^2} \sum_{i=1}^m (\frac{fb}{x} - y_i)
@@ -271,7 +271,8 @@ where  $\bth=\bw\Dt$, $\theta=\norm{\bth}$ and $\bfu=\bth/\theta$ form the angle
 \label{sec:imu_compact_adjoint}
 
 %
-Following the general methodology explained in \cite{sola2018micro}, the adjoint matrix is obtained by identifying the linear terms in $\Ad{\D}\bftau=(\D\bftau\hhat\D\inv)\vvee$. We get after long but relatively easy calculations,
+Following the general methodology explained in \cite{sola2018micro}, the adjoint matrix is obtained by identifying the linear terms in $\Ad{\D}\bftau=(\D\bftau\hhat\D\inv)\vvee$. 
+We get after long but relatively easy calculations,
 %
 \begin{align}\label{eq:Ad}
 \Ad{\D} &=
@@ -325,13 +326,4 @@ Lacking at the moment a closed form for it, we take the general methodology for 
 \end{align}
 %
 This sum can be truncated at the desired degree of accuracy.
-
-
-
-
-
-
-\section{Jacobians of force/torque pre-integration}
-
-TODO
 

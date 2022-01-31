@@ -56,7 +56,8 @@ Consequently, we are not able to recover the exact centroidal state if there is 
 
 Yet, we can see from the centroidal dynamics that the force measurements are connected to the variation of the centroidal state.
 As observed in~\cite{carpentier2016center}, a proper fusion of the force measurements with an estimation of the state of the base makes the centroidal state observable.
-We achieve this by adding two different kinds of information to the factor graph: centroidal kinematics and pre-integrated forces and torques. The derivation of their involved factors is presented hereafter.
+We achieve this by adding two different kinds of information to the factor graph: centroidal kinematics and pre-integrated forces and torques. 
+The derivation of their involved factors is presented hereafter.
 
 
 \section{Centroidal kinematics}
@@ -84,7 +85,9 @@ By definition, computation of the CoM position from the kinodynamic model resort
     \posi{B}{\COM} = \sum_{i=1}^{n} m_i \posi{B}{\COM_i}(\qa),
 \end{equation}
 %
-were $m_i$ are the individual segment masses and $\posi{B}{\COM_i}$ the levers between the base and the center of mass of each segment, computed from the robot configurations $\qa$. In general, these terms are not exactly accurate as our model of the robot may not be faithful to the real system. The computation of $\posi{B}{\COM}$ is therefore biased. Worse, this bias is not constant, since it nonlinearly depends on the robot limbs configuration. 
+were $m_i$ are the individual segment masses and $\posi{B}{\COM_i}$ the levers between the base and the center of mass of each segment, computed from the robot configurations $\qa$. 
+In general, these terms are not exactly accurate as our model of the robot may not be faithful to the real system. The computation of $\posi{B}{\COM}$ is therefore biased. 
+Worse, this bias is not constant, since it nonlinearly depends on the robot limbs configuration. 
 
 We chose a simple additive model on the CoM kinematics noisy measurements
 
@@ -108,6 +111,7 @@ In the end, the equations used to derive the factor are:
     \\
     \AM &= \Rot{}{}(\Inertia (\angvelm{}{} - \bias_{\omega} - \noise_{\omega}) + \AM_a)
     \end{split}
+    \label{eq:ck_with_noise}
 \end{equation}
 
 The residual $\bfe^{CK} \in \Reals^9$ is finally expressed as:
@@ -123,6 +127,37 @@ The residual $\bfe^{CK} \in \Reals^9$ is finally expressed as:
     \end{bmatrix}
     \label{eq:CK_residual}
 \end{equation}
+
+
+To obtain a covariance $\Cov_{CK}$ associated to the residual, we considered three sources of measurement noise: the CoM position measurement $\noise_{c}$, the CoM velocity measurement $\noise_{v}$, 
+and the angular velocity measurement $\noise_{\omega}$.
+We group this noises in a single noise vector $\noise = [\noise_{c}, \noise_{v}, \noise_{\omega}]$ with associated covariance:
+
+\begin{equation}
+    \Cov_{\noise} =
+    \begin{pmatrix}
+        \Cov_p & \bf0   & \bf0 \\
+        \bf0   & \Cov_v & \bf0 \\
+        \bf0   & \bf0   & \Cov_{\omega}
+    \end{pmatrix}
+\end{equation}
+
+The residual covariance is then obtained by propagating the noise $\noise$ through the nonlinearity of the residual error function \eqRef{eq:CK_residual}, 
+neglecting the second order noise terms found in \eqRef{eq:ck_with_noise}. The linearized propagation writes
+$\Cov_{CK} = \bfJ^{\bfe}_{\noise} \Cov_{\noise} \bfJ^{\bfe,\top}_{\noise}$, with $\bfJ^{\bfe}_{\noise}$ the Jacobian with respect to the noise vector constructed as:
+
+\begin{equation}
+    \bfJ^{\bfe}_{\noise} = 
+    \begin{pmatrix}
+    \Ident & 0 & 0 
+    \\
+    [\angvelm{B}{B} - \bias_{\omega}]_{\times} & \Ident & -[\posim{B}{BC} -  \bias_{p}]_{\times}
+    \\
+    0 & 0 & \Inertia
+    \end{pmatrix}
+\end{equation}
+
+
 
 This factor is added to the factor graph as a link between base states and centroidal states and, therefore, depends on almost all variables of the problem
 at a certain timestamp. We use this factor in the application presented in \chpRef{chp:centroidal_estimation}, whose factor graph is represented in 
