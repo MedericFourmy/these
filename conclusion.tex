@@ -91,19 +91,40 @@ Following the endeavor to develop an estimator fusing as many sources of informa
 \textit{whole-body} state estimation. As we have seen, the standard proprioception sensor set for legged robots is an IMU attached to the robot base
 and encoders at the joints (possibly along with joint torque, motor current, and force sensors at the end effector). This set of sensors
 is enough to implement proprioceptive odometry of the base but is quite limited when it comes to perceiving finer information about the state of the robot
-and its environment. In particular, the kinesthesis sense of artificial-legged systems is far from the subtleties of their biological counterparts, in particular,
+and its environment. In particular, the kinesthesis sense of artificial-legged systems is far from the subtleties of their biological counterparts, partly
 because of the rigid segment assumptions. One solution is to augment the robot with other sensors measuring these flexibilities. Recent solutions have demonstrated
 the applicability of such methods by using placing IMUs in each segment of an exoskeleton. One might also imagine adding strain gauges to measure directly 
-the deflections of certain beams. The sense of touch is for the moment also underrepresented in legged robotics. Some teams propose to add sheets
-of strain cells as artificial, which provides a higher density haptic feed-back that strain-gauges, with demonstrated use for human robot interaction. 
-A higher quality sense a touch may in provide richer information about the nature of the contacts between the robot and its environment, be it for locomotion
-(slip detection, nature of the terrain etc.), or for manipulation (object surface analysis, 3D object position estimation).
+the deflections of the segments. 
 
-Potential to add priors to vision models
+The sense of touch is for the moment also underrepresented in legged robotics. Some teams propose to add
+artificial skins that are implemented as strain cells sheets, which provides a higher density haptic feedback than strain-gauges. 
+These systems in particular demonstrated a great potential for human-robot interactions. 
+A higher-quality sense a touch may also provide richer information about the nature of the contacts between the robot and its environment, be it for locomotion
+(slip detection, nature of the terrain, etc.), or for manipulation (object surface analysis, 3D object position estimation). 
 
-- WB estimation
-- Object SLAM
-- Facteur appris 
-- SLAM dense
-- Optim WOLF
+On the other end of the spectrum, one could imagine methods targeted toward robots with limited sets of sensors. For instance, Solo-12 is too small to be 
+equipped with high-fidelity, multiple-axis strain gauges such as those found on humanoid robots. Such a robot may be equipped with cheap
+one-dimensional strain-gauges, which would require new measurement model formulations, with application in centroidal estimation.
+
+With a limited set of sensors, the choice of their nature and placement on the robotic platform is crucial, which is limited by the nature of its initial design. 
+On the control side, the concept of co-design is gaining traction. The goal is
+to optimize the design of a robot to certain criteria, such as energy efficiency or dynamic capabilities, by exploring the design space guided by 
+the simulated control of the platform. A dual concept could be applied to optimize the design of the platform to maximize the efficiency of estimation algorithms.
+
+Our visual-inertial SLAM work based on CosyPose object position is a first step in deriving semantic information from the environment. On this line of research, we may imagine
+including more general information about the scene objects by leveraging latent space representations of these deep-learning algorithms. This might enable us to deal with the problem
+caused by the symmetries of these objects more properly. Work is also currently conducted on the side of the CosyPose team to better generalize the pose estimation to objects on which the 
+model has not been trained. More broadly, the dialog between trained models and optimal estimation has a lot of potentials, both in robotics
+and computer vision communities. On one hand, learned factors could be trained with the end goal of improving the result of the estimation algorithm. On the other end,
+injecting priors based on physical models of the world, such as the dynamics of legged systems, can be used to improve the results of vision-based algorithms
+for dynamic scenes and human pose reconstruction.
+
+% In the context of legged robot locomotion, we showed that systems such as CosyPose were useful to aid the navigation of legged robots with 
+
+Finally, the notion of state feedback may be rethought entirely. Model-based controllers rely on a limited set of physically grounded states to compute the robot control inputs. 
+However, some recent learning-based systems do not require this kind of information, relying instead on latent space representations of the robot state learned
+in simulation. Some of these algorithms abstract the concepts of robot and environment as a single latent state resulting from a tight coupling of raw proprioceptive and exteroceptive
+measurements. While demonstrating impressive results in practice, those representations might have the downside of not being interpretable by a human operator and other systems, 
+making the communication and fault detection harder to manage.  
+
 
