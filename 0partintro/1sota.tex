@@ -550,7 +550,7 @@ using heuristics based on the traveled distance. \cite{fankhauser2014robot, fank
 was also improved by including horizontal uncertainty due to the robot's relative motion. A costly map fusion process that computes lower and upper bound on the elevations
 is decoupled from the sensor updates and can be computed intermittently at the discretion of the user. This system was recently integrated in a reactive planning system
 \cite{huang2021efficient} able to navigate outdoor uneven terrain with a biped using LIDAR data. Taking another route, Kim \cite{kim2020vision} proposed a much 
-simpler algorithm, relying on integrated Realsense sensors, in order to alleviate on-board computations. A T265 integrated SLAM algorithm provides localization and 
+simpler algorithm, relying on integrated RealSense sensors, in order to alleviate on-board computations. A T265 integrated SLAM algorithm provides localization and 
 a D435 provides noisy depth information. A 2.5D world-centered height map is produced from scratch at each point-cloud acquisition using opening morphological 
 transformation filtering. Classification of the terrain, based on local gradient thresholds, is used to implement dynamical manoeuvers in a cluttered environment
 with an MIT Mini-Cheetah.
