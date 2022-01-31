@@ -51,12 +51,12 @@ In~\cite{hartley2018legged}, a graph-SLAM is proposed to fuse inertial, kinemati
 Inertial measurements are considered using Forster's pre-integration factors~\cite{forster2017-TRO}, which is recalled in \secRef{sec:imu_preint_composite}.
 Kinematics data are included using a 6D factor which is also pre-integrated, taking into account the hybrid nature 
 of the contact dynamics using an event-based approach.
-Visual factors are also expressed as 6D factors obtained by visual odometry. Results are reported on sequences of a few meters with motion-capture ground-truth.
+Visual factors are also expressed as 6D factors obtained by visual odometry. Results are reported on sequences of a few meters with motion-capture ground truth.
 In~\cite{wisth2019robust}, the graph-SLAM also considers inertial measurements through Forster's pre-integration, while kinematic
  measurements are pre-treated by the robot low-level system~\cite{bloesch2017two} and integrated directly as 6D factors without further consideration.
 % As this work is applied to a quadruped robot, obtaining this 6D information indeed requires complex filtering in itself. 
 Finally, the visual information is included as 2D pixel reprojection factors in the image space, obtained from feature tracking (KLT \cite{baker2004lucas}).
-Impressive experimental results are demonstrated with long outdoor sequences, using a ground-truth obtained from off-line LIDAR reconstruction.
+Impressive experimental results are demonstrated with long outdoor sequences, using a ground truth obtained from off-line LIDAR reconstruction.
 
 The pros and cons of these two approaches come from the choice of the factors, but the similarities are possibly more important than the differences.
 Both use a plain Forster pre-integration~\cite{forster2017-TRO}. 
@@ -137,13 +137,13 @@ We have gathered several datasets in the experimental arena of the humanoid robo
 stairs, and a 30cm wide beam.
 The robot environment was augmented with about 20 fiducial ``\apriltag'' markers (of about 20 cm width).
 The tags have been randomly dispatched in the environment.
-They are fixed during a run but may vary significantly between two sets of data, and their locations are not calibrated ---that is, we do not have ground-truth localization of the tags.
+They are fixed during a run but may vary significantly between two sets of data, and their locations are not calibrated ---that is, we do not have ground truth localization of the tags.
 
 Each dataset is composed of 3 sequences:
 \begin{itemize}
     \item a sequence of RGB images captured at 33 Hz
     \item a sequence of IMU measures captured at 200 Hz
-    \item a sequence of motion-capture (MoCap) at 200Hz measurements used as ground-truth.
+    \item a sequence of motion-capture (MoCap) at 200Hz measurements used as ground truth.
 \end{itemize}
 
 
@@ -230,7 +230,7 @@ This is used to test the long-term localization of the robot, which is interesti
 \HRP{2} walk and turn around on a short distance to evaluate the resilience of the filter to the vibrations of the robot. Finally, two more 
 challenging datasets are recorded while the robot is climbing and descending stairs. Especially on the latter, the locomotion causes impacts 
 that on one hand bring the IMU close to its dynamic range saturation, and on the other hand, provoke images with motion blur. Note that during these experiments, 
-the estimator was not used for feedback control. To compare our results with the ground-truth, we used methods described in \cite{zhang2018tutorial} to align 
+the estimator was not used for feedback control. To compare our results with the ground truth, we used methods described in \cite{zhang2018tutorial} to align 
 trajectories given that 4 DoFs are unobservable in VI estimation.
 For each case, \keyframes\ are created at a frequency of 6.6 Hz (every 5 images) if tags are detected in the corresponding image.
 
@@ -258,7 +258,7 @@ optimized by the solver, as explained in \secRef{sec:publish-state}. The smoothn
     % \includegraphics[width=0.8\textwidth]{figures/absolute/vz_descending_onestep.pdf}
     \includegraphics[width=0.9\textwidth]{figures/absolute/vz_descending_onestep_with_kf.pdf}
     \caption{Descending stairs (one step): the robot first lowers its base and then touches the next step with results in vibrations from the impact.
-    Vibrations at approximately 10Hz visible in both the motion capture ground-truth and optimal state estimation. Note that the estimation in this case has a smoother curve.
+    Vibrations at approximately 10Hz visible in both the motion capture ground truth and optimal state estimation. Note that the estimation in this case has a smoother curve.
     \keyframes\ are introduced at 6.6Hz (every $\approx 150 ms$) and are represented by vertical red bars. State in between is obtained by applying the pre-integrated 
     delta from the last \keyframe\ to the current time to the estimate of the last \keyframe\ state estimate (see \secRef{sec:publish-state}).}
     \label{fig:vz_descending_onestep}

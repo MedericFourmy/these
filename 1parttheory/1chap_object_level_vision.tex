@@ -26,7 +26,7 @@ in the scene which can be detected in the images. Dedicated algorithms can then 
 
 In this chapter, we present two measurements models based on available software, that permit the implementation of this paradigm. The first one 
 uses unique \apriltag\ fiducial markers \cite{wang2016iros} (to which we may refer to as \textit{tags} informally) that are laid out sparsely in the scene. 
-The second uses a deep-learning based method \cite{labbe2020cosypose}
+The second uses a deep-learning-based method \cite{labbe2020cosypose}
 to obtain relative poses from an object of interest, such as a pair of stairs. Instead of artificially augmenting the environment with fiducial markers, we assume 
 that objects of interest exist in the scene, whose CAD models are known. 
 Both systems lack ways to estimate the uncertainty of their output and we, therefore, propose methods for the computation of the measurements covariances.
@@ -390,7 +390,7 @@ A quantitative comparison with \cite{urban2016mlpnp} would be interesting as wel
 %
 \section{Learning-based object pose estimation}
 \label{sec:learning_based_object_pose_est}
-In this section, we propose to integrate a deep-learning based algorithm to object pose estimation \cite{labbe2020cosypose} to our measurement models. 
+In this section, we propose to integrate a deep-learning-based algorithm to object pose estimation \cite{labbe2020cosypose} to our measurement models. 
 
 
 \subsection{Object pose estimation}
@@ -399,7 +399,7 @@ The problem of object pose estimation can simply be stated: given a calibrated c
 frame and extract camera-objects poses. Traditionally, competing methods were developed using either local features matching or learning-based methods.
 As shown by the most recent BOP challenge results \cite{hodan2020bop}, deep-learning methods now clearly dominate the field in terms of accuracy. 
 At the time of the writing, the highest-ranking non-learning based pose extraction method \cite{konig2020hybrid} (object detection is deep learning based) 
-actually uses depth measurement measurements and is dominated by a purely RGB, deep-learning based model \cite{haugaard2021surfemb}, though \cite{konig2020hybrid} 
+actually uses depth measurement measurements and is dominated by a purely RGB, deep-learning-based model \cite{haugaard2021surfemb}, though \cite{konig2020hybrid} 
 seems to be ten times faster \footnote{BOP challenge leaderboard is available at \url{https://bop.felk.cvut.cz/leaderboards/}}.
 
 In terms of accuracy, these results advocate for the use of deep-learning purely RGB image-based methods, that now provide accurate enough results 
@@ -414,7 +414,7 @@ this direction.
 
 \subsection{CosyPose}
 The front end of the SLAM system designed for this project includes object detection and object pose estimation. 
-This function is provided by CosyPose \cite{labbe2020cosypose}, a deep-learning based 6D pose estimator that reaches state-of-the-art
+This function is provided by CosyPose \cite{labbe2020cosypose}, a deep-learning-based 6D pose estimator that reaches state-of-the-art
  performances for 6D object pose estimation.
 In the original paper, a single-view pose estimator and a multi-view algorithm were introduced. In our context, only the single-view module is used, 
 while object tracking is handled by the SLAM framework. 
@@ -636,7 +636,7 @@ The generation of photorealistic synthetic data was handled by BlenderProc \cite
     \label{fig:cosypose-ycbv}%
 \end{figure}
 
-We generate 10.000 synthetic images that are labeled with object pose ground-truths. We retrain the three modalities of CosyPose: 
+We generate 10.000 synthetic images that are labeled with object pose ground truths. We retrain the three modalities of CosyPose: 
 the Mask-RCNN detector, the coarse pose estimator, and the pose refiner. We slightly tune the training parameters used for the object from the BOP challenge as 
 the scale is different: the stair is $1m \times 0.3m \times 0.07m$ whereas a T-LESS object is never wider than $10cm$. 
 Thus, we generate training data on $10m \times 10m$ scenes, and we increase the noise used to train the refiner.  
