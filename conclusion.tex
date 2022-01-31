@@ -3,6 +3,7 @@
 The objective of this thesis was to develop a new class of state estimators for legged robots able to fuse proprioceptive and exteroceptive
 sensors. We advocated for the use of tightly-coupled formulations where all measurements and state variables are integrated into a single estimation 
 problem. This type of estimator permits a greater accuracy and the estimation of extra parameters by leveraging all sensors correlations.
+It also leverages a sound mathematical formulation to extend generic estimators to more diverse and numerous perception sources, toward whole-body estimation.
 The accent was put on the necessary modularity of the formulations to make the mathematical developments extendable to new types of sensors. This 
 was achieved through the use of Maximum-A-Posteriori estimation, modeled as Factor Graph optimization. All mathematical formulations used extensively the smooth manifold
 and Lie group theories that best represent the geometry of the state variables. We also emphasize the generalizability of the developed measurement models. 
@@ -74,6 +75,8 @@ us from obtaining a real-time estimate for the proprioceptive estimator, while t
 be a hyperspace search on the numerous options provided by the Ceres solver \cite{ceres-solver}. Another is to search for the most appropriate size of the graph,
 that is the frequency of \keyframe\ creation. Marginalization of older states and sparsification procedures should also be investigated.
 
+
+
 \subsection{Mid term}
 
 In a second time, we would like to further strengthen the environmental perception of our system. This would be done by developing or integrating a vision system
@@ -83,5 +86,26 @@ the first venue that we explore.
 Our ideal realization would then be an integrated demo on Solo-12 with an odometry estimator based on kinematics, IMU, and a sparse feature KLT tracking-based 
 vision front-end. This system would then easily be extended with either of our object-level SLAM algorithms to provide loop closures and, therefore, a global localization.
 
-\subsection{Concluding remarks}
+
+
+\subsection{Longer term}
+
+We will here develop a few ideas and reflections that our work on a general estimator for legged robots brought.
+
+Following the endeavour to develop an estimator fusing as many sources of information, we could turn our attention to a 
+\textit{whole-body} state estimation. As we have seen, the standard proprioception sensor set for legged robots is an IMU attached to the robot base
+and encoders at the joints (possibly along with joint torque, motor current, and force sensors at the end effector). This set of sensor
+is enough to implement a proprioceptive odometry of the base but is quite limited when it comes to perceiving finer information about the state of the robot
+and its environment. In particular, the kinesthesis sense of artificial legged systems is far from the subtleties of their biological counterparts, in particular
+because of the rigid segment assumptions. One solution is to augment the robot with other sensors measuring these flexibilities. Recent solutions have demonstrated
+the applicability of such methods by using placing IMUs in each segment of an exoskeleton. One might also imagine adding strain gauges to measure directly 
+the deflections of certain beams.  The sense of touch is for the moment also underrepresented in legged robotics. Some teams propose to add sheets
+of strain cells are an artificial skin to 
+
+- WB estimation
+- Detection de contact
+- Object SLAM
+- Facteur appris 
+- SLAM dense
+- Optim WOLF
 
