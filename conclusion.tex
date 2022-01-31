@@ -13,49 +13,45 @@ and Lie group theories that best represent the geometry of the state variables. 
 We developed a range of measurement models targeted at sensors present on legged platforms. These measurement models were integrated as factors in 
 three factor-graph-based estimators.
 
-\bigskip
-
 We implemented a general factor for camera-based object-level pose estimations based on open source libraries. 
-
 First, the \apriltag\ library was used 
-to obtain poses of fiducial markers used to augment the scene with unique landmarks. We proposed a new analytical model to estimate the covariance of 
+to \textbf{obtain poses of fiducial markers} used to augment the scene with unique landmarks. We proposed a new analytical model to estimate the covariance of 
 these measurements. We discussed the problem of the orientation ambiguity of these markers and proposed a practical method to alleviate this problem.
 The anisotropic nature of the pose uncertainty was highlighted in simulated experiments. 
-
-Second, we used a deep-learning-based framework to obtain the pose of known objects in the scene. A covariance model  based on empirical data was obtained through
+Second, we used a deep-learning-based framework to obtain the pose of known objects in the scene. A covariance model based on empirical data was obtained through
 experiments. We showed that we could fine-tune the model to elements of the scene of interest for legged-robots navigation such as stairs.
 
-We proposed a leg-odometry model based on single foot matching.
+We then leverage the pre-integration formulation to include high-frequency sensors such as IMU in the factor graph. We propose 
+\textbf{a more systematic formulation of this idea, generalizable to other high-rate proprioceptive sensors}. Within this framework, we proposed a new 
+IMU pre-integration algorithm \textbf{based on a compact "delta" Lie-group}.
+This approach was theoretically compared to the seminal work on IMU pre-integration, based on composite delta Lie groups. 
+We then leveraged the generalized pre-integration method to \textbf{extend the pre-integration to force-torque sensors} present at the end-effectors of
+legged robots. 
+%
+We then proposed a first step toward whole-body estimation, by extending the factor graph approach to also \textbf{estimate centroidal quantities}
+(center of mass position and velocity, and angular momentum) by merging centroidal kinematics and force measurements. This makes it possible 
+to accurately estimate the centroidal states, despite unavoidable biases in the kinematic model. 
 
-One of the most important contributions of our work was the application of a generalized pre-integration theory to IMU and force-torque measurements. 
-%
-First, we proposed a new formulation of the IMU pre-integration algorithm based on a compact delta Lie group. This approach was compared
-theoretically to the seminal work on IMU pre-integration. 
-%
-Second, we applied the same general pipeline to the pre-integration of
-force-torque sensors present at the end-effectors of legged robots. This algorithm was shown to make possible the high-rate estimation of centroidal 
-quantities and to observe a bias on the traditionally used kinematics-based computation of the CoM position.   
+
+These measurement models were all integrated into the WOLF library \cite{sola2021wolf} to which we contributed, joining our effort with the IRI team, 
+toward an open-source release. WOLF provided the necessary modularity to formulate various estimation
+problems. It then allowed us to implement three different applications of the proposed theory, which we used to experimentally validate our models.
 
 \bigskip
 
-These measurement models were all integrated into the WOLF library \cite{sola2021wolf}, which provided the necessary modularity to formulate various estimation
-problems. We applied these models to three applications.
-
-\bigskip
-
-First, we developed a visual-inertial SLAM system based on IMU pre-integration and the \apriltag\ pose measurement model. This estimator was validated through
-a series of experiments conducted at LAAS on the \HRP{2} humanoid robot. We showed that the system provided both a localization and mapping with centimetric precision
+First, we developed \textbf{a visual-inertial SLAM system based on IMU pre-integration and the \apriltag\ pose measurement model}. This estimator was validated through
+a series of experiments conducted at LAAS on the \HRP{2} humanoid robot. We showed that the system provided both: localization and mapping with centimetric precision
 for the locomotion of the robot on flat terrain and stairs, and a high-rate, smooth estimation of the base velocity. Both were evaluated against a motion capture 
 ground truth. 
 
-Second, we proposed a tightly coupled algorithm for base and centroidal estimation. This estimator combined the pre-integration of IMU and force-torque data, 
-leg odometry, and kinematics. We showed that the estimator enables to estimate the bias on CoM kinematics measurements, which is sometimes ignored
+Second, we proposed \textbf{a tightly coupled algorithm for simultaneous estimation of the base and centroidal states of the robot}. This estimator combined the pre-integration 
+of IMU and force-torque data, leg odometry, and kinematics. We showed that the estimator enables to estimate the bias on CoM kinematics measurements, which is sometimes ignored
 by controllers in first approximation. Experimental validation was conducted on simple trajectories performed on the Solo-12 quadruped robot. 
 
-Finally, we implemented another object-level visual-inertial SLAM system based on a deep-learning framework for object pose estimation . This system  used the same 
+Finally, we implemented \textbf{another object-level visual-inertial SLAM system based on a deep-learning framework for object pose estimation}. This system  used the same 
 IMU pre-integration as well as our empirical model of the object pose uncertainty. We showed that the trajectory of the system and objects
 in the scene could be recovered and that the IMU contributed to the robustness of the system by alleviating the instability of the pose estimation. We proposed
-as a proof of concept to perform VI-SLAM using stairs elements as landmarks, for which we retrained the neural network. This dataset was recorded on the Solo-12 quadruped robot.
+as a proof of concept to perform visual-inertial SLAM using stairs elements as landmarks, for which we retrained the neural network. This dataset was recorded on the Solo-12 quadruped robot.
 
 
 \section{Perspectives}
@@ -91,18 +87,21 @@ vision front-end. This system would then easily be extended with either of our o
 
 We will here develop a few ideas and reflections that our work on a general estimator for legged robots brought.
 
-Following the endeavour to develop an estimator fusing as many sources of information, we could turn our attention to a 
+Following the endeavor to develop an estimator fusing as many sources of information, we could turn our attention to a 
 \textit{whole-body} state estimation. As we have seen, the standard proprioception sensor set for legged robots is an IMU attached to the robot base
-and encoders at the joints (possibly along with joint torque, motor current, and force sensors at the end effector). This set of sensor
-is enough to implement a proprioceptive odometry of the base but is quite limited when it comes to perceiving finer information about the state of the robot
-and its environment. In particular, the kinesthesis sense of artificial legged systems is far from the subtleties of their biological counterparts, in particular
+and encoders at the joints (possibly along with joint torque, motor current, and force sensors at the end effector). This set of sensors
+is enough to implement proprioceptive odometry of the base but is quite limited when it comes to perceiving finer information about the state of the robot
+and its environment. In particular, the kinesthesis sense of artificial-legged systems is far from the subtleties of their biological counterparts, in particular,
 because of the rigid segment assumptions. One solution is to augment the robot with other sensors measuring these flexibilities. Recent solutions have demonstrated
 the applicability of such methods by using placing IMUs in each segment of an exoskeleton. One might also imagine adding strain gauges to measure directly 
-the deflections of certain beams.  The sense of touch is for the moment also underrepresented in legged robotics. Some teams propose to add sheets
-of strain cells are an artificial skin to 
+the deflections of certain beams. The sense of touch is for the moment also underrepresented in legged robotics. Some teams propose to add sheets
+of strain cells as artificial, which provides a higher density haptic feed-back that strain-gauges, with demonstrated use for human robot interaction. 
+A higher quality sense a touch may in provide richer information about the nature of the contacts between the robot and its environment, be it for locomotion
+(slip detection, nature of the terrain etc.), or for manipulation (object surface analysis, 3D object position estimation).
+
+Potential to add priors to vision models
 
 - WB estimation
-- Detection de contact
 - Object SLAM
 - Facteur appris 
 - SLAM dense
