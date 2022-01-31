@@ -897,11 +897,11 @@ orientation about the gravity vector in particular.
 This seminal work was quickly adopted by other authors using smoothing filters \cite{carlone2014eliminating}. As pioneering as this work was, it was however 
 limited by the use of Euler angles whose problematic geometric properties are notorious. Indelman \cite{Indelman-2013-7768} first proposed to use the exponential of the 
 matrix rotation group instead of Euler integration and to relax the assumptions of non-rotating and flat earth of Lupton \cite{lupton-09}. Forster \cite{forster2015imu, forster2017-TRO}
-proposed the same formulation using instead quaternions. Various experiments brought to light three main problems with the Euler angle formulation, that are completely absent 
+proposed the same formulation using the SO(3) Lie group, which was adapted to the quaternions group S$^3$ by Atchuthan \cite{atchuthan-18-thesis}. Various experiments brought to light three main problems with the Euler angle formulation, that are completely absent 
 from the quaternion "on-manifold" formulation. Firstly, first-order integration of angular velocities using Euler angles is approximate, which leads to accumulated errors 
 for high angular velocities or sampling rate. Secondly, the log-likelihood of the angular displacement is not invariant under the action of rigid body transformations, 
 \eg the choice of the world frame influence the results of the estimation. Finally, the well-known gimbal lock singularity of Euler angles has a consequence 
-on the covariance IMU noise covariance propagation, which is severely degraded when the robot trajectory comes close to the singularity. 
+on the IMU noise covariance propagation, which is severely degraded when the robot trajectory comes close to the singularity. 
 \cite{shen2015tightly}, later improved in \cite{qin2018vins} proposed to use a more precise numerical integration procedure than the default forward Euler used by Forster. 
 Eckenhoff \cite{eckenhoff2019closed} derived closed-form solutions of the pre-integration equations using various piecewise constant models.
 
