@@ -61,8 +61,8 @@ Finally, both works can account for the very different sensor frequencies, while
     \begin{subfigure}{0.546\textwidth}
         \includegraphics[width=\textwidth]{figures/absolute/bauzil.png}
         \caption{Experimental room with parkour, \HRP{2} and fiducial markers.}
+        \label{fig:bauzil}
     \end{subfigure}
-    \label{fig:bauzil}
     \caption{Experimental setup. (\subref{fig:HPR2_head_crop}): installation of the visual-inertial sensor. (\subref{fig:bauzil}): experimental space.}
     \label{fig:HRP2}
 \end{figure}
@@ -121,7 +121,7 @@ In line with the recent works on the subject, we write the MAP optimization as t
 %
 with $\{\bfr^I,\Cov^I\}$ and $\{\bfr^V,\Cov^V\}$ indicating the residuals and covariances of respectively the inertial (IMU) and visual factors.
 These residuals are computed differently depending on the nature of the measurements and the state blocks they relate to. 
-The \apriltag\ factor is described in this thesis \chpRef{chp:object_level} and the IMU factor in \chpRef{chp:preintegration}.
+The \apriltag\ factor is described in this thesis \chpRef{chp:object_level} and the IMU factor in \chpRef{chp:pre-integration}.
 
 
 \section{Results}

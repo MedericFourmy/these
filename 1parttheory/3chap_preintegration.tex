@@ -101,7 +101,7 @@ $t_i$ and $t_m$ by recursively applying \eqRef{eq:imu_dyn_disc}, we obtain:
     \vel{}{}^{m}  &= \vel{}{}^{i} + \sum_{k=i}^{m} \Big[\grav \dt + \Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^k - \noise_{\acc{}{}}^k)\dt \Big]  \\
     \Rot{}{}^{m}  &= \Rot{}{}^{i} \prod_{k=i}^{m} \Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^k - \noise_{\angvel{}{}}^k)\dt) 
     \end{split}
-    \label{eq:IMUIntij}
+    \label{eq:imu_int_world}
 \end{equation}
 %
 where we assume that IMU biases stay constant during $\Dt_{im}$
@@ -115,7 +115,7 @@ which makes their integration trivial and thus allows us to concentrate in the u
 
 
 We are here in the position of illustrating why a naive definition of data integration leads to very bad performance. 
-By observing \eqRef{eq:IMUIntij} we can define a motion error, as follows. 
+By observing \eqRef{eq:imu_int_world} we can define a motion error, as follows. 
 First, we naively define the motion increments or "deltas"
 %
 % \begin{equation}
@@ -138,7 +138,7 @@ From the integration of the motion model, %we get
     \sum_{k=i}^{m} \Big[\grav \dt + \Rot{}{}^{k}(\accm{}{}^k - \bias_{\acc{}{}}^i)\dt \Big]  \\
     \prod_{k=i}^{m} \Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^i)\dt)  
     \end{bmatrix}
-    \label{eq:imu_delta_naive}
+    \label{eq:imu_delta_forster_naive}
 \end{align}
 %
 and from the difference between initial and final states:
@@ -186,7 +186,7 @@ reads \cite{lupton-09, forster2015imu} (proof in the annex \secRef{sec:forster_p
     \prod_{k=i}^{m} \DR^{ik} \Exp((\accm{}{}^k - \bias_{\acc{}{}}^i)\dt)  \\
     \prod_{k=i}^{m} \Exp((\angvelm{}{}^k - \bias_{\angvel{}{}}^i)\dt)  
     \end{bmatrix}
-    \label{eq:imu_delta}
+    \label{eq:imu_delta_forster}
 \end{align}
 %
 and:
@@ -201,9 +201,9 @@ and:
     \label{eq:boxminus-forster}
 \end{align}
 %
-Let us now emphasize the fact that $\D_{im}(\bias^i)$ as defined in \eqRef{eq:imu_delta} does not depend on $\bfx_i$, contrary to \eqRef{eq:imu_delta_naive}. 
+Let us now emphasize the fact that $\D_{im}(\bias^i)$ as defined in \eqRef{eq:imu_delta_forster} does not depend on $\bfx_i$, contrary to \eqRef{eq:imu_delta_forster_naive}. 
 
-But we are not over yet. The dependency on the bias variable $\bfb^i$ in \eqRef{eq:imu_delta} still enforces the repeated reintegration of the measurements buffer 
+But we are not over yet. The dependency on the bias variable $\bfb^i$ in \eqRef{eq:imu_delta_forster} still enforces the repeated reintegration of the measurements buffer 
 to get $\D_{im}$ each time the solver produces a new estimate of $\bfb^i$. 
 Fortunately, because the variations in $\bias_i$ are small, a linearized approximation can be used. The IMU measurements can be pre-integrated using the prior 
 bias estimation at time $t_i$, that we note $\ol\bfb_i$, to give the pre-integrated delta $\ol\D_{im}\triangleq\D_{im}(\ol\bfb_i)$.
@@ -453,7 +453,7 @@ the acceleration of gravity (\figRef{fig:fff}).
 \end{figure}
 
 This derives in the definition of the operator $\boxminus$ in \eqRef{eq:boxminus} as what we detailed in \eqRef{eq:boxminus-forster}, and the operator 
-$\boxplus$ in \eqRef{equ:boxplus} as being just its inverse.
+$\boxplus$ in \eqRef{eq:boxplus} as being just its inverse.
 % Then, $\bfx_k=\bfx_i\boxplus\D_{ik}$ is \cite[eq.~32]{forster2017-TRO} and $\D_{ik}=\bfx_k\boxminus\bfx_i$ is \cite[eq.~33]{forster2017-TRO}. 
 Full details can be found in \cite[Section 3.4]{atchuthan-18-thesis}.
 
@@ -785,7 +785,7 @@ Use the pre-integrated Jacobian $\mjac{\D_{im}}{\bfb}$ to correct the pre-integr
     ~.
 \end{align}
 %
-Use \eqRef{equ:delta} as $\boxminus$ to compute the expected delta from  $\bfx_i$ to $\bfx_m$,
+Use \eqRef{eq:boxminus-forster} as $\boxminus$ to compute the expected delta from  $\bfx_i$ to $\bfx_m$,
 %
 \begin{align}
     \widehat\D_{im}(\bfx_i,\bfx_m) &= \bfx_m \boxminus \bfx_i 

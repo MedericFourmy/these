@@ -102,9 +102,9 @@ of the real posterior is not equal to its mode.
 
 
 \chapter{Pre-integration on Lie groups}
-\section{Justification of \cite{forster2017-TRO} delta formulas}
+\section{Justification of Forster's delta formulas}
 \label{sec:forster_proof}
-We detail here how the delta formulas of equation \eqRef{eq:IMUPreintij} can be derived from \eqRef{eq:IMUIntim}.
+We detail here how the delta formulas of equations \eqRef{eq:imu_delta_forster} and \eqRef{eq:boxminus-forster} can be derived from \eqRef{eq:imu_int_world}.
 
 The rotation one is easy to get, multiplying by $\Rot{}{}^{i,T}$:
 \begin{equation}
@@ -119,7 +119,7 @@ The velocity is as well quite easy, by defining $\Dt_{im} \triangleq \sum_{k=i}^
     \label{eq:IMUDeltav}
 \end{equation}
 
-The position delta requires more calculations. First, inject equation \eqRef{eq:IMUDeltav} in the position equation of \eqRef{eq:IMUIntim} then rearrange and reorder the terms.
+The position delta requires more calculations. First, inject equation \eqRef{eq:IMUDeltav} in the position equation of \eqRef{eq:imu_int_world} then rearrange and reorder the terms.
 
 \begin{equation}
 \begin{split}
@@ -180,7 +180,7 @@ Noting $\dot{\bullet} \te \dpar{\bullet}{t}$, this yields
 % This gives 
 after a few manipulations
 %
-\begin{align}\label{equ:constr}
+\begin{align}\label{eq:constr}
 \D\inv\dot\D 
 &=
 \begin{bsmallmatrix}
@@ -214,11 +214,11 @@ Its elements $\bm\nu\hhat
 \end{align}
 %
 This tangent $\bm\nu\hhat$ corresponds to the `velocity' of the group element. 
-Any point in the Lie algebra can be obtained after moving at constant velocity during a period $\Dt$, that is, $\bftau\hhat=\bm\nu\hhat\Dt\in\mathfrak{d}$ ---see \eqRef{equ:lie_algebra}.
+Any point in the Lie algebra can be obtained after moving at constant velocity during a period $\Dt$, that is, $\bftau\hhat=\bm\nu\hhat\Dt\in\mathfrak{d}$ ---see \eqRef{eq:lie_algebra}.
 %
 \subsection{The exponential map}
 
-Eq.~\eqRef{equ:constr} can be written as $\dot\D=\D\cdot\bm\nu\hhat$.
+Eq.~\eqRef{eq:constr} can be written as $\dot\D=\D\cdot\bm\nu\hhat$.
 This is an ordinary differential equation whose  integral for constant $\bm\nu$ yields the exponential map \cite{sola2018micro}, $ \D(t) = \exp\left(\bm\nu\hhat t\right)$.
 This gives a direct expression of the integral of information of the type $(\bfv,\bfa,\bw)$ onto the deltas manifold. %See below for the $(\bfa,\bw)$ case.
 The closed form of the exponential map is obtained through Taylor expansion (see \eg\ \cite{sola2018micro}\ for examples). 
@@ -249,7 +249,7 @@ Exploiting the cyclic pattern of the powers of $\hatx{\bw}$, this results in
 %
 with (we skip proofs for space reasons)
 %
-\begin{align} \label{equ:RQP}
+\begin{align} \label{eq:RQP}
 % \bfR (\bth)
 %  &= \exp(\hatx{\bth})
 %   = \bfI + \sin\theta\hatx{\bfu} + (1-\cos\theta)\hatx{\bfu}^2\\
@@ -273,7 +273,7 @@ where  $\bth=\bw\Dt$, $\theta=\norm{\bth}$ and $\bfu=\bth/\theta$ form the angle
 %
 Following the general methodology explained in \cite{sola2018micro}, the adjoint matrix is obtained by identifying the linear terms in $\Ad{\D}\bftau=(\D\bftau\hhat\D\inv)\vvee$. We get after long but relatively easy calculations,
 %
-\begin{align}\label{equ:Ad}
+\begin{align}\label{eq:Ad}
 \Ad{\D} &=
 \begin{bsmallmatrix}
 \DR & -\DR\Dt & \hatx{\Dp-\Dv\Dt}\DR & \Dv \\
@@ -294,7 +294,7 @@ $
 %
 which  for $\bftau=(\bfrho,\bfupsilon,\bth,\Dt)\in\mathfrak{d}$ yields,
 %
-\begin{align}\label{equ:ad}
+\begin{align}\label{eq:ad}
 \mathrm{\bf ad}_\bftau = \begin{bsmallmatrix}
 \hatx{\bth} & -\bfI\Dt & \hatx{\bfrho} & \bfupsilon \\
 \bf0 & \hatx{\bth} & \hatx{\bfupsilon} & \bf0 \\
@@ -314,7 +314,7 @@ which  for $\bftau=(\bfrho,\bfupsilon,\bth,\Dt)\in\mathfrak{d}$ yields,
 The right Jacobian $\mjac{}{r}$ is the Jacobian of $\Exp()$ as described in \cite{sola2018micro}.
 Lacking at the moment a closed form for it, we take the general methodology for the left Jacobian described in \cite{EADE-18-DERIVATIVE}, and transform it to the right using $\mjac{}{r}(\bftau)=\mjac{}{l}(-\bftau)$ \cite{sola2018micro},
 %
-\begin{align}\label{equ:Jr}
+\begin{align}\label{eq:Jr}
 \mjac{}{r}(\bftau) 
 = \mjac{}{l}(-\bftau) 
 = \sum_i \frac{\ad{-\bftau}^i}{(i+1)!}
