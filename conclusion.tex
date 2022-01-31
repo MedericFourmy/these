@@ -6,11 +6,10 @@ problem. This type of estimator permits a greater accuracy and the estimation of
 The accent was put on the necessary modularity of the formulations to make the mathematical developments extendable to new types of sensors. This 
 was achieved through the use of Maximum-A-Posteriori estimation, modeled as Factor Graph optimization. All mathematical formulations used extensively the smooth manifold
 and Lie group theories that best represent the geometry of the state variables. We also emphasize the generalizability of the developed measurement models. 
-We recall here the technical contributions that be presented during this work.
 
 \section{Contributions}
 
-We developed a range of measurement models targeted at sensors present on legged platforms. These measurements models were integrated as factors in 
+We developed a range of measurement models targeted at sensors present on legged platforms. These measurement models were integrated as factors in 
 three factor-graph-based estimators.
 
 \bigskip
@@ -22,40 +21,40 @@ to obtain poses of fiducial markers used to augment the scene with unique landma
 these measurements. We discussed the problem of the orientation ambiguity of these markers and proposed a practical method to alleviate this problem.
 The anisotropic nature of the pose uncertainty was highlighted in simulated experiments. 
 
-Second, we used a deep-learning-based framework to obtain the pose of known objects in the scene. A model based on empirical data was obtained through
+Second, we used a deep-learning-based framework to obtain the pose of known objects in the scene. A covariance model  based on empirical data was obtained through
 experiments. We showed that we could fine-tune the model to elements of the scene of interest for legged-robots navigation such as stairs.
 
 We proposed a leg-odometry model based on single foot matching.
 
 One of the most important contributions of our work was the application of a generalized pre-integration theory to IMU and force-torque measurements. 
-
+%
 First, we proposed a new formulation of the IMU pre-integration algorithm based on a compact delta Lie group. This approach was compared
 theoretically to the seminal work on IMU pre-integration. 
-
+%
 Second, we applied the same general pipeline to the pre-integration of
 force-torque sensors present at the end-effectors of legged robots. This algorithm was shown to make possible the high-rate estimation of centroidal 
 quantities and to observe a bias on the traditionally used kinematics-based computation of the CoM position.   
 
 \bigskip
 
-These measurements models were all integrated into the WOLF library \cite{sola2021wolf}, which provided the necessary modularity to formulate various estimation
+These measurement models were all integrated into the WOLF library \cite{sola2021wolf}, which provided the necessary modularity to formulate various estimation
 problems. We applied these models to three applications.
 
 \bigskip
 
 First, we developed a visual-inertial SLAM system based on IMU pre-integration and the \apriltag\ pose measurement model. This estimator was validated through
-a series of experiments conducted at LAAS on the \HRP{2} humanoid robot. We showed that the system provided both a localization with reasonable precision
-for the locomotion of the robot on an experimental platform and a high rate, smooth estimation of the base velocity. Both were compared to a motion capture 
+a series of experiments conducted at LAAS on the \HRP{2} humanoid robot. We showed that the system provided both a localization and mapping with centimetric precision
+for the locomotion of the robot on flat terrain and stairs, and a high-rate, smooth estimation of the base velocity. Both were evaluated against a motion capture 
 ground truth. 
 
 Second, we proposed a tightly coupled algorithm for base and centroidal estimation. This estimator combined the pre-integration of IMU and force-torque data, 
 leg odometry, and kinematics. We showed that the estimator enables to estimate the bias on CoM kinematics measurements, which is sometimes ignored
 by controllers in first approximation. Experimental validation was conducted on simple trajectories performed on the Solo-12 quadruped robot. 
 
-Finally, we implemented another object-level visual-inertial SLAM system based on an object pose estimation deep-learning framework. This system again used the 
-IMU pre-integration as well as our measurement model based on an empirical model of the pose uncertainty. We showed that the trajectory of the system and objects
+Finally, we implemented another object-level visual-inertial SLAM system based on a deep-learning framework for object pose estimation . This system  used the same 
+IMU pre-integration as well as our empirical model of the object pose uncertainty. We showed that the trajectory of the system and objects
 in the scene could be recovered and that the IMU contributed to the robustness of the system by alleviating the instability of the pose estimation. We proposed
-as a proof of concept to perform VI-SLAM using stairs elements as landmarks. This dataset was recorded on the Solo-12 quadruped robot.
+as a proof of concept to perform VI-SLAM using stairs elements as landmarks, for which we retrained the neural network. This dataset was recorded on the Solo-12 quadruped robot.
 
 
 \section{Perspectives}
@@ -64,15 +63,15 @@ to obtain a usable estimator on any legged platform. Here we present a few of th
 
 \subsection{Short term}
 We developed on one hand an object-level visual-inertial system and on the other hand a proprioceptive estimator for the sense of balance. A short-term goal
-would be to merge both estimators in one, providing simultaneously a high-rate estimation for control and a non-drifting localization based on SLAM. 
+would be to merge both estimators in one, providing simultaneously a high-rate estimation for control and a non-drifting localization based on SLAM, which should serve also as an input for gait and/or contact planning. 
 
 We began to work in this direction by recording datasets using Solo-12 as an experimental platform. For this experiment, we will concentrate on estimating the 
-base state by including inertial, kinematics, and \apriltag\ measurements in the estimator. 
+base state by including inertial, kinematics, and \apriltag\ measurements. 
 
 We also plan to integrate the system in a feedback loop with the current controller of Solo-12. For the moment, instabilities in the solver convergence times prevented
-us from obtaining a real-time estimate for the proprioceptive estimator, while the \apriltag\ based SLAM system works in real-time. One of the solutions would 
+us from obtaining a hard-real-time estimate for the proprioceptive estimator, while the \apriltag\ based SLAM system works in real-time. One of the solutions would 
 be a hyperspace search on the numerous options provided by the Ceres solver \cite{ceres-solver}. Another is to search for the most appropriate size of the graph,
-that is the frequency of \keyframe\ creation. Marginalization of older states and sparsification procedures should also be investigated.
+that is the frequency of \keyframe\ creation and their number. Marginalization of older states and sparsification procedures should also be investigated.
 
 \subsection{Mid term}
 
