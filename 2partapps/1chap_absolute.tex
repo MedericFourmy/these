@@ -3,22 +3,37 @@
 \minitoc
 \bigskip
 
-Results presented in this section are adapted from our published work \cite{fourmy2019absolute}. The opinions and perspectives reflected are the ones we had
-at the time.
 
 \section{Introduction}
 
-In this work, we are interested in quantifying how accurately a humanoid robot can be localized in a structured 3D environment.
-The seminal works on localization of legged robots were using leg-odometry \cite{roston1991dead}, quickly followed by contributions fusing the kinematics 
-with inertial measurements~\cite{lin2006sensor}. Naturally, odometry measurements can only lead to a drift of the localization.
-Based on leg-odometry, the community has extended the localization performances by improving the behavior of the inertial-kinematic 
-filter~\cite{bloesch2013state,rotella2014state,flayols2017experimental}, the underlying contact 
-model~\cite{bledt2018cheetah,rotella2018unsupervised}, and by augmenting the odometer with exteroceptive measurements coming from cameras 
-or LIDAR \cite{stasse2006real, fallon2014drift, camurri2017multisensory}.
+In this chapter, we are looking for a solution to localize a humanoid robot indoors, with sufficient accuracy to navigate on some stairs, grasp a handrail, or 
+walk on a 30-cm wide beam. 
+As the robot is going to come back again and again in the same environment, we would like to benefit from loop-closure information and localization with 
+respect to some known landmarks. 
+While our final goal is to merge in the optimal estimator the measurements coming from all the sensors of the robot, we focus here on contributions 
+validating the use of visual-inertial localization and mapping on a humanoid robot navigating indoors in a 3D environment.
+
+For the visual factor, we rely on \apriltags \cite{wang2016iros}, while proposing a practical contribution to avoid ambiguity 
+issues in the pose estimation of the tags, as described in \secRef{sec:fiducial_markers}. 
+For the inertial factor, we build upon Forster pre-integration~\cite{forster2017-TRO} and propose an original, 
+by exhibiting a compact Lie group (described in \secRef{sec:imu_preint_compact}) that is suitable for optimal estimation. 
+This formulation, although leading to very similar formulas for the inertial factors, enables a generalization to the other high-frequency factors 
+that would typically arise in the humanoid contact (leg odometry based on coders, force sensors, etc).
+Both inertial and visual factors are processed in a factor graph formalizing a MAP problem.
+
+This first application is typically addressed in the literature as Visual-Inertial estimation, and expressed by various approaches in several robotics domains.
+We will first discuss the state-of-the-art related to this experimental context to more accurately define the experimental stakes.
+
+We then formalize the inertial SLAM estimation problem using factor definitions given in the previous part. 
+Most of the chapter will be presenting experimental results on datasets obtained
+with a visual-inertial sensor (VIS) carried by a human operator and the \HRP{2} humanoid robot. 
+
+
+\section{Related works}
 
 The difficulty in fusing inertial, kinematics, and exteroceptive measurements stems from the disparity in the properties of each data source.
 Inertial and kinematic measurements come at high frequency (typically 100 Hz to 1 kHz) and are cheap to process, while images and laser scans 
-are obtained at some few images per second and are expensive to process. 
+are obtained at some few frame per second and are expensive to process. 
 On the other hand, inertial measurements are quickly deprecated while images and scans provide absolute information.
 This implies a rigorous synchronization between the sensors with the risk of decreasing the performances of the inertial 
 estimation when images and laser scans are not carefully merged. 
@@ -28,7 +43,7 @@ have been with staggered approach, first fusing inertial and kinematic measureme
 the localization drift with absolute localization computed the from the camera and/or the LIDAR with low bandwidth and higher 
 delay~\cite{nobili2017heterogeneous,fallon2014drift}.
 
-Very recently, several concurrent approaches have been proposed to merge all relevant data in a unique estimator.
+Quite recently, several concurrent approaches have been proposed to merge all relevant data in a unique estimator.
 Following the recent results in UAVs localization~\cite{forster2017-TRO,leutenegger2015keyframe}, optimal estimation 
 structured by a factor graph seems to be an suitable framework to formulate the fusion.
 In~\cite{hartley2018legged}, a graph-SLAM is proposed to fuse inertial, kinematics, and visual data.
@@ -49,6 +64,14 @@ to exploit known map information.
 In both cases, the kinematic factor is straightforward to write as a 6D probabilistic constraint.
 Finally, both works can account for the very different sensor frequencies, while providing a good estimate at the higher frequency if needed.
 
+As for the specific problem that we wish to solve in this chapter, two \apriltag\ based visual-inertial SLAM systems have been implemented in the previous years. 
+In \cite{neunert2016open}, the authors rely on an EKF in which state propagation is naturally 
+handled by the IMU and each marker detection is used in an update step where the reprojection error of its 4 corners provides an 8D innovation vector. 
+A closer solution to ours was very recently proposed in \cite{he2019lightweight} and is also based on graph SLAM optimization benefiting from 
+Forster's IMU pre-integration from GTSAM. As explained previously, the \apriltag\ factor formulation is different from ours and the algorithm is tested 
+on large datasets consisting only of smooth motions.
+
+
 
 \begin{figure}[h]
     \centering
@@ -67,24 +90,6 @@ Finally, both works can account for the very different sensor frequencies, while
     \label{fig:HRP2}
 \end{figure}
 
-In this work, we are looking for a solution to localize a humanoid robot indoors, with sufficient accuracy to navigate on some stairs, grasp a handrail, or 
-walk on a 30-cm wide beam. 
-As the robot is going to come back again and again in the same environment, we would like to benefit from loop-closure information and localization with 
-respect to some known landmarks. 
-While our final goal is to merge in the optimal estimator the measurements coming from all the sensors of the robot, we focus here on contributions 
-validating the use of visual-inertial localization and mapping on a humanoid robot navigating indoors in a 3D environment.
-For the visual factor, we rely on \apriltags \cite{wang2016iros}, while proposing a practical contribution to avoid ambiguity 
-issues in the pose estimation of the tags, as described in \secRef{sec:fiducial_markers}. 
-For the inertial factor, we build upon Forster pre-integration~\cite{forster2017-TRO} and propose an original,% and more rigorous theoretical formulation, 
-by exhibiting a compact Lie group (described in \secRef{sec:imu_preint_compact}) that is suitable for optimal estimation. 
-This formulation, although leading to very similar formulas % results -> we don't have practical results to compare 
-for the inertial factors, enables a generalization to the other high-frequency factors 
-that would typically arise in the humanoid contact (leg odometry based on coders, force sensors, etc).
-Both inertial and visual factors are processed in a factor graph resulting in a nonlinear least-square optimization problem, solved with Ceres~\cite{ceres-solver}.
-
-In the following section, we first formalize the inertial SLAM estimation problem that we wish to solve. Then we present experimental results on datasets obtained
-with a visual-inertial sensor (VIS) carried by a human operator and the \HRP{2} humanoid robot. 
-
 
 
 \section{Problem statement}
@@ -92,14 +97,14 @@ with a visual-inertial sensor (VIS) carried by a human operator and the \HRP{2} 
 \begin{figure}
     \centering
     \includegraphics[scale=1.3]{figures/absolute/graph}
-    \caption{A typical fraction of the factor graph, involving state blocks corresponding to keyframes $\bfx_i=(\bfp_i,\bfv_i,\bfR_i)$, biases $\bfb_i$ and landmark poses $\bfl_n$. 
+    \caption{Factor graph supporting the estimator used in this chapter, involving state blocks corresponding to keyframes $\bfx_i=(\bfp_i,\bfv_i,\bfR_i)$, biases $\bfb_i$ and landmark poses $\bfl_n$. 
     IMU factors (\textbf{blue}) relate consecutive keyframes and the IMU biases.
     The lower branch controls bias drift along time.
     Visual factors (\textbf{red}) relate landmarks with poses $(\bfp_i,\bfR_i)$.}
     \label{fig:VI_factor_graph}
 \end{figure}
 
-In graph-based optimization, the problem is well represented as a bipartite graph, where one type of node refers to the variables, 
+As mentioned in the tutorial on MAP estimation (\chpRef{chp:map_tuto}), the problem is well represented as a bipartite graph, where one type of node refers to the variables, 
 and the other type called \emph{factors} represents probabilistic constraints between variables, produced by the measurements.
 %
 % The state $\bfx$ is modeled as a multi-variate Gaussian distribution.
@@ -122,11 +127,11 @@ In line with the recent works on the subject, we write the MAP optimization as t
 with $\{\bfr^I,\Cov^I\}$ and $\{\bfr^V,\Cov^V\}$ indicating the residuals and covariances of respectively the inertial (IMU) and visual factors.
 These residuals are computed differently depending on the nature of the measurements and the state blocks they relate to. 
 The \apriltag\ factor is described in this thesis \chpRef{chp:object_level} and the IMU factor in \chpRef{chp:pre-integration}.
+The factor graph is then implemented the WOLF framework \cite{sola2021wolf}, using Ceres \cite{ceres-solver} as the backend solver. 
 
 
-\section{Results}
 
-\subsection{Experimental setup}
+\section{Experimental setup}
 We have gathered several datasets in the experimental arena of the humanoid robots at LAAS-CNRS, a 3D environment about $10m \times 5m$ made of flat floor, 
 stairs, and a 30cm wide beam.
 The robot environment was augmented with about 20 fiducial ``\apriltag'' markers (of about 20 cm width).
@@ -214,6 +219,7 @@ cross-correlation between MoCap and estimated state sequences.
     \label{fig:results}
 \end{figure}
 
+\subsection{Results}
 
 \subsection{Absolute localization}
 
@@ -258,10 +264,27 @@ optimized by the solver, as explained in \secRef{sec:publish-state}. The smoothn
 \end{figure}
 
 
-\subsection{Related works}
-Two \apriltag\ based visual-inertial SLAM systems have been implemented in the previous years. 
-In \cite{neunert2016open}, the authors rely on an EKF in which state propagation is naturally 
-handled by the IMU and each marker detection is used in an update step where the reprojection error of its 4 corners provides an 8D innovation vector. 
-A closer solution to ours was very recently proposed in \cite{he2019lightweight} and is also based on graph SLAM optimization benefiting from 
-Forster's IMU pre-integration from GTSAM. As explained previously, the \apriltag\  factor formulation is different from ours and the algorithm is tested 
-on large datasets consisting only of smooth motions.
+
+
+\section{Conclusion}
+
+This chapter reports our first experimental results, validating our IMU observation model (using pre-integration), that we assembled into an observable 
+estimator using fiducial markers. The implementation reproduces what now is a classical formulation of visual-inertial odometry, but, at the time it was 
+released, not demonstrated on a humanoid robot. We have been able to obtain an accurate estimation of the humanoid robot \HRP{2} in a 3D terrain. In particular, 
+the IMU enables the estimator to have an excellent accuracy, and high bandwidth in the resulting estimation. In particular, the impact of the feet on the stairs, 
+and ensuing vibrations, clearly appears as relevant movement in the estimator output. On the other hand, the fiducial markers enable the filter to display 
+a global localization, in particular closing the loop when previously-seen markers where observed again while the 
+robot was walking along a loop in the experimental room. This experimentally validates the relevance of fusing these two 
+information for localizing a legged robot. In particular, the filter provides a full consistency, on the opposite to loosely-coupled 
+filters where the global localization (SLAM-like) is not guaranteed to be consistent with the local estimation of the base state. 
+
+Since this work, a few interesting MAP-based estimators have been deployed on legged robot, as we are going to discuss in the next chapters. 
+For the implementation we reported here, we mostly missed some visual odometry (\ie low level geometrical visual features) that would have help the estimator 
+to have a better mid-frequency accuracy (between the high-frequency provided by the IMU and the low-frequency provided by the sparse fiducial tracker).
+The experimental results were running in real-time by using a fixed window of \keyframes\ active in the estimator and removing the older ones. This
+approach may be improved by introducing a marginalization procedure as done in some classical visual-inertial systems \cite{leutenegger2015keyframe}.
+
+In this chapter, we have not yet added the information coming from the foot contact. Moreover, the fiducial markers are not strongly related with any 
+relevant part of the robot environment, which makes it difficult to use the localization information into a contact planner. In the next chapters, we are going to show 
+how this estimator extends to fully account for the contact information, and directly estimates environment parts that a motion planner could directly used by replacing
+the visual front-end.
