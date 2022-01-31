@@ -4,6 +4,7 @@
 \bigskip
 
 
+
 \section{Introduction}
 
 In this chapter, we are looking for a solution to localize a humanoid robot indoors, with sufficient accuracy to navigate on some stairs, grasp a handrail, or 
@@ -98,7 +99,7 @@ on large datasets consisting only of smooth motions.
     \centering
     \includegraphics[scale=1.3]{figures/absolute/graph}
     \caption{Factor graph supporting the estimator used in this chapter, involving state blocks corresponding to keyframes $\bfx_i=(\bfp_i,\bfv_i,\bfR_i)$, biases $\bfb_i$ and landmark poses $\bfl_n$. 
-    IMU factors (\textbf{blue}) relate consecutive keyframes and the IMU biases.
+    IMU factors (\textbf{blue}) relate consecutive \keyframes\ and the IMU biases.
     The lower branch controls bias drift along time.
     Visual factors (\textbf{red}) relate landmarks with poses $(\bfp_i,\bfR_i)$.}
     \label{fig:VI_factor_graph}

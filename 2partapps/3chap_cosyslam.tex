@@ -4,7 +4,7 @@
 \bigskip
 
 
-In this chapter we present a visual-inertial SLAM system based on a deep-learning based pose estimation libary \cite{labbe2020cosypose}.
+In this chapter we present an object-level visual-inertial SLAM system based on the deep-learning based pose estimation CosyPose \cite{labbe2020cosypose}.
 We present experimental results from our paper \cite{debeunne2021cosyslam}.
 
 \section{Introduction}
@@ -69,10 +69,15 @@ the direct output of CosyPose is not sufficient for two reasons. First, many obj
 depending on the frames. This output has, therefore, to be filtered using prior knowledge about the world or the robot's movements. Second, the robot needs to keep
 a memory of objects it has seen when they go out of its field of view.
 
-To address the challenges, we presented in \cite{debeunne2021cosyslam} a practical implementation of a SLAM system based on the design of an off-the-shelf 
-deep-learning object pose estimation algorithm \cite{labbe2020cosypose}. To integrate CosyPose measurements with other sensors, we propose a noise model based 
-on empirical data, presented in \secRef{sec:cosypose_covariance}. We also detail implementation details to circumvent outliers in the network output. 
-Experimental validations were conducted with a visual-inertial system, both handheld and mounted on a quadruped robot. Finally, we fine-tuned the pre-trained models 
+We present in this chapter a practical implementation of the proposed MAP formulation fusing inertial measurements and object-level visual features estimated
+by CosyPose. The stake is to demonstrate that a centroidal filter is able to merge information typically used for balance control (IMU related)
+with features typically needed by a high-level planner, \eg the stair steps locations extracted by the object pose estimator.
+Beyond the practical validation for legged robots, this also demonstrates that the single view CosyPose can be extended to a sequential
+tracker able to benefit from complementary measurements such as an IMU.
+
+To integrate CosyPose measurements with other sensors, we used the noise model based on empirical data, presented in \secRef{sec:cosypose_covariance}. 
+We also detail here the pragmatic implementation of heuristics to circumvent outliers in the network output. 
+Experimental validations were conducted with a visual-inertial system, first handheld then mounted on a quadruped robot. Finally, we fine-tuned the pre-trained models 
 to perform stairs localization, as explained in \secRef{sec:retraining_with_stairs}. 
 
 

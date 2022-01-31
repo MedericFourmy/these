@@ -4,8 +4,8 @@
 \bigskip
 
 
-In this chapter, we propose a tightly coupled base and centroidal estimator that fuses IMU, kinematics, centroidal kinematics, and force-torque measurements.
-This work was first presented in our published paper \cite{fourmy2021contact}.
+In this chapter, we propose a tightly coupled estimator of the base and centroidal states that fuses IMU, kinematics, centroidal kinematics, 
+and force-torque measurements. This work was first presented in our published paper \cite{fourmy2021contact}.
 
 \section{Introduction}
 
@@ -15,23 +15,30 @@ robots (see \secRef{sec:centroidal_est_lit}). To our knowledge, all of the centr
 (following the terminology introduced in \secRef{sec:proprio_filters}): they rely on prior knowledge of a base state. For instance, Piperakis \cite{piperakis2018nonlinear} 
 describes the whole pipeline: first, an inertial-kinematics EKF estimates the base state, then an EKF uses this fixed base state to obtain centroidal states. 
 Since the factor graph optimization framework that we use theoretically reaches its full potential when the maximum number of cross-correlation
-are considered, we did not find this solution satisfactory. In \cite{fourmy2021contact}, we proposed a tightly-coupled estimator that jointly estimates
+are considered, we did not find this solution satisfactory. Here, we rather propose a tightly-coupled estimator that jointly estimates
 base and centroidal states using IMU, kinematics, and force measurements.
 
 
-We present results of the application of the estimator on a dataset taken at LAAS-CNRS on the open source robot Solo-12 \cite{grimminger2020open}:
-\textit{sinXYZ} corresponds to a trajectory where the robot moves by following a sine wave reference with the feet fixed in place. 
-This movement and another one are displayed in the companion video \url{https://peertube.laas.fr/videos/watch/16822d27-3557-4e35-9a0d-ce5b0aea4c27}.
 
-We use the state estimation framework WOLF, developed at IRI-Barcelona, which relies on Google Ceres \cite{ceres-solver} as the graph solver. 
-The robot kinematics and dynamics computations are handled by the Pinocchio library \cite{carpentier2019pinocchio}. For all runs, \keyframes\ were created 
-at 4Hz for fair comparison.
+To the best of our knowledeg, this is the first time an estimator tightly couples forces, IMU, and proprioception to estimate both base and centroidal
+quantities. This estimator finds its roots in visual-inertial SLAM as described in the previous chapter,
+and in the observability studies of centroidal quantities, already discussed in \secRef{sec:centroidal_dynamics}. We then skip here a discussion of related
+works which has been sufficiently covered, to directly describe the underlying factor before exhibiting the experimental results.
+
+
+% We present results of the application of the estimator on a dataset taken at LAAS-CNRS on the open source robot Solo-12 \cite{grimminger2020open}:
+% \textit{sinXYZ} corresponds to a trajectory where the robot moves by following a sine wave reference with the feet fixed in place. 
+% This movement and another one are displayed in the companion video \url{https://peertube.laas.fr/videos/watch/16822d27-3557-4e35-9a0d-ce5b0aea4c27}.
+
+% We use the state estimation framework WOLF, developed at IRI-Barcelona, which relies on Google Ceres \cite{ceres-solver} as the graph solver. 
+% The robot kinematics and dynamics computations are handled by the Pinocchio library \cite{carpentier2019pinocchio}. For all runs, \keyframes\ were created 
+% at 4Hz for fair comparison.
 
 
 
 \section{Problem statement}
 
-We wish to define an estimator capable of observing both base states (position, orientation, velocity) and centroidal states (CoM, CoM velocity, angular momentum) from proprioception
+We define here an estimator capable of observing both base states (position, orientation, velocity) and centroidal states (CoM, CoM velocity, angular momentum) from proprioception
 only. We assume that the following measurements are available on the robot: IMU data, kinematics (leg odometry), centroidal kinematics, and force-torque sensors. 
 Since the IMU measurements \eqRef{eq:imu_meas_model} and CoM local position from the kinematics \eqref{eq:com_kine_meas} are biased, we also need to integrate them to the estimated
 variables.
@@ -57,10 +64,11 @@ In this estimator, we have two motion sensors, IMU and force-torque, whose measu
 \secRef{sec:force_torque_preint} respectively. Base states and centroidal states are tightly constrained by the centroidal kinematics factor, which relates almost all 
 estimation variables at a given \keyframes.
 
-This estimator is implemented in WOLF \cite{sola2021wolf} and is experimentally validated on the Solo-12 quadruped robot as explained in the following sections. 
-
 \section{Experimental setup}
-%  
+
+This estimator is implemented in WOLF \cite{sola2021wolf}, with necessary kinematics and dynamics quantities computing
+with Pinocchio software \cite{carpentier2019pinocchio}, and is experimentally validated on the Solo-12 quadruped robot. 
+
 As is often the case with quadruped robots, Solo-12 is not equipped with three axis force sensors at its feet. 
 Yet, in order to validate the present method, it is possible to reconstruct the contact forces based on the robot dynamics 
 equation \eqref{eq:wbdyn}. Knowing the robot configuration and derivatives $\q,\vq,\dvq$ and joint torques $\bm\tau$ (from motor currents), 
@@ -77,8 +85,14 @@ the force reconstruction of one leg using the robot proprioceptive sensors.
     \label{fig:force_est}
 \end{figure}
 
+This movement and another one are displayed in the video \url{https://peertube.laas.fr/videos/watch/16822d27-3557-4e35-9a0d-ce5b0aea4c27}.
+
+
+
+\section{Results}
+
 \subsection{Base estimation through inertial kinematic fusion}
-First, to validate the use of our kinematic factor, we include uniquely the IMU and LO factors to obtain an Inertial Kinematics  estimator which 
+First, to validate the use of our kinematic factor, we include uniquely the IMU and leg-odometry factors to obtain an Inertial Kinematics estimator which 
 conceptually includes the same information as estimators such as \cite{bloesch2013state}. In \figRef{fig:PosiIK4}, we compare our state estimation 
 at 1kHz with motion capture (Mo-Cap) up-sampled from 200Hz to 1kHz.
 Velocity in base frame is also shown in \figRef{fig:VelIK4}.
@@ -116,7 +130,7 @@ for the drift to remain below around 5mm on all axes.
 Now, on the same trajectory, we deploy the full estimator with all factors described in the factor graph in \figRef{fig:centroidal_factor_graph} to jointly 
 estimate the base and centroidal quantities. A ground-truth on the centroidal quantities is difficult to obtain since no direct 
 sensor can provide us with this information contrary to the base state. 
-We can however validate our method by comparing it to a two step procedure: first, estimate the base state with a state Kalman filter as 
+We can however validate our method by comparing it to a two-step procedure: first, estimate the base state with a state Kalman filter as 
 implemented in \cite{bledt2018cheetah}, then compute the centroidal quantities directly from the robot kinematic model. 
 The full estimator should be able to infer a bias on the $\posim{B}{C}$ measure so we artificially add a constant disturbance 
 in the robot dynamic model on the lever of the base link of [0.03, 0.06, 0.04]\,cm, which then corresponds to a CoM bias of 
@@ -157,3 +171,13 @@ The estimated CoM velocity closely follows the velocity of the base as shown in 
 \end{figure}
 
 
+
+
+\section{Conclusion}
+
+This chapter reports the first implementation of a MAP estimator tightly coupling the estimation of both the basis and 
+the centroidal states, by fusing IMU, contact and kinematic measurements. It shows the validity of the approach, 
+and demonstrates that the consistency of the filter results in correct estimation of both the states and the biases.
+
+While the results corresponds to the expectation, several aspects of the experimental protocole would benefit from 
+improvements in the future. 
