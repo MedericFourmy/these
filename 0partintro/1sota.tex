@@ -631,22 +631,22 @@ be debiased by tightly coupling mapping and odometry. Another important feature 
 pitch and roll can be observed thanks to the gravity (absolute yaw is unobservable, unless a compass is used). Estimation of the pose and velocity
 of the system can be estimated at the IMU frequency (which is usually an order of magnitude higher than the camera's).
 
-A careful preintegration \cite{lupton-09,forster2017-TRO} of these high 
+A careful pre-integration \cite{lupton-09,forster2017-TRO} of these high 
 rate measurements had to be developed in the context of smoothing for the optimization to remain tractable. The core idea of this algorithm has 
 since been applied to other information sources such as drone thrust commands \cite{nisar2019vimo} to make external force estimation possible; 
 while we propose in this thesis to preintegrate force/torque measurements present in legged robots.
-A detailed description of the theory of preintegration and discussion of related works is found in \chpRef{chp:preintegrated}.
+A detailed description of the theory of pre-integration and discussion of related works is found in \chpRef{chp:preintegrated}.
 
 
 \subsection{Factor Graph estimation for legged robots}
 Very recently, two teams started to apply factor graph optimization principles as a general framework for legged robot estimation. At Michigan University, Hartley \cite{hartley2018legged} 
-proposes to fuse IMU preintegration with a novel kinematic factor by adding the contact foot pose in the optimized states, similarly to \cite{bloesch2013state,rotella2014state}. 
+proposes to fuse IMU pre-integration with a novel kinematic factor by adding the contact foot pose in the optimized states, similarly to \cite{bloesch2013state,rotella2014state}. 
 Semi-direct Visual Odometry \cite{forster2014svo} is also used to integrate camera measurements as relative pose. The estimation framework was based on GTSAM framework \cite{dellaert2012factor}
 and tests were conducted on a Cassie bipedal robot. In \cite{hartley2018hybrid}, the same authors extended 
 modified the kinematic factor formulation, taking into account uncertainty induced by contact switches. Dynamic Robot Systems Group at Oxford proposed in 
 \cite{wisth2019robust} to replace a modeled kinematic factor by integrating odometry from the onboard proprioceptive filter of the ANYmal robot. Stereo vision was 
 also used as a source of odometry by using a sparse 3D landmark map. In a following work \cite{wisth2020preintegrated}, the proprioceptive odometry factor was adapted
-to include a slowly variable bias on odometry measurements by adapting the preintegration theory from \cite{forster2017-TRO}. The same authors extended this work
+to include a slowly variable bias on odometry measurements by adapting the pre-integration theory from \cite{forster2017-TRO}. The same authors extended this work
 by including LIDAR measurements in \cite{wisth2021vilens}.
 \cite{kim2021legged} also implemented an inertial kinematic proprioceptive smoothing estimator on the MIT Mini Cheetah (see \figRef{fig:robots}), mitigating slipping of the feet by removing kinematic 
 measurements whose residual errors exceed a certain threshold.    
