@@ -133,14 +133,23 @@ found in \url{www.iri.upc.edu/wolf}}, that we have used and contributed to durin
 
 \section{Thesis organization and contributions}
 
-In this thesis, we propose to approach the different legged robot estimation problems in a unified manner, based on a tightly-coupled estimator implemented in the framework of Factor Graph optimization.
-We propose to build an object-level environmental model through object-level visual-inertial SLAM algorithms. We propose two implementations of this paradigm. 
-The first is based on \apriltag\ fiducial markers, the second is based on a deep-learning-based object pose estimation library.   
-For the sense of balance, we implemented a whole-body estimation algorithm based on IMU, kinematic and force-torque measurements.
-Experimental validation on humanoid \HRP{2} and quadruped robot Solo (see \figRef{fig:robots} for both) were conducted for all of these applications.
+In this thesis, I contribute to the estimation of legged robots by striving to take into account information from
+many sensors, of many types, and in a modular way. I defend the main idea of the necessity for a tightly-coupled estimation, which maximizes the observability
+of the system, as opposed to loosely-coupled methods. In particular, tightly-coupled methods enable the estimation of biases and parameters estimation
+on top of states variables. The Maximum-a-Posteriori approach, which is best described with the Factor Graph framework, lends itself comfortably 
+to tightly-coupled approaches. I shall seek to demonstrate it by formulating several measurement models, in particular generalizing some existing approaches to other sensor modalities.
+I will then display the operational capacity of the system on several proofs of concepts, building blocks for a future whole-body estimator, providing both kHz, gravity aware
+estimation for control, and world reconstruction for navigation. Those intermediate systems will enable to experimentally demonstrate the suitability of the method.
 
-To summarize, in this thesis, we will defend the use of tightly-coupled, modular estimators for legged robots. This estimator should provide a kHz state 
-throughput of the robot dynamics, in particular of its localization, orientation with respect to gravity, dynamics, and a representation of the environment.
+
+% In this thesis, we propose to approach the different legged robot estimation problems in a unified manner, based on a tightly-coupled estimator implemented in the framework of Factor Graph optimization.
+% We propose to build an object-level environmental model through object-level visual-inertial SLAM algorithms. We propose two implementations of this paradigm. 
+% The first is based on \apriltag\ fiducial markers, the second is based on a deep-learning-based object pose estimation library.   
+% For the sense of balance, we implemented a whole-body estimation algorithm based on IMU, kinematic and force-torque measurements.
+% Experimental validation on humanoid \HRP{2} and quadruped robot Solo (see \figRef{fig:robots} for both) were conducted for all of these applications.
+
+% To summarize, in this thesis, we will defend the use of tightly-coupled, modular estimators for legged robots. This estimator should provide a kHz state 
+% throughput of the robot dynamics, in particular of its localization, orientation with respect to gravity, dynamics, and a representation of the environment.
 
 I have organized this thesis as follows:
 
