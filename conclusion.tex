@@ -3,7 +3,7 @@
 The objective of this thesis was to develop a new class of state estimators for legged robots able to fuse proprioceptive and exteroceptive
 sensors. We advocated for the use of tightly-coupled formulations where all measurements and state variables are integrated into a single estimation 
 problem. This type of estimator permits a greater accuracy and the estimation of extra parameters by leveraging all sensors correlations.
-It also leverages a sound mathematical formulation to extend generic estimators to more diverse and numerous perception sources, toward whole-body estimation.
+It also makes use of a sound mathematical formulation to extend generic estimators to more diverse and numerous perception sources, toward whole-body estimation.
 The accent was put on the necessary modularity of the formulations to make the mathematical developments extendable to new types of sensors. This 
 was achieved through the use of Maximum-A-Posteriori estimation, modeled as Factor Graph optimization. All mathematical formulations used extensively the smooth manifold
 and Lie group theories that best represent the geometry of the state variables. We also emphasize the generalizability of the developed measurement models. 
@@ -13,7 +13,7 @@ and Lie group theories that best represent the geometry of the state variables. 
 We developed a range of measurement models targeted at sensors present on legged platforms. These measurement models were integrated as factors in 
 three factor-graph-based estimators.
 
-We implemented a general factor for camera-based object-level pose estimations based on open source libraries. 
+We implemented a general factor for camera-based object-level pose estimations based on object pose estimators. 
 First, the \apriltag\ library was used 
 to \textbf{obtain poses of fiducial markers} used to augment the scene with unique landmarks. We proposed a new analytical model to estimate the covariance of 
 these measurements. We discussed the problem of the orientation ambiguity of these markers and proposed a practical method to alleviate this problem.
@@ -27,15 +27,14 @@ IMU pre-integration algorithm \textbf{based on a compact "delta" Lie-group}.
 This approach was theoretically compared to the seminal work on IMU pre-integration, based on composite delta Lie groups. 
 We then leveraged the generalized pre-integration method to \textbf{extend the pre-integration to force-torque sensors} present at the end-effectors of
 legged robots. 
-%
 We then proposed a first step toward whole-body estimation, by extending the factor graph approach to also \textbf{estimate centroidal quantities}
 (center of mass position and velocity, and angular momentum) by merging centroidal kinematics and force measurements. This makes it possible 
 to accurately estimate the centroidal states, despite unavoidable biases in the kinematic model. 
 
 
 These measurement models were all integrated into the WOLF library \cite{sola2021wolf} to which we contributed, joining our effort with the IRI team, 
-toward an open-source release. WOLF provided the necessary modularity to formulate various estimation
-problems. It then allowed us to implement three different applications of the proposed theory, which we used to experimentally validate our models.
+toward an open-source release. WOLF provided the necessary modularity to formulate various estimation problems. 
+It then allowed us to implement three different applications of the proposed theory, which we used to experimentally validate our models.
 
 \bigskip
 
@@ -45,7 +44,7 @@ for the locomotion of the robot on flat terrain and stairs, and a high-rate, smo
 ground truth. 
 
 Second, we proposed \textbf{a tightly coupled algorithm for simultaneous estimation of the base and centroidal states of the robot}. This estimator combined the pre-integration 
-of IMU and force-torque data, leg odometry, and kinematics. We showed that the estimator enables to estimate the bias on CoM kinematics measurements, which is sometimes ignored
+of IMU and force-torque data, centroidal kinematics, and leg odometry. We showed that the estimator enables to estimate the bias on CoM kinematics measurements, which is sometimes ignored
 by controllers in first approximation. Experimental validation was conducted on simple trajectories performed on the Solo-12 quadruped robot. 
 
 Finally, we implemented \textbf{another object-level visual-inertial SLAM system based on a deep-learning framework for object pose estimation}. This system  used the same 
@@ -66,8 +65,8 @@ We began to work in this direction by recording datasets using Solo-12 as an exp
 base state by including inertial, kinematics, and \apriltag\ measurements. 
 
 We also plan to integrate the system in a feedback loop with the current controller of Solo-12. For the moment, instabilities in the solver convergence times prevented
-us from obtaining a hard-real-time estimate for the proprioceptive estimator, while the \apriltag\ based SLAM system works in real-time. One of the solutions would 
-be a hyperspace search on the numerous options provided by the Ceres solver \cite{ceres-solver}. Another is to search for the most appropriate size of the graph,
+us from obtaining a hard-real-time estimate for the proprioceptive estimator, while the \apriltag\ based visual-inertial SLAM system works in real-time. One of the solutions would 
+be a hyperparameter search on the numerous options provided by the Ceres solver \cite{ceres-solver}. Another is to search for the most appropriate size of the graph,
 that is the frequency of \keyframe\ creation and their number. Marginalization of older states and sparsification procedures should also be investigated.
 
 
@@ -85,7 +84,7 @@ vision front-end. This system would then easily be extended with either of our o
 
 \subsection{Longer term}
 
-We will here develop a few ideas and reflections that our work on a general estimator for legged robots brought.
+We will here develop a few ideas and reflections that our work on a general estimator for legged robots inspired.
 
 Following the endeavor to develop an estimator fusing as many sources of information, we could turn our attention to a 
 \textit{whole-body} state estimation. As we have seen, the standard proprioception sensor set for legged robots is an IMU attached to the robot base
@@ -93,14 +92,14 @@ and encoders at the joints (possibly along with joint torque, motor current, and
 is enough to implement proprioceptive odometry of the base but is quite limited when it comes to perceiving finer information about the state of the robot
 and its environment. In particular, the kinesthesis sense of artificial-legged systems is far from the subtleties of their biological counterparts, partly
 because of the rigid segment assumptions. One solution is to augment the robot with other sensors measuring these flexibilities. Recent solutions have demonstrated
-the applicability of such methods by using placing IMUs in each segment of an exoskeleton. One might also imagine adding strain gauges to measure directly 
-the deflections of the segments. 
+the applicability of such methods by placing IMUs in each segment of an exoskeleton. One might also imagine adding strain gauges to measure directly 
+the segments' deflections. 
 
 The sense of touch is for the moment also underrepresented in legged robotics. Some teams propose to add
 artificial skins that are implemented as strain cells sheets, which provides a higher density haptic feedback than strain-gauges. 
 These systems in particular demonstrated a great potential for human-robot interactions. 
 A higher-quality sense a touch may also provide richer information about the nature of the contacts between the robot and its environment, be it for locomotion
-(slip detection, nature of the terrain, etc.), or for manipulation (object surface analysis, 3D object position estimation). 
+(slip detection, terrain nature, etc.), or for manipulation (object surface analysis, 3D object position estimation). 
 
 On the other end of the spectrum, one could imagine methods targeted toward robots with limited sets of sensors. For instance, Solo-12 is too small to be 
 equipped with high-fidelity, multiple-axis strain gauges such as those found on humanoid robots. Such a robot may be equipped with cheap
@@ -108,7 +107,7 @@ one-dimensional strain-gauges, which would require new measurement model formula
 
 With a limited set of sensors, the choice of their nature and placement on the robotic platform is crucial, which is limited by the nature of its initial design. 
 On the control side, the concept of co-design is gaining traction. The goal is
-to optimize the design of a robot to certain criteria, such as energy efficiency or dynamic capabilities, by exploring the design space guided by 
+to optimize the design of a robot to certain criteria, such as energy efficiency or dynamic capabilities, exploring the design space guided by 
 the simulated control of the platform. A dual concept could be applied to optimize the design of the platform to maximize the efficiency of estimation algorithms.
 
 Our visual-inertial SLAM work based on CosyPose object position is a first step in deriving semantic information from the environment. On this line of research, we may imagine
@@ -123,7 +122,7 @@ for dynamic scenes and human pose reconstruction.
 
 Finally, the notion of state feedback may be rethought entirely. Model-based controllers rely on a limited set of physically grounded states to compute the robot control inputs. 
 However, some recent learning-based systems do not require this kind of information, relying instead on latent space representations of the robot state learned
-in simulation. Some of these algorithms abstract the concepts of robot and environment as a single latent state resulting from a tight coupling of raw proprioceptive and exteroceptive
+in simulation. Some of these algorithms abstract the concepts of robot and environment as a single latent state vector resulting from a tight coupling of raw proprioceptive and exteroceptive
 measurements. While demonstrating impressive results in practice, those representations might have the downside of not being interpretable by a human operator and other systems, 
 making the communication and fault detection harder to manage.  
 
