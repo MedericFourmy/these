@@ -229,7 +229,8 @@ to avoid drift in the estimates. One solution would be to increase the robustnes
 objects in the scene would be useful both for providing semantic and surface information, as well as providing loop-closures. The covariance model that we developed also requires more development.
 In particular, it required important experimental work to build the dataset of CosyPose errors. In particular, needing to collect data for each individual object is very time-consuming. Besides,
 the models are likely to overfit the obtained dataset and generalize poorly to datapoints outside of its boundaries.
-To improve this, we could work on several aspects. First, the ideal method would be to find a general model, as we did for the AprilTag PnP algorithm (\secRef{sec:apritlag_covariance}), directly computable 
+
+To improve this, we could work on several aspects. First, the ideal method would be to find a general model, as we did for the AprilTag PnP algorithm (\secRef{sec:apritlag_covariance}), directly computable
 from the CosyPose network. Second, if we show that this is not feasible, we could try to train the covariance model in simulation which provides a vastly superior diversity in situations, though lacking
 some of the artifacts of reality. CosyPose itself is only trained in simulation. Thirdly, we could use a Bayesian estimator to fit the uncertainty model, the uncertainty of this model itself in order to 
 avoid the particularly bad case of an underestimated covariance. 

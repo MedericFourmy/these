@@ -711,13 +711,13 @@ We highlight the parts that differ from the regular Gauss-Newton algorithm with 
 
 \begin{enumerate}
     \item Initialize the state estimate at an initial value $\check{\cX} := \cX^0$ \\
-    $\cX$ lives on a composite manifold. Its covariance is defined on the local tangent space of this manifold (see \secRef{sec:uncertainty_on_manifolds}).
+    $\cX$ lives on a composite manifold. Its error and increments leave are expressed in its local tangent space.
     \item Approximate the NLLS cost function around the current estimate as a quadratic function \\
     The linear approximation is done using the notation of Jacobian on manifolds described in \secRef{sec:uncertainty_on_manifolds}.
     $\Delta \bfx$ is defined as the Cartesian representation of a composite tangent space element.  
     \item Find the optimal step $\Delta \bfx^*$ by solving a linear set of equations \eqRef{eq:linear_syst_GN} \\
     This part does not change. As mentioned in \secRef{sec:LM}, globalization of Gauss-Newton such as the Levenberg-Marquardt algorithm
-    may alter the linear system to solved for increased performance.
+    may alter the linear system to be solved for increased performance.
     \item Update the current state estimate $\check{\cX} := \check{\cX} \oplus \Delta \bfx^*$ \\
     The update of the current state is done using the retraction operator $\oplus$ of the composite manifold \eqRef{eq:composite_retract}.
     \item Loop over steps 2-4 until convergence
@@ -733,12 +733,12 @@ appendix \chpRef{chp:MAP_covariance}). This is however a costly computation that
 We have described a general algorithm to solve NLLS problems with variables belonging to manifolds and weighted by covariance matrices. This problem
 comes from framing the state estimation as a MAP problem and using multiple assumptions on the nature of the measurement models. These measurement models
 are described as residuals weighted by their respective covariance matrices, representing the confidence we have in the sensor measurements. Factor Graphs can 
-represent visually those problems and their connectivity is closely related to the sparsity of the linear problems appearing in the optimization algorithm.
+represent visually those problems and their connectivity exactly translates to the sparsity of the linear problems appearing in the optimization algorithm.
 
 In our opinion, two equally important research directions start from here: (i) finding new solvers extending these ideas to new sets of problems, such as multi-robot or multi-hypothesis problems, and (ii)
 formulating new, efficient, and generalizable measurement models. This thesis mostly theoretically contributes to the direction of extending
 the estimation model (ii) while we mostly rely on existing algorithms (i) to solve the subsequent problems.
-A commonly used denomination in the context of robotics state estimation is to refer to the solver implementation as the \textit{backend} while the measurement models are referred to as \textit{front-ends}.
+A commonly used denomination in the context of robotics state estimation is to refer to the solver implementation as the \textit{backend} while the algorithms processing sensor information to create residuals are referred to as \textit{front-ends}.
 
 The next chapters each concentrate on a range of sensor modalities useful for legged robots:
 object pose retrieval from vision algorithms, a generalized pre-integration theory for high rate sensors, legged robot kinematics, and the application 
