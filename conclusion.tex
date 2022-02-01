@@ -2,7 +2,7 @@
 
 The objective of this thesis was to develop a new class of state estimators for legged robots able to fuse proprioceptive and exteroceptive
 sensors. We advocated for the use of tightly-coupled formulations where all measurements and state variables are integrated into a single estimation 
-problem. This type of estimator permits a greater accuracy and the estimation of extra parameters by leveraging all sensors correlations.
+problem. This type of estimator enables a greater accuracy and the estimation of extra parameters by leveraging all sensors correlations.
 It also makes use of a sound mathematical formulation to extend generic estimators to more diverse and numerous perception sources, toward whole-body estimation.
 The accent was put on the necessary modularity of the formulations to make the mathematical developments extendable to new types of sensors. This 
 was achieved through the use of Maximum-A-Posteriori estimation, modeled as Factor Graph optimization. All mathematical formulations used extensively the smooth manifold
@@ -18,7 +18,7 @@ First, the \apriltag\ library was used
 to \textbf{obtain poses of fiducial markers} used to augment the scene with unique landmarks. We proposed a new analytical model to estimate the covariance of 
 these measurements. We discussed the problem of the orientation ambiguity of these markers and proposed a practical method to alleviate this problem.
 The anisotropic nature of the pose uncertainty was highlighted in simulated experiments. 
-Second, we used a deep-learning-based framework to obtain the pose of known objects in the scene. A covariance model based on empirical data was obtained through
+Second, we used \textbf{a deep-learning-based framework to obtain the pose of known objects in the scene}. A covariance model based on empirical data was obtained through
 experiments. We showed that we could fine-tune the model to elements of the scene of interest for legged-robots navigation such as stairs.
 
 We then leverage the pre-integration formulation to include high-frequency sensors such as IMU in the factor graph. We propose 
@@ -32,7 +32,7 @@ We then proposed a first step toward whole-body estimation, by extending the fac
 to accurately estimate the centroidal states, despite unavoidable biases in the kinematic model. 
 
 
-These measurement models were all integrated into the WOLF library \cite{sola2021wolf} to which we contributed, joining our effort with the IRI team, 
+These measurement models were all integrated into the WOLF framework \cite{sola2021wolf} to which we contributed, joining our effort with the IRI team, 
 toward an open-source release. WOLF provided the necessary modularity to formulate various estimation problems. 
 It then allowed us to implement three different applications of the proposed theory, which we used to experimentally validate our models.
 
@@ -43,15 +43,16 @@ a series of experiments conducted at LAAS on the \HRP{2} humanoid robot. We show
 for the locomotion of the robot on flat terrain and stairs, and a high-rate, smooth estimation of the base velocity. Both were evaluated against a motion capture 
 ground truth. 
 
-Second, we proposed \textbf{a tightly coupled algorithm for simultaneous estimation of the base and centroidal states of the robot}. This estimator combined the pre-integration 
+Second, we proposed \textbf{a tightly-coupled algorithm for simultaneous estimation of the base and centroidal states of the robot}. This estimator combined the pre-integration 
 of IMU and force-torque data, centroidal kinematics, and leg odometry. We showed that the estimator enables to estimate the bias on CoM kinematics measurements, which is sometimes ignored
 by controllers in first approximation. Experimental validation was conducted on simple trajectories performed on the Solo-12 quadruped robot. 
 
-Finally, we implemented \textbf{another object-level visual-inertial SLAM system based on a deep-learning framework for object pose estimation}. This system  used the same 
+Third, we implemented \textbf{an object-level visual-inertial SLAM system based on a deep-learning framework for object pose estimation}. This system  used the same 
 IMU pre-integration as well as our empirical model of the object pose uncertainty. We showed that the trajectory of the system and objects
 in the scene could be recovered and that the IMU contributed to the robustness of the system by alleviating the instability of the pose estimation. We proposed
 as a proof of concept to perform visual-inertial SLAM using stairs elements as landmarks, for which we retrained the neural network. This dataset was recorded on the Solo-12 quadruped robot.
 
+Finally, we recorded new datasets on Solo-12 quadruped for following works on the fusion of inertial, kinematics, and vision data. 
 
 \section{Perspectives}
 This work laid the foundations of a general factor-graph-based estimation framework for legged robotics. However, a lot of alleys have yet to be explored 
@@ -62,7 +63,7 @@ We developed on one hand an object-level visual-inertial system and on the other
 would be to merge both estimators in one, providing simultaneously a high-rate estimation for control and a non-drifting localization based on SLAM, which should serve also as an input for gait and/or contact planning. 
 
 We began to work in this direction by recording datasets using Solo-12 as an experimental platform. For this experiment, we will concentrate on estimating the 
-base state by including inertial, kinematics, and \apriltag\ measurements. 
+base state by including inertial, kinematics, and object pose measurements. 
 
 We also plan to integrate the system in a feedback loop with the current controller of Solo-12. For the moment, instabilities in the solver convergence times prevented
 us from obtaining a hard-real-time estimate for the proprioceptive estimator, while the \apriltag\ based visual-inertial SLAM system works in real-time. One of the solutions would 
@@ -77,9 +78,15 @@ In a second time, we would like to further strengthen the environmental percepti
 based on general geometric constraints. Many of the most mature vision-based SLAM systems are based on sparse feature extraction. This will be 
 the first venue that we explore. 
 
-Our ideal realization would then be an integrated demo on Solo-12 with an odometry estimator based on kinematics, IMU, and a sparse feature KLT tracking-based 
-vision front-end. This system would then easily be extended with either of our object-level SLAM algorithms to provide loop closures and, therefore, a global localization.
+Our ideal realization would then be an integrated demo on Solo-12 with an odometry estimator based on kinematics, IMU, and a sparse feature KLT \cite{baker2004lucas} tracking-based 
+vision front-end. This system would then easily be extended with either of our object-level SLAM algorithms to provide loop closures and, therefore, a global localization, together
+with high bandwidth gravity related state estimation.
 
+The reproducibility of experimental results is a common issue in many scientific fields, which is especially notable in the robotics community. Many benchmarks including 
+IMU, vision, and LIDAR sensors are nowadays available \cite{Burri25012016, cortes2018advio, kasper2019benchmark, zhang2021multi}. However, to the best of our knowledge,
+very few legged robots datasets are available \cite{fink2020dls, ahmadi2021semi} and none include exteroceptive sensors. The Open Dynamic Robot Initiative \cite{grimminger2020open}, 
+through the development of open-hardware robots (such as Solo-12) and open-source low-level controllers aims at making a robotic platform easily accessible to
+many institutions. One could imagine that a dataset to benchmark estimation algorithms on such a platform would be useful to the community as a whole. 
 
 
 \subsection{Longer term}
@@ -101,7 +108,8 @@ These systems in particular demonstrated a great potential for human-robot inter
 A higher-quality sense a touch may also provide richer information about the nature of the contacts between the robot and its environment, be it for locomotion
 (slip detection, terrain nature, etc.), or for manipulation (object surface analysis, 3D object position estimation). 
 
-On the other end of the spectrum, one could imagine methods targeted toward robots with limited sets of sensors. For instance, Solo-12 is too small to be 
+On the other end of the spectrum, one could imagine methods targeted toward robots with limited sets of sensors that
+an observability study based on our formulation would help to optimize. For instance, Solo-12 is too small to be 
 equipped with high-fidelity, multiple-axis strain gauges such as those found on humanoid robots. Such a robot may be equipped with cheap
 one-dimensional strain-gauges, which would require new measurement model formulations, with application in centroidal estimation.
 
@@ -126,6 +134,3 @@ in simulation. Some of these algorithms abstract the concepts of robot and envir
 measurements. While demonstrating impressive results in practice, those representations might have the downside of not being interpretable by a human operator and other systems, 
 making the communication and fault detection harder to manage.  
 
-[Other ideas:
-- comment on the need of datasets to compare methods
-- same problem as control community, Solo-12 a solution in this direction]

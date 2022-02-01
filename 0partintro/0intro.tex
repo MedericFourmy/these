@@ -14,7 +14,7 @@ The challenge is then to choose the set of appropriate sensors for each applicat
 Let us first discuss how this feedback loop has evolved while robotics was growing mature.
 
 % We will first compare the nature of perception needs for a few robotics applications, then give a biological example, and finish by motivating the use of 
-% modular tightly coupled estimators in the context of legged-robotics.
+% modular tightly-coupled estimators in the context of legged-robotics.
 
 
 
@@ -61,10 +61,11 @@ The first major robotic use was in the industrial space:
 starting in the early 60's \footnote{The Unimate manipulator was adopted by General Motors to displace hot die casting pieces to cooling tanks or assembly lines, first tests starting in 1961.}, 
 arm manipulators have been progressively integrated into many assembly lines, especially in the automotive industry. 
 This application requires the performance of highly precise, repetitive tasks, which are predefined by specialized human operators.
-These highly rigid robots are position-controlled and fixed to the ground, which usually limits the perception needs to the relative angles between their different parts.
+These highly rigid robots are controlled in position and fixed to the ground, which usually limits the perception needs to the relative angles between their different parts.
 
 On the other end of the spectrum, researchers started to equip wheeled mobile platforms in controlled laboratory environments with exteroceptive sensors 
-\cite{Nilsson1984ShakeyTR, chatila1985position} to apply planning algorithms, using mainly range sensors to control the presence of obstacles, along with wheel odometry \footnote{Odometry is, in the large sense, information about the relative motion of a robot obtained the integration of a motion sensor (wheel encoder, IMU, Doppler Velocity Logs, etc.}
+\cite{Nilsson1984ShakeyTR, chatila1985position} to apply planning algorithms, using mainly range sensors to control the presence of obstacles, along with wheel odometry \footnote{Odometry is, in the large sense, information 
+about the relative motion of a robot obtained the integration of a motion sensor (wheel encoder, IMU, Doppler Velocity Logs, etc.)}
 to detect relative displacement. 
 Research on mobile robotics moved to outdoors applications, using motorized vehicles as research platforms. The 2005 DARPA grand challenge
 offered one of the first large scale proof of concept of autonomous cars, where a few teams managed to safely drive 150 miles paths in desert-environments 
@@ -90,10 +91,10 @@ This makes for challenging perceptual problems that require taking into account 
 In this thesis, we are interested in extending the perceptual capabilities of legged robots (humanoids and quadrupeds). This kind of robot requires both a high-rate (1kHz),
 low latency estimates (<1ms) of its physical quantities to balance itself, like a precise direction of the gravity (< 0.01 radians for a full-size biped), 
 and an accurate environment representation for safe navigation and interaction.
-These tasks are oftentimes handled separately in the literature. We believe that it is possible to improve existing systems by a tight integration of the
+As we will explain in the next chapter, these tasks are oftentimes handled separately in the literature. We believe that it is possible to improve existing systems by a tight integration of the
 many sensor modalities available on such a platform.
 
-To justify this point of view, let us consider first a biological example that will motivate the formulation of this approach.
+As a first justification of this point of view, let us consider first a biological example that will motivate the formulation of this approach.
 
 
 \section{Biological equivalent, an example}
@@ -142,7 +143,7 @@ The estimated state should accurately reflect both the dynamics of the robot as 
 estimation of the gravity vector direction, as well centroidal quantities (center of mass, angular momentum, etc.).
 In our opinion, this implies that the ideal perception system should encourage the multiplication of perception sources both in the number of sensors and their variety.
 In addition, to maximize the accuracy of the estimator, any available correlations between variables and prior knowledge should in principle be taken into account. 
-We also need to enable online calibration of the many sensor biases and fixed parameters. To achieve these goals, the development of \textit{tightly coupled} estimators, 
+We also need to enable online calibration of the many sensor biases and fixed parameters. To achieve these goals, the development of \textit{tightly-coupled} estimators, 
 which exploit as many data correlations as possible between the sensor measurements, should be undertaken.
 
 Two main perception problems are typically considered onboard a legged robot. On the first hand, the sense of balance is replicated through high-frequency
@@ -167,32 +168,24 @@ found in \url{www.iri.upc.edu/wolf}}, that we have used and contributed to durin
 
 \section{Thesis organization and contributions}
 
-In this thesis, I contribute to the estimation of legged robots by striving to take into account information from
-many sensors, of many types, and in a modular way. I defend the main idea of the necessity for a tightly-coupled estimation, which maximizes the observability
-of the system, as opposed to loosely-coupled methods. In particular, tightly-coupled methods enable the estimation of biases and parameters estimation
+This thesis aims at I contributing to the estimation of legged robots by taking into account information from
+many sensors, of many types, and in a modular way. Tightly-coupled estimation, whose necessity will be recurrently corroborated in this thesis, maximizes the observability
+of the system, as opposed to loosely-coupled methods. In particular, tightly-coupled methods makes it possible to estimate the biases and calibration parameters
 on top of states variables. The Maximum-a-Posteriori approach, which is best described with the Factor Graph framework, lends itself comfortably 
-to tightly-coupled approaches. I shall seek to demonstrate it by formulating several measurement models, in particular generalizing some existing approaches to other sensor modalities.
-I will then display the operational capacity of the system on several proofs of concepts, building blocks for a future whole-body estimator, providing both kHz, gravity aware
-estimation for control, and world reconstruction for navigation. Those intermediate systems will enable to experimentally demonstrate the suitability of the method.
+to tightly-coupled approaches. I shall seek to demonstrate it by formulating several measurement models, in particular generalizing some existing approaches to other sensor modalities
+in the first part of this thesis. In the second part,
+I will then display the operational capacity of the system on several proofs of concepts, building blocks for a future whole-body estimator, providing both gravity aware
+estimation for balance control, and world reconstruction for navigation. Those intermediate systems will enable to experimentally qualify the performances, 
+and feasability of the method.
 
-
-% In this thesis, we propose to approach the different legged robot estimation problems in a unified manner, based on a tightly-coupled estimator implemented in the framework of Factor Graph optimization.
-% We propose to build an object-level environmental model through object-level visual-inertial SLAM algorithms. We propose two implementations of this paradigm. 
-% The first is based on \apriltag\ fiducial markers, the second is based on a deep-learning-based object pose estimation library.   
-% For the sense of balance, we implemented a whole-body estimation algorithm based on IMU, kinematic and force-torque measurements.
-% Experimental validation on humanoid \HRP{2} and quadruped robot Solo (see \figRef{fig:robots} for both) were conducted for all of these applications.
-
-% To summarize, in this thesis, we will defend the use of tightly-coupled, modular estimators for legged robots. This estimator should provide a kHz state 
-% throughput of the robot dynamics, in particular of its localization, orientation with respect to gravity, dynamics, and a representation of the environment.
-
-I have organized this thesis as follows:
+This thesis is organized in two parts:
 
 \bigskip
 \textbf{Chapter 2} presents a literature overview of state estimation legged robots, that we will use to position our objectives.
 
 \bigskip
 \textbf{Chapter 3} serves as a general introduction to Factor Graph optimization using the Maximum-A-Posteriori. We emphasize the special treatment of variables 
-belonging to manifolds and give a brief introduction to Lie theory, which is used extensively in chapter 6.
+belonging to manifolds and give a brief introduction to Lie theory, which is used extensively in \mbox{Chapter 6}.
 
 \bigskip
 \textbf{Chapter 4} describes two different measurement models used in the object-level visual-inertial systems that we built. 
@@ -205,7 +198,7 @@ belonging to manifolds and give a brief introduction to Lie theory, which is use
 then extended to a compact Lie group formulation. 
 
 \bigskip
-The following chapters present three different applications where we fuse several of the sensing modalities described so far.
+The chapters of the second part present three different applications where we fuse several of the sensing modalities described so far.
 Regarding their practical implementation, we contributed to different parts of the WOLF state estimation framework \cite{sola2021wolf} which was 
 submitted to RAL journal this year. We present these applications in the chronological order of their development, reflecting the opinions that
 we had at those respective times.
@@ -221,7 +214,8 @@ work was presented at ICRA 2021 conference \cite{fourmy2021contact}.
 \bigskip
 In \textbf{Chapter 9}, a visual-inertial SLAM system using deep-learning-based object pose estimation is presented. This work will be submitted to IROS 2022 conference \cite{debeunne2021cosyslam}.
 
-
+\bigskip
+In \textbf{Chapter 10}, we will present the conclusions and perspectives of this work.
 
 
 
