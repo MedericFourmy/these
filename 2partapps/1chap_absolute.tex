@@ -272,12 +272,12 @@ optimized by the solver, as explained in \secRef{sec:publish-state}. The smoothn
 \section{Conclusion}
 
 This chapter reports our first experimental results, validating our IMU observation model (using pre-integration), that we assembled into an observable 
-estimator using fiducial markers. The implementation reproduces what now is a classical formulation of visual-inertial odometry, but, at the time it was 
-released, not demonstrated on a humanoid robot. We have been able to obtain an accurate estimation of the humanoid robot \HRP{2} in a 3D terrain. In particular, 
-the IMU enables the estimator to have excellent accuracy and high bandwidth in the resulting estimation. In particular, the impact of the feet on the stairs, 
+estimator using fiducial markers. The implementation reproduces what now is a classical formulation of visual-inertial odometry, but, before our work was released, 
+it had not been demonstrated on a humanoid robot, to the best of our knowledge. We have been able to obtain an accurate estimation of the humanoid robot \HRP{2} in a 3D terrain.
+The IMU enables the estimator to have excellent accuracy and high bandwidth in the resulting estimation. In particular, the impact of the feet on the stairs, 
 and ensuing vibrations, clearly appears as a relevant movement in the estimator output. On the other hand, the fiducial markers enable the filter to display 
-a global localization, in particular, closing the loop when previously-seen markers were observed again while the 
-robot was walking along a loop in the experimental room. This experimentally validates the relevance of fusing these two information sources for localizing a legged robot. In particular, the filter provides a full consistency, on the opposite to loosely-coupled 
+a global localization, by closing the loop when previously-seen markers are observed again while the 
+robot walks along a loop in the experimental room. This experimentally validates the relevance of fusing these two information sources for localizing a legged robot. In particular, the filter provides a full consistency, on the opposite to loosely-coupled 
 filters where the global localization (SLAM-like) is not guaranteed to be consistent with the local estimation of the base state. 
 
 Since this work, a few interesting MAP-based estimators have been deployed on legged robots, as we are going to discuss in the next chapters. 
@@ -288,5 +288,5 @@ approach may be improved by introducing a marginalization procedure as done in s
 
 In this chapter, we have not yet added the information coming from the foot contact. Moreover, the fiducial markers are not strongly related to any 
 relevant part of the robot environment, which makes it difficult to use the localization information in a contact planner. In the next chapters, we are going to show, on one hand,
-how this estimator extends to fully account for the contact information and, on the other hand, how it may directly estimate parts of the environment that a motion planner could directly use by replacing
-the visual front-end.
+how this estimator extends to fully account for the contact information. On the other hand, we will investigate an estimator it may obtain information about parts of the environment, 
+that a motion planner could directly use, by replacing the visual front-end.
