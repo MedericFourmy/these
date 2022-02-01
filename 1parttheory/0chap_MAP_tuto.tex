@@ -114,7 +114,7 @@ apply the assumptions successively to write:
     \\
     &= \argmin_{\cX} - \log p(\cZ | \cX) p(\cX) &\text{\small Unaffected by constant denominator}
     \\
-    &= \argmin_{\cX} - \log p(\cX_0) \prod_{i=1}^{n} p(\bfz_i | \cX_{S_i})  &\text{\small Conditional independences}
+    &= \argmin_{\cX} - \log p(\cX_0) \prod_{i=1}^{n} p(\bfz_i | \cX_{S_i})  &\text{\small Conditional independences} \label{eq:factorized_likelihood}
     \\
     &= \argmin_{\cX} - \log \phi_0(\cX_{S_0}) \prod_{i=1}^{n} \phi_i(X_{S_i}) &\text{\small Factorized likelihood}  \label{eq:factorized_likelihood}
     \\
