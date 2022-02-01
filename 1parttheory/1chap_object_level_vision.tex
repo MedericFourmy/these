@@ -61,9 +61,10 @@ Depending on the nature of the problem, we can fix some of the variables of the 
 
 \begin{table}[h]
     \centering
+    \caption{Some possible estimation problems corresponding to fixing either of the variables. Estimated variables are checkmarked with " \checkmark ". Fixed variables are marked with "X".}
     \begin{tabular}{|l|ccc|}
         \hline
-        & $\T{W}{B}$ & $\T{B}{C}$ & $\T{W}{O}$  \\
+        & \thead{$\T{W}{B}$} & \thead{$\T{B}{C}$} & \thead{$\T{W}{O}$}  \\
         \hline
         \makecell[l]{SLAM with \\ extrinsics calibration} &  \checkmark &  \checkmark &  \checkmark \\
         \hline
@@ -76,8 +77,6 @@ Depending on the nature of the problem, we can fix some of the variables of the 
         Mapping & X & X &  \checkmark \\
         \hline
     \end{tabular}
-    \caption{Some possible estimation problems corresponding to fixing either of the variables. Estimated variables are checkmarked with " \checkmark
-". Fixed variables are marked with "X".}
     \label{tab:res_var_fix}
 \end{table}
 
@@ -365,14 +364,14 @@ orientation as in \figRef{fig:apriltag_cov_O_10deg}. On the contrary, tags with 
     \caption{Orientation uncertainty from the analytical covariance model. The single frame at the bottom represents the pose of the virtual camera, others are identical 
     \apriltags\ placed in front of the camera at different distances but identical orientations. Covariances are represented in orange, centered at the corresponding tag 
     position.
-    In (\subref{fig:apriltag_cov_O_10deg}) . 
-    (\subref{fig:apriltag_cov_O_45deg}) shows tags with the same positions but 45 degree orientations with respect to the camera.}
+    In (\subref{fig:apriltag_cov_O_10deg}), tags are oriented to be nearly fronto parallel to the camera (10 degrees orientation), resulting in high orientation uncertainty due to the ambiguous perspective. 
+    (\subref{fig:apriltag_cov_O_45deg}) shows tags with the same positions but 45 degree orientations with respect to the camera, which results in lesser uncertainty.}
     \label{fig:apriltag_cov_O}
 \end{figure}
 
 
 In \figRef{fig:apriltag_proj}, 3 tags are projected: the first (black) is half a meter away from the camera in fronto-parallel orientation, the second (orange)
-10cm to the right, and the third (rose) 10cm behind. We can see that the appearance of difference of appearance due to a depth-wise movement is much smaller, which 
+10cm to the right, and the third (rose) 10cm behind. We can see that the difference of appearance due to a depth-wise movement is much smaller, which 
 explains the higher uncertainty on the depth measurement.
 
 \begin{figure}[h]
@@ -602,7 +601,7 @@ A more quantitative evaluation can be deduced from \tabRef{tab:empirical_models}
 \begin{table}[h]
     \centering
     \caption{A quantitative evaluation of our models, these values are computed on test samples that were not used for training. }
-    \begin{tabular}{|llll|}
+    \begin{tabular}{|l|ccc|}
         \hline 
           & \thead[l]{$\displaystyle R^{2}$} & \thead[l]{RMSE ang. err. (°)} & \thead[l]{RMSE trans. err. (cm)} \\
         \hline 
