@@ -153,10 +153,9 @@ This is therefore a challenging dataset to test the robustness of our algorithm.
     \begin{center}
     \caption{Datasets description and results of the hand held videos}
     \label{tab:tless}
-    % \begin{tabular}{|c|c{1.1cm}|c{1.1cm}|c{1.1cm}|c{1cm}|}
-    \begin{tabular}{|c|c|c|c|c|}
+    \begin{tabular}{|l|llll|}
         \hline 
-        Scenario  & Length(m) & Duration(s) & MTE¹(cm) & STE²(cm) \\
+        \thead[l]{Scenario}  & \thead[l]{Length(m)} & \thead[l]{Duration(s)} & \thead[l]{MTE¹(cm)} & \thead[l]{STE²(cm)} \\
         \hline 
          V-only - Circular & 3.7 & 23.7 & 3.8 & 1.6\\
         \hline 
@@ -177,7 +176,7 @@ This is therefore a challenging dataset to test the robustness of our algorithm.
 \end{table}
 
 It is interesting to analyze the gains brought by the IMU fusion. The most evident observation is that the output trajectory is smoother, which gives more consistency 
-to the result (\figRef{fig:traj_circular}). But we can notice that the MTE is also reduced (\tabRef{tab:tless}). Indeed, the motion model is more precise thanks 
+to the result (\figRef{fig:traj_circular}). But we can notice that the mean translation error (MTE) is also reduced (\tabRef{tab:tless}). Indeed, the motion model is more precise thanks 
 to IMU data. This makes the outlier rejection more efficient than the visual-only CosySLAM which makes a zero velocity assumption between \keyframes.
 
 
@@ -195,10 +194,9 @@ These scenarios are challenging for our SLAM system, but it maps successfully th
    \begin{center}
    \caption{Datasets description and results of the videos taken on Solo}
    \label{tab:solo}
-    % \begin{tabular}{|c{2.2c1cm}|c{1.1cm}|c{1cm}|c{1cm}|}
-    \begin{tabular}{|c|c|c|c|c|}
+    \begin{tabular}{|l|llll|}
         \hline 
-        Scenario  & Length(m) & Duration(s) & MTE(cm) & STE(cm) \\
+        \thead[l]{Scenario}  & \thead[l]{Length(m)} & \thead[l]{Duration(s)} & \thead[l]{MTE(cm)} & \thead[l]{STE(cm)} \\
         \hline 
          V-IMU - Approach & 1.3 & 18.7 & 2.0 & 0.9\\
         \hline 

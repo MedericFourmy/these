@@ -221,7 +221,7 @@ in particular IMUs, to derive proprioceptive filters.
     orange elements correspond to the state variables affected by these residuals. Figures (\subref{fig:kin_point_matching}),(\subref{fig:kin_point_direct}),(\subref{fig:kin_point_vel}) are models
     for point feet robot, a model commonly used for quadrupeds. Figures (\subref{fig:kin_flat_matching}),(\subref{fig:kin_flat_direct}),(\subref{fig:kin_flat_vel}) are flat feet based models,
     commonly used for humanoid robots. The green rotational arrow represents gyroscope measurements that used in addition to encoders for the point-feet linear velocity model (\subref{fig:kin_point_vel}).
-    $N_c$: number of feet in contact, $\T{}{} \in \SE(3)$: spatial transformation, $\posi{}{} \in \Reals^3$: translation, $\nu \in \Reals^6$: spatial velocity \cite[2.2]{featherstone2014rigid}. 
+    $N_c$: number of feet in contact, $\T{}{} \in \SE(3)$: spatial transformation, $\posi{}{} \in \Reals^3$: translation, $\nu \in \Reals^6$: spatial velocity \cite[Section 2.2]{featherstone2014rigid}. 
         }
     \label{fig:kin_models}
 \end{figure}
@@ -323,7 +323,9 @@ and generalizes better to different environments. It does not provide covariance
 % CONLU
 Contact estimation is a still burgeoning field of research, especially for small quadrupeds which often do not embed contact sensors. The main reason 
 is the fact that adding extra weight at the very end of the legs can increase significantly the leg's inertia, limiting the explosivity of possible movement. The 
-extra electronics and wiring required may also be a limiting factor.  
+extra electronics and wiring required may also be a limiting factor. As part of our work is to include leg-odometry in an factor graph estimator, for which contact
+detection is important, we scrutinized closely the state of the art on the topic. However, the tests we conducted were on flat ground for which the planned
+contacts are very similar to the actual contacts, so that slightly reducing the size of the planned contact phase was a sufficient heuristic for us. 
 
 
 \subsection{Mitigation of kinematics model inaccuracies}
@@ -586,7 +588,7 @@ with respect to a known map, making position and yaw observable.
 A different kind of estimator has been investigated over the last decades in the visual/LIDAR SLAM community and has become predominant in applications
 such as drone navigation: \textit{factor graph optimization} (FGO), also known as simply \textit{graph optimization}. 
 
-\section{Visual SLAM transition to graph optimization}
+\subsection{Visual SLAM transition to graph optimization}
 
 While the Bayes filter summarizes  the accumulated information about the current estimated state and its cross-correlations as a single probabilistic distribution, 
 Factor Graph optimization keeps a trajectory of arbitrarily spaced past states that are regularly re-optimized in the least-squares sense, by finding the so-called 

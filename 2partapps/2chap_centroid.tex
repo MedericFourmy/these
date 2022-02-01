@@ -12,7 +12,7 @@ and force-torque measurements. This work was first presented in our published pa
 As mentioned in the literature review, centroidal states are key to the control of legged robots. Indeed, they provide rich information about the general
 behavior of the system and can be used to check for the stability of the system. The centroidal state estimation literature is rich, especially for humanoid
 robots (see \secRef{sec:centroidal_est_lit}). To our knowledge, all of the centroidal estimators proposed in the literature can be classified as loosely-coupled estimators 
-(following the terminology introduced in \ref{sec:proprio_filters}): they rely on prior knowledge of a base state. For instance, Piperakis \cite{piperakis2018nonlinear} 
+(following the terminology introduced in \secRef{sec:sec:proprio_filters}): they rely on prior knowledge of a base state. For instance, Piperakis \cite{piperakis2018nonlinear} 
 describes the whole pipeline: first, an inertial-kinematics EKF estimates the base state, then an EKF uses this fixed base state to obtain centroidal states. 
 Since the factor graph optimization framework that we use theoretically reaches its full potential when the maximum number of cross-correlation
 are considered, we did not find this solution satisfactory. Here, we rather propose a tightly-coupled estimator that jointly estimates

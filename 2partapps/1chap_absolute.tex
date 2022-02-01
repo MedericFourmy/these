@@ -160,9 +160,9 @@ Each dataset is composed of 3 sequences:
 \begin{table}[t]
     \centering
     \caption{Datasets description and results}
-    \begin{tabular}{c|c|c|c|c}
-        Description & Duration & Length & MTE$^1$ & STE$^2$ \\
+    \begin{tabular}{|l|llll|}
         \hline
+        \thead[l]{Description} & \thead[l]{Duration} & \thead[l]{Length} & \thead[l]{MTE$^1$} & \thead[l]{STE$^2$} \\
         \hline
         Handheld loop & 59.0\,\textrm{s} & 20.6\,\textrm{m} & 29.0 & 11.3  \\
         \hline
@@ -226,7 +226,7 @@ cross-correlation between MoCap and estimated state sequences.
 
 \subsection{Absolute localization}
 
-We consider four datasets that are summarized in table \tabRef{tab:datasets}. They cover different tasks on which a consistent 
+We consider four datasets that are summarized in \tabRef{tab:datasets}. They cover different tasks on which a consistent 
 estimation of the robot movement is necessary. The first one is a relatively long sequence consisting of two loops with the VIS handheld. 
 This is used to test the long-term localization of the robot, which is interesting for navigation. Secondly, we made the LAAS Gepetto team 
 \HRP{2} walk and turn around on a short distance to evaluate the resilience of the filter to the vibrations of the robot. Finally, two more 

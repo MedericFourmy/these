@@ -57,24 +57,24 @@ the robot pose, the camera extrinsics, and the object pose:
 %
 where here $\Log_{\SE(3)}$ denotes the log map on $\SE(3)$.
 
-Depending on the nature of the problem, we can fix some of the variables of the residual. In table \tabRef{tab:res_var_fix}, various estimation problems are modelled depending on which variable is fixed.
+Depending on the nature of the problem, we can fix some of the variables of the residual. In \tabRef{tab:res_var_fix}, various estimation problems are modelled depending on which variable is fixed.
 
 \begin{table}[h]
     \centering
-    \begin{tabular}{c|c|c|c}
+    \begin{tabular}{|l|ccc|}
+        \hline
         & $\T{W}{B}$ & $\T{B}{C}$ & $\T{W}{O}$  \\
         \hline
-        \hline
-        SLAM with extrinsics calibration &  \checkmark
- &  \checkmark &  \checkmark \\
+        \makecell[l]{SLAM with \\ extrinsics calibration} &  \checkmark &  \checkmark &  \checkmark \\
         \hline
         SLAM &  \checkmark & X &  \checkmark \\
         \hline
-        Localization with extrinsics calibration &  \checkmark &  \checkmark & X \\
+        \makecell[l]{Localization with \\ extrinsics calibration} &  \checkmark &  \checkmark & X \\
         \hline
         Localization &   \checkmark & X & X \\
         \hline
         Mapping & X & X &  \checkmark \\
+        \hline
     \end{tabular}
     \caption{Some possible estimation problems corresponding to fixing either of the variables. Estimated variables are checkmarked with " \checkmark
 ". Fixed variables are marked with "X".}
@@ -593,7 +593,7 @@ The error of the object from the YCBV dataset seems more stable and smaller than
 This can be explained by the texture of the object and the absence of symmetries: T-LESS objects are known to be more challenging 
 for pose estimation and this is confirmed by our model.
 
-A more quantitative evaluation can be deduced from table \tabRef{tab:empirical_models}. The translation error seems to be captured pretty well,
+A more quantitative evaluation can be deduced from \tabRef{tab:empirical_models}. The translation error seems to be captured pretty well,
  as the RMSE is around the centimeter. However, the angular error seems a little less predictable, especially for T-LESS objects whose orientation 
  estimation can suffer from an important measurement noise due to the lack of textures. The $R^2\in[0,1]$ score is the coefficient of determination 
  and is often used to evaluate statistical models. Its interpretation is subject to debate and cannot conclude by itself on the absolute quality of the model. 
@@ -602,9 +602,9 @@ A more quantitative evaluation can be deduced from table \tabRef{tab:empirical_m
 \begin{table}[h]
     \centering
     \caption{A quantitative evaluation of our models, these values are computed on test samples that were not used for training. }
-    \begin{tabular}{|c|c|c|c|}
+    \begin{tabular}{|llll|}
         \hline 
-          & $\displaystyle R^{2}$ & RMSE ang. err. (°) & RMSE trans. err. (cm) \\
+          & \thead[l]{$\displaystyle R^{2}$} & \thead[l]{RMSE ang. err. (°)} & \thead[l]{RMSE trans. err. (cm)} \\
         \hline 
          YCBV-4 & 0.55 & 5,1 & 0.6 \\
         \hline 

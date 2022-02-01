@@ -157,7 +157,7 @@ The Gauss-Newton algorithm is an iterative algorithm to find the minimum of NLLS
 \begin{enumerate}
     \item Initialize the state estimate at an initial value $\check{\cX} := \cX^0$
     \item Approximate the NLLS cost function around the current estimate as a quadratic function:  
-    $\cF(\Delta \bfx) \approx \cL(\check{\cX} + \Delta \bfx)$ (see \ref{eq:gaussian_step_quadratic_eq} below)
+    $\cF(\Delta \bfx) \approx \cL(\check{\cX} + \Delta \bfx)$ (see \eqRef{eq:gaussian_step_quadratic_eq} below)
     \item Find the optimal step $\Delta \bfx^*$ as the root of $\cF(\Delta \bfx)$, corresponding to a linear set of 
     equations (see \eqRef{eq:linear_syst_GN} below)
     \item Update the current state estimate $\check{\cX} := \check{\cX} + \Delta \bfx^*$
@@ -216,7 +216,7 @@ $\bfJ \in \Reals^{M \times N}$. We call this new function $\cF(\Delta \bfx) \app
 
 $\cF(\Delta \bfx)$ is therefore a local parabolic approximation of 
 $\cL$ around the current estimate and $\bfH \triangleq \bfJ\tr \bfJ$ is the approximate Hessian of $\cL$ 
-\footnote{See \cite{sola2017course} Section 4.2.1 for more details on the nature of the approximation.}. Note that by construction, $\bfH$ is always 
+\footnote{See \cite[Section 4.2.1]{sola2017course} for more details on the nature of the approximation.}. Note that by construction, $\bfH$ is always 
 semi-definite positive.
 
 
@@ -702,8 +702,8 @@ state variables that the residual depends on are non-zero. For instance, the mat
 
 
 The approximate Hessian matrix $\bfH \in \Reals^{N \times N}$ displays a similarly remarkable sparsity that makes the resolution of the linear system
-at each step very efficient. Algorithms such as the Schur complement \cite[A.5.5]{boyd2004convex}, Cholesky factorization \cite[C.3]{boyd2004convex}, 
-and QR factorization \cite[C.5]{boyd2004convex} were applied by different authors to the problem of SLAM and estimation. 
+at each step very efficient. Algorithms such as the Schur complement \cite[Section A.5.5]{boyd2004convex}, Cholesky factorization \cite[Section C.3]{boyd2004convex}, 
+and QR factorization \cite[Section C.5]{boyd2004convex} were applied by different authors to the problem of SLAM and estimation. 
 
 \subsection{The algorithm (revisited)}
 To tie things together, we now recapitulate the Gauss-Newton algorithm in the context of variables living on manifolds. 

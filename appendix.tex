@@ -18,8 +18,8 @@ illustrate the nature of the approximation and compare it to an exact inference 
 Even if our priors and measurements models are Gaussian distributions, the posterior distribution
 is in general non-Gaussian (unless all measurements models are linear). The region near the peak of the posterior is, however, often nearly Gaussian in shape.
 The curvature around the mode is described by the Hessian of the posterior negative log-likelihood at the MAP estimated state. 
-It can be shown that he Hessian is the \textit{information matrix} of the problem\footnote{The proof of this statement is out of the scope of this document and can be found in Section 5.1 of
-\cite{peng2018advanced}}. Thus, finding the covariance of the MAP estimate resolves to inverting a 
+It can be shown that he Hessian is the \textit{information matrix} of the problem\footnote{The proof of this statement is out of the scope of this document and can be found in
+\cite[Section 5.1]{peng2018advanced}}. Thus, finding the covariance of the MAP estimate resolves to inverting a 
 sparse positive definite matrix.
 
 \begin{equation}
@@ -27,7 +27,7 @@ sparse positive definite matrix.
     \label{eq:map_laplace}
 \end{equation}
 
-This is referred to as the quadratic or Laplace approximation (\cite{mcelreath2018statistical}, section 2.4.2). Obtaining an approximation of the full posterior is then a two-step process: 
+This is referred to as the quadratic or Laplace approximation (\cite[Section 2.4.2]{mcelreath2018statistical}). Obtaining an approximation of the full posterior is then a two-step process: 
 first, find the mode of the posterior (the MAP), then "fit a Gaussian" on this mode. 
 
 The full covariance is however rarely computed for a few reasons. First, few algorithms rely on this information (a notable exception being active feature matching \cite{davison2007monoslam}, which is not longer used in state of the art vision systems). Second, computing the Hessian's inverse is too costly to be realized "in the loop". Sometimes, only parts of the covariance are computed using the Schur-complement method \cite{konolige2005slam}, which is costly but much less than the full inverse.
@@ -40,7 +40,7 @@ To contrast this approach with the aforementioned approximations, variational in
 
 \section{Example: stereoscopic depth estimation}
 
-We can illustrate the Laplace approximation with a one-dimensional toy problem (borrowed from Barfoot \cite{barfoot2017state}, section 4.1.1).
+We can illustrate the Laplace approximation with a one-dimensional toy problem (borrowed from Barfoot \cite[Section 4.1.1]{barfoot2017state}).
 The problem is stated as estimating the depth $x \in \Reals$ of a landmark in the scene with a nonlinear camera model (see \figRef{fig:barfoot_stereo})
 %
 \begin{equation}
