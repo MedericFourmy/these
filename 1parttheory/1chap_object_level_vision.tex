@@ -65,17 +65,19 @@ Depending on the nature of the problem, we can fix some of the variables of the 
         & $\T{W}{B}$ & $\T{B}{C}$ & $\T{W}{O}$  \\
         \hline
         \hline
-        SLAM with extrinsics calibration & & & \\
+        SLAM with extrinsics calibration &  \checkmark
+ &  \checkmark &  \checkmark \\
         \hline
-        SLAM & & X & \\
+        SLAM &  \checkmark & X &  \checkmark \\
         \hline
-        Localization with extrinsics calibration & & X & \\
+        Localization with extrinsics calibration &  \checkmark &  \checkmark & X \\
         \hline
-        Localization &  & X & X \\
+        Localization &   \checkmark & X & X \\
         \hline
-        Mapping & X & X &  \\
+        Mapping & X & X &  \checkmark \\
     \end{tabular}
-    \caption{Some possible estimation problems corresponding to fixing either of the variables. Fixed variables are checked.}
+    \caption{Some possible estimation problems corresponding to fixing either of the variables. Estimated variables are checkmarked with " \checkmark
+". Fixed variables are marked with "X".}
     \label{tab:res_var_fix}
 \end{table}
 
