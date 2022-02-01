@@ -112,7 +112,7 @@ estimation of the gravity vector direction, as well centroidal quantities (cente
 In our opinion, this implies that the ideal perception system should encourage the multiplication of perception sources both in the number of sensors and their variety.
 In addition, to maximize the accuracy of the estimator, any available correlations between variables and prior knowledge should in principle be taken into account. 
 We also need to enable online calibration of the many sensor biases and fixed parameters. To achieve these goals, the development of \textit{tightly coupled} estimators, 
-that exploit as many data correlations as possible between the sensor measurements should be undertaken.
+which exploit as many data correlations as possible between the sensor measurements, should be undertaken.
 
 Two main perception problems are typically considered onboard a legged robot. On the first hand, the sense of balance is replicated through high-frequency
 local estimator fusing IMU and contact information to obtain the robot base velocity directed with respect to the gravity field. On the other hand,
@@ -122,11 +122,12 @@ This second layer is typically estimated at lower frequencies.
 It is not yet exactly clear what is the optimal set of sensors that needs to be integrated on legged platforms (though Inertial Measurement Units, kinesthesis, and 
 cameras or LIDARS are becoming more and more standard for industrial applications). This set may depend heavily on the type of application,
 the size of the platform (LIDARS are too bulky for smaller quadrupeds), or the acceptable price range of the robot. Thus, it is important to allow
-for a great \textit{modularity} in the design of estimators. We think that this can be attained by different means. First, by a flexible software architecture
+for a great \textit{modularity} in the design of estimators. 
+We think that this can be attained by different means. First, by a flexible software architecture
 that allows a general formulation of estimation problems (which is the endeavor of WOLF \cite{sola2021wolf} \footnote{WOLF documentation and examples can be 
 found in \url{www.iri.upc.edu/wolf}}, that we have used and contributed to during the preparation of this thesis). Second, by a generalization of mathematical
  models describing sensor measurements. Third, by the formalization of the correlation between observation models through a factor graph,
- naturally leading to a natural estimator that finds the maximum of the posterior distribution over the states.
+ naturally leading to an estimator that finds the maximum of the posterior probability distribution over the states.
  
 
 
