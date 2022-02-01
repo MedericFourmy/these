@@ -38,9 +38,9 @@ Research on mobile robotics moved to outdoors applications, using motorized vehi
 offered one of the first large scale proof of concept of autonomous cars, where a few teams managed to safely drive 150 miles paths in desert-environments 
 \cite{thrun2006stanley}, while the 2007 DARPA Urban challenge concentrated on urban road environments \cite{urmson2008autonomous}. In both cases, cars were 
 equipped with GPS, IMU's, cameras, and a metric map of the path. Most teams relied heavily on global positioning, exteroceptive sensors being used for 
-minor checks and corrections \cite{hillel2014recent}. Nowadays, the most successful autonomous car systems (such as Tesla \footnote{See A. Karpathy  
-\href{https://www.youtube.com/watch?v=g6bOwQdCJrc}{presentation} of Tesla's vision stack} and comma.ai \cite{comma2020openpilot}) 
-seem to tend toward exclusive use of vision for local navigation (lane following, lane changing, overtaking, etc.) \footnote{As A. Karpathy puts it, “Lidar is really a shortcut”}. 
+minor checks and corrections \cite{hillel2014recent}. Nowadays, the most successful autonomous car systems 
+% (such as Tesla \footnote{See A. Karpathy \href{https://www.youtube.com/watch?v=g6bOwQdCJrc}{presentation} of Tesla's vision stack} and comma.ai \cite{comma2020openpilot}) 
+seem to tend toward exclusive use of vision for local navigation (lane following, lane changing, overtaking, etc.) \footnote{As Andrej Karpathy puts it, “Lidar is really a shortcut”}. 
 
 % Mature systems now exhibit almost human-level performance, though some hard corner cases,
 % especially involving other humans behavior predictions, are still on the table.
@@ -102,12 +102,13 @@ of proprioception, something as simple as grasping a glass is a tedious process,
 % the task of representing them in an abstracted algorithm to be implemented on a cybernetic system is a serious challenge. 
 
 
-\section{Need for a tightly-coupled and modular estimator for legged-robots}
+\section{How to implement artificial sensing for legged robots}
 
 Legged robots are designed to evolve in human-designed environments to be able to replace us in some of our tedious or dangerous tasks. As such, they should be able to
 display a sufficient level of dynamical intelligence and perception capabilities. 
 In particular, the perception should be adapted to real-time control at the high frequencies usually found in legged-robot controllers (in the kilohertz range).
-The estimated state should accurately reflect both the dynamics of the robot as well as its environment structure. Balance controllers in particular require a precise estimation of the gravity vector direction, as well centroidal quantities (center of mass, angular momentum, etc.).
+The estimated state should accurately reflect both the dynamics of the robot as well as its environment structure. Balance controllers in particular require a precise 
+estimation of the gravity vector direction, as well centroidal quantities (center of mass, angular momentum, etc.).
 In our opinion, this implies that the ideal perception system should encourage the multiplication of perception sources both in the number of sensors and their variety.
 In addition, to maximize the accuracy of the estimator, any available correlations between variables and prior knowledge should in principle be taken into account. 
 We also need to enable online calibration of the many sensor biases and fixed parameters. To achieve these goals, the development of \textit{tightly coupled} estimators, 
@@ -157,7 +158,8 @@ I have organized this thesis as follows:
 \textbf{Chapter 2} presents a literature overview of state estimation legged robots, that we will use to position our objectives.
 
 \bigskip
-\textbf{Chapter 3} serves as a general introduction to Factor Graph optimization using the Maximum-A-Posteriori. We emphasize the special treatment of variables belonging to manifolds and give a brief introduction to Lie theory, which is used extensively in chapter 6.
+\textbf{Chapter 3} serves as a general introduction to Factor Graph optimization using the Maximum-A-Posteriori. We emphasize the special treatment of variables 
+belonging to manifolds and give a brief introduction to Lie theory, which is used extensively in chapter 6.
 
 \bigskip
 \textbf{Chapter 4} describes two different measurement models used in the object-level visual-inertial systems that we built. 
