@@ -282,8 +282,8 @@ isotropic as explained above, $\Cov_{\bfx} = \sigma_x^2 \bfI$, this equation fin
 
 \begin{align}
     \Cov_{\T{}{}} 
-    &=  (\bfJ\tr \bfJ)^{-1}\bfJ \tr \sigma_x^2 \bfI ((\bfJ\tr \bfJ)^{-1}\bfJ\tr)\tr \\
-    &=  \sigma_x^2 (\bfJ\tr \bfJ)^{-1} \bfJ\tr \bfJ (\bfJ\tr \bfJ)^{-1} \\
+    &=  (\bfJ\tr \bfJ)^{-1}\bfJ \tr \sigma_x^2 \bfI ((\bfJ\tr \bfJ)^{-1}\bfJ\tr)\tr \notag\\
+    &=  \sigma_x^2 (\bfJ\tr \bfJ)^{-1} \bfJ\tr \bfJ (\bfJ\tr \bfJ)^{-1} \notag\\
     &= \sigma_{x}^2(\bfJ\tr \bfJ)^{-1}.
 \end{align}
 
@@ -346,7 +346,7 @@ one axis corresponds to a dilatation of the ellipse along this axis. For instanc
 along the Z-axis of the camera frame have a very high uncertainty along the X and Y-axis (in camera frame). Their uncertainty ellipses seem, therefore, very flat
 along the Z-axis. \figRef{fig:apriltag_cov_O_10deg} directly relates to our discussion about tag pose ambiguity in \secRef{sec:tag_ambiguity}. Tags close
 to fronto-parallel configuration (along the camera Z-axis) have a very high rotational uncertainty compared to tags that have a more important relative 
-orientation as in \figRef{fig:apriltag_cov_O_10deg}.
+orientation as in \figRef{fig:apriltag_cov_O_10deg}. On the contrary, tags with higher relative orientation in \figRef{fig:apriltag_cov_O_10deg} display a much lower rotational uncertainty.
 
 
 \begin{figure}[h]
@@ -360,13 +360,13 @@ orientation as in \figRef{fig:apriltag_cov_O_10deg}.
     \begin{subfigure}{.50\linewidth}
         \centering
         \includegraphics[width=\textwidth]{figures/apriltag_cov_O_45deg.png}
-        \caption{Relative position covariances, 45 degree orientation \label{fig:apriltag_cov_O_45deg}}
+        \caption{Relative orientation covariances, 45 degree orientation \label{fig:apriltag_cov_O_45deg}}
     \end{subfigure}%
     \caption{Orientation uncertainty from the analytical covariance model. The single frame at the bottom represents the pose of the virtual camera, others are identical 
-    \apriltags placed in front of the camera at different distances but identical orientations. Covariances are represented in orange, centered at the corresponding tag 
+    \apriltags\ placed in front of the camera at different distances but identical orientations. Covariances are represented in orange, centered at the corresponding tag 
     position.
     In (\subref{fig:apriltag_cov_O_10deg}) . 
-    (\subref{fig:apriltag_cov_O_45deg}) shows the same configuration for tag twice the size, whose relative position is less uncertain.}
+    (\subref{fig:apriltag_cov_O_45deg}) shows tags with the same positions but 45 degree orientations with respect to the camera.}
     \label{fig:apriltag_cov_O}
 \end{figure}
 
