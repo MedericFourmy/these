@@ -220,17 +220,24 @@ These scenarios are challenging for our SLAM system, but it maps successfully th
 
 \section{Conclusion}
 
-This chapter presents the first step toward a semantic reconstruction of the robot's environment. We see in this method the potential to provide multi-contact locomotion controllers \cite{carpentier2017multi}
-with their needed contact surface reconstructions. By leveraging models of known objects in the scene, one may imagine localizing staircases, their banister, door handles, etc. that
-the robot is required to interact with. This work was conducted during the Msc thesis of Cesar Debeunne.
+This chapter presents the first step toward a semantic reconstruction of the robot environment. We see in this method the potential to provide multi-contact locomotion controllers \cite{carpentier2017multi}
+with their needed contact surface reconstructions. By leveraging models of known objects in the scene, one may imagine localizing staircases, their handrail, door handles, etc. that
+the robot is required to interact with. This work was conducted during the Msc thesis of Cesar Debeunne, who was a passionate collaborator.
 
-In the case when these object features become sparse, the IMU handles the estimation as a strap-down integration, which is viable for a few seconds. After this delay, extra sources of information are required
-to avoid drift in the estimates. One solution would be to increase the robustness of the visual front-end by including residuals using classical 2D salient points features, as visual odometry. In this context,
-objects in the scene would be useful both for providing semantic and surface information, as well as providing loop-closures. The covariance model that we developed also requires more development.
-In particular, it required important experimental work to build the dataset of CosyPose errors. In particular, needing to collect data for each individual object is very time-consuming. Besides,
+In the case where few or no object of interest are in the field of view, the IMU handles the estimation as a strap-down integration, which is viable for a few seconds. After this delay, extra sources of information are required
+to avoid drift in the estimates. One solution would be to increase the robustness of the visual front-end by including residuals using classical 2D salient points features, as visual odometry, as already discussed in \chpRef{chp:absolute_vi}. 
+In this context,
+objects in the scene would be useful both for providing semantic and surface information, as well as providing loop-closures. 
+
+The covariance model that we developed also requires more development.
+In particular, it required important experimental work to build the dataset of CosyPose errors. Collecting data for each individual object is very time-consuming. Besides,
 the models are likely to overfit the obtained dataset and generalize poorly to datapoints outside of its boundaries.
 
 To improve this, we could work on several aspects. First, the ideal method would be to find a general model, as we did for the AprilTag PnP algorithm (\secRef{sec:apritlag_covariance}), directly computable
 from the CosyPose network. Second, if we show that this is not feasible, we could try to train the covariance model in simulation which provides a vastly superior diversity in situations, though lacking
-some of the artifacts of reality. CosyPose itself is only trained in simulation. Thirdly, we could use a Bayesian estimator to fit the uncertainty model, the uncertainty of this model itself in order to 
-avoid the particularly bad case of an underestimated covariance. 
+some of the artifacts of reality. CosyPose itself is only trained in simulation. For this, we could use a reduced model as presented in this chapter or retrain Cosypose using methods specialized 
+for neural networks \cite{jospin2020hands}. Third, we could work on the formal definition of an uncertainty model, e.g. using a Bayesian formulation, that we also would have to fit empirical data. 
+This would potentiality enable to quantify this quality of the predictions when extrapolating outside of the training domain (for example, if trained 
+on a range 2-4 meters, the current model would diverge without warning if triggered at 5m, while a Bayesian model would predict a the variance and and uncertainty on this prediction).
+
+Finally, we are eager to validate this formulation jointly with the tight estimation of \chpRef{chp:cosyslam} and are getting prepared for that as explained in next chapter.
