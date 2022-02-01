@@ -6,7 +6,7 @@
 
 Sensor modalities available on robotic platforms display a great variety in the rate at which measurements are acquired. For instance, 
 a camera may record images at 33Hz while an IMU may be updated at 1kHz. In the context of Factor Graph estimation, this creates a challenge since residuals
-are defined between \keyframes\ selected at a relatively low frequency, at times as low as 1Hz. One needs to integrate measurements from these high-rate sensors between \keyframes\,
+are defined between \keyframes\ selected at a relatively low frequency, at times as low as 1Hz. One needs to integrate measurements from these high-rate sensors between \keyframes,
 which is not trivial in general.
 
 In this chapter, we first describe the example of the integration of IMU measurements which motivates the development of the pre-integration theory \cite{lupton-09,forster2017-TRO}.
@@ -172,7 +172,7 @@ where $\ominus$ is the composite manifold lift operator defined in \eqRef{eq:com
 
 $\hat\D_{im}(\bfx^i, \bfx^m)$ only depends on state variables and, thus, is cheap to compute. It corresponds to the "expected" motion of the system, given the current state estimates. 
 $\D_{im}(\bias^i, \bfx^i)$ is the motion computed from the integration of (very many) IMU measurements during $\Dt_{im}$. However, since we "naively" integrated
-in the world frame, this term also depends on the initial state $\bfx_i$ and on IMU bias $\bias_i$. This implies that for each update of the estimate $\bfx_i$, the IMU measurements 
+in the world frame, this term also depends on the initial state $\bfx_i$ and on IMU bias $\bias_i$. This implies that for each update of the estimate $\bfx_i$, that is for every iteration of the MAP solver, the IMU measurements 
 need to be re-integrated from the new $\bfx_i$ and for the new $\bfb^i$. This is highly inefficient and, therefore, not well adapted to the repeated evaluations required by nonlinear 
 solvers.
 
@@ -308,7 +308,7 @@ From all the considerations exposed above, the delta pre-integration algorithm i
 
 \paragraph{Initialization}
 First, $\ol\D_{ii}$ is initialized to the null motion via the identity of the group, $\D_{\cE}$. 
-Its covariance $\Cov_\Delta^{ii}$ and the Jacobian $\mjac{\D_i}{\bfb_i}$ are set to zero. 
+Its covariance $\Cov_\Delta^{ii}$ and the Jacobian $\mjac{\D_{ii}}{\bfb_i}$ are set to zero. 
 
 \paragraph{Calibration and retraction}
 Second, at each reception of sensor data $\tilde\bfz_k$ at time $k$, we integrate during $\dt$ to obtain the delta corresponding to a single data sample
