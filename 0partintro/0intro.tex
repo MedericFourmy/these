@@ -121,12 +121,14 @@ This second layer is typically estimated at lower frequencies.
 It is not yet exactly clear what is the optimal set of sensors that needs to be integrated on legged platforms (though Inertial Measurement Units, kinesthesis, and 
 cameras or LIDARS are becoming more and more standard for industrial applications). This set may depend heavily on the type of application,
 the size of the platform (LIDARS are too bulky for smaller quadrupeds), or the acceptable price range of the robot. Thus, it is important to allow
-for a great \textit{modularity} in the design of estimators. 
-We think that this can be attained by different means. First, by a flexible software architecture
+for a great \textit{modularity} in the design of estimators.
+And even though modularity together with tight coupling may seem incompatible at first, we believe these two assets must be attained simultaneously.
+We think that this can be attained by different means. 
+First, by using a factor graph formulation together with a modular front-end/back-end architecture, that naturally leads to a tightly-coupled, optimization based, Maximum-a-Posteriori estimation.
+Second, by a flexible software architecture
 that allows a general formulation of estimation problems (which is the endeavor of WOLF \cite{sola2021wolf} \footnote{WOLF documentation and examples can be 
-found in \url{www.iri.upc.edu/wolf}}, that we have used and contributed to during the preparation of this thesis). Second, by a generalization of mathematical
- models describing sensor measurements. Third, by the formalization of the correlation between observation models through a factor graph,
- naturally leading to an estimator that finds the maximum of the posterior probability distribution over the states.
+found in \url{www.iri.upc.edu/wolf}}, that we have used and contributed to during the preparation of this thesis). Third, by a generalization of mathematical
+models describing sensor measurements. 
  
 
 
