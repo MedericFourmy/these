@@ -209,7 +209,7 @@ Note that the orientation of the system $\Rot{}{}$ appears in the centroidal sta
 which we conduct the integration. We, therefore, have to include the dynamical model of the orientation by integrating gyroscope measurements $\angvelm{}{}$ together with forces and torques. 
 
 As illustrated in \secRef{sec:imu_preint_motivation}, recursively applying \eqRef{eq:COMDiscrete} and defining a naive difference in the world frame leads to an inefficient
-residual definition. Instead, we resort to the generalized pre-integration algorithm that we developed in \secRef{sec:sec:general-preint}.
+residual definition. Instead, we resort to the generalized pre-integration algorithm that we developed in \secRef{sec:general-preint}.
 
 
 
@@ -218,7 +218,7 @@ residual definition. Instead, we resort to the generalized pre-integration algor
 
 \subsection{Force-torque pre-integration on composite Lie group}
 
-This section follows the same structure and logic as the two IMU pre-integration algorithm described in \secRef{sec:sec:imu_preint_composite} and \secRef{sec:sec:imu_preint_compact} since
+This section follows the same structure and logic as the two IMU pre-integration algorithm described in \secRef{sec:imu_preint_composite} and \secRef{sec:imu_preint_compact} since
 we use the same generalized pre-integration pipeline. 
 % To apply this pipeline to a new motion sensor, we need to define the delta $\D_c$ Lie group relating the centroidal states (and base orientation) between two \keyframes\ thanks to the $\boxminus$ operator 
 % $\D^{im}=\bfx^k\boxminus\bfx^i$. 
@@ -366,7 +366,7 @@ Where the problems differ however is in the inclusion of the angular momentum (t
 the CoM lever bias $\bias_c$, which is also present in the centroidal kinematics residual \eqref{eq:CK_residual}. \cite{rotella2015humanoid} showed that including the same set of measurements on centroidal quantities as
 us, the state space centroidal system with centroidal kinematics bias is made observable, provide we have a prior estimation of the base states. In our case, base states are
 state variables estimated in conjunction with the centroidal states. However, if the base states are made observable by other sensor sources, then the same observability analysis
-should apply to the centroidal states in our case. This is confirmed by experimental results presented in \secRef{sec:chp:centroidal_estimation}.
+should apply to the centroidal states in our case. This is confirmed by experimental results presented in \chpRef{chp:centroidal_estimation}.
 
 
 \section{Conclusion}
