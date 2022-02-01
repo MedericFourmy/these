@@ -20,6 +20,38 @@ Let us first discuss how this feedback loop has evolved while robotics was growi
 
 \section{From factory automation to dancing robots}
 
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\textwidth]{figures/1961unimate.jpg}
+        \caption{}
+        \label{fig:unimate}
+    \end{subfigure}%
+    \hspace{0.5cm}
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{figures/hilare.png}
+        \caption{}
+        \label{fig:hilare}
+    \end{subfigure}%
+
+    \begin{subfigure}{0.49\textwidth}
+        \includegraphics[width=\textwidth]{figures/darpa_car_stanford.jpeg}
+        \caption{}
+        \label{fig:darpa_stanford}
+    \end{subfigure}%
+    \hspace{0.5cm}
+    \begin{subfigure}{0.44\textwidth}
+        \includegraphics[width=\textwidth]{figures/digit.jpg}
+        \caption{}
+        \label{fig:digit}
+    \end{subfigure}%
+    \caption{Evolution of robotics platforms from factory manipulators to humanoid robots. (\subref{fig:unimate}) Unimate factory manipulator, 
+    (\subref{fig:hilare}): Hilare mobile robotics research platform developed at LAAS-CNRS, (\subref{fig:darpa_stanford}): Stanford autonomous car winner of the 2005 grand challenge DARPA, 
+    (\subref{fig:digit}): Digit (Agility Robotics) commercial humanoid robot.}
+
+\end{figure}
+
 Within the field of robotics, the implementation of the feedback loop has seen dramatic changes over the years, propelled by the changing nature 
 of the mechatronic systems, in particular in the actuation and sensor array, the applications at play, and the mathematical formulations
 used to model the systems. The progression of the perception side of the loop, extracting meaningful information from sensor data, can be divided into a few
@@ -36,7 +68,7 @@ On the other end of the spectrum, researchers started to equip wheeled mobile pl
 to detect relative displacement. 
 Research on mobile robotics moved to outdoors applications, using motorized vehicles as research platforms. The 2005 DARPA grand challenge
 offered one of the first large scale proof of concept of autonomous cars, where a few teams managed to safely drive 150 miles paths in desert-environments 
-\cite{thrun2006stanley}, while the 2007 DARPA Urban challenge concentrated on urban road environments \cite{urmson2008autonomous}. In both cases, cars were 
+\cite{thrun2006stanley} (see \figRef{fig:darpa_stanford}), while the 2007 DARPA Urban challenge concentrated on urban road environments \cite{urmson2008autonomous}. In both cases, cars were 
 equipped with GPS, IMU's, cameras, and a metric map of the path. Most teams relied heavily on global positioning, exteroceptive sensors being used for 
 minor checks and corrections \cite{hillel2014recent}. Nowadays, the most successful autonomous car systems 
 % (such as Tesla \footnote{See A. Karpathy \href{https://www.youtube.com/watch?v=g6bOwQdCJrc}{presentation} of Tesla's vision stack} and comma.ai \cite{comma2020openpilot}) 
@@ -46,8 +78,7 @@ seem to tend toward exclusive use of vision for local navigation (lane following
 % especially involving other humans behavior predictions, are still on the table.
 % Though relying mostly on global positioning (fusing GPS and IMU \cite{hillel2014recent}), exteroceptive sensing 
 
-In this landscape of autonomous systems, legged robots (such as humanoid 
-or quadrupeds) are singular in many regards. 
+In this landscape of autonomous systems, legged robots (humanoid or quadrupeds) are singular in many regards. 
 First and foremost, they are inherently unstable dynamical systems that require continuous active control by applying forces at chosen locations of the environment. 
 Therefore, they require an acute sense of balance, in which Inertial Measurement Units and contact detection play important roles. 
 %which was primarily handled by Inertial Measurement Units in early applications ([CITE RAIBERT+HONDA]) 
