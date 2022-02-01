@@ -172,13 +172,7 @@ The estimated CoM velocity closely follows the velocity of the base as shown in 
 \end{figure}
 
 
-
-
-\section{Conclusion}
-
-This chapter reports the first implementation of a MAP estimator tightly coupling the estimation of both the basis and 
-the centroidal states, by fusing IMU, contact, and kinematic measurements. It shows the validity of the approach 
-and demonstrates that the consistency of the filter results in the correct estimation of both the states and the biases.
+\section{Discussion}
 
 On the theoretical side, the correlation of the IMU and forces pre-integration models (due to the common gyroscope data integration) might also be investigated. 
 One of the hypotheses involved in factor graph MAP estimation is the conditional independence of measurement data (see \eqRef{eq:factorized_likelihood} in \secRef{sec:MAP} for more details).
@@ -199,6 +193,20 @@ structure, biased feet force sensors).
 
 
 Nevertheless, Solo-12 permitted us to easily generate datasets based on simple quasi-static trajectories. We since recorded more datasets with walking trajectories
-based on the walking controller \cite{leziart2021implementation}, including the robot proprioceptive measurements as well as images from an onboard camera. Evaluation
+based on the walking controller \cite{leziart2021implementation}, including the robot proprioceptive measurements as well as images from an onboard camera (See \chpRef{chp:dataset} for more details). Evaluation
 of our inertial-kinematic estimator on these new trajectories is ongoing.
+
+
+
+
+\section{Conclusion}
+
+To the best of our knowledge, it corresponds to the first demonstration of the feasibility of tightly coupling the estimation
+of both the robot basis and its centroidal state. Beyond the practical limitations of our experimental setup, it opens the
+road to more ambitious filters able to provide a consistent by design estimation of the quantities needed for balance
+control and navigation, which we believe to be essential for reaching safe locomotion on 3d terrains. Our main effort
+is now to extend this work to also integrate advanced exteroceptive measurements able to provide meaningful information
+about the surrounding environment, as will be explained in the next chapter. We then see exciting perspectives in extending
+this estimator to multiple other information sources on the robot's whole body, to tightly couple the estimation of a more
+complete state.
 
