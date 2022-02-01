@@ -2,27 +2,23 @@
 
 
 
-Since the advent of cybernetics, the concept of sensory feedback has been at the core of the study of autonomous agents. To realize
-actions, an agent needs a representation of the current state of the world, which is inferred from its past sensors measurements. Its actions may 
+The concept of sensory feedback is at the core of the study of cybernetics agents targeting autonomy. To realize
+actions, an agent needs a representation of the current state of the world, which is inferred from its past sensors measurements. Current actions may 
 then affect this state, which is reflected in a change of its sensors output. This creates a feedback loop, that, if designed well, leads to a stable, 
 auto-regulated system.
 
-For most robotics applications, actions are decided by a control algorithm and 
-the representation may be limited to a set of physically meaningful variables (robot position, orientation, position of a set of stairs). 
-This representation is built by an estimator that fuses several sources of information. 
+For most robotics applications, the complexity of building a proper feedback behavior comes both from the difficulty
+to capture a proper representation of the robot world and the diversity of possible control reactions. 
+The world representation is built by an estimator that fuses several sources of information. 
 The challenge is then to choose the set of appropriate sensors for each application and to design an efficient estimation algorithm to fuse them.
+Let us first discuss how this feedback loop has evolved while robotics was growing mature.
 
-In this thesis, we are interested in extending the perceptual capabilities of legged robots (humanoids and quadrupeds). This kind of robot requires both a high-rate (1kHz),
-low latency estimates (<1ms) of its physical quantities to balance itself, like a precise direction of the gravity, and an accurate environment representation for safe navigation and interaction.
-These tasks are oftentimes handled separately in the literature. We believe that it is possible to improve existing systems by a tight integration of the
-many sensor modalities available on such a platform.
-
-We will first compare the nature of perception needs for a few robotics applications, then give a biological example, and finish by motivating the use of 
-modular tightly coupled estimators in the context of legged-robotics.
+% We will first compare the nature of perception needs for a few robotics applications, then give a biological example, and finish by motivating the use of 
+% modular tightly coupled estimators in the context of legged-robotics.
 
 
 
-\section{Evolution of perception for autonomous systems}
+\section{From factory automation to dancing robots}
 
 Within the field of robotics, the implementation of the feedback loop has seen dramatic changes over the years, propelled by the changing nature 
 of the mechatronic systems, in particular in the actuation and sensor array, the applications at play, and the mathematical formulations
@@ -30,13 +26,13 @@ used to model the systems. The progression of the perception side of the loop, e
 steps that accompany the evolution of robotics, from fixed manipulators to agile legged robots. 
 
 The first major robotic use was in the industrial space: 
-starting in the early 60's \footnote{The Unimate manipulator was adopted by General Motors to displace hot die casting pieces to cooling tanks or to assembly lines, first tests starting in 1961.}, 
+starting in the early 60's \footnote{The Unimate manipulator was adopted by General Motors to displace hot die casting pieces to cooling tanks or assembly lines, first tests starting in 1961.}, 
 arm manipulators have been progressively integrated into many assembly lines, especially in the automotive industry. 
 This application requires the performance of highly precise, repetitive tasks, which are predefined by specialized human operators.
 These highly rigid robots are position-controlled and fixed to the ground, which usually limits the perception needs to the relative angles between their different parts.
 
 On the other end of the spectrum, researchers started to equip wheeled mobile platforms in controlled laboratory environments with exteroceptive sensors 
-\cite{Nilsson1984ShakeyTR, chatila1985position} to apply planning algorithms, using mainly range sensors to control the presence of obstacles, along with wheel odometry \footnote{Odometry is, in the large sense, a information about the relative motion of a robot obtained the integration of a motion sensor (wheel encoder, IMU, Doppler Velocity Logs etc.}
+\cite{Nilsson1984ShakeyTR, chatila1985position} to apply planning algorithms, using mainly range sensors to control the presence of obstacles, along with wheel odometry \footnote{Odometry is, in the large sense, information about the relative motion of a robot obtained the integration of a motion sensor (wheel encoder, IMU, Doppler Velocity Logs, etc.}
 to detect relative displacement. 
 Research on mobile robotics moved to outdoors applications, using motorized vehicles as research platforms. The 2005 DARPA grand challenge
 offered one of the first large scale proof of concept of autonomous cars, where a few teams managed to safely drive 150 miles paths in desert-environments 
@@ -60,11 +56,19 @@ A perception of the environment is therefore required for any meaningful tasks t
 Thirdly, they can in theory navigate cluttered, unstructured environments, which extends their operational capacities, compared to wheeled platforms.
 This makes for challenging perceptual problems that require taking into account the many sensor modalities available.
 
+In this thesis, we are interested in extending the perceptual capabilities of legged robots (humanoids and quadrupeds). This kind of robot requires both a high-rate (1kHz),
+low latency estimates (<1ms) of its physical quantities to balance itself, like a precise direction of the gravity (< 0.01 radians for a full-size biped), 
+and an accurate environment representation for safe navigation and interaction.
+These tasks are oftentimes handled separately in the literature. We believe that it is possible to improve existing systems by a tight integration of the
+many sensor modalities available on such a platform.
+
+To justify this point of view, let us consider first a biological example that will motivate the formulation of this approach.
+
 
 \section{Biological equivalent, an example}
 
 A digression through a biological example can give some intuitions to grasp the complexity of the problem. 
-Let's investigate the example of a human lifting a box. Our vision might inform us about the general form of the object, 
+Let us investigate the example of a human lifting a box. Our vision might inform us about the general form of the object, 
 its location in space with respect to us, some of its physical properties through our prior knowledge of the world. Our proprioception (kinesthetic sense) 
 instinctively guide our arms toward the right path. Our sense of touch might infer the surface texture of the object,  its softness, making us 
 adapt our grip. During this whole process, our vestibular system provides us with a sense of balance to counter gravity, while our ears 
@@ -76,46 +80,53 @@ However, if even one of these senses becomes deficient we are severely hindered 
 of proprioception, something as simple as grasping a glass is a tedious process, even if their sense of touch and vision works perfectly.
 
 
-% Imitating these skills in robot system requires then to build models of available sensor modalities and to integrate them through sensor
+% Imitating these skills in robot system requires then to build models of available sensor modalities and to integrate them through the sensor
 % fusion. 
 
-% This can be achieved at several levels depending on the task to solve. In the legged robot community, one of the core task is locomotion.
+% This can be achieved at several levels depending on the task to solve. In the legged robot community, one of the core tasks is locomotion.
 % For this application, robust algorithms exist in the literature using a limited set of sensors, most often inertial and contact detection.
 % On the other end of the blind robot approach, a broad field of research has been concentrated on building representations of the environment 
 % using exteroceptive sensors such as cameras and LIDARs. This in turn enables planning algorithms to navigate the robot in its environment. 
 % Many approaches decouple the two tasks, using layered perception systems. However, theoretically, a system able to tightly fuse all the 
-% available modalities would benefit a better consideration of the correlations between the different quantities to estimate. 
-% Even though recent approaches have taken step in this direction, such a system is still not widely used in legged robotics. 
+% available modalities would benefit from a better consideration of the correlations between the different quantities to estimate. 
+% Even though recent approaches have taken a step in this direction, such a system is still not widely used in legged robotics. 
 % This thesis is a contribution to this goal. 
 
 
 
 
-% For robots, perception of oneself and of its environment is a major challenge on the road toward many real world applications. 
+% For robots, perception of oneself and its environment is a major challenge on the road toward many real-world applications. 
 % Tasks that are instinctive to us, like for instance manipulating an object, actually involve a complex 
 % interactions between our many senses, our nervous and our muscular system.
-% Though our sensory motor skills have been developed by millions of year of evolution, and are refined throughout our childhood,
-% the task of representing them in abstracted algorithm to be implemented on a cybernetic system is a serious challenge. 
+% Though our sensory-motor skills have been developed by millions of years of evolution, and are refined throughout our childhood,
+% the task of representing them in an abstracted algorithm to be implemented on a cybernetic system is a serious challenge. 
 
 
 \section{Need for a tightly-coupled and modular estimator for legged-robots}
 
-Legged robots are designed to evolve in human-designed environments to be able replace us in some of our tedious or dangerous tasks. As such, they should be able to
+Legged robots are designed to evolve in human-designed environments to be able to replace us in some of our tedious or dangerous tasks. As such, they should be able to
 display a sufficient level of dynamical intelligence and perception capabilities. 
 In particular, the perception should be adapted to real-time control at the high frequencies usually found in legged-robot controllers (in the kilohertz range).
-The estimated state should accurately reflect both the dynamics of the robot as well as its environment structure. Balance controllers in particular require a precise estimation of the gravity vector direction, as well centroidal quantities (center of mass, angular momentum etc.).
-In our opinion, this implies that a fusion of as many sources of
-information as possible is necessary. In addition, in order to maximize the precision of the estimator, all correlations between variables should in principle be taken into account. 
-We also need to perform online calibration for certain sensor biases and fixed parameters. To achieve these goals, the development of \textit{tightly coupled} estimators, 
-that exploit as many data correlations as possible between the sensor measurements, should be undertaken.
+The estimated state should accurately reflect both the dynamics of the robot as well as its environment structure. Balance controllers in particular require a precise estimation of the gravity vector direction, as well centroidal quantities (center of mass, angular momentum, etc.).
+In our opinion, this implies that the ideal perception system should encourage the multiplication of perception sources both in the number of sensors and their variety.
+In addition, to maximize the accuracy of the estimator, any available correlations between variables and prior knowledge should in principle be taken into account. 
+We also need to enable online calibration of the many sensor biases and fixed parameters. To achieve these goals, the development of \textit{tightly coupled} estimators, 
+that exploit as many data correlations as possible between the sensor measurements should be undertaken.
+
+Two main perception problems are typically considered onboard a legged robot. On the first hand, the sense of balance is replicated through high-frequency
+local estimator fusing IMU and contact information to obtain the robot base velocity directed with respect to the gravity field. On the other hand,
+exteroceptive sensors (camera, LIDARs) are used to localize the robot with respect to a large representation of its environment, ideally built on the flight.
+This second layer is typically estimated at lower frequencies.
 
 It is not yet exactly clear what is the optimal set of sensors that needs to be integrated on legged platforms (though Inertial Measurement Units, kinesthesis, and 
 cameras or LIDARS are becoming more and more standard for industrial applications). This set may depend heavily on the type of application,
 the size of the platform (LIDARS are too bulky for smaller quadrupeds), or the acceptable price range of the robot. Thus, it is important to allow
 for a great \textit{modularity} in the design of estimators. We think that this can be attained by different means. First, by a flexible software architecture
 that allows a general formulation of estimation problems (which is the endeavor of WOLF \cite{sola2021wolf} \footnote{WOLF documentation and examples can be 
-found in \url{www.iri.upc.edu/wolf}}). Second, by a generalization of mathematical models describing sensor measurements. 
-Third, by the use of an estimation algorithm called Factor Graph optimization, which lends itself well to a modular design.
+found in \url{www.iri.upc.edu/wolf}}, that we have used and contributed to during the preparation of this thesis). Second, by a generalization of mathematical
+ models describing sensor measurements. Third, by the formalization of the correlation between observation models through a factor graph,
+ naturally leading to a natural estimator that finds the maximum of the posterior distribution over the states.
+ 
 
 
 
@@ -134,11 +145,10 @@ throughput of the robot dynamics, in particular of its localization, orientation
 I have organized this thesis as follows:
 
 \bigskip
-\textbf{Chapter 2} presents a literature overview for of state estimation legged robots. 
+\textbf{Chapter 2} presents a literature overview of state estimation legged robots, that we will use to position our objectives.
 
 \bigskip
-\textbf{Chapter 3} serves as general introduction to Factor Graph optimization using the Maximum-A-Posteriori. We put the emphasis
-on the special treatment of variables belonging to manifolds and give a brief introduction to Lie theory, which is used extensively in chapter 6.
+\textbf{Chapter 3} serves as a general introduction to Factor Graph optimization using the Maximum-A-Posteriori. We emphasize the special treatment of variables belonging to manifolds and give a brief introduction to Lie theory, which is used extensively in chapter 6.
 
 \bigskip
 \textbf{Chapter 4} describes two different measurement models used in the object-level visual-inertial systems that we built. 
