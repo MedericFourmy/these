@@ -65,6 +65,7 @@ In this estimator, we have two motion sensors, IMU and force-torque, whose measu
 estimation variables at a given \keyframes.
 
 \section{Experimental setup}
+\label{eq:expe_setup_centroid}
 
 This estimator is implemented in WOLF \cite{sola2021wolf}, with necessary kinematics and dynamics quantities computing
 with Pinocchio software \cite{carpentier2019pinocchio}, and is experimentally validated on the Solo-12 quadruped robot. 
@@ -86,7 +87,7 @@ the force reconstruction of one leg using the robot proprioceptive sensors.
 \end{figure}
 
 This movement and another one are displayed in the video \url{https://peertube.laas.fr/videos/watch/16822d27-3557-4e35-9a0d-ce5b0aea4c27}.
-
+The configuration trajectories were obtained using task space inverse dynamics \cite{adelprete:jnrh:2016} and applied to the robot with joint-level admittance control.
 
 
 \section{Results}
@@ -180,4 +181,15 @@ the centroidal states, by fusing IMU, contact, and kinematic measurements. It sh
 and demonstrates that the consistency of the filter results in the correct estimation of both the states and the biases.
 
 While the results correspond to the expectation, several aspects of the experimental protocol would benefit from 
-improvements in the future. 
+improvements in the future. First, the experimental platform we used is not the most appropriate to implement this type of estimator.
+Indeed, Solo-12 does not have force-sensors at the feet, which required the force estimation procedure described in \secRef{eq:expe_setup_centroid}.
+The inconvenience of this method is two-fold. Firstly, the estimated forces make heavy use of the IMU acceleration measurements which makes the forces pre-integration
+correlated with IMU pre-integration. Secondly, the force estimation gave us good performances only for rather slow trajectories, which prevented their use for walking
+trajectories for instance. We could have turned our interest to our humanoid robot Talos (see \figRef{fig:robots}) which features force-torque sensors at its feet.
+However, at the time, Solo-12 was still a safer choice for several issues with Talos, that have since been partially addressed (kinematic calibration, higher flexibility of the 
+structure, biased feet force sensors). 
+
+Nevertheless, Solo-12 permitted us to easily generate datasets based on simple quasi-static trajectories. We since recorded more datasets with walking trajectories
+based on the walking controller \cite{leziart2021implementation}, including the robot proprioceptive measurements as well as images from an onboard camera. Evaluation
+of our inertial-kinematic estimator on these new trajectories is ongoing.
+
