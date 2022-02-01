@@ -165,7 +165,7 @@ Usually, when a nonlinear mapping of noise variables from one space to another i
 as shown in Eq. \eqRef{eq:cov_propagation}. 
 Instead of directly obtaining Jacobians from the PnP algorithms, we found that a natural way to proceed is to take the opposite 
 direction as follows. It should somehow be possible, knowing the marker size and the relative pose measurement, and assuming pixel noise, to
-recover $\Cov_{\T{}{}}$. A simple model of pixel noise is to assume isotropic Gaussian noise on the pixels. If we stack four pixel (the four tag corners) 
+recover the pose covariance $\Cov_{\T{}{}}$. A simple model of pixel noise is to assume isotropic Gaussian noise on the pixels with variance $\sigma_x^2$. If we stack four pixel (the four tag corners) 
 $\bfx_i = [u_i, v_i] \in \Reals^2$ in the column vector $\bfx = [\bfx_1~\bfx_2~\bfx_3~\bfx_4]\tr$, we have therefore that
 $\bfx$ is corrupted by a Gaussian noise $\Cov_{\bfx} = \sigma_{x}^2 \bfI_8$, where $\sigma_{x}$ usually takes values of 1 or 2 pixels.
 The PnP algorithm provides us with a function $\text{pnp}$ defined as:
@@ -274,7 +274,7 @@ Finally, we stack the 4 Jacobians to get the full Jacobian to be used for covari
 \end{equation}.
 
 We therefore have the covariance propagation equation $\Cov_{\bfx} = \bfJ \Cov_{\T{}{}} \bfJ\tr$. 
-This equation must be inverted in order to recover the needed covariance $\Cov_{\T{}{}}$. $\bfJ$ being non square and full column rank for four 
+Since $\Cov_{\bfx}$ and $\bfJ$ are known, this equation must be inverted in order to recover the needed covariance $\Cov_{\T{}{}}$. $\bfJ$ being non square and full column rank for four 
 corners ($\bfJ \in \Reals^{8 \times 6}$, we can use the right pseudo inverse $\bfJ^{+} = (\bfJ\tr \bfJ)^{-1}\bfJ\tr$. Multiplying left and right by 
 respectively $\bfJ^{+}$ and $\bfJ^{+,\top}$, we obtain: $\Cov_{\T{}{}} = \bfJ^{+} \Cov_{\bfx} \bfJ^{+,\top}$. Given that the pixel noise covariance is 
 isotropic as explained above, $\Cov_{\bfx} = \sigma_x^2 \bfI$, this equation finally simplifies to:
