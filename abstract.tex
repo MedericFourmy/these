@@ -26,7 +26,7 @@ as factor graphs are nowadays highly popular in the SLAM literature, yet they ar
 In this thesis, we investigate a few avenues that we believe are crucial to achieving these goals. First, we develop tailored sensor measurement models 
 with attention to the correct mathematical formulation involving Lie theory.
 Second, we propose visual-inertial systems based on object-level detection that provide relative transformation between the camera and the objects.
-We provide covariance models for two kinds of objects: the first one is an analytical model for fiducial markers; the second
+We provide covariance models for two kinds of objects: the first one is an analytical model for fiducial markers~; the second
 is an empirical model for deep-learning-based object pose estimation.
 Third, we handle high-rate sensors by developing a generalization of the IMU pre-integration theory. We propose a new formulation of the IMU
 pre-integration based on compact Lie groups. 
@@ -55,43 +55,43 @@ Factor Graph, estimation, legged robots, SLAM, pre-integration, IMU, force senso
 
 \paragraph{Résumé}~
 
-Les robots à pattes sont des mécanismes complexes dont le comportement stable dépend de la bonne estimation de plusieurs quantités 
+Les robots à pattes sont des mécanismes complexes dont la stabilité dépend de la bonne estimation de plusieurs quantités 
 qui doivent être observées à grande vitesse et avec précision. Bien que l'état du robot ne puisse généralement pas être observé directement par 
-les capteurs existants, il est généralement possible de le reconstruire en fusionnant des modalités de capteurs très diverses.
-Ces sources d'information diffèrent significativement au niveau de leurs fréquences d'acquisition, la nature des données et leurs coûts de traitement informatique.
-Alors que l'estimation d'état par fusion de capteurs est un sujet commun à la plupart des plateformes robotiques, elle offre un défi particulier à la 
-robotique à pattes du fait de leur dynamique particulière.
-Pour les robots à pattes, d'une part, l'état du robot est nécessaire pour maintenir son sens de l'équilibre et se déplacer en toute sécurité, et, 
-d'autre part, une représentation précise de l'environnement est nécessaire pour la navigation et l'interaction.
+des capteurs, il est généralement possible de le reconstruire en fusionnant plusieurs capteurs à condition d'être capable de
+bénéficier des modalités très diverses qu'ils offrent.
+C'est bien sur un sujet commun à la plupart des plateformes robotiques, mais le défi posé par l'estimation d'état par fusion de capteurs
+se renouvelle dans le cadre de la robotique à patte à cause de la dynamique particulière de ces systèmes. D'une part, leur équilibre
+dépend intimement de l'estimation correcte de leur état~; d'autre part, ils ont besoin d'une représentation fine de leur environement
+pour y naviguer et y intéragir.
 
-L'approche actuelle dominante pour de nombreux systèmes à pattes dans la littérature est de résoudre ces problèmes
-indépendamment, en utilisant des cascades d'estimateurs qui peuvent négliger une partie des corrélations présente dans les données.
-Ce découplage artificiel agit comme des \textit{a priori} forts qui permettent à des estimateurs simples de gérer l'estimation de chaque partie de la cascade et de stabiliser 
-le comportement du schéma d'estimation global. D'un autre côté, la conception d'une cascade implique beaucoup de travail spécialisé qui ne se généralise guère à de 
+A ce jour, l'approche actuelle dominante les robots à pattes est de résoudre
+indépendamment plusieurs problèmes d'estimation, en utilisant des cascades d'estimateurs qui peuvent négliger une partie des corrélations présente dans les données.
+Ce découplage artificiel agit comme des \textit{a priori} forts qui permettent à des estimateurs simples de gérer chaque partie de la cascade et de stabiliser 
+le comportement du schéma d'estimation global. Ce pragmatisme implique néanmoins beaucoup de travail spécialisé qui ne se généralise guère à de 
 nouveaux scénarios ou à de nouvelles modalités de capteurs.
-Dans cette thèse, nous défendrions plutôt l'idée de construire un seul estimateur étroitement couplé capable d'estimer toutes les quantités nécessaires au robot.
-Pour cet objectif, le cadre de l'estimation a-postério, formalisé sous la forme d'un graphe factoriel, est très approprié. Cette affirmation n'est pas une surprise, 
-car les graphes factoriels sont aujourd'hui très populaires dans la littérature SLAM. Ils sont cependant encore sous-représentés pour les robots à pattes.
+Dans cette thèse, nous défendons l'idée de construire un unique estimateur capable d'estimer toutes les quantités nécessaires au robot de manière étroitement couplée.
+Le cadre de l'estimation a-postériori, formalisé sous la forme d'un graphe de facteurs, est alors très approprié pour formaliser l'approche. Cette affirmation n'est pas une surprise, 
+car les graphes de facteurs sont aujourd'hui très populaires dans la littérature SLAM. Ils sont cependant encore sous-représentés pour les robots à pattes.
 
-Dans cette thèse, nous étudions quelques pistes qui nous semblent cruciales pour atteindre ces objectifs. Tout d'abord, nous développons des modèles de mesure de 
+Dans cette thèse, nous étudions quelques pistes qui nous semblent cruciales pour atteindre cet objectif. Tout d'abord, nous développons des modèles de mesure de 
 capteurs en prêtant attention à la formulation mathématique correcte fondée sur la théorie des groupes de Lie.
 Deuxièmement, nous proposons des systèmes visuels inertiels basés sur des algorithmes de détection d'objets, qui fournissent une transformation relative entre la caméra 
 et les objets.
-Nous fournissons des modèles de covariance pour deux types d'objets : le premier est un modèle analytique pour les marqueurs fiduciaires ; la deuxième
+Nous fournissons des modèles de covariance pour deux types d'objets~: le premier est un modèle analytique pour les marqueurs fiduciaires~; la deuxième
 est un modèle empirique pour l'estimation de pose d'objet basée sur l'apprentissage en profondeur.
 Troisièmement, nous traitons les capteurs à haute fréquence en développant une généralisation de la théorie de pré-intégration IMU. Nous proposons une nouvelle 
 formulation de la pré-intégration IMU basée sur des groupes de Lie compacts.
 Quatrièmement, nous montrons que la pré-intégration peut également être appliquée pour utiliser les capteurs de forces trouvés sur les robots à pattes.
 En la fusionnant avec une odométrie basée sur la cinématique des jambes et une IMU, nous montrons que cette nouvelle formulation rend possible l'estimation 
-étroitement couplée des quantités centroïdale dans le contexte de l'estimation des graphes factoriels.
+étroitement couplée des quantités centroïdale dans le contexte de l'estimation des graphes de facteurs.
 
-Les idées théoriques proposées sont mises en œuvre dans un cadre d'estimation cohérent, étendant le logiciel de graphe factoriel Wolf. 
+Les idées théoriques proposées sont mises en œuvre dans un cadre d'estimation cohérent, étendant le logiciel de graphe de facteurs Wolf. 
 Chaque nouvelle modalité est validée dans un montage expérimental dédié qui nous a permis de quantifier son intérêt et sa pertinence pour la robotique à pattes.
 
 
 \paragraph{Mots clefs} ~
 
-Estimation, graphe factoriel, robots à pattes, SLAM, pre-integration, IMU, capteur de force, vision 
+Estimation, graphes de facteurs, robots à pattes, SLAM, pre-integration, IMU, capteur de force, vision 
 
 
 \noindent\makebox[\linewidth]{\rule{0.6\textwidth}{2pt}}
