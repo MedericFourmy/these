@@ -3,6 +3,8 @@
 \minitoc
 \bigskip
 
+This chapter presents a abstraction of the pre-integration, originally introduced in \cite{lupton-09, forster2015imu}. We will explain
+the interest of this generalization that we in part developed with Dinesh Atchuthan at the end of his Ph. D.
 
 Sensor modalities available on robotic platforms display a great variety in the rate at which measurements are acquired. For instance, 
 a camera may record images at 33Hz while an IMU may be updated at 1kHz. In the context of Factor Graph estimation, this creates a challenge since residuals
@@ -10,7 +12,7 @@ are defined between \keyframes\ selected at a relatively low frequency, at times
 which is not trivial in general.
 
 In this chapter, we first describe the example of the integration of IMU measurements which motivates the development of the pre-integration theory \cite{lupton-09,forster2017-TRO}.
-We then express this pre-integration in more abstract mathematical terms to generalize it to other high-rate sensors \cite{atchuthan-18-thesis}. 
+We then express this pre-integration in more abstract mathematical terms to generalize it to other high-rate sensors, which was first described in Dinesh Atchuthan's thesis \cite{atchuthan-18-thesis}. 
 Then, we describe a possible reformulation of the original IMU-pre-integration algorithm \cite{forster2017-TRO} by exploiting a new Lie group that we 
 proposed in \cite{fourmy2019absolute}. We conclude the chapter with a discussion of related works.
 
@@ -929,13 +931,13 @@ In this chapter, we have recalled the mathematics of the pre-integration,
 which is very important when handling high-frequency measurements strongly
 correlated with Lie-group quantities. Pre-integration was first introduced for
 handling IMU in the MAP framework, as we also did in our experiments. We
-introduced here a reformulation of the original mathematics, which lead to
-minor practical differences, but mostly allows us to more systematically generalize
-to other measurements. We also believe that this formulation, relying on
+introduced here an abstraction of the original mathematics, which allows us to more systematically generalize
+to other measurements. We also present a reformulation of the algorithm based on a compact Lie group.
+We also believe that this formulation, relying on
 Lie theory, gives some easier intuition to catch, at least when the reader is
 familiar with Lie groups.
 
-We are now going to use this formulation to handle force sensors, which also
+We are now going to use the generalized pre-integration to handle force sensors, which also
 stream meaningful information at high (1kHz) frequency, and integrate to
 to an extended MAP problem where the centroidal quantities are also estimated
 simultaneously to previously estimated basis state and map variables.
