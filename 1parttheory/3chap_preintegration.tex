@@ -7,8 +7,8 @@ This chapter presents a abstraction of the pre-integration, originally introduce
 the interest of this generalization that we in part developed with Dinesh Atchuthan at the end of his Ph. D.
 
 Sensor modalities available on robotic platforms display a great variety in the rate at which measurements are acquired. For instance, 
-a camera may record images at 33Hz while an IMU may be updated at 1kHz. In the context of Factor Graph estimation, this creates a challenge since residuals
-are defined between \keyframes\ selected at a relatively low frequency, at times as low as 1Hz. One needs to integrate measurements from these high-rate sensors between \keyframes,
+a camera may record images at 33Hz while an IMU may be updated at 1 kHz. In the context of Factor Graph estimation, this creates a challenge since residuals
+are defined between \keyframes\ selected at a relatively low frequency, at times as low as 1 Hz. One needs to integrate measurements from these high-rate sensors between \keyframes,
 which is not trivial in general.
 
 In this chapter, we first describe the example of the integration of IMU measurements which motivates the development of the pre-integration theory \cite{lupton-09,forster2017-TRO}.
@@ -938,6 +938,6 @@ Lie theory, gives some easier intuition to catch, at least when the reader is
 familiar with Lie groups.
 
 We are now going to use the generalized pre-integration to handle force sensors, which also
-stream meaningful information at high (1kHz) frequency, and integrate to
+stream meaningful information at high (1 kHz) frequency, and integrate to
 to an extended MAP problem where the centroidal quantities are also estimated
 simultaneously to previously estimated basis state and map variables.

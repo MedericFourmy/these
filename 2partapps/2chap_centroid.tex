@@ -32,7 +32,7 @@ works which has been sufficiently covered, to directly describe the underlying f
 
 % We use the state estimation framework WOLF developed at IRI-Barcelona, which relies on Google Ceres \cite{ceres-solver} as the graph solver. 
 % The robot kinematics and dynamics computations are handled by the Pinocchio library \cite{carpentier2019pinocchio}. For all runs, \keyframes\ were created 
-% at 4Hz for a fair comparison.
+% at 4 Hz for a fair comparison.
 
 
 
@@ -95,7 +95,7 @@ The configuration trajectories were obtained using task space inverse dynamics \
 \subsection{Base estimation through inertial kinematic fusion}
 First, to validate the use of our kinematic factor, we include uniquely the IMU and leg-odometry factors to obtain an Inertial Kinematics estimator which 
 conceptually includes the same information as estimators such as \cite{bloesch2013state}. In \figRef{fig:PosiIK4}, we compare our state estimation 
-at 1kHz with motion capture (Mo-Cap) up-sampled from 200Hz to 1kHz.
+at 1 kHz with motion capture (Mo-Cap) up-sampled from 200 Hz to 1 kHz.
 Velocity in the base frame is also shown in \figRef{fig:VelIK4}.
 
 \begin{figure}[h]

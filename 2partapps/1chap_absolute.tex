@@ -145,7 +145,7 @@ Each dataset is composed of 3 sequences:
 \begin{itemize}
     \item a sequence of RGB images captured at 33 Hz
     \item a sequence of IMU measures captured at 200 Hz
-    \item a sequence of motion-capture (MoCap) at 200Hz measurements used as ground truth.
+    \item a sequence of motion-capture (MoCap) at 200 Hz measurements used as ground truth.
 \end{itemize}
 
 
@@ -189,11 +189,11 @@ In each sequence, we have taken care that the camera is navigating in a comforta
 The motion-capture data have been obtained from a calibrated 3D marker attached to the camera and are synchronized in post-process by maximizing the velocity norm 
 cross-correlation between MoCap and estimated state sequences.
 % The datasets are available at \url{https://gepgitlab.laas.fr/loco-3d/wolf-data/}.
-%In order to gather datasets to test our estimator, we designed a Visual Inertial System (VIS) comprised of a Memsic IMU running at 200Hz synchronized through a 
+%In order to gather datasets to test our estimator, we designed a Visual Inertial System (VIS) comprised of a Memsic IMU running at 200 Hz synchronized through a 
 % micro-controller (STM32) with an Imagine Source camera which captures are hardware triggered. Noises parameters of the IMU were estimated using the 
 % Allanvariance method described in \cite{el2007analysis}.
 %We recorded several datasets in which the camera was either handheld or mounted on the head of an \HRP{2} humanoid robot. Rosbags for the datasets are available at 
-% [url]. Ground truth is also provided thanks to a [brand name] motion capture system (mocap) recording the system pose at 200Hz.
+% [url]. Ground truth is also provided thanks to a [brand name] motion capture system (mocap) recording the system pose at 200 Hz.
 %
 \begin{figure}[t]
      \centering
@@ -260,8 +260,8 @@ optimized by the solver, as explained in \secRef{sec:publish-state}. The smoothn
     % \includegraphics[width=0.8\textwidth]{figures/absolute/vz_descending_onestep.pdf}
     \includegraphics[width=0.9\textwidth]{figures/absolute/vz_descending_onestep_with_kf.pdf}
     \caption{Descending stairs (one step): the robot first lowers its base and then touches the next step with results in vibrations from the impact.
-    Vibrations at approximately 10Hz visible in both the motion capture ground truth and optimal state estimation. Note that the estimation in this case has a smoother curve.
-    \keyframes\ are introduced at 6.6Hz (every $\approx 150 ms$) and are represented by vertical red bars. State in between is obtained by applying the pre-integrated 
+    Vibrations at approximately 10 Hz visible in both the motion capture ground truth and optimal state estimation. Note that the estimation in this case has a smoother curve.
+    \keyframes\ are introduced at 6.6 Hz (every $\approx 150 ms$) and are represented by vertical red bars. State in between is obtained by applying the pre-integrated 
     delta from the last \keyframe\ to the current time to the estimate of the last \keyframe\ state estimate (see \secRef{sec:publish-state}).}
     \label{fig:vz_descending_onestep}
 \end{figure}
