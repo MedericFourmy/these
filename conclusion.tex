@@ -15,11 +15,11 @@ three factor-graph-based estimators.
 
 We implemented a general factor for camera-based object-level pose estimations based on object pose estimators. 
 First, the \apriltag\ library was used 
-to \textbf{obtain poses of fiducial markers} used to augment the scene with unique landmarks. We proposed a new analytical model to estimate the covariance of 
+to \textbf{obtain poses of fiducial markers} augmenting the scene with unique landmarks. We proposed a new analytical model to estimate the covariance of 
 these measurements. We discussed the problem of the orientation ambiguity of these markers and proposed a practical method to alleviate this problem.
 The anisotropic nature of the pose uncertainty was highlighted in simulated experiments. 
 Second, we used \textbf{a deep-learning-based framework to obtain the pose of known objects in the scene}. A covariance model based on empirical data was obtained through
-experiments. We showed that we could fine-tune the model to elements of the scene of interest for legged-robots navigation such as stairs.
+experiments. We also showed that we could fine-tune the model to elements of the scene of interest for legged-robots navigation such as stairs.
 
 We then leverage the pre-integration formulation to include high-frequency sensors such as IMU in the factor graph. We propose 
 \textbf{a more systematic formulation of this idea, generalizable to other high-rate proprioceptive sensors}. Within this framework, we proposed a new 
@@ -33,7 +33,7 @@ to accurately estimate the centroidal states, despite unavoidable biases in the 
 
 
 These measurement models were all integrated into the WOLF framework \cite{sola2021wolf} to which we contributed, joining our effort with the IRI team, 
-an which was recently released open-source. WOLF provided the necessary modularity to formulate various estimation problems. 
+which was recently released open-source. WOLF provided the necessary modularity to formulate various estimation problems. 
 It then allowed us to implement three different applications of the proposed theory, which we used to experimentally validate our models.
 
 \bigskip
@@ -52,17 +52,17 @@ IMU pre-integration as well as our empirical model of the object pose uncertaint
 in the scene could be recovered and that the IMU contributed to the robustness of the system by alleviating the instability of the pose estimation. We proposed
 as a proof of concept to perform visual-inertial SLAM using stairs elements as landmarks, for which we retrained the neural network. This dataset was recorded on the Solo-12 quadruped robot.
 
-Finally, we recorded new datasets on Solo-12 quadruped for following works on the fusion of inertial, kinematics, and vision data. 
+Finally, we recorded a new dataset on Solo-12 quadruped for following works on the fusion of inertial, kinematics, and vision data. 
 
 \section{Perspectives}
 This work laid the foundations of a general factor-graph-based estimation framework for legged robotics. However, a lot of alleys have yet to be explored 
-to obtain a usable estimator on any legged platform. Here we present a few of the next projects that we wish to undertake.
+to obtain an estimator usable on any legged platform. Here we present a few of the next projects that we wish to undertake.
 
 \subsection{Short term}
 We developed on one hand an object-level visual-inertial system and on the other hand a proprioceptive estimator for the sense of balance. A short-term goal
 would be to merge both estimators in one, providing simultaneously a high-rate estimation for control and a non-drifting localization based on SLAM, which should serve also as an input for gait and/or contact planning. 
 
-We began to work in this direction by recording datasets using Solo-12 as an experimental platform. For this experiment, we will concentrate on estimating the 
+We began to work in this direction by recording a dataset using Solo-12 as an experimental platform. For this experiment, we will concentrate on estimating the 
 base state by including inertial, kinematics, and object pose measurements. 
 
 We also plan to integrate the system in a feedback loop with the current controller of Solo-12. For the moment, instabilities in the solver convergence times prevented
@@ -84,7 +84,7 @@ with high bandwidth gravity related state estimation.
 
 The reproducibility of experimental results is a common issue in many scientific fields, which is especially notable in the robotics community. Many benchmarks including 
 IMU, vision, and LIDAR sensors are nowadays available \cite{Burri25012016, cortes2018advio, kasper2019benchmark, zhang2021multi}. However, to the best of our knowledge,
-very few legged robots datasets are available \cite{fink2020dls, ahmadi2021semi} and none include exteroceptive sensors. The Open Dynamic Robot Initiative \cite{grimminger2020open}, 
+very few legged robots datasets are available \cite{fink2020dls, ahmadi2021semi} and none include both proprioceptive and exteroceptive sensors. The Open Dynamic Robot Initiative \cite{grimminger2020open}, 
 through the development of open-hardware robots (such as Solo-12) and open-source low-level controllers aims at making a robotic platform easily accessible to
 many institutions. One could imagine that a dataset to benchmark estimation algorithms on such a platform would be useful to the community as a whole. 
 

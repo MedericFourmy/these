@@ -12,10 +12,10 @@ with \apriltags\ and elements from the T-less dataset, recording proprioceptive 
     \label{fig:solo_dataset_scene}
 \end{figure}
 
-The recorded sensor measurements include joint encoders, joint current, IMU from Solo onboard sensing as well as a RealSense D435i RGB camera and IMU.
+The recorded sensor measurements include joint encoders, joint currents, the IMU from Solo onboard sensing as well as RGB camera and IMU from a RealSense D435i.
 Controller logs (such as the planned feet contacts timings) are also recorded. The RealSense was fixed at the front of the robot, slightly down-facing (30 degrees).
-A summary of available data is reported in \tabRef{tab:dataset_solo}. Calibration data using a fiducial marker grid obtained before the experiments to 
-calibrate the image distortion, camera-IMU relative transformation, and potential time-shift of the RealSense system. A sample image of one of the trajectories
+A summary of available data is reported in \tabRef{tab:dataset_solo}. Calibration data using a fiducial marker grid were recored before the experiments to 
+obtain the image distortion, camera-IMU relative transformation, and potential time-shift of the RealSense system. A sample image of one of the trajectories
 is shown in \figRef{fig:solo_dataset_image}.
 External video recordings of each experiment were taken.
 
@@ -49,13 +49,13 @@ tapping on the robot a few times. This precise signal should be enough to align 
 
 Recorded trajectories (2 minutes each) include motions of increasing difficulty, with forward-backward walking in a straight line, a square path around the scene, and
 loopy trajectories. With this dataset, we plan to implement an estimator fusing inertial, kinematics, and object-level transformation based on our previous work.
-This dataset will serve to benchmark an integration work destined to obtain an estimator for both balance control states (orientation, velocity) and 
+This will serve to benchmark an integration work destined to obtain an estimator for both balance control states (orientation, velocity) and 
 global localization through object-level SLAM. The loopy trajectories in particular will serve to display the behavior of the estimator when closing longer loops.
 
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.7\textwidth]{figures/solo_dataset_image.png}
-    \caption{Example of an image captured with the RealSense attached to Solo while walking.}
+    \caption{Example of an image captured with the RealSense attached to Solo while walking (with \apriltag\ detections).}
     \label{fig:solo_dataset_image}
 \end{figure}

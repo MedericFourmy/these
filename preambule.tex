@@ -165,23 +165,19 @@
 \usepackage{bm}
 
 
-% \usepackage[sorting=none,
-%   style=alphabetic,
-%   backref=true,
-%   backend=biber,
-%   maxnames=6,
-%   minnames=1]{biblatex}
-
-
-\usepackage[sorting=none,
-style=numeric,
-backref=true,
-backend=biber,
-maxnames=6,
-minnames=1]{biblatex}
+% style=numeric for [2]
+\usepackage[
+  sorting=nyt,
+  style=alphabetic,
+  backref=true,
+  backend=biber,
+  maxnames=6,
+  backref=true,
+  minnames=1]
+  {biblatex}
 
 % When more than one author, replace the ugly "+" between name and date by a nice superscript +
-% \renewcommand*{\labelalphaothers}{\textsuperscript{+}}
+\renewcommand*{\labelalphaothers}{\textsuperscript{+}}
 
 
 % recommended when using biblatex with babel
