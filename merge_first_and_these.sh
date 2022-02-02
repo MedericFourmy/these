@@ -1,3 +1,3 @@
 #!/bin/bash
-pdfunite first_page.pdf these.pdf these_mfourmy.pdf
+pdftk first_page.pdf these.pdf cat output these_mfourmy.pdf
 echo "\nthese_mfourmy.pdf generated"
