@@ -9,8 +9,8 @@ and velocity, joint angles, etc.
 Those quantities may not directly be measurable, due to their physical nature (the center of mass is a virtual point) or because sensor data
 is too noisy, biased, or impractical to obtain (\eg GPS for localization is bad close to flat surfaces because of beam reflections). 
 Those latent variables can however be estimated by fusing multiple sensors data using a state estimator (aka. observer in automation). 
-The task of \textit{estimation} can then simply be stated as finding the robot state given these measurements. We formalized this intuition
-following the approach by finding the mode of the posterior distribution on the states. 
+The task of \textit{estimation} can then simply be stated as finding the robot state given these measurements. This intuition can be formalized
+as finding the mode of the posterior distribution on the states conditioned by the measurements. 
 
 Probabilistic theory applied to signal processing and information theory has been the bedrock of the state estimation theory development.
 For probabilistic estimators, states are random variables, that, in the robotics context, are mostly continuous.
@@ -23,19 +23,19 @@ The Bayes law represents this inference:
     p(\cX | \cZ) = \frac{p(\cZ | \cX) p(\cX)}{p(\cZ)}.
 \end{equation}
 
-$p(\cZ | \cX)$ is the measurement model that can be obtained through modeling, also called the \textit{likelihood} of the observation. 
+$p(\cZ | \cX)$ is the measurement model, also called the \textit{likelihood} of the observation. 
 $p(\cX)$ is a \textit{prior} that we have on the state variable distribution. This may include for instance knowledge about the initial state of the robot or
 an approximate value of parameters that we seek to estimate.
-The \textit{marginalized likelihood} $p(\cZ) = \int p(\cZ|\cX)p(\cX)d\cX $ can be thought of as a global normalization constant (\cite{koller2009probabilistic}, chapter 20 ) in case 
+The \textit{marginalized likelihood} $p(\cZ) = \int p(\cZ|\cX)p(\cX)d\cX $ can be thought of as a global normalization constant (\cite[Chapter 20]{koller2009probabilistic}) in case 
 the $\cZ$ random variable is observed, which is our case. In general, this term is computationally intractable to compute, since it requires marginalizing
 the likelihood distribution over all possible states. Exact inference is therefore rarely possible, the Bayesian practitioner instead relying on approximate inference.
 
-For example, in the context of robotics, recursive Monte Carlo sampling (\cite{koller2009probabilistic}, chapter 11) has been 
+For example, in the context of robotics, recursive Monte Carlo sampling (\cite[Chapter 12]{koller2009probabilistic}) has been 
 leveraged in the popular recursive particle filter for tasks such as localization \cite{dellaert1999monte} and SLAM \cite{montemerlo2002fastslam}. A very interesting
 property of this approximation is the fact that multimodal distributions can be modeled, which can be useful
 for multi hypothesis problems such as the kidnapped robot problem \cite{dellaert1999monte} or target tracking \cite{gustafsson2002particle}. 
 
-Another type of approximate inference, with scarcer applications in robotics until now, is variational inference (\cite{koller2009probabilistic}, chapter 11). 
+Another type of approximate inference, with scarcer applications in robotics until now, is variational inference (\cite[Chapter 11]{koller2009probabilistic}). 
 The idea here is to fit the parameters of a candidate distribution so that the Kullback-Leibler 
 divergence between the posterior and the candidate distribution is minimized. Gaussian distributions are then
 often used because closed forms of their divergence are easy to evaluate. Very recent works start 
@@ -79,8 +79,8 @@ Secondly, the measurements are assumed to be corrupted by multivariate Gaussian 
 \end{equation}
 %
 where the \textit{residuals} $\bfe_i(\cX_{S_i}) \in \Reals^{M_i}$ are (potentially) nonlinear functions of the state variables, $K_i \in \Reals$ are constants, 
-$\Cov_i \in \Reals^{M_i \times M_i}$ is the covariance of the observation noise,
-$\phi_i(\cX_{S_i})$ is the un-normalized measurement likelihoods called \textit{factors}, and 
+$\Cov_i \in \Reals^{M_i \times M_i}$ are the covariances of the measurements' noise,
+$\phi_i(\cX_{S_i})$ are the un-normalized measurement likelihoods called \textit{factors}, and 
 %
 \begin{equation*}
     ||\bfe_i(\cX_{S_i})||_{\Cov_i} \triangleq \sqrt{\bfe_i(\cX_{S_i}) \Cov_i^{-1} \bfe_i(X_{S_i})}
@@ -209,7 +209,7 @@ We stack up the $\Delta \bfx_i$ column vectors as $\Delta \bfx \in \Reals^N$ and
 $\bfJ \in \Reals^{M \times N}$. We call this new function $\cF(\Delta \bfx) \approx \cL(\check{\cX} + \Delta \bfx)$, so that the linearized cost function writes:  
 %
 \begin{equation}
-    \cF(\Delta \bfx) \approx ||\check{\bfr} + \bfJ \Delta \bfx||^2 
+    \cF(\Delta \bfx) = ||\check{\bfr} + \bfJ \Delta \bfx||^2 
     = \check{\cL} +  2\check{\bfr}\tr \bfJ \Delta \bfx + \Delta \bfx\tr \bfJ\tr \bfJ \Delta \bfx.
     \label{eq:gaussian_step_quadratic_eq}
 \end{equation}
@@ -365,9 +365,10 @@ $\oplus$ and $\ominus$:
     \label{fig:manifold}
 \end{figure}
 
-As in \cite{sola2018micro}, we use the concept of composite manifold, which allows us to deal with a collection of elements $\bfx^i$ living in their respective manifold $\cM^i$, which very often occur in robotics. We define the composite manifold as the concatenation $\cM_c \triangleq \left<\cM^1, \dots, \cM^M \right>$. The element of this composite manifold is denoted by $\cX$.
-We will also write a composite Lie group  equivalent of the retraction $\oplus$ and 
-lift $\ominus$ operations. It consists in applying operations to individual elements of the manifold and its tangent space:
+As in \cite{sola2018micro}, we use the concept of composite manifold, which allows us to deal with a collection of elements $\bfx^i$ living in their respective manifold $\cM^i$, which very often occur in robotics. 
+We define the composite manifold as the concatenation $\cM_c \triangleq \left<\cM^1, \dots, \cM^M \right>$. An element of this composite manifold is denoted by $\cX$.
+We will also write a composite Lie group  equivalent of the retraction $\oplus$ and lift $\ominus$ operations. 
+It consists in applying operations to individual elements of the manifold and its tangent space:
 
 \begin{equation}
     \cX=
@@ -429,8 +430,8 @@ simply reduce to the addition and subtraction of Cartesian vectors.
 
 \subsection{Uncertainty on manifolds, Jacobians}
 \label{sec:uncertainty_on_manifolds}
-Our state variables are random variables approximated by multivariate Gaussian distribution, that can be summarized by their mean vector and covariance matrix.
-These concepts need to be slightly modified to account for the manifold nature of some of these. We will see how to define Gaussian distribution on manifolds.
+Our state variables are random variables approximated by multivariate Gaussian distributions, that can be summarized by their mean vector and covariance matrix.
+These concepts need to be slightly modified to account for the manifold nature of some of these by defining Gaussian distributions on manifolds.
 Let  $\bftau \in \Reals^n$ be a small perturbation around a point $\bar{\bfx} \in \cM$, so that we can write:
 %
 \begin{equation}
@@ -445,7 +446,7 @@ We define a zero mean "Cartesian" Gaussian distribution on the tangent space, th
 \end{equation}
 %
 where $\mathbb{E}[\cdot]$ denotes the expectation operator.
-By a slight abuse of notation, we note that the manifold distribution is $\bfx \sim \Gaussian{\bfx}{\Cov_{\bfx}}$.
+By a slight abuse of notation, we note that the manifold distribution is $\bfx \sim \Gaussian{\bar{\bfx}}{\Cov_{\bfx}}$.
 
 As an illustration, the group of unit quaternions $\mathbb{H} = \left\{ \bfq \in \Reals^4~|~\bfq \odot \bfq^*=1 \right\}$ under quaternion multiplication 
 $\odot$ is a manifold (the $S^3$ sphere, p=4 and n=3) \cite{sola2012quaternion}. 
@@ -459,7 +460,7 @@ $\Cov_{\bfx} \in \Reals^{n_x \times n_x}$ through f writes:
 
 \begin{equation}
     f~: \bfx \in \Reals^{n_x} \rightarrow \bfy \in \Reals^{n_y}, \quad \quad \Cov_{\bfy} \approx 
-                \left.\frac{D f}{D \bfx} \right|_{\bfx}   \Cov_{\bfx}    \left.\frac{D \bfy}{D \bfx}\right|_{\bfx}\tr
+                \left.\frac{D f}{D \bfx} \right|_{\bfx}   \Cov_{\bfx}    \left.\frac{D f}{D \bfx}\right|_{\bfx}\tr
     \label{eq:cov_propagation}
 \end{equation}
 
@@ -592,7 +593,6 @@ The Adjoint $\text{Ad}_{\bfx}\cM$ is an operator that maps elements from the loc
 For rotation matrices, the adjoint matrix is $\text{Ad}_{\bfR}\SO(3)=\bfR$: to change the reference frame of the angle axis from local to global reference, it needs
 to be rotated from one frame to another. Those operations are illustrated in \figRef{fig:rotation_exp_log}.
 
-
 %
 %
 %
@@ -684,7 +684,7 @@ The Jacobian matrix of the residuals $\bfJ \in \Reals^{M \times N}$ is a big spa
 \end{itemize}   
 
 Each block column corresponds to one of the state variables and each row corresponds to a residual. For each row, only the blocks corresponding to the
-state variables that the residual depends on are non-zero. For instance, the matrix corresponding to the toy problem described in \figRef{fig:toy_problem} is:
+state variables that the residual depends on are non-zero. For instance, the Jacobian corresponding to the toy problem described in \figRef{fig:toy_problem} is:
 \begin{equation}
     \bfJ=
     \begin{pmatrix}
@@ -711,7 +711,7 @@ We highlight the parts that differ from the regular Gauss-Newton algorithm with 
 
 \begin{enumerate}
     \item Initialize the state estimate at an initial value $\check{\cX} := \cX^0$ \\
-    $\cX$ lives on a composite manifold. Its error and increments leave are expressed in its local tangent space.
+    $\cX$ lives on a composite manifold. Its error and increments are expressed in its local tangent space.
     \item Approximate the NLLS cost function around the current estimate as a quadratic function \\
     The linear approximation is done using the notation of Jacobian on manifolds described in \secRef{sec:uncertainty_on_manifolds}.
     $\Delta \bfx$ is defined as the Cartesian representation of a composite tangent space element.  
@@ -740,7 +740,7 @@ formulating new, efficient, and generalizable measurement models. This thesis mo
 the estimation model (ii) while we mostly rely on existing algorithms (i) to solve the subsequent problems.
 A commonly used denomination in the context of robotics state estimation is to refer to the solver implementation as the \textit{backend} while the algorithms processing sensor information to create residuals are referred to as \textit{front-ends}.
 
-The next chapters each concentrate on a range of sensor modalities useful for legged robots:
+The next chapters concentrate on a range of sensor modalities useful for legged robots:
 object pose retrieval from vision algorithms, a generalized pre-integration theory for high rate sensors, legged robot kinematics, and the application 
 of pre-integration to legged robots force measurements.
 
