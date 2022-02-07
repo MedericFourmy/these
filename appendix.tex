@@ -15,8 +15,8 @@ illustrate the nature of the approximation and compare it to an exact inference 
 
 \section{Laplace approximation}
 \label{sec:map_covariance}
-Even if our priors and measurements models are Gaussian distributions, the posterior distribution
-is in general non-Gaussian (unless all measurements models are linear). The region near the peak of the posterior is, however, often nearly Gaussian in shape.
+Even if our priors and measurement models are Gaussian distributions, the posterior distribution
+is in general non-Gaussian (unless all measurement models are linear). The region near the peak of the posterior is, however, often nearly Gaussian in shape.
 The curvature around the mode is described by the Hessian of the posterior negative log-likelihood at the MAP estimated state. 
 It can be shown that he Hessian is the \textit{information matrix} of the problem\footnote{The proof of this statement is out of the scope of this document and can be found in
 \cite[Section 5.1]{peng2018advanced}}. Thus, finding the covariance of the MAP estimate resolves to inverting a 
@@ -221,7 +221,7 @@ Any point in the Lie algebra can be obtained after moving at constant velocity d
 Eq.~\eqRef{eq:constr} can be written as $\dot\D=\D\cdot\bm\nu\hhat$.
 This is an ordinary differential equation whose  integral for constant $\bm\nu$ yields the exponential map \cite{sola2018micro}, $ \D(t) = \exp\left(\bm\nu\hhat t\right)$.
 This gives a direct expression of the integral of information of the type $(\bfv,\bfa,\bw)$ onto the deltas manifold. %See below for the $(\bfa,\bw)$ case.
-The closed form of the exponential map is obtained through Taylor expansion (see \eg\ \cite{sola2018micro}\ for examples). 
+The closed form of the exponential map is obtained through Taylor expansion (see \eg \cite{sola2018micro}\ for examples). 
 At $t=\Dt$ we have,
 %
 \begin{align}

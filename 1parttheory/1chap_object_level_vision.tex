@@ -5,15 +5,15 @@
 
 
 The field of computer vision comprises a wide range of methods to extract information about the real world from images taken by digital cameras. 
-This information can be used to infer the structure of the environment (mapping or object tracking), about the movement of the system to which is 
+Among others, this information may be the structure of the environment (mapping or object tracking), the movement of the system to which is 
 attached the camera (localization), or both at the same time (Simultaneous Localization And Mapping, \aka\ SLAM). In the context of robotics, the images 
 are obtained one after another at a constant rate. This leads to a somewhat continuous evolution of the image appearance, which can be leveraged in 
-various ways  (feature tracking, motion models, etc.). We are here interested in solving SLAM, which is the most general application of this method and 
+various ways (feature tracking, motion models, etc.). We are here interested in solving SLAM, which is the most general application of this method and 
 is used when a robot needs to localize itself in an a priori unknown environment. A vast literature of dedicated algorithms have been developed in this 
-regard, with approaches ranging from geometrical constraints using sparse feature detection \cite{mur2015orb, ferrera2021ov} or photometric consistencies 
+regard, from approaches based on geometrical constraints using sparse feature detection \cite{mur2015orb, ferrera2021ov} to methods leveraging photometric consistency
 \cite{newcombe2011dtam, engel2014lsd, engel2017direct}, certain methods combining ideas from both approaches \cite{forster2014svo, forster2016svo}.
 
-These algorithms aim at being generalizable to any kind of environment and have their respective strengths and weaknesses \cite{fuentes2015visual}. 
+These algorithms aim at generalizing to any kind of environment and have their respective strengths and weaknesses \cite{fuentes2015visual}. 
 Although open-source code is available for most, these pieces of software may be difficult to integrate into other frameworks. Besides, 
 though providing quite accurate localization, maps obtained from these methods are rarely immediately useful, lacking semantic information about 
 the scene. 
@@ -24,14 +24,14 @@ Approaches based on object-level measurement can provide an affordable alternati
 in the scene which can be detected in the images. Dedicated algorithms can then infer the object pose relative to the camera, which can be used to build 
 \textit{object-level SLAM} systems. 
 
-In this chapter, we present two measurements models based on available software, that permit the implementation of this paradigm. The first one 
+In this chapter, we present two measurement models based on available software, that enable the implementation of this paradigm. The first one 
 uses unique \apriltag\ fiducial markers \cite{wang2016iros} (to which we may refer to as \textit{tags} informally) that are laid out sparsely in the scene. 
 The second uses a deep-learning-based method \cite{labbe2020cosypose}
 to obtain relative poses from an object of interest, such as a pair of stairs. Instead of artificially augmenting the environment with fiducial markers, we assume 
 that objects of interest exist in the scene, whose CAD models are known. 
-Both systems lack ways to estimate the uncertainty of their output and we, therefore, propose methods for the computation of the measurements covariances.
+Both systems lack ways to estimate the uncertainty of their output and we, therefore, propose methods for the computation of their measurements outputs covariances.
 
-In both models, we assume that we have a calibrated camera and that the images have been corrected for distortions. The camera reference frame $C$ has its origin at 
+In both models, we assume that we have a calibrated pinhole camera and that the images have been corrected for distortions. The camera reference frame $C$ has its origin at 
 the camera optical center and follows the convention X-Y-Z = Righ-Down-Front, Front being the optical axis direction, looking through the lens. This chapter starts by 
 introducing the measurement model based on a general 6D factor used by both systems. Methods to recover the covariance of both algorithms are then given. 
 For applications fusing these models with IMU data, please refer to \chpRef{chp:absolute_vi} and \chpRef{chp:cosyslam}.
@@ -39,14 +39,14 @@ For applications fusing these models with IMU data, please refer to \chpRef{chp:
 
 
 \section{Relative 6D pose factor}
-In this section, we will derive a general 6D relative transformation factor between a \keyframe\ and a object, whose poses in world frame are respectively $\T{W}{B} \in \SE(3)$ and $\T{W}{O} \in \SE(3)$. In this chapter, we denote by $\T{}{} \in \SE(3)$ 6D transformations.
+In this section, we will derive a general 6D relative transformation factor between a \keyframe\ and a object, whose poses in world frame are respectively $\T{W}{B} \in \SE(3)$ and $\T{W}{O} \in \SE(3)$. 
+We denote by $\T{a}{b} \in \SE(3)$ 6D transformations transforming a 3D point $\posi{b}{} \in \Reals^3$ expressed in frame $b$ to its expression in frame $a$ $\posi{a}{}=\T{a}{b}\posi{b}{} \in \Reals^3$.
 
 Let us assume that an algorithm estimates directly $\Tm{C}{O}$, a measurement of the pose of an element 
 of the scene with an attached frame $O$ with respect to the camera frame $C$.
 The kinematic chain of the problem described in \figRef{fig:camera_object_chain} unrolls as 
-$\T{W}{O} = \T{W}{B}\T{B}{C}\T{C}{O}$ where W and B correspond to the world and body frames. $\T{B}{C}$ corresponds to the extrinsic pose 
-of the camera.
-Given measurement $\Tm{C}{O}$, this relation can therefore be turned into a residual relating 
+$\T{W}{O} = \T{W}{B}\T{B}{C}\T{C}{O}$ where W and B correspond to the world and body frames. $\T{B}{C}$ corresponds to the extrinsic pose  of the camera.
+Given measurement $\Tm{C}{O}$, this relation can be turned into a residual relating 
 the robot pose, the camera extrinsics, and the object pose:
 
 \begin{align}
@@ -55,9 +55,9 @@ the robot pose, the camera extrinsics, and the object pose:
     &= \Log_{\SE(3)} ( (\T{W}{B} \T{B}{C} \Tm{C}{O})^{-1} \T{W}{O}) ~ \in \Reals^6
 \end{align}
 %
-where here $\Log_{\SE(3)}$ denotes the log map on $\SE(3)$.
+where here $\Log_{\SE(3)}$ denotes the log map on $\SE(3)$ \cite{sola2018micro}.
 
-Depending on the nature of the problem, we can fix some of the variables of the residual. In \tabRef{tab:res_var_fix}, various estimation problems are modelled depending on which variable is fixed.
+Depending on the nature of the problem, we can fix some of the variables of the residual. In \tabRef{tab:res_var_fix}, various estimation problems are modeled depending on which variable is fixed.
 
 \begin{table}[h]
     \centering
@@ -150,14 +150,14 @@ Our solution is to bring the disambiguation to the front-end side.
 both solutions share the tag position and differ only in their orientation. We typically want to select the solution with the smallest error. 
 However, if the reprojection errors $e_1$ and $e_2$ are too close (we test for $\tfrac{e_2}{e_1} < h$ with $e_1 \leq e_2$ and $h$ an empirical threshold), 
 we increase the rotational part of the covariance matrix by a great factor to cancel the influence of the wrong tag orientation on the 
-overall MAP problem
+overall MAP problem.
 
 \subsection{Covariance model}
 \label{sec:apritlag_covariance}
 Obtaining a covariance of the estimated transformation is an important step toward the integration of these measurements in a sensor fusion algorithm.
 
-Urban \cite{urban2016mlpnp} (Eq. (23)) uses a careful parameterization of the homogeneous coordinates associated with 2D features to develop
-a maximum likelihood PnP algorithm and also proposes a covariance model based on the problem Hessian (Eq. (23)).  However, the particular choice of variable 
+Urban \cite[Eq. (23)]{urban2016mlpnp} uses a careful parameterization of the homogeneous coordinates associated with 2D features to develop
+a maximum likelihood PnP algorithm and also proposes a covariance model based on the problem Hessian.  However, the particular choice of variable 
 parameterization makes the formulation of the covariance computation overcomplicated.
 We think that a simpler yet equivalent formulation is possible. 
 
@@ -177,7 +177,7 @@ The PnP algorithm provides us with a function $\text{pnp}$ defined as:
     \end{split}
 \end{equation}
 %
-where w denotes the dependency on the width of the marker. This $\text{pnp}_w$ function implementation depends on the specificities of the PnP algorithm used and  
+where w denotes the dependency on the width of the marker. This "pnp" function implementation depends on the specificities of the PnP algorithm used and  
 is in general hard to analytically differentiate. Instead, if we consider the inverse function.
 
 \begin{equation}
@@ -187,7 +187,7 @@ is in general hard to analytically differentiate. Instead, if we consider the in
     \end{split},
 \end{equation}
 
-This function $\text{proj}$ maps the relative pose to the projection of the tag in the image, a rather simple Jacobian expression can be derived using the chain rule, as follows.
+"proj" maps the relative pose to the projection of the tag in the image. A rather simple Jacobian expression can be derived using the chain rule, as follows.
 
 We denote the marker corner coordinates in the marker frame as shown in \figRef{fig:apriltag_coordinate_frame}. As a convention 
 \cite{wang2016iros}, we order the corners counter-clockwise starting from bottom-left (looking straight at the tag). 
@@ -211,7 +211,7 @@ We denote the marker corner coordinates in the marker frame as shown in \figRef{
 \begin{figure}
     \centering
     \includegraphics[width=0.5\textwidth]{figures/tag12_frame.png}
-    \caption{\apriltag~local coordinate systems and corners conventions \cite{wang2016iros}}
+    \caption{\apriltag\ local coordinate systems and corners conventions \cite{wang2016iros}}
     \label{fig:apriltag_coordinate_frame}
 \end{figure}
 
@@ -221,7 +221,7 @@ Then, assuming that images are corrected (no distortion), the pinhole camera mod
     \bfx_i = \text{eucl}(\bfh_i) = \text{eucl}(\bfK\T{C}{O} \bfc_i)
 \end{equation}
 %
-for each corner $c_i$, where $h_i$ are the homogeneous coordinates representing the projected corners and $eucl$ is the function that maps 
+for each corner $c_i$, where $h_i$ are the homogeneous coordinates representing the projected corners and "eucl" is the function that maps 
 homogeneous coordinates to euclidean pixel coordinates defined as
 %
 \begin{equation}
@@ -239,8 +239,8 @@ We need to compute the Jacobian of each corner projection with respect to the es
     \bfJ^{\bfx_i}_{\T{}{}} = \bfJ^{\bfx_i}_{\bfh_i} \bfJ^{\bfh_i}_{\T{}{}}.   
 \end{equation}
 
-Regarding the transformation, we will consider it to be an element of the composite Lie group $\left<\Reals(3)\times \SO(3)\right>$ since the translation and rotation part 
-of transformation are treated separately in our solver. The expressions of those functions are, therefore, expressed as:
+Regarding the transformation, we will consider it to be an element of the composite Lie group $\left<\Reals(3)\times \SO(3)\right>$ as it is done in our solver. 
+The expressions of those functions are, therefore, expressed as:
 
 \begin{equation}
     \begin{split}
@@ -275,7 +275,7 @@ Finally, we stack the 4 Jacobians to get the full Jacobian to be used for covari
 
 We therefore have the covariance propagation equation $\Cov_{\bfx} = \bfJ \Cov_{\T{}{}} \bfJ\tr$. 
 Since $\Cov_{\bfx}$ and $\bfJ$ are known, this equation must be inverted in order to recover the needed covariance $\Cov_{\T{}{}}$. $\bfJ$ being non square and full column rank for four 
-corners ($\bfJ \in \Reals^{8 \times 6}$, we can use the right pseudo inverse $\bfJ^{+} = (\bfJ\tr \bfJ)^{-1}\bfJ\tr$. Multiplying left and right by 
+corners ($\bfJ \in \Reals^{8 \times 6}$), we can use the right pseudo inverse $\bfJ^{+} = (\bfJ\tr \bfJ)^{-1}\bfJ\tr$. Multiplying left and right by 
 respectively $\bfJ^{+}$ and $\bfJ^{+,\top}$, we obtain: $\Cov_{\T{}{}} = \bfJ^{+} \Cov_{\bfx} \bfJ^{+,\top}$. Given that the pixel noise covariance is 
 isotropic as explained above, $\Cov_{\bfx} = \sigma_x^2 \bfI$, this equation finally simplifies to:
 
@@ -309,24 +309,24 @@ follows a chi-square distribution with 3 degrees of freedom. Since \eqRef{eq:chi
 governed by $\Cov$, we can then plot confidence volumes as ellipsoids by replacing the right-hand side of  
 \eqRef{eq:chi2} by the critical value of the chi-square distribution for the desired confidence interval (we chose $\alpha=99\%$). 
 
-We simulate a realistic scenario using calibration data from a laboratory RealSense camera, 15cm tags and $\sigma_x = 2~\text{pixels}$. 
-\figRef{fig:apriltag_cov_P} and \figRef{fig:apriltag_cov_P} show how the uncertainty on position and orientation relate to different factors.
+We simulate a realistic scenario using calibration data from a laboratory RealSense camera, 15 cm tags and $\sigma_x = 2~\text{pixels}$. 
+\figRef{fig:apriltag_cov_P} and \figRef{fig:apriltag_cov_O} show how the uncertainty on position and orientation relate to different factors.
 
 \begin{figure}[h]
     \centering
     \begin{subfigure}{.50\linewidth}
         \centering
         \includegraphics[width=\textwidth]{figures/apriltag_cov_P_015.png}
-        \caption{Relative position covariances, 15cm tags \label{fig:apriltag_cov_P_015}}
+        \caption{Relative position covariances, 15 cm tags \label{fig:apriltag_cov_P_015}}
     \end{subfigure}%
     \hfill
     \begin{subfigure}{.50\linewidth}
         \centering
         \includegraphics[width=\textwidth]{figures/apriltag_cov_P_030.png}
-        \caption{Relative position covariances, 30cm tags \label{fig:apriltag_cov_P_030}}
+        \caption{Relative position covariances, 30 cm tags \label{fig:apriltag_cov_P_030}}
     \end{subfigure}%
     \caption{Position uncertainty from the analytical covariance model. The single frame at the bottom represents the pose of the virtual camera, others are identical 
-    \apriltags placed in front of the camera at different distances but identical orientations. Covariances are represented in orange, centered at the corresponding tag 
+    \apriltags\ placed in front of the camera at different distances but identical orientations. Covariances are represented in orange, centered at the corresponding tag 
     position.
     (\subref{fig:apriltag_cov_P_015}) shows that the main positional uncertainty is along the camera-tag axis, which corresponds to the distance information. 
     In (\subref{fig:apriltag_cov_P_030}), tags are twice the size, which shrinks their position uncertainty.}
@@ -343,7 +343,7 @@ Besides, this uncertainty is not much influenced by the relative camera-tag orie
 For the orientation uncertainty (\figRef{fig:apriltag_cov_O}), the shape of the covariance is harder to interpret: a high uncertainty about the orientation along 
 one axis corresponds to a dilatation of the ellipse along this axis. For instance, in \figRef{fig:apriltag_cov_O_10deg}, tags placed
 along the Z-axis of the camera frame have a very high uncertainty along the X and Y-axis (in camera frame). Their uncertainty ellipses seem, therefore, very flat
-along the Z-axis. \figRef{fig:apriltag_cov_O_10deg} directly relates to our discussion about tag pose ambiguity in \secRef{sec:tag_ambiguity}. Tags close
+along the Z-axis. \figRef{fig:apriltag_cov_O_10deg} directly relates to our discussion about tag pose ambiguity in \secRef{sec:tag_ambiguity}: tags close
 to fronto-parallel configuration (along the camera Z-axis) have a very high rotational uncertainty compared to tags that have a more important relative 
 orientation as in \figRef{fig:apriltag_cov_O_10deg}. On the contrary, tags with higher relative orientation in \figRef{fig:apriltag_cov_O_10deg} display a much lower rotational uncertainty.
 
@@ -353,13 +353,13 @@ orientation as in \figRef{fig:apriltag_cov_O_10deg}. On the contrary, tags with 
     \begin{subfigure}{.50\linewidth}
         \centering
         \includegraphics[width=\textwidth]{figures/apriltag_cov_O_10deg.png}
-        \caption{Relative orientation covariances, 10 degree orientation \label{fig:apriltag_cov_O_10deg}}
+        \caption{Relative orientation covariances, 10° orientation \label{fig:apriltag_cov_O_10deg}}
     \end{subfigure}%
     \hfill
     \begin{subfigure}{.50\linewidth}
         \centering
         \includegraphics[width=\textwidth]{figures/apriltag_cov_O_45deg.png}
-        \caption{Relative orientation covariances, 45 degree orientation \label{fig:apriltag_cov_O_45deg}}
+        \caption{Relative orientation covariances, 45° orientation \label{fig:apriltag_cov_O_45deg}}
     \end{subfigure}%
     \caption{Orientation uncertainty from the analytical covariance model. The single frame at the bottom represents the pose of the virtual camera, others are identical 
     \apriltags\ placed in front of the camera at different distances but identical orientations. Covariances are represented in orange, centered at the corresponding tag 
@@ -371,7 +371,7 @@ orientation as in \figRef{fig:apriltag_cov_O_10deg}. On the contrary, tags with 
 
 
 In \figRef{fig:apriltag_proj}, 3 tags are projected: the first (black) is half a meter away from the camera in fronto-parallel orientation, the second (orange)
-10cm to the right, and the third (rose) 10cm behind. We can see that the difference of appearance due to a depth-wise movement is much smaller, which 
+10 cm to the right, and the third (rose) 10 cm behind. We can see that the difference of appearance due to a depth-wise movement is much smaller, which 
 explains the higher uncertainty on the depth measurement.
 
 \begin{figure}[h]
@@ -419,7 +419,7 @@ The front end of the SLAM system designed for this project includes object detec
 This function is provided by CosyPose \cite{labbe2020cosypose}, a deep-learning-based 6D pose estimator that reaches state-of-the-art
  performances for 6D object pose estimation.
 In the original paper, a single-view pose estimator and a multi-view algorithm were introduced. In our context, only the single-view module is used, 
-while object tracking is handled by the SLAM framework. 
+while object tracking and mapping is handled by the SLAM framework. 
 
 CosyPose takes as input a single image $I$ and a set of 3D models, each associated with an object label $l$. The camera $C$ is assumed to be calibrated. 
 A set of object detections is performed using the object detector Mask-RCNN \cite{he2018mask}. Each 2D candidate detection is identified 
@@ -450,7 +450,7 @@ The single-view procedure for pose estimation of CosyPose is an improvement over
 use the same neural network to iteratively converge to the object pose (\figRef{fig:cosypose-convergence}). It takes as input the cropped image of the detected 
 object bounding box and a rendered image based on the current object pose solution $\T{C}{O_{\alpha},k-1}$ at iteration $k-1$. 
 It returns a transformation update $\T{O_{\alpha},k-1}{O_{\alpha},k}$ that brings the rendered image closer to the cropped image. In practice, 
-two neural networks with the same structure are trained independently: one for coarse pose estimation, \ie, the first iteration of the iterative process, 
+two neural networks with the same structure are trained independently: one for coarse pose estimation, \ie the first iteration of the iterative process, 
 and another for the refinement of the pose. The coarse network gives the first transformation $\T{C}{O_{\alpha},0}$, 
 and the prediction of the pose of the object is obtained by composing the $N$ successive transformations:
 
@@ -458,7 +458,7 @@ and the prediction of the pose of the object is obtained by composing the $N$ su
 \T{C}{O_{\alpha}} = \T{C}{O_{\alpha},0} \prod_{k=1}^N  \T{O_{\alpha},k-1}{O_{\alpha},k}.
 \end{equation}
 
-CosyPose reuses the neural network architecture of DeepIm with a new backbone for feature extraction, Efficient-Net \cite{tan2020efficientnet} ,
+CosyPose reuses the neural network architecture of DeepIm with a new backbone for feature extraction, Efficient-Net \cite{tan2020efficientnet},
 with a spatial average pooling layer added after it. Then, it disables the optical flow sub-network during the training. 
 A new rotation parametrization, introduced in \cite{zhou2020continuity}, is used for the loss function, which has been shown 
 to bring more stability during training. Then, the focal length of the cropped images is recomputed during training to fit the virtual camera 
@@ -466,7 +466,7 @@ of these images. Finally, the object symmetries are taken into account during tr
 Each 3D model $l$ is associated with a set of symmetries $S(l)$, that is the set of transformations that leave the aspect of the object unchanged:
 
 \begin{equation}
-    \textit{S}(l) = \left \{ \bfS \in \SE(3) | \forall \bfT \in \SE(3), \cR(l,\bfT) = \cR(l,\bfT \bfS)\right \}
+    \textit{S}(l) = \left \{ \bfS \in \SE(3)~~|~~\forall~\bfT \in \SE(3), \cR(l,\bfT) = \cR(l,\bfT \bfS)\right \}
 \end{equation}
 %
 where $\cR(l,\bfT)$ is the rendered image of the object $l$ captured in pose $M$. Given a set of symmetries $S(l)$, 
@@ -479,7 +479,7 @@ Given an object $l$ associated to a set $\cX_l$ of 3D points $\mathbf{x} \in \cX
 \end{equation}
 
 Equation \eqRef{eq:distSym} measures the average distance between the points of the object model transformed by $\bfT_1$ and $\bfT_2$ according to the symmetry 
-that best aligns the transformed points. In practice, for continuous symmetries  that are rotations around an axis (like for instance for a textureless cylinder), 
+that best aligns the transformed points. In practice, for continuous symmetries  that are rotations around an axis (\eg for a texture-less cylinder), 
 $S(l)$ is discretized using 64 angles.
 
 
@@ -559,9 +559,9 @@ $\so(3)$.
 
 We want to find a polynomial function $f(r, \varphi, \theta, s) \in \mathbb{R}^6$ that returns the error given the set of training data $\{X,E\}$. 
 For each object, we capture a set of video sequences and we compute the error with the motion capture data for each measurement. 
-We then perform polynomial regression with a pipeline in Scikit Learn \cite{scikit-learn}. A simple linear regression leads to a high root-mean-square error (RMSE) 
+We then perform polynomial regression implemented with Scikit Learn \cite{scikit-learn}. A simple linear regression leads to a high root-mean-square error (RMSE) 
 on a test dataset. Over degree 3, the model overfits and the high curvature of the polynomial returned high error values outside of the training data range. 
-Thus, a degree 2 polynomial regression seemed to offer a good compromise.  Quantitative results are given in the experimental validation section 
+Thus, a degree 2 polynomial regression seemed to offer a good compromise. Quantitative results are given in the experimental validation section 
 (see Fig.~\figRef{fig:empirical_err} for a few examples of fitted polynomials).
 
 
@@ -640,7 +640,7 @@ The generation of photorealistic synthetic data was handled by BlenderProc \cite
 
 We generate 10.000 synthetic images that are labeled with object pose ground truths. We retrain the three modalities of CosyPose: 
 the Mask-RCNN detector, the coarse pose estimator, and the pose refiner. We slightly tune the training parameters used for the object from the BOP challenge as 
-the scale is different: the stair is $1m \times 0.3m \times 0.07m$ whereas a T-LESS object is never wider than $10cm$. 
+the scale is different: the stair is $1m \times 0.3m \times 0.07m$ whereas a T-LESS object is never wider than $10 cm$. 
 Thus, we generate training data on $10m \times 10m$ scenes, and we increase the noise used to train the refiner.  
 
 An illustration of the performances of CosyPose on a set of 3 stair steps is given on \figRef{fig:cosypose-ycbv}: 
@@ -675,7 +675,7 @@ algorithm, is not able to provide enough performance guarantee to be
 embedded in a robot feedback loop.
 
 This chapter paves the way to extending our work to true semantic SLAM,
-i.e mapping while directly extracting the location of an object of interest. With
+\ie mapping while directly extracting the location of an object of interest. With
 CosyPose, we directly identify the accurate pose of known objects. This is
 important in our context for two reasons. First, the recognized objects can
 later be used to close the localization loop with a high degree of accuracy.
