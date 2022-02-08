@@ -11,7 +11,7 @@ a camera may record images at 33Hz while an IMU may be updated at 1 kHz. In the 
 are defined between \keyframes\ selected at a relatively low frequency, at times as low as 1 Hz. One needs to integrate measurements from these high-rate sensors between \keyframes,
 which is not trivial in general.
 
-In this chapter, we first describe the example of the integration of IMU measurements which motivates the development of the pre-integration theory \cite{lupton-09,forster2017-TRO}.
+In this chapter, we first describe the example of the integration of IMU measurements which motivates the development of the pre-integration theory \cite{lupton-09,forster2015imu}.
 We then express this pre-integration in more abstract mathematical terms to generalize it to other high-rate sensors, which was first described in Dinesh Atchuthan's thesis \cite{atchuthan-18-thesis}. 
 Then, we describe a possible reformulation of the original IMU-pre-integration algorithm \cite{forster2017-TRO} by exploiting a new Lie group that we 
 proposed in \cite{fourmy2019absolute}. We conclude the chapter with a discussion of related works.
@@ -48,7 +48,7 @@ The IMU measurements are known to be noisy, biased, and affected by the gravity,
     \label{eq:imu_meas_model}
 \end{equation}
 %    
-The biases $\bias \triangleq [\bias_{\acc{}{}}, \bias_{\angvel{}{}}]$ need to be estimated in order to be able to cancel them, and are thus included in the estimator state.
+The biases $\bias \triangleq [\bias_{\acc{}{}}, \bias_{\angvel{}{}}]$ need to be estimated in order to be canceled and are thus included in the estimator state.
 Fusing with other sensors will help make them observable.
 
 These biases may drift over time, more or less slowly depending on the quality of the IMU. This drift is modeled 
@@ -392,11 +392,12 @@ in the factor graph, with residual error defined by
     \bfe^{\bias}_{im}(\bias^i, \bias^m) = \bias^m - \bias^i
 \end{equation}
 %
-with associated covariance matrix
+with associated covariance
 %
 \begin{equation}
-    \Cov_{\bias,im} = \bfW^c_{\bias} \Dt_{im}
+    \Cov_{\bias,im} = \bfW^c_{\bias} \Dt_{im}.
 \end{equation}
+
 
 
 \subsection{Publishing the current optimal state}
@@ -846,7 +847,7 @@ In effect, with this approximation, if we now compact all the steps \eqsRef{eq:p
 %
 \begin{align}
     \D_{ik} = \prod_{j=i+1}^k \Exp\left(\begin{bmatrix}
-    \bf0 \\ (\bias_a^i - \bias_a^j) \\ (\bias_{\angvel{}{}}^j-\bias_{\angvel{}{}}^j) \\ 1
+    \bf0 \\ (\bfa^i - \bias_a^j) \\ (\bw^j-\bias_{\angvel{}{}}^j) \\ 1
     \end{bmatrix}\dt\right)
 ~,
 \end{align}

@@ -86,7 +86,7 @@ By definition, computation of the CoM position from the kinodynamic model resort
 \end{equation}
 %
 were $m_i$ are the individual segment masses and $\posi{B}{\COM_i}$ the levers between the base and the center of mass of each segment, computed from the robot configurations $\qa$. 
-In general, these terms are not exactly accurate as our model of the robot may not be faithful to the real system. The computation of $\posi{B}{\COM}$ is therefore biased. 
+In general, these terms are not exactly accurate as our model of the robot may not be faithful to the real system. The computation of $\posi{B}{\COM}$ and masses $m_i$ are therefore biased. 
 Worse, this bias is not constant, since it nonlinearly depends on the robot limbs configuration. 
 
 We chose a simple additive model on the CoM kinematics noisy measurements
@@ -151,7 +151,7 @@ $\Cov_{CK} = \bfJ^{\bfe}_{\noise} \Cov_{\noise} \bfJ^{\bfe,\top}_{\noise}$, with
     \begin{pmatrix}
     \Ident & 0 & 0 
     \\
-    [\angvelm{B}{B} - \bias_{\omega}]_{\times} & \Ident & -[\posim{B}{BC} -  \bias_{p}]_{\times}
+    [\angvelm{}{} - \bias_{\omega}]_{\times} & \Ident & -[\posim{B}{C} -  \bias_{p}]_{\times}
     \\
     0 & 0 & \Inertia
     \end{pmatrix}
@@ -201,7 +201,7 @@ Assuming constant forces during each interval $\dt$ the integration of \eqRef{eq
     \label{eq:COMDiscrete}
 \end{equation}
 
-This model is well adapted to humanoid robots with 6axis force-torque sensors at their flat feet or quadrupeds with 3D force sensors at their (approximately) 
+This model is well adapted to humanoid robots with 6-axis force-torque sensors at their flat feet or quadrupeds with 3D force sensors at their (approximately) 
 point feet. Indeed, for quadruped with point feet, no pure moment is applied by the ground of the robot. In this case, the same equations can be kept, simply setting the
 pure torques  $\torque{}{}$ terms to zero.
 
@@ -387,7 +387,7 @@ previously on more theoretical estimation work, the force sensors provide the
 observability condition to unbias the COM position despite (unavoidable) kinematic
 and inertial calibration problem of the robot model.
 
-We will show in the experimental part of this thesis how this tight coupling can
+We will show in the experimental part of this thesis (\chpRef{chp:centroidal_estimation}) how this tight coupling can
 be implemented on a quadruped robot, although a significant experimental work
 remains to be done to demonstrate its interest in practice. As previously said, this
 contribution is a first step toward building a whole-body estimator, \ie an estimator

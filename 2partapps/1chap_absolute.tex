@@ -14,7 +14,7 @@ respect to some known landmarks.
 While our final goal is to merge in the optimal estimator the measurements coming from all the sensors of the robot, we focus here on contributions 
 validating the use of visual-inertial localization and mapping on a humanoid robot navigating indoors in a 3D environment.
 
-For the visual factor, we rely on \apriltags \cite{wang2016iros}, while proposing a practical contribution to avoid ambiguity 
+For the visual factor, we rely on \apriltags\ \cite{wang2016iros}, while proposing a practical contribution to avoid ambiguity 
 issues in the pose estimation of the tags, as described in \secRef{sec:fiducial_markers}. 
 For the inertial factor, we build upon Forster pre-integration~\cite{forster2017-TRO} and propose an original, 
 by exhibiting a compact Lie group (described in \secRef{sec:imu_preint_compact}) that is suitable for optimal estimation. 
@@ -261,7 +261,7 @@ optimized by the solver, as explained in \secRef{sec:publish-state}. The smoothn
     \includegraphics[width=0.9\textwidth]{figures/absolute/vz_descending_onestep_with_kf.pdf}
     \caption{Descending stairs (one step): the robot first lowers its base and then touches the next step with results in vibrations from the impact.
     Vibrations at approximately 10 Hz visible in both the motion capture ground truth and optimal state estimation. Note that the estimation in this case has a smoother curve.
-    \keyframes\ are introduced at 6.6 Hz (every $\approx 150 ms$) and are represented by vertical red bars. State in between is obtained by applying the pre-integrated 
+    \keyframes\ are introduced at 6.6 Hz (every $\approx$ 150 ms) and are represented by vertical red bars. State in between is obtained by applying the pre-integrated 
     delta from the last \keyframe\ to the current time to the estimate of the last \keyframe\ state estimate (see \secRef{sec:publish-state}).}
     \label{fig:vz_descending_onestep}
 \end{figure}
