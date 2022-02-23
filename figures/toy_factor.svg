@@ -723,9 +723,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4326432"
-     inkscape:cx="306.13826"
-     inkscape:cy="670.05412"
+     inkscape:zoom="0.44107075"
+     inkscape:cx="430.63842"
+     inkscape:cy="296.90077"
      inkscape:document-units="mm"
      inkscape:current-layer="g2845-7"
      inkscape:document-rotation="0"
@@ -1785,8 +1785,8 @@
            id="rect7374-7"
            width="19.045515"
            height="15.544241"
-           x="350.03326"
-           y="615.43536"
+           x="354.65991"
+           y="614.6225"
            ry="0" />
         <g
            id="g1351-0"
@@ -1983,6 +1983,14 @@
            x="177.00443"
            y="517.8382"
            ry="22.506599" />
+        <rect
+           style="fill:none;fill-rule:evenodd;stroke-width:2.27622"
+           id="rect1273"
+           width="275.4935"
+           height="199.15288"
+           x="212.3232"
+           y="516.01959"
+           ry="0" />
       </g>
     </g>
   </g>
