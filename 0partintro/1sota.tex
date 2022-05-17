@@ -567,7 +567,7 @@ tightly couple motion/step planning and terrain reconstruction.
 Fallon \cite{fallon2015continuous} used the Kintinuous framework \cite{whelan2012kintinuous} to obtain a local Truncated Signed Distance Function based dense representation. This map was
 shown to be of equivalent quality to that of a LIDAR and used as an input to a feasible contact surface segmentation algorithm selecting planar convex regions of uneven cinder blocks. 
 In order to handle local loopy trajectories better than Kintinuous, Elastic Fusion \cite{whelan2016elasticfusion}, which is a dense depth-based vision system using surfels \footnote{"
-A surfel is a zero-dimensional n-tuple with shape and shade attributes that locally approximate an object surfac" \cite{pfister2000surfels}}, 
+A surfel is a zero-dimensional n-tuple with shape and shade attributes that locally approximate an object surface \cite{pfister2000surfels}}, 
 was shown to be usable on humanoid platforms \cite{scona2017direct}. The system augmented the Elastic Fusion algorithm by adding 
 proprioceptive odometry term to the solved nonlinear least-squares (NLLS) problem, using a heuristic to increase the weight of proprioception in visually degenerate situations. The 
 dense reconstruction is accurate up to 2 cm, which is enough for motion planning. However, in this case, the map was only used for localization.
