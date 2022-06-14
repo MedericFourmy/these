@@ -156,8 +156,7 @@ We purposely keep this tutorial to a minimal version; the reader is referred to 
 The Gauss-Newton algorithm is an iterative algorithm to find the minimum of NLLS cost functions that can be decomposed in a series of steps.
 \begin{enumerate}
     \item Initialize the state estimate at an initial value $\check{\cX} := \cX^0$
-    \item Approximate the NLLS cost function around the current estimate as a quadratic function:  
-    $\cF(\Delta \bfx) \approx \cL(\check{\cX} + \Delta \bfx)$ (see \eqRef{eq:gaussian_step_quadratic_eq} below)
+    \item Approximate the NLLS cost function around the current estimate as a quadratic function (see \eqRef{eq:gaussian_step_quadratic_eq} below).
     \item Find the optimal step $\Delta \bfx^*$ as the root of $\cF(\Delta \bfx)$, corresponding to a linear set of 
     equations (see \eqRef{eq:linear_syst_GN} below)
     \item Update the current state estimate $\check{\cX} := \check{\cX} + \Delta \bfx^*$
@@ -186,10 +185,10 @@ where $\bfr_i(X_{S_i}) \triangleq \Cov_i^{-\frac{1}{2}}\bfe_i(X_{S_i})$ can be i
 from the Cholesky factorization of $\Cov_i^{-1}$. Therefore, the NLLS MAP problem can simply be written:
 %
 \begin{equation}
-    \cX^{MAP} = \argmin_{\cX} \cL(\cX) \triangleq||\bfr(\cX)||^2 = \sum_{i=0}^N ||\bfr_i({\cX_{S_i}})||^2 
+    \cX^{MAP} = \argmin_{\cX} ||\bfr(\cX)||^2 
 \end{equation}
 %
-where $\bfr$ is a vector of vertically stacked residuals (column vectors) and the cost function $\cL(\cX)$ is simply the squared norm 
+where $\bfr$ is a vector of vertically stacked residuals (column vectors) and the cost function is the squared norm 
 of the residual vector. Let us assume we have a current estimate $\check{\cX}$ of the state variables $\cX$ .
 Each residual can be linearized with respect to the states it depends on $\cX_{S_i}$ at their current estimate $\check{\cX}_{S_i}$:
 %
@@ -206,16 +205,16 @@ where $J_i$ is the Jacobian of the residual at $\check{\cX}_{S_i}$:
 
 We can note $N = \sum_{i=1}^{n}dim(\bfx_i)$ and $M = \sum_{i=1}^{m}dim(\bfe_i)$.
 We stack up the $\Delta \bfx_i$ column vectors as $\Delta \bfx \in \Reals^N$ and the residual Jacobians at the linearization point 
-$\bfJ \in \Reals^{M \times N}$. We call this new function $\cF(\Delta \bfx) \approx \cL(\check{\cX} + \Delta \bfx)$, so that the linearized cost function writes:  
+$\bfJ \in \Reals^{M \times N}$. We call this new function $\cF(\Delta \bfx) \approx ||\bfr(\cX + \Delta \bfx)||^2$, so that the linearized cost function writes:  
 %
 \begin{equation}
     \cF(\Delta \bfx) = ||\check{\bfr} + \bfJ \Delta \bfx||^2 
-    = \check{\cL} +  2\check{\bfr}\tr \bfJ \Delta \bfx + \Delta \bfx\tr \bfJ\tr \bfJ \Delta \bfx.
+    = \check{\bfr}\tr\check{\bfr} +  2\check{\bfr}\tr \bfJ \Delta \bfx + \Delta \bfx\tr \bfJ\tr \bfJ \Delta \bfx.
     \label{eq:gaussian_step_quadratic_eq}
 \end{equation}
 
-$\cF(\Delta \bfx)$ is therefore a local parabolic approximation of 
-$\cL$ around the current estimate and $\bfH \triangleq \bfJ\tr \bfJ$ is the approximate Hessian of $\cL$ 
+$\cF(\Delta \bfx)$ is therefore a local parabolic approximation of the squared residual around the current estimate 
+and $\bfH \triangleq \bfJ\tr \bfJ$ is the approximate Hessian of the squared residual with respect to the state variables 
 \footnote{See \cite[Section 4.2.1]{sola2017course} for more details on the nature of the approximation.}. Note that by construction, $\bfH$ is always 
 semi-definite positive.
 
@@ -263,7 +262,7 @@ to alleviate this phenomenon.
 Levenberg \cite{levenberg1944method} contribution was to propose to dampen the Hessian by the identity matrix:
 %
 \begin{equation}
-    \Delta \bfx_{L}^* = - \alpha (\bfH^{-1} + \lambda \bfI)^{-1} \bfJ\tr \bfr
+    \Delta \bfx_{L}^* = - \alpha (\bfH + \lambda \bfI)^{-1} \bfJ\tr \bfr
 \end{equation}
 %
 where $\alpha$ and $\lambda$ are scalar coefficients that can be tuned depending on the evolution of the cost function. 
@@ -278,7 +277,7 @@ Marquardt \cite{marquardt1963algorithm} improves on Levenberg by proposing to da
 instead of the identity matrix:
 %
 \begin{equation}
-    \Delta \bfx_{L}^* = - \alpha (\bfH^{-1} + \lambda \text{diag}(\bfH))^{-1} \bfJ\tr \bfr.
+    \Delta \bfx_{L}^* = - \alpha (\bfH + \lambda \text{diag}(\bfH))^{-1} \bfJ\tr \bfr.
 \end{equation}
 
 Thus, the damping affects each direction of the state differently, depending on the local shape of the cost function.
