@@ -85,11 +85,8 @@ Depending on the nature of the problem, we can fix some of the variables of the 
 We also assume that we have access to the covariance of this measurement 
 \mbox{$\Cov_V \in \Reals^{6 \times 6}$}. 
 
-This factor is general enough to be used in two applications that we successively describe, based on \apriltag\ fiducial markers and CosyPose. For both, we explain the
+This factor is general enough to be used in two applications that we successively describe, based on \apriltag\ fiducial markers and CosyPose. For both, we explain
 the algorithm behind the pose measurements and propose covariance models.
-
-% We will now describe two applications of this factor, one using \apriltag\ fiducial markers and one using 
-% a deep-learning object pose estimation algorithm.
 
 \begin{figure}
     \centering
@@ -401,7 +398,7 @@ The problem of object pose estimation can simply be stated: given a calibrated c
 frame and extract camera-objects poses. Traditionally, competing methods were developed using either local features matching or learning-based methods.
 As shown by the most recent BOP challenge results \cite{hodan2020bop}, deep-learning methods now clearly dominate the field in terms of accuracy. 
 At the time of the writing, the highest-ranking non-learning based pose extraction method \cite{konig2020hybrid} (object detection is deep learning based) 
-actually uses depth measurement measurements and is dominated by a purely RGB, deep-learning-based model \cite{haugaard2021surfemb}, though \cite{konig2020hybrid} 
+actually uses depth measurements and is dominated by a purely RGB, deep-learning-based model \cite{haugaard2021surfemb}, though \cite{konig2020hybrid} 
 seems to be ten times faster \footnote{BOP challenge leaderboard is available at \url{https://bop.felk.cvut.cz/leaderboards/}}.
 
 In terms of accuracy, these results advocate for the use of deep-learning purely RGB image-based methods, that now provide accurate enough results 
@@ -446,7 +443,7 @@ is then computed as follows.
 \end{figure}
 
 
-The single-view procedure for pose estimation of CosyPose is an improvement over the one proposed in DeepIm \cite{deepim_2019}. The general idea is to iteratively 
+The single-view procedure for pose estimation of CosyPose is an improvement over the one proposed in DeepIm \cite{deepim_2019}. The general idea is to 
 use the same neural network to iteratively converge to the object pose (\figRef{fig:cosypose-convergence}). It takes as input the cropped image of the detected 
 object bounding box and a rendered image based on the current object pose solution $\T{C}{O_{\alpha},k-1}$ at iteration $k-1$. 
 It returns a transformation update $\T{O_{\alpha},k-1}{O_{\alpha},k}$ that brings the rendered image closer to the cropped image. In practice, 
@@ -564,11 +561,9 @@ on a test dataset. Over degree 3, the model overfits and the high curvature of t
 Thus, a degree 2 polynomial regression seemed to offer a good compromise. Quantitative results are given in the experimental validation section 
 (see Fig.~\figRef{fig:empirical_err} for a few examples of fitted polynomials).
 
-
-In general, this empirical model led to good experimental results, with the drawback that it needs to be trained (ideally with real data)
+This empirical model has the drawback that it needs to be trained (ideally with real data)
 for each new object. If possible, the covariance model should directly result from CosyPose nominal training.
-We started to investigate this direction (with the MSc thesis of Cesar Debeunne) but mostly let it be here as an open perspective.
-
+We started to investigate this direction (with the MSc thesis of Cesar Debeunne) but acknowledged it as an open perspective.
 
 
 
