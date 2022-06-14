@@ -106,27 +106,6 @@ However, if even one of these senses becomes deficient we are severely hindered 
 of proprioception, something as simple as grasping a glass while being seated is a tedious process, even if their sense of touch and vision works perfectly.
 
 
-% Imitating these skills in robot system requires then to build models of available sensor modalities and to integrate them through the sensor
-% fusion. 
-
-% This can be achieved at several levels depending on the task to solve. In the legged robot community, one of the core tasks is locomotion.
-% For this application, robust algorithms exist in the literature using a limited set of sensors, most often inertial and contact detection.
-% On the other end of the blind robot approach, a broad field of research has been concentrated on building representations of the environment 
-% using exteroceptive sensors such as cameras and LIDARs. This in turn enables planning algorithms to navigate the robot in its environment. 
-% Many approaches decouple the two tasks, using layered perception systems. However, theoretically, a system able to tightly fuse all the 
-% available modalities would benefit from a better consideration of the correlations between the different quantities to estimate. 
-% Even though recent approaches have taken a step in this direction, such a system is still not widely used in legged robotics. 
-% This thesis is a contribution to this goal. 
-
-
-
-
-% For robots, perception of oneself and its environment is a major challenge on the road toward many real-world applications. 
-% Tasks that are instinctive to us, like for instance manipulating an object, actually involve a complex 
-% interactions between our many senses, our nervous and our muscular system.
-% Though our sensory-motor skills have been developed by millions of years of evolution, and are refined throughout our childhood,
-% the task of representing them in an abstracted algorithm to be implemented on a cybernetic system is a serious challenge. 
-
 
 \section{How to implement artificial sensing for legged robots}
 To be able to able to achieve any meaningful tasks, robots need to display a sufficient level of dynamical intelligence and perception capabilities. 
@@ -138,7 +117,8 @@ Special care should be taken to obtain sensors of the best quality and to carry 
 location on the robot (extrinsics). 
 In addition, to maximize the accuracy of the estimator, any available correlations between variables and prior knowledge should in principle be taken into account. 
 We also need to enable online calibration of many sensor biases and fixed parameters. To achieve these goals, the development of \textit{tightly-coupled} estimators, 
-which exploit as many data correlations as possible between the sensor measurements, should be undertaken. 
+which exploit as many data correlations as possible between the sensor measurements, should be undertaken \cite{nori2015, wisth2021vilens}. On the other end,
+\textit{loosely-coupled} estimator usually neglect part of the correlations, potentially resulting in suboptimal solutions.
 
 Two main perception problems are typically considered onboard a legged robot. On the first hand, the sense of balance is replicated through high-frequency
 local estimator fusing IMU and contact information to obtain the robot base velocity directed with respect to the gravity field. On the other hand,

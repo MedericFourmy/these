@@ -1,12 +1,12 @@
 \chapter{State estimation for legged robots: a literature review}
 %
-The field of state estimation for autonomous systems is at the frontier between many fields including automation, probability theory, nonlinear optimization, etc.
+The field of state estimation for autonomous systems is at the frontier between many fields including control theory, probability theory, nonlinear optimization, etc.
 The general aim is to design and implement computationally tractable algorithms using noisy causal sensor measurements that can be embedded in feedback-controlled systems.
 With the advent of digital computers and the theoretical breakthroughs of Kalman \cite{kalman1960new} among others, a vast family of observers has been developed 
 \cite{smith1962application, bellantoni1967square, wan2001unscented, thrun2004simultaneous}. Applications range the full scope of autonomous systems from spacecraft guidance \cite{mcgee1985discovery} 
 to autonomous underwater vehicle navigation \cite{leonard2016autonomous}. Each application has its own specific sets of requirements, depending on the physical
 nature of the system and its environment, available sensors, and embedded computation power. Legged robots in particular require high frequency (kHz) 
-and low latency (<1 ms) estimates owing to the inherent instability their dynamics. Moreover, they interact with the environment through 
+and low latency (<1 ms) estimates owing to the inherent instability of their dynamics. Moreover, they interact with the environment through 
 intermittent contacts to move around, which requires to plan in advance the motion using Model Predictive Control (MPC). These tight requirements 
 have given birth to a wealth of research works that are now commonly used in commercial products \cite{hutter2016anymal}.
 
@@ -76,8 +76,9 @@ They are needed to obtain non-drifting estimates of the robot pose.
 They are used either to localize with respect to a map or to build a representation of the environment online, that the robot can use to plan contacts for instance. 
 
 These measurement sources convey tremendously different types of information and are captured at various frequencies (\eg tens of Hz for cameras, kHz for encoders). 
-In this work, we assume that they are reasonably well time-synchronized. Measurements are generally \textit{noisy} and sometimes \textit{biased}. High levels of noise can 
-come from the lower quality of the sensor (a low-cost MEMS IMU gyroscope exhibits much more noise than a high-end fiber-optic gyroscope) or from the process needed to obtain the
+In this work, we assume that they are reasonably well time-synchronized, that is to say with delays inferior to the highest sampling period of all sensors. 
+Measurements are generally \textit{noisy} and sometimes \textit{biased}. High levels of noise can come from the lower quality of the sensor 
+(a low-cost MEMS IMU gyroscope exhibits much more noise than a high-end fiber-optic gyroscope) or from the process needed to obtain the
 data (joint velocities measurements are obtained by numerical differentiation of the encoder measurements). Noise can either be filtered using classical finite impulse 
 response filters, though this may introduce delays, or by fusing measurements using probabilistic filters. Biases are constant or slowly varying quantities affecting measures 
 and are either inherent to the sensor nature (IMU accelerometers and gyroscopes exhibit slowly varying biases) or to uncertainties of the used model (inaccuracies
@@ -117,7 +118,8 @@ Once a stable contact (no slipping/tipping) is detected, the relative pose and v
 can be computed through forward kinematics. Integrated over time, the relative displacement of the base of the robot can be inferred, a computation 
 often referred to as \textit{leg odometry} (by analogy with wheel odometry). This computation takes about 1 microsecond thanks to libraries such as \cite{carpentier2019pinocchio, hereid2017frost}. It uses
 readings from the joint encoders as well as the robot kinematic model. In systems with actuator reduction steps, encoders are usually placed before the reduction step 
-to increase accuracy (precision of 0.002 degrees for Solo equipped with optical encoders \cite{grimminger2020open}!). Joint velocities are often less precise since they are generally computed from numerical differentiation \cite{rotella2016imu}. 
+to increase accuracy (precision of 0.002 degrees for Solo equipped with optical encoders \cite{grimminger2020open}!). 
+Joint velocities are often less precise since they are generally computed from numerical differentiation \cite{rotella2016imu}. 
 The main sources of uncertainty usually come from inaccuracies in the parameters of the kinematic models such as approximate segment lengths, flexibilities \cite{vigne2018estimation, villa2022addressing}, or 
 joint backlash \cite{fallon2014drift, koolen2016design}. 
 Bloesch \cite{bloesch2018technical} classifies kinematic measurement models in three categories that define the structure of this section. 
@@ -291,7 +293,7 @@ does not require extra sensors. Some robustness can be gained by reducing the co
 \cite{leziart2021implementation, bledt2018contact}. Most high-end humanoid robots however \cite{stasse2017talos, englsberger2014overview} are 
 equipped with strain gauges at their feet that can fairly accurately measure the ground reaction forces (GRFs). 
 Though often biased depending on temperature, force measurements can be used as a proxy to stable contact by setting a reasonably large threshold \cite{fallon2014drift}. 
-This method is an approximation of checking the Coulomb cone.
+This method is an approximation to checking if the contact force lies in Coulomb cone of the foot.
 However, for quadruped slip detection, Focchi \cite{Focchi2015SlipDA} argues that force sensing is not enough, because the friction coefficient,
 as well as the contact normal, is generally hard to infer. The authors propose a simple algorithm checking relative feet velocities values in the base frame and discarding those
 far from the median. A similar choice is made by \cite{bloesch2013stateSlippery} in which Unscented \KalmanF velocity updates are rejected as outliers if their innovation exceeds a threshold.  
@@ -363,7 +365,7 @@ For the \HRP{2} humanoid robot (see \figRef{fig:robots}), a rubber joint is plac
 It also acts as a rotational spring that, given the length of the ankle-base lever, 
 leads to important and unmeasured base accelerations. \HRP{2} being equipped with 6-axis 
 force sensors at the end-effectors, Flayols \cite{flayols2017experimental} proposes to map these measurements to relative orientations that can 
-directly be included in the kinematic chain as an intermediate ball joint. Calibration of the stiffness matrix is done by comparing 
+directly be included in the kinematic chain as an intermediate ball joint. Calibration of the rotational stiffness matrix is done by comparing 
 kinematics to motion capture measurements. Similarly, Villa \cite{villa2022addressing} proposes to account for the flexibility of the hip joint of Talos robot 
 \cite{stasse2017talos} (see \figRef{fig:robots}) by modeling it as a passive joint with a damped-spring model.
 Benallegue \cite{benallegue2015estimation} derives a procedure to alleviate the need for force-torque sensors by 
@@ -395,12 +397,12 @@ tightly-coupled estimators, to which this thesis would like to contribute.
 
 
 %%%%%%%%%%
-\section{Dynamic centroidal estimation}
+\section{Centroidal dynamics estimation}
 %
 \label{sec:centroidal_est_lit}
 \subsection{Why is centroidal dynamic estimation important?}
 Legged robots are highly nonlinear systems that use contact forces between their end-effector and the environment to implement stable locomotion. 
-The effect of these forces is dictated by the Newton/Euler equations, also known as the underactuated dynamics, which state that the variation of the 
+The effect of these forces is described by the Newton/Euler equations, also known as the underactuated dynamics, which state that the variation of the 
 system momentum is equal to the external wrench applied to the robot. Though these equations may appear simple, they introduce a nonlinear coupling 
 between the CoM position and the angular momentum. Many reduced-order models are based directly on 
 various levels of approximation of these equations \cite{kajita20013d, wieber2006trajectory, carpentier2016versatile} to derive predictive
@@ -416,7 +418,10 @@ the platform \cite{ayusawa2008identification, ayusawa2014identifiability, bonnet
 This problem was closely scrutinized in the biomechanics literature where mass distributions often come from standardized anthropomorphic tables \cite{de1996adjustments}. 
 A second kind of information comes from measurements of the external wrench. 
 Forces provide the CoM accelerations while moments relate to the CoM position through a line called the central axis. This line passes only approximately by
-the CoM because of gesticulation \cite{wieber2000modelisation} induced angular momentum variations \cite{wieber2006holonomy}. Moreover, the wrench measurements 
+the CoM because of gesticulation \footnote{We call gesticulation the part of the angular momentum due to the movement of the limbs. 
+The total angular momentum is the sum of the centroidal angular momentum and the gesticulation. If no torque is applied to it, a polyarticulated system angular 
+momentum is conserved but its angular velocity may be non-zero due to compensate for the gesticulation. Walking in space makes you turn!} induced angular momentum variations 
+\cite{wieber2000modelisation, wieber2006holonomy}. Moreover, the wrench measurements 
 are usually noisy and require the presence of expensive deformation gauge sensors at each contact point. A complete analysis of the particularities
 of these different information sources along with an observability analysis can be found in \cite{carpentier2016center}. 
 This fosters the use of more complex algorithms by fusing kinematic and external wrench measurements. 
@@ -644,7 +649,7 @@ Very recently, two teams started to apply factor graph optimization principles a
 proposes to fuse IMU pre-integration with a novel kinematic factor by adding the contact foot pose in the optimized states, similarly to \cite{bloesch2013state,rotella2014state}. 
 Semi-direct Visual Odometry \cite{forster2014svo} is also used to integrate camera measurements as relative pose. The estimation backend was based on GTSAM framework \cite{dellaert2012factor}
 and tests were conducted on a Cassie bipedal robot. In a later work \cite{hartley2018hybrid}, the same authors extended 
-modified the kinematic factor formulation, taking into account uncertainty induced by contact switches. At the Dynamic Robot Systems Group at Oxford, Wisth proposed in 
+the kinematic factor formulation, taking into account uncertainty induced by contact switches. At the Dynamic Robot Systems Group at Oxford, Wisth proposed in 
 \cite{wisth2019robust} to replace a modeled kinematic factor by integrating odometry from the onboard proprioceptive filter of the ANYmal robot. Stereo vision was 
 also used as a source of odometry by using a sparse 3D landmark map. In a following work \cite{wisth2020preintegrated}, the proprioceptive odometry factor was changed
 to include a slowly variable bias on odometry measurements by adapting the pre-integration theory from \cite{forster2017-TRO}. The same authors extended this work
