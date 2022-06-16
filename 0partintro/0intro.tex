@@ -93,17 +93,38 @@ As a first justification of this point of view, let us consider a biological exa
 
 \section{Biological equivalent, an example}
 
-A digression through a biological example can give some intuitions to grasp the complexity of the problem. 
-Let us investigate the example of a human lifting a box. Our vision might inform us about the general form of the object, 
-its location in space with respect to us, and about some of its physical properties through our prior knowledge of the world. Our proprioception (kinesthetic sense) 
-instinctively guide our arms toward the right path. Our sense of touch might infer the surface texture of the object,  its softness, making us 
-adapt our grip. During this whole process, our vestibular and vision systems provide us with a sense of balance to counter gravity, while our ears 
-make us aware of events external to our current enterprise.
+A digression through a biological example can give some intuitions to grasp the complexity of the problem. For instance, the simple task of picking up a box
+makes use of almost all of our senses: our eyes to spot the object, our vestibular system to balance against gravity, our proprioception (kinesthetic sense) 
+to extend our arms toward the object, our sense of touch to assess its softness, etc. However, this simplistic enumeration hides a more complex reality:
+in many cases, the information processed by our brain to make decisions results from the fusion of multi-modal stimuli. 
+For instance, it is demonstrated that during communication between animals or humans, vocal stimuli, mouth movements, and facial gestures are 
+integrated \cite{miller2005perceptual, sugihara2006integration}: watching a speaker's mouth changes our perception of its speech. 
+The combination of these stimuli can affect the recovered information, either clarifying the underlying message \cite{meredith1983interactions} or 
+compromising it, as for the McGurk effect \cite{mcgurk1976hearing}. These coupling phenomena being highlighted by group experiments \cite{mcgurk1976hearing}, 
+the location of the fusion can be demonstrated by recording the activity of neurons \cite{rao1997integration}.
 
-All of this happens mostly at the subconscious level while our conscious mind focuses on high-level decisions.
-The difficulty of mimicking these feats is therefore hard to grasp at first since we are most of the time oblivious to them.
-However, if even one of these senses becomes deficient we are severely hindered in our daily enterprises. For instance, for people deprived
-of proprioception, something as simple as grasping a glass while being seated is a tedious process, even if their sense of touch and vision works perfectly.
+This tight coupling is also present in the sense of movement. One major example is the vestibulo-ocular reflex \cite{miles1981plasticity}: our eye movements are regulated 
+by the semicircular canals signals, that essentially provide angular-velocity measurements, stabilizing our gaze. This reflex is very fast: less than 10 ms 
+\cite{aw1996three} and is constantly being recalibrated throughout our life \cite{miles1981plasticity}. Notice that this performance is likely only made possible 
+by the colocation of the two senses and their proximity to the central nervous system. Evidence suggests that this concentration of senses and processing capability
+in the head has an evolutionary advantage that can be explained by several reasons \cite{bailly2018should}: stimuli from sensory organs whose spatial relation is fixed
+are easier to process; shorter pathways between senses and the brain increases the acceptable bandwidth of information; the independence of the head helps to stabilize the sensory
+inputs as well as it enables active exploration strategies. Despite these facts, except for humanoid robots, few systems come equipped with a truly multisensory head 
+nowadays. This would be justified by estimation approaches that are capable of truly coupling the different sensor modalities.
+
+%%%%%%%%%%%%%%%%%%%%%%
+% former crappy one
+%%%%%%%%%%%%%%%%%%%%%%
+% Let us investigate the example of a human lifting a box. Our vision might inform us about the general form of the object, 
+% its location in space with respect to us, and about some of its physical properties through our prior knowledge of the world. Our proprioception (kinesthetic sense) 
+% instinctively guide our arms toward the right path. Our sense of touch might infer the surface texture of the object,  its softness, making us 
+% adapt our grip. During this whole process, our vestibular and vision systems provide us with a sense of balance to counter gravity, while our ears 
+% make us aware of events external to our current enterprise.
+
+% All of this happens mostly at the subconscious level while our conscious mind focuses on high-level decisions.
+% The difficulty of mimicking these feats is therefore hard to grasp at first since we are most of the time oblivious to them.
+% However, if even one of these senses becomes deficient we are severely hindered in our daily enterprises. For instance, for people deprived
+% of proprioception, something as simple as grasping a glass while being seated is a tedious process, even if their sense of touch and vision works perfectly.
 
 
 
